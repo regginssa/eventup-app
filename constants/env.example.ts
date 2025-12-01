@@ -1,0 +1,7 @@
+export const GOOGLE_API_KEY = "";
+export const GOOGLE_ANDROID_CLIENT_ID = "";
+export const GOOGLE_IOS_CLIENT_ID = "";
+export const GOOGLE_WEB_CLIENT_ID = "";
+export const GOOGLE_WEB_CLIENT_SECRET = "";
+export const SERVER_API_ENDPOINT = "";
+export const STRIPE_PUBLISHABLE_KEY = "";

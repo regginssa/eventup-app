@@ -1,0 +1,254 @@
+import { setAuthToken } from "@/api/AxiosInstance";
+import { emailRegister, googleRegister } from "@/api/scripts/auth";
+import { Button, Input, PasswordInput } from "@/components/common";
+import { AuthScreenContainer } from "@/components/organisms";
+import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/constants/env";
+import { setAuth } from "@/redux/slices/auth.slice";
+import { Feather } from "@expo/vector-icons";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { useDispatch } from "react-redux";
+
+const RegisterScreen = () => {
+  const [fullname, setFullName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmedPassword, setConfirmedPassword] = useState<string>("");
+  const [googleLoading, setGoogleLoading] = useState<boolean>(false);
+  const [emailLoading, setEmailLoading] = useState<boolean>(false);
+  const [invalidFullName, setInvalidFullName] = useState<boolean>(false);
+  const [invalidEmail, setInvalidEmail] = useState<boolean>(false);
+  const [invalidPassword, setInvalidPassword] = useState<boolean>(false);
+  const [invalidConfirmPassword, setInvalidConfirmPassword] =
+    useState<boolean>(false);
+  const [invalidPasswordTxt, setInvalidPasswordTxt] = useState<
+    string | undefined
+  >(undefined);
+
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  GoogleSignin.configure({
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    scopes: ["profile", "email"],
+    offlineAccess: true,
+    forceCodeForRefreshToken: false,
+    iosClientId: GOOGLE_IOS_CLIENT_ID,
+  });
+
+  const getPasswordError = (password: string): string => {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long.";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "Password must include at least one uppercase letter (A–Z).";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "Password must include at least one lowercase letter (a–z).";
+    }
+    if (!/\d/.test(password)) {
+      return "Password must include at least one number (0–9).";
+    }
+    if (!/[@!#$%]/.test(password)) {
+      return "Password must include one special character (@!#$%).";
+    }
+
+    return ""; // valid
+  };
+
+  const validate = () => {
+    const isValidFullName = fullname.trim().length > 0;
+    const trimmed = email.trim();
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+
+    const passwordError = getPasswordError(password);
+    const isValidPassword = passwordError === "";
+    const isValidConfirmPassword = password === confirmedPassword;
+
+    setInvalidFullName(!isValidFullName);
+    setInvalidEmail(!isValidEmail);
+    setInvalidPassword(!isValidPassword);
+    setInvalidConfirmPassword(!isValidConfirmPassword);
+    setInvalidPasswordTxt(passwordError);
+
+    return (
+      isValidFullName &&
+      isValidEmail &&
+      isValidPassword &&
+      isValidConfirmPassword
+    );
+  };
+
+  const handleGoogleRegister = async () => {
+    try {
+      setGoogleLoading(true);
+      await GoogleSignin.hasPlayServices();
+
+      const payload = await GoogleSignin.signIn();
+
+      console.log(payload);
+
+      const { user: googleUser } = payload.data ?? {};
+
+      if (!googleUser?.email || !googleUser?.id || !googleUser?.name) {
+        setGoogleLoading(false);
+        return Alert.alert("Google sign in error");
+      }
+
+      const response = await googleRegister(
+        googleUser.name,
+        googleUser.email,
+        googleUser.id,
+        googleUser.photo ?? ""
+      );
+
+      const { token, user } = response.data;
+      await setAuthToken(token);
+      dispatch(setAuth({ isAuthenticated: true, user }));
+
+      Alert.alert("Welcome !!!");
+      router.replace("/onboarding/step1");
+    } catch (error: any) {
+      const message = error?.response?.data?.message;
+      console.log(error);
+
+      if (error?.status === 400) {
+        Alert.alert(message);
+        router.replace("/auth/login");
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleEmailRegister = async () => {
+    if (!validate()) return;
+
+    try {
+      setInvalidPassword(false);
+      setEmailLoading(true);
+
+      const response = await emailRegister(fullname, email, password);
+
+      const { token, user } = response.data;
+      await setAuthToken(token);
+      dispatch(setAuth({ isAuthenticated: true, user }));
+
+      Alert.alert("Welcome !!!");
+      router.replace("/onboarding/step1");
+    } catch (error: any) {
+      const message = error?.response?.data?.message;
+
+      Alert.alert(message);
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  return (
+    <AuthScreenContainer
+      title="Join the Perfect Event, Party"
+      subtitle="Create your account to get started"
+    >
+      <View className="w-full gap-5">
+        <Input
+          type="string"
+          placeholder="Enter your full name"
+          icon={<Feather name="mail" size={16} color="#4b5563" />}
+          className="rounded-md"
+          invalid={invalidFullName}
+          invalidTxt="Full name is invalid"
+          value={fullname}
+          onChange={setFullName}
+        />
+        <Input
+          type="string"
+          placeholder="Enter your email"
+          icon={<Feather name="mail" size={16} color="#4b5563" />}
+          className="rounded-md"
+          invalid={invalidEmail}
+          invalidTxt="Email is invalid"
+          value={email}
+          onChange={setEmail}
+        />
+        <PasswordInput
+          placeholder="Create a password"
+          invalid={invalidPassword}
+          invalidTxt={invalidPasswordTxt}
+          value={password}
+          onChange={setPassword}
+        />
+        <PasswordInput
+          placeholder="Confirm your password"
+          isConfirm={true}
+          invalid={invalidConfirmPassword}
+          invalidTxt="Password does not match"
+          value={confirmedPassword}
+          onChange={setConfirmedPassword}
+        />
+        <View className="flex-row flex-wrap justify-center">
+          <Text className="font-dm-sans text-sm text-gray-500">
+            By signing up, you agree to our{" "}
+          </Text>
+
+          <TouchableOpacity activeOpacity={0.8}>
+            <Text className="font-dm-sans text-sm text-[#15A5FF]">
+              Terms of Service
+            </Text>
+          </TouchableOpacity>
+
+          <Text className="font-dm-sans text-sm text-gray-500"> and </Text>
+
+          <TouchableOpacity activeOpacity={0.8}>
+            <Text className="font-dm-sans text-sm text-[#15A5FF]">
+              Privacy Policy
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <Button
+          type="primary"
+          label="Sign up with email"
+          buttonClassName="h-12"
+          textClassName="text-sm"
+          loading={emailLoading}
+          onPress={handleEmailRegister}
+        />
+      </View>
+
+      <View className="w-full gap-6">
+        <View className="flex flex-row items-center gap-1">
+          <View className="flex-1 h-[1px] bg-gray-300"></View>
+          <Text className="font-dm-sans text-sm text-gray-500">
+            Or continue with
+          </Text>
+          <View className="flex-1 h-[1px] bg-gray-300"></View>
+        </View>
+
+        <Button
+          type="social"
+          socialType="google"
+          label="Sign up with Google"
+          buttonClassName="h-12"
+          loading={googleLoading}
+          onPress={handleGoogleRegister}
+        />
+
+        <View className="flex flex-row items-center justify-center gap-2">
+          <Text className="font-dm-sans text-gray-500 text-sm">
+            Already have an account?
+          </Text>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => router.replace("/auth/login")}
+          >
+            <Text className="text-[#15A5FF] text-sm font-dm-sans">Sign in</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </AuthScreenContainer>
+  );
+};
+
+export default RegisterScreen;

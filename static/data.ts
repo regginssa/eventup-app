@@ -1,0 +1,118 @@
+import { IEvent } from "@/types/data";
+
+export const SAMPLE_EVENTS: IEvent[] = [
+  {
+    _id: "1",
+    title: "Opener Festival Gdynia ",
+    detail: "",
+    country: "Portugal",
+    country_code: "PT",
+    region: "Lisboa",
+    region_code: "LI",
+    coordinate: {
+      longitude: 0,
+      latitude: 0,
+    },
+    address: "",
+    opening_date: new Date(),
+    end_date: new Date(),
+    fee: { type: "free", currency: "usd", amount: 0 },
+    preview_img:
+      "https://cdn.prod.website-files.com/620b4dfc30add2618d5e13a5/622b57f4d6fe6adb2ed2c62c_ultimate-festival-planning-guide.jpeg",
+  },
+  {
+    _id: "1",
+    title: "Americian Top Ten",
+    detail: "",
+    country: "United Kingdom",
+    country_code: "PT",
+    region: "London",
+    region_code: "LI",
+    coordinate: {
+      longitude: 0,
+      latitude: 0,
+    },
+    address: "",
+    opening_date: new Date(),
+    end_date: new Date(),
+    fee: { type: "free", currency: "usd", amount: 0 },
+    preview_img:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVndedB6bALd6i4NLTbf045G71_969CkhUrnc0jsKqsRIhDKn19Fta1DPgy9y0Vox5w7I&usqp=CAU",
+  },
+  {
+    _id: "1",
+    title: "5 Skills every sport",
+    detail: "",
+    country: "Portugal",
+    country_code: "PT",
+    region: "Lisboa",
+    region_code: "LI",
+    coordinate: {
+      longitude: 0,
+      latitude: 0,
+    },
+    address: "",
+    opening_date: new Date(),
+    end_date: new Date(),
+    fee: { type: "free", currency: "usd", amount: 0 },
+    preview_img:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTquHt3RKzKZ5Kqz4aJPj7SikVq9EWMe7gk2ScDQNa-mu2pC8la4Y2KEvXXIL4QbwuN4AU&usqp=CAU",
+  },
+  {
+    _id: "1",
+    title: "Opener Festival Gdynia ",
+    detail: "",
+    country: "Portugal",
+    country_code: "PT",
+    region: "Lisboa",
+    region_code: "LI",
+    coordinate: {
+      longitude: 0,
+      latitude: 0,
+    },
+    address: "",
+    opening_date: new Date(),
+    end_date: new Date(),
+    fee: { type: "free", currency: "usd", amount: 0 },
+    preview_img:
+      "https://cdn.prod.website-files.com/620b4dfc30add2618d5e13a5/622b57f4d6fe6adb2ed2c62c_ultimate-festival-planning-guide.jpeg",
+  },
+  {
+    _id: "1",
+    title: "Americian Top Ten",
+    detail: "",
+    country: "United Kingdom",
+    country_code: "PT",
+    region: "London",
+    region_code: "LI",
+    coordinate: {
+      longitude: 0,
+      latitude: 0,
+    },
+    address: "",
+    opening_date: new Date(),
+    end_date: new Date(),
+    fee: { type: "free", currency: "usd", amount: 0 },
+    preview_img:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVndedB6bALd6i4NLTbf045G71_969CkhUrnc0jsKqsRIhDKn19Fta1DPgy9y0Vox5w7I&usqp=CAU",
+  },
+  {
+    _id: "1",
+    title: "5 Skills every sport",
+    detail: "",
+    country: "Portugal",
+    country_code: "PT",
+    region: "Lisboa",
+    region_code: "LI",
+    coordinate: {
+      longitude: 0,
+      latitude: 0,
+    },
+    address: "",
+    opening_date: new Date(),
+    end_date: new Date(),
+    fee: { type: "free", currency: "usd", amount: 0 },
+    preview_img:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTquHt3RKzKZ5Kqz4aJPj7SikVq9EWMe7gk2ScDQNa-mu2pC8la4Y2KEvXXIL4QbwuN4AU&usqp=CAU",
+  },
+];

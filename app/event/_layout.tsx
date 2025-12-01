@@ -1,0 +1,12 @@
+import { Stack } from "expo-router";
+
+const EventLayout = () => {
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="create" />
+      <Stack.Screen name="[id]" />
+    </Stack>
+  );
+};
+
+export default EventLayout;
