@@ -1,10 +1,10 @@
 import { TDropdownItem, TPassengerInfo } from "@/types";
 import { formatBookingDate } from "@/utils/format";
 import { Text, View } from "react-native";
-import { DateTimePicker, Dropdown, Input } from "../common";
+import { DateTimePicker, Dropdown, Input, NationalityPicker } from "../common";
 
 interface PassengerInputGroupProps {
-  type: "adult" | "child";
+  type: "adult" | "child" | "infant";
   items: TPassengerInfo[];
   onChange: (idx: number, val: any, label: keyof TPassengerInfo) => void;
 }
@@ -44,7 +44,7 @@ const PassengerInputGroup: React.FC<PassengerInputGroupProps> = ({
             selectedItem={
               type === "adult"
                 ? adultsTitles.find((a) => a.value === item.title)
-                : type === "child"
+                : type === "child" || type === "infant"
                 ? childTitles.find((c) => c.value === item.title)
                 : (adultsTitles[0] as any)
             }
@@ -79,6 +79,14 @@ const PassengerInputGroup: React.FC<PassengerInputGroupProps> = ({
             onPick={(date: Date) =>
               onChange(index, formatBookingDate(date), "dob")
             }
+          />
+          <NationalityPicker
+            label="Nationality"
+            placeholder="e,g. PL"
+            bordered={true}
+            className="rounded-lg"
+            value={item.nationality}
+            onChange={(val) => onChange(index, val, "nationality")}
           />
         </View>
       ))}

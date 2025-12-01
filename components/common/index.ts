@@ -12,6 +12,7 @@ export { default as Input } from "./Input";
 export { default as LocationPicker } from "./LocationPicker";
 export { default as Modal } from "./Modal";
 export { default as MultiSelectDropdown } from "./MultiSelectDropdown";
+export { default as NationalityPicker } from "./NationalityPicker";
 export { default as PasswordInput } from "./PasswordInput";
 export { default as RegionPicker } from "./RegionPicker";
 export { default as Spinner } from "./Spinner";
