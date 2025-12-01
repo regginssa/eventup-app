@@ -64,17 +64,19 @@ export type TPassengerInfo = {
   passportExpiryDate: string; // "2025-11-29"
 };
 
+export type TPaxDetails = {
+  adults: TPassengerInfo[];
+  child: TPassengerInfo[];
+  infant: TPassengerInfo[];
+};
+
 export interface IFlightDetail {
   paxInfo: {
     customerEmail: string;
     customerPhone: string;
     bookingNote: string;
   };
-  paxDetails: {
-    adults: TPassengerInfo[];
-    child: TPassengerInfo[];
-    infant: TPassengerInfo[];
-  };
+  paxDetails: TPaxDetails;
 }
 
 export interface TFlightAvailability {

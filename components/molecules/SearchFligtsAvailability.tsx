@@ -42,7 +42,7 @@ const SearchsFlightAvailability: React.FC<SearchFlightsAvailabilityProps> = ({
     title: "Mr",
     firstName: "",
     lastName: "",
-    dob: "",
+    dob: "1991-11-12",
     nationality: "",
     passportNo: "",
     passportIssueCountry: "",

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 
 interface CustomDatePickerProps {
+  mode?: "date" | "datetime";
   label?: string;
   placeholder?: string;
   className?: string;
@@ -18,6 +19,7 @@ interface CustomDatePickerProps {
 }
 
 const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
+  mode,
   label,
   placeholder,
   className,
@@ -37,8 +39,13 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
     setShowDate(false);
 
     if (selectedDate) {
-      setTempDate(selectedDate); // Save date part
-      setShowTime(true); // Open time picker next
+      setTempDate(selectedDate);
+
+      if (mode === "datetime") {
+        setShowTime(true);
+      } else {
+        onPick(new Date(selectedDate));
+      }
     }
   };
 

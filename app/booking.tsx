@@ -6,9 +6,10 @@ import {
   Spinner,
   Textarea,
 } from "@/components/common";
+import { PassengerInputGroup } from "@/components/molecules";
 import BookingContainer from "@/components/organisms/BookingContainer";
 import { RootState } from "@/redux/store";
-import { TFlight } from "@/types";
+import { TFlight, TPassengerInfo, TPaxDetails } from "@/types";
 import { IEvent } from "@/types/data";
 import { formatEventDate } from "@/utils/format";
 import {
@@ -16,6 +17,7 @@ import {
   Fontisto,
   Ionicons,
   MaterialCommunityIcons,
+  MaterialIcons,
 } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
@@ -92,8 +94,25 @@ const FlightForm = ({ flight }: { flight: TFlight | null }) => {
   const [email, setEmail] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [note, setNote] = useState<string>("");
+  const [paxDetails, setPaxDetails] = useState<TPaxDetails | undefined>(
+    flight?.recommend?.details.paxDetails
+  );
 
   const selected = flight?.recommend;
+
+  const handleAdultChange = (
+    idx: number,
+    val: any,
+    label: keyof TPassengerInfo
+  ) => {
+    if (!paxDetails?.adults) return;
+
+    const adults = paxDetails.adults.map((adult, i) =>
+      i === idx ? { ...adult, [label]: val } : adult
+    );
+
+    setPaxDetails({ ...paxDetails, adults });
+  };
 
   return (
     <View className="w-full bg-white rounded-xl p-4 gap-6">
@@ -115,11 +134,19 @@ const FlightForm = ({ flight }: { flight: TFlight | null }) => {
       </TouchableOpacity>
 
       <View className="w-full flex flex-col gap-3">
+        <View className="flex flex-row items-center gap-1">
+          <MaterialIcons name="edit-note" size={18} color="#374151" />
+          <Text className="font-poppins-semibold text-gray-700 text-sm">
+            Booking Information
+          </Text>
+        </View>
         {selected?.details.paxDetails && (
           <View className="w-full">
-            {selected?.details.paxDetails.adults.map((adult, index) => (
-              <View key={`booking-adult-${index}`}></View>
-            ))}
+            <PassengerInputGroup
+              type="adult"
+              items={selected.details.paxDetails.adults}
+              onChange={handleAdultChange}
+            />
           </View>
         )}
         <View className="w-full h-[1px] bg-gray-200"></View>
