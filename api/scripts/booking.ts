@@ -1,7 +1,8 @@
 import { IHotelDetails } from "@/types";
-import { ApiResponse } from "@/types/api";
+import { ApiResponse, BookingFlightResponse } from "@/types/api";
 import AxiosInstance from "../AxiosInstance";
 import {
+  BOOKING_FLIGHT_METHOD,
   FETCH_HOTEL_DETAILS,
   FETCH_STANDARD_FLIGHTS_AVAILABILITY,
   FETCH_STANDARD_HOTELS_AVAILABILITY,
@@ -67,4 +68,10 @@ export const validateFlightFareMethod = async (
     session_id,
     fare_source_code,
   });
+};
+
+export const bookingFlightMethod = async (
+  payload: any
+): Promise<ApiResponse<BookingFlightResponse>> => {
+  return await AxiosInstance.post(BOOKING_FLIGHT_METHOD, { payload });
 };

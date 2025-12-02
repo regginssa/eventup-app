@@ -97,3 +97,12 @@ export interface PaymentResponse {
   message: string;
   timestamp: Date;
 }
+
+export interface BookingFlightResponse {
+  errorMessage: string;
+  status: string;
+  success: string;
+  target: string;
+  tktTimeLimit: string;
+  uniqueId: string;
+}

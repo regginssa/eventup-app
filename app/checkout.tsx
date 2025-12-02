@@ -1,3 +1,4 @@
+import { bookingFlightMethod } from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
   fetchStripeClientSecret,
@@ -635,6 +636,7 @@ const CheckoutScreen = () => {
   const [paymentMethod, setPaymentMethod] = useState<TPaymentMethod>("card");
   const [stripePaymentMethodId, setStripePaymentMethodId] =
     useState<string>("");
+  const [isBookLoading, setIsBookLoading] = useState<boolean>(false);
 
   const { eventId, packageType } = useLocalSearchParams();
   const router = useRouter();
@@ -695,6 +697,55 @@ const CheckoutScreen = () => {
     setServices(selectedServices);
   }, [flight, hotel]);
 
+  const bookWithCard = async () => {
+    if (
+      !flight?.payload ||
+      !flight.session_id ||
+      !flight?.recommend?.FareItinerary?.AirItineraryFareInfo?.FareSourceCode ||
+      !user?.location.region_code
+    )
+      return Alert.alert(
+        "Invalid Flight Information",
+        "Please select another flight"
+      );
+
+    const response = await bookingFlightMethod(flight.payload);
+
+    const { errorMessage, success } = response.data;
+
+    const isSuccess = String(success).toLowerCase() === "true";
+
+    if (!isSuccess) {
+      return Alert.alert("Booking Flight Error", errorMessage);
+    }
+  };
+
+  const handleBook = async (paymentMethod: TPaymentMethod) => {
+    try {
+      setIsBookLoading(true);
+      switch (paymentMethod) {
+        case "card":
+          await bookWithCard();
+          break;
+
+        case "crypto":
+          break;
+
+        case "token":
+          break;
+
+        default:
+          return;
+      }
+    } catch (error: any) {
+      console.error("handle book error: ", error);
+      const message = error?.response?.data?.message;
+      Alert.alert(message);
+    } finally {
+      setIsBookLoading(false);
+    }
+  };
+
   return (
     <CheckoutContainer>
       <EventDetail
@@ -723,7 +774,8 @@ const CheckoutScreen = () => {
         buttonClassName="h-12"
         textClassName="text-lg"
         disabled={paymentMethod === "card" && stripePaymentMethodId === ""}
-        onPress={() => router.replace("/booked")}
+        loading={isBookLoading}
+        onPress={() => handleBook(paymentMethod)}
       />
     </CheckoutContainer>
   );

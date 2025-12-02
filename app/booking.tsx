@@ -12,7 +12,12 @@ import { PassengerInputGroup } from "@/components/molecules";
 import BookingContainer from "@/components/organisms/BookingContainer";
 import { setBookingFlight } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { TFlight, TPassengerInfo, TPaxDetails } from "@/types";
+import {
+  TFlight,
+  TFlightAvailability,
+  TPassengerInfo,
+  TPaxDetails,
+} from "@/types";
 import { IEvent } from "@/types/data";
 import { formatEventDate } from "@/utils/format";
 import {
@@ -287,7 +292,9 @@ const BookingScreen = () => {
 
   const { eventId, packageType } = useLocalSearchParams();
   const router = useRouter();
+  const { user } = useSelector((state: RootState) => state.auth);
   const { flight, hotel } = useSelector((state: RootState) => state.booking);
+
   const dispatch = useDispatch();
 
   const init = useCallback(async () => {
@@ -396,7 +403,10 @@ const BookingScreen = () => {
   };
 
   const buildRequestPayload = (
-    flight: any,
+    sessionId: string,
+    areaCode: string,
+    countryCode: string,
+    flight: TFlightAvailability,
     paxDetails: TPaxDetails,
     email: string,
     phone: string,
@@ -457,12 +467,13 @@ const BookingScreen = () => {
 
     return {
       flightBookingInfo: {
-        flight_session_id: flight.session_id,
-        fare_source_code: flight.fare_source_code,
-        IsPassportMandatory: flight.IsPassportMandatory ?? false,
-        fareType: flight.fareType,
-        areaCode: flight.areaCode ?? "",
-        countryCode: flight.countryCode ?? "",
+        flight_session_id: sessionId,
+        fare_source_code:
+          flight.FareItinerary.AirItineraryFareInfo.FareSourceCode,
+        IsPassportMandatory: flight.FareItinerary.IsPassportMandatory ?? false,
+        fareType: flight.FareItinerary.AirItineraryFareInfo.FareType,
+        areaCode: areaCode ?? "",
+        countryCode,
       },
 
       paxInfo: {
@@ -491,7 +502,10 @@ const BookingScreen = () => {
     }
 
     const payload = buildRequestPayload(
-      flight?.recommend.details,
+      flight.session_id,
+      user?.location.region_code as string,
+      user?.location.country_code as string,
+      flight?.recommend,
       paxDetails!,
       flightCustomerEmail,
       flightCustomerPhone,

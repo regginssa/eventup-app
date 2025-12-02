@@ -32,6 +32,7 @@ export const FETCH_STANDARD_TRANSFERS_AVAILABILITY =
 export const FETCH_HOTEL_DETAILS = "/booking/hotel/";
 // /:sessionId/:hotelId/:productId/:tokenId
 export const VALIDATE_FLIGHT_FARE_METHOD = "/booking/flight/validate/fare";
+export const BOOKING_FLIGHT_METHOD = "/booking/flight";
 
 // Stripe
 export const FETCH_STRIPE_CUSTOMER_ID = "/stripe/customer-id";
