@@ -62,7 +62,7 @@ export const fetchHotelDetails = async (
 export const validateFlightFareMethod = async (
   session_id: string,
   fare_source_code: string
-): Promise<ApiResponse<any>> => {
+): Promise<ApiResponse<boolean>> => {
   return await AxiosInstance.post(VALIDATE_FLIGHT_FARE_METHOD, {
     session_id,
     fare_source_code,

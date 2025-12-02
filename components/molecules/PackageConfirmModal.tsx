@@ -73,7 +73,10 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
         buttonClassName="h-12"
         textClassName="text-lg"
         onPress={() =>
-          router.push({ pathname: "/booking", params: { eventId } })
+          router.push({
+            pathname: "/booking",
+            params: { eventId, packageType },
+          })
         }
       />
 

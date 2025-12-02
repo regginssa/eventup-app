@@ -23,7 +23,7 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -285,7 +285,8 @@ const BookingScreen = () => {
   );
   const [isCheckLoading, setIsCheckLoading] = useState<boolean>(false);
 
-  const { eventId } = useLocalSearchParams();
+  const { eventId, packageType } = useLocalSearchParams();
+  const router = useRouter();
   const { flight, hotel } = useSelector((state: RootState) => state.booking);
   const dispatch = useDispatch();
 
@@ -505,9 +506,18 @@ const BookingScreen = () => {
         flight.recommend.FareItinerary.AirItineraryFareInfo.FareSourceCode
       );
 
-      dispatch(setBookingFlight({ ...flight, payload }));
-    } catch (err) {
-      console.error(err);
+      const isValid = response.data;
+
+      if (isValid) {
+        dispatch(setBookingFlight({ ...flight, payload }));
+        router.push({
+          pathname: "/checkout",
+          params: { eventId, packageType },
+        });
+      }
+    } catch (error: any) {
+      const message = error?.response?.data?.message;
+      Alert.alert(message);
     } finally {
       setIsCheckLoading(false);
     }
