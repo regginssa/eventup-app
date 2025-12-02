@@ -514,6 +514,8 @@ const BookingScreen = () => {
           pathname: "/checkout",
           params: { eventId, packageType },
         });
+      } else {
+        Alert.alert(response.message);
       }
     } catch (error: any) {
       const message = error?.response?.data?.message;
