@@ -121,7 +121,6 @@ const NationalityPicker: React.FC<NationalityPickerProps> = ({
                   activeOpacity={0.8}
                   className="p-1 flex flex-row items-center gap-2 w-full"
                   onPress={() => {
-                    console.log(c.cca2);
                     onChange(c.cca2);
                     setIsOpen(false);
                   }}

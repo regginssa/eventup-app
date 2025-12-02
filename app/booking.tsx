@@ -117,7 +117,7 @@ const FlightForm = ({
   setNote: (val: string) => void;
   setPaxDetails: React.Dispatch<React.SetStateAction<TPaxDetails | undefined>>;
 }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(true);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
 
   const selected = flight?.recommend;

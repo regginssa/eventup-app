@@ -697,7 +697,7 @@ const CheckoutScreen = () => {
     setServices(selectedServices);
   }, [flight, hotel]);
 
-  const bookWithCard = async () => {
+  const bookFlight = async () => {
     if (
       !flight?.payload ||
       !flight.session_id ||
@@ -720,6 +720,7 @@ const CheckoutScreen = () => {
     }
 
     const ticketResponse = await ticketFlightMethod(uniqueId);
+    console.log("Ticket response: ", ticketResponse.data, uniqueId);
 
     if (!ticketResponse.data.success) {
       return Alert.alert(
@@ -727,8 +728,10 @@ const CheckoutScreen = () => {
         ticketResponse.data.errorMessage
       );
     }
+  };
 
-    console.log("Ticket is ordered: ", ticketResponse.data);
+  const bookWithCard = async () => {
+    await bookFlight();
   };
 
   const handleBook = async (paymentMethod: TPaymentMethod) => {

@@ -84,5 +84,6 @@ export const bookingFlightMethod = async (
 export const ticketFlightMethod = async (
   uniqueId: string
 ): Promise<ApiResponse<TicketFlightResponse>> => {
+  console.log(uniqueId);
   return await AxiosInstance.post(TICKET_FLIGHT_METHOD, { uniqueId });
 };

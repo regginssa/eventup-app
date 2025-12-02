@@ -201,9 +201,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                       label="View package"
                       buttonClassName="w-[125px] h-12"
                       textClassName="text-sm"
-                      onPress={() =>
-                        router.replace(`/event/${event._id}` as any)
-                      }
+                      onPress={() => router.push(`/event/${event._id}` as any)}
                     />
                   </View>
                 </View>
