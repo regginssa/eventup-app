@@ -6,6 +6,7 @@ import {
   FETCH_STANDARD_FLIGHTS_AVAILABILITY,
   FETCH_STANDARD_HOTELS_AVAILABILITY,
   FETCH_STANDARD_TRANSFERS_AVAILABILITY,
+  VALIDATE_FLIGHT_FARE_METHOD,
 } from "../apis";
 
 export const fetchStandardFlightsAvailability = async (
@@ -56,4 +57,14 @@ export const fetchHotelDetails = async (
       "/" +
       tokenId
   );
+};
+
+export const validateFlightFareMethod = async (
+  session_id: string,
+  fare_source_code: string
+): Promise<ApiResponse<any>> => {
+  return await AxiosInstance.post(VALIDATE_FLIGHT_FARE_METHOD, {
+    session_id,
+    fare_source_code,
+  });
 };

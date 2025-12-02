@@ -220,6 +220,7 @@ export interface TFlight {
   session_id: string;
   availabilities: TFlightAvailability[];
   recommend: TFlightAvailability;
+  payload: any;
 }
 
 export interface IHotelDetails {
@@ -274,6 +275,7 @@ export interface THotel {
   session_id: string;
   availabilities: THotelAvailability[];
   recommend?: THotelAvailability;
+  payload: any;
   checkin: Date;
   checkout: Date;
 }

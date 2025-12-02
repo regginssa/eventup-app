@@ -1,3 +1,4 @@
+import { validateFlightFareMethod } from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
   Button,
@@ -9,6 +10,7 @@ import {
 } from "@/components/common";
 import { PassengerInputGroup } from "@/components/molecules";
 import BookingContainer from "@/components/organisms/BookingContainer";
+import { setBookingFlight } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TFlight, TPassengerInfo, TPaxDetails } from "@/types";
 import { IEvent } from "@/types/data";
@@ -477,6 +479,16 @@ const BookingScreen = () => {
       return Alert.alert("Invalid Passenger", result.message);
     }
 
+    if (
+      !flight?.session_id ||
+      !flight.recommend.FareItinerary.AirItineraryFareInfo.FareSourceCode
+    ) {
+      return Alert.alert(
+        "Invalid Flight Information",
+        "Your Flight information is incorrect"
+      );
+    }
+
     const payload = buildRequestPayload(
       flight?.recommend.details,
       paxDetails!,
@@ -485,10 +497,15 @@ const BookingScreen = () => {
       flightBookingNote
     );
 
-    console.log("📌 FINAL REQUEST PAYLOAD: ", JSON.stringify(payload, null, 2));
-
     try {
       setIsCheckLoading(true);
+
+      const response = await validateFlightFareMethod(
+        flight.session_id,
+        flight.recommend.FareItinerary.AirItineraryFareInfo.FareSourceCode
+      );
+
+      dispatch(setBookingFlight({ ...flight, payload }));
     } catch (err) {
       console.error(err);
     } finally {
