@@ -101,8 +101,14 @@ export interface PaymentResponse {
 export interface BookingFlightResponse {
   errorMessage: string;
   status: string;
-  success: string;
+  success: boolean;
   target: string;
   tktTimeLimit: string;
+  uniqueId: string;
+}
+
+export interface TicketFlightResponse {
+  errorMessage: string;
+  success: boolean;
   uniqueId: string;
 }

@@ -1,4 +1,4 @@
-import { bookingFlightMethod } from "@/api/scripts/booking";
+import { bookingFlightMethod, ticketFlightMethod } from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
   fetchStripeClientSecret,
@@ -709,15 +709,26 @@ const CheckoutScreen = () => {
         "Please select another flight"
       );
 
-    const response = await bookingFlightMethod(flight.payload);
+    const bookResponse = await bookingFlightMethod(flight.payload);
 
-    const { errorMessage, success } = response.data;
+    const { errorMessage, success, uniqueId } = bookResponse.data;
 
     const isSuccess = String(success).toLowerCase() === "true";
 
-    if (!isSuccess) {
+    if (!isSuccess || !uniqueId) {
       return Alert.alert("Booking Flight Error", errorMessage);
     }
+
+    const ticketResponse = await ticketFlightMethod(uniqueId);
+
+    if (!ticketResponse.data.success) {
+      return Alert.alert(
+        "Flight Ticket Order Error",
+        ticketResponse.data.errorMessage
+      );
+    }
+
+    console.log("Ticket is ordered: ", ticketResponse.data);
   };
 
   const handleBook = async (paymentMethod: TPaymentMethod) => {
