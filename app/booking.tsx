@@ -1,5 +1,6 @@
 import { fetchEvent } from "@/api/scripts/event";
 import {
+  Button,
   FlightItem,
   Input,
   Modal,
@@ -22,7 +23,7 @@ import {
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const EventDetail = ({
@@ -88,30 +89,48 @@ const EventDetail = ({
   );
 };
 
-const FlightForm = ({ flight }: { flight: TFlight | null }) => {
+const FlightForm = ({
+  flight,
+  email,
+  phone,
+  note,
+  paxDetails,
+  setEmail,
+  setPhone,
+  setNote,
+  setPaxDetails,
+}: {
+  flight: TFlight | null;
+  email: string;
+  phone: string;
+  note: string;
+  paxDetails: TPaxDetails | undefined;
+  setEmail: (val: string) => void;
+  setPhone: (val: string) => void;
+  setNote: (val: string) => void;
+  setPaxDetails: React.Dispatch<React.SetStateAction<TPaxDetails | undefined>>;
+}) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
-  const [email, setEmail] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
-  const [note, setNote] = useState<string>("");
-  const [paxDetails, setPaxDetails] = useState<TPaxDetails | undefined>(
-    flight?.recommend?.details.paxDetails
-  );
 
   const selected = flight?.recommend;
 
-  const handleAdultChange = (
+  const handlePaxChange = (
+    type: "adults" | "child" | "infant",
     idx: number,
     val: any,
     label: keyof TPassengerInfo
   ) => {
-    if (!paxDetails?.adults) return;
+    setPaxDetails((prev) => {
+      if (!prev) return prev;
 
-    const adults = paxDetails.adults.map((adult, i) =>
-      i === idx ? { ...adult, [label]: val } : adult
-    );
-
-    setPaxDetails({ ...paxDetails, adults });
+      return {
+        ...prev,
+        [type]: prev[type].map((p, i) =>
+          i === idx ? { ...p, [label]: val } : p
+        ),
+      };
+    });
   };
 
   return (
@@ -133,69 +152,106 @@ const FlightForm = ({ flight }: { flight: TFlight | null }) => {
         />
       </TouchableOpacity>
 
-      <View className="w-full flex flex-col gap-3">
-        <View className="flex flex-row items-center gap-1">
-          <MaterialIcons name="edit-note" size={18} color="#374151" />
-          <Text className="font-poppins-semibold text-gray-700 text-sm">
-            Booking Information
-          </Text>
-        </View>
-        {selected?.details.paxDetails && (
-          <View className="w-full">
+      {isOpen && (
+        <View className="w-full flex flex-col gap-3">
+          <View className="w-full flex flex-row items-center justify-between">
+            <View className="flex flex-row items-center gap-1">
+              <MaterialIcons name="edit-note" size={18} color="#374151" />
+              <Text className="font-poppins-semibold text-gray-700 text-sm">
+                Booking Information
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className=""
+              onPress={() => setIsDetailOpen(true)}
+            >
+              <Text className="font-poppins-semibold text-gray-700 text-xs">
+                View details
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {paxDetails && (
             <PassengerInputGroup
               type="adult"
-              items={selected.details.paxDetails.adults}
-              onChange={handleAdultChange}
+              items={paxDetails?.adults ?? []}
+              onChange={(i, val, label) =>
+                handlePaxChange("adults", i, val, label)
+              }
             />
-          </View>
-        )}
-        <View className="w-full h-[1px] bg-gray-200"></View>
-        <View className="w-full">
-          <View className="flex flex-row items-center gap-1">
-            <MaterialCommunityIcons
-              name="account-outline"
-              size={18}
-              color="#374151"
+          )}
+
+          {paxDetails && (
+            <PassengerInputGroup
+              type="child"
+              items={paxDetails?.child ?? []}
+              onChange={(i, val, label) =>
+                handlePaxChange("child", i, val, label)
+              }
             />
-            <Text className="font-poppins-semibold text-sm text-gray-700">
-              Customer Information
-            </Text>
-          </View>
-          <View className="w-full p-4 flex flex-col gap-3">
-            <Input
-              type="string"
-              label="Customer email"
-              placeholder="you@example.com"
-              bordered={true}
-              className="rounded-lg"
-              value={email}
-              onChange={setEmail}
+          )}
+
+          {paxDetails && (
+            <PassengerInputGroup
+              type="infant"
+              items={paxDetails?.infant ?? []}
+              onChange={(i, val, label) =>
+                handlePaxChange("infant", i, val, label)
+              }
             />
-            <Input
-              type="string"
-              label="Customer phone"
-              placeholder="+4811422424"
-              bordered={true}
-              className="rounded-lg"
-              value={phone}
-              onChange={setPhone}
-            />
-            <Textarea
-              label="Booking note"
-              placeholder="Note your booking"
-              bordered={true}
-              className="rounded-lg"
-              value={note}
-              onChange={setNote}
-            />
+          )}
+
+          <View className="w-full h-[1px] bg-gray-200"></View>
+          <View className="w-full">
+            <View className="flex flex-row items-center gap-1">
+              <MaterialCommunityIcons
+                name="account-outline"
+                size={18}
+                color="#374151"
+              />
+              <Text className="font-poppins-semibold text-sm text-gray-700">
+                Customer Information
+              </Text>
+            </View>
+            <View className="w-full p-4 flex flex-col gap-3">
+              <Input
+                type="string"
+                label="Customer email"
+                placeholder="you@example.com"
+                bordered={true}
+                className="rounded-lg"
+                value={email}
+                onChange={setEmail}
+              />
+              <Input
+                type="string"
+                label="Customer phone"
+                placeholder="+4811422424"
+                bordered={true}
+                className="rounded-lg"
+                value={phone}
+                onChange={setPhone}
+              />
+              <Textarea
+                label="Booking note"
+                placeholder="Note your booking"
+                bordered={true}
+                className="rounded-lg"
+                value={note}
+                onChange={setNote}
+              />
+            </View>
           </View>
         </View>
-      </View>
+      )}
 
       <Modal
         title="Flight Details"
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
+        scrolled={true}
       >
         {!selected ? (
           <View className="w-full flex flex-col items-center justify-center gap-2">
@@ -219,6 +275,13 @@ const FlightForm = ({ flight }: { flight: TFlight | null }) => {
 const BookingScreen = () => {
   const [event, setEvent] = useState<IEvent | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [flightCustomerEmail, setFlightCustomerEmail] = useState<string>("");
+  const [flightCustomerPhone, setFlightCustomerPhone] = useState<string>("");
+  const [flightBookingNote, setFlightBookingNote] = useState<string>("");
+  const [paxDetails, setPaxDetails] = useState<TPaxDetails | undefined>(
+    undefined
+  );
+  const [isCheckLoading, setIsCheckLoading] = useState<boolean>(false);
 
   const { eventId } = useLocalSearchParams();
   const { flight, hotel } = useSelector((state: RootState) => state.booking);
@@ -244,10 +307,219 @@ const BookingScreen = () => {
     init();
   }, []);
 
+  useEffect(() => {
+    if (flight?.recommend?.details?.paxDetails) {
+      setPaxDetails(flight.recommend.details.paxDetails);
+    }
+  }, [flight?.recommend?.details?.paxDetails]);
+
+  type ValidateResult = { valid: true } | { valid: false; message: string };
+
+  const validate = (
+    flight: TFlight | null,
+    paxDetails: TPaxDetails | undefined
+  ): ValidateResult => {
+    // If no flight selected, skip passenger validation (user didn't choose a flight)
+    if (!flight?.recommend) return { valid: true };
+
+    // Flight is selected -> paxDetails must exist
+    if (!paxDetails)
+      return { valid: false, message: "Passenger details missing" };
+
+    const adultTitles = ["Mr", "Mrs"];
+    const childTitles = ["Master", "Miss"];
+
+    const validatePassenger = (
+      p: TPassengerInfo,
+      type: "adults" | "child" | "infant"
+    ) => {
+      // basic required fields
+      if (
+        !p.firstName?.trim() ||
+        !p.lastName?.trim() ||
+        !p.nationality?.trim()
+      ) {
+        return { ok: false, reason: "Required fields missing" };
+      }
+
+      // title rules
+      if (type === "adults") {
+        if (!adultTitles.includes(p.title))
+          return { ok: false, reason: "Invalid title for adult" };
+      } else {
+        if (!childTitles.includes(p.title))
+          return { ok: false, reason: "Invalid title for child/infant" };
+      }
+
+      // Optional: additional format checks (DOB / passport dates) can be added
+      // Example simple YYYY-MM-DD format check if these fields are present and required:
+      // if (!/^\d{4}-\d{2}-\d{2}$/.test(p.dob)) return { ok: false, reason: "Invalid DOB format" };
+
+      return { ok: true };
+    };
+
+    const groups: (keyof TPaxDetails)[] = ["adults", "child", "infant"];
+
+    for (const group of groups) {
+      const list = paxDetails[group];
+      if (!Array.isArray(list)) continue;
+
+      for (let i = 0; i < list.length; i++) {
+        const passenger = list[i];
+        const res = validatePassenger(passenger, group);
+        if (!res.ok) {
+          return {
+            valid: false,
+            message: `${group.slice(0, -1).toUpperCase()} ${i + 1}: ${
+              res.reason
+            }`,
+          };
+        }
+      }
+    }
+
+    if (flightCustomerEmail.trim().length === 0) {
+      return { valid: false, message: "Flight customer email is required" };
+    }
+
+    if (flightCustomerPhone.trim().length === 0) {
+      return {
+        valid: false,
+        message: "Flight customer phone number is required",
+      };
+    }
+
+    return { valid: true };
+  };
+
+  const buildRequestPayload = (
+    flight: any,
+    paxDetails: TPaxDetails,
+    email: string,
+    phone: string,
+    bookingNote: string
+  ) => {
+    const group = (list: TPassengerInfo[], key: keyof TPassengerInfo) =>
+      list.map((item) => item[key] ?? "");
+
+    const paxFormatted = {
+      adult: paxDetails.adults.length
+        ? {
+            title: group(paxDetails.adults, "title"),
+            firstName: group(paxDetails.adults, "firstName"),
+            lastName: group(paxDetails.adults, "lastName"),
+            dob: group(paxDetails.adults, "dob"),
+            nationality: group(paxDetails.adults, "nationality"),
+            passportNo: group(paxDetails.adults, "passportNo"),
+            passportIssueCountry: group(
+              paxDetails.adults,
+              "passportIssueCountry"
+            ),
+            passportExpiryDate: group(paxDetails.adults, "passportExpiryDate"),
+          }
+        : undefined,
+
+      child: paxDetails.child.length
+        ? {
+            title: group(paxDetails.child, "title"),
+            firstName: group(paxDetails.child, "firstName"),
+            lastName: group(paxDetails.child, "lastName"),
+            dob: group(paxDetails.child, "dob"),
+            nationality: group(paxDetails.child, "nationality"),
+            passportNo: group(paxDetails.child, "passportNo"),
+            passportIssueCountry: group(
+              paxDetails.child,
+              "passportIssueCountry"
+            ),
+            passportExpiryDate: group(paxDetails.child, "passportExpiryDate"),
+          }
+        : undefined,
+
+      infant: paxDetails.infant.length
+        ? {
+            title: group(paxDetails.infant, "title"),
+            firstName: group(paxDetails.infant, "firstName"),
+            lastName: group(paxDetails.infant, "lastName"),
+            dob: group(paxDetails.infant, "dob"),
+            nationality: group(paxDetails.infant, "nationality"),
+            passportNo: group(paxDetails.infant, "passportNo"),
+            passportIssueCountry: group(
+              paxDetails.infant,
+              "passportIssueCountry"
+            ),
+            passportExpiryDate: group(paxDetails.infant, "passportExpiryDate"),
+          }
+        : undefined,
+    };
+
+    return {
+      flightBookingInfo: {
+        flight_session_id: flight.session_id,
+        fare_source_code: flight.fare_source_code,
+        IsPassportMandatory: flight.IsPassportMandatory ?? false,
+        fareType: flight.fareType,
+        areaCode: flight.areaCode ?? "",
+        countryCode: flight.countryCode ?? "",
+      },
+
+      paxInfo: {
+        customerEmail: email,
+        customerPhone: phone,
+        bookingNote,
+        paxDetails: [paxFormatted],
+      },
+    };
+  };
+
+  const handleCheckout = async () => {
+    const result = validate(flight, paxDetails);
+    if (!result.valid) {
+      return Alert.alert("Invalid Passenger", result.message);
+    }
+
+    const payload = buildRequestPayload(
+      flight?.recommend.details,
+      paxDetails!,
+      flightCustomerEmail,
+      flightCustomerPhone,
+      flightBookingNote
+    );
+
+    console.log("📌 FINAL REQUEST PAYLOAD: ", JSON.stringify(payload, null, 2));
+
+    try {
+      setIsCheckLoading(true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsCheckLoading(false);
+    }
+  };
+
   return (
     <BookingContainer>
-      <EventDetail loading={loading} event={event} />
-      <FlightForm flight={flight} />
+      <View className="flex-1 gap-4">
+        <EventDetail loading={loading} event={event} />
+        <FlightForm
+          flight={flight}
+          email={flightCustomerEmail}
+          phone={flightCustomerPhone}
+          note={flightBookingNote}
+          setEmail={setFlightCustomerEmail}
+          setPhone={setFlightCustomerPhone}
+          setNote={setFlightBookingNote}
+          paxDetails={paxDetails}
+          setPaxDetails={setPaxDetails}
+        />
+      </View>
+
+      <Button
+        type="primary"
+        label="Checkout"
+        buttonClassName="h-12"
+        loading={isCheckLoading}
+        onPress={handleCheckout}
+      />
     </BookingContainer>
   );
 };

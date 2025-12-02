@@ -28,7 +28,9 @@ const BookingContainer: React.FC<BookingContainerProps> = ({ children }) => {
           <View className="w-10"></View>
         </View>
 
-        <ScrollView contentContainerStyle={{ flexGrow: 1, gap: 16 }}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, gap: 16, marginBottom: 16 }}
+        >
           {children}
         </ScrollView>
       </SafeAreaView>

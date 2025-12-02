@@ -1,3 +1,4 @@
+import { formatBookingDate } from "@/utils/format";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import {
@@ -78,7 +79,11 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
           placeholder={placeholder}
           className="flex-1 bg-none text-black font-dm-sans text-sm"
           editable={false}
-          value={value.toLocaleString()}
+          value={
+            mode === "datetime"
+              ? value.toLocaleString()
+              : formatBookingDate(value)
+          }
         />
       </TouchableOpacity>
 

@@ -24,14 +24,14 @@ const PassengerInputGroup: React.FC<PassengerInputGroupProps> = ({
   onChange,
 }) => {
   return (
-    <View className="w-full">
+    <View className="w-full flex flex-col gap-4">
       {items.map((item, index) => (
         <View
           key={`passenger-input-group-item-${index}`}
           className="w-full px-4 flex flex-col gap-3"
         >
           <View className="w-full flex flex-row items-center justify-center gap-2">
-            <Text className="font-dm-sans-medium text-gray-600 text-sm">
+            <Text className="font-dm-sans-bold text-gray-600 text-sm">
               {type.toUpperCase()} {index + 1}
             </Text>
             <View className="flex-1 bg-gray-200 h-[1px]"></View>

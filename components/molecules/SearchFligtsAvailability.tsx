@@ -73,6 +73,11 @@ const SearchsFlightAvailability: React.FC<SearchFlightsAvailabilityProps> = ({
 
       const { recommend } = response.data;
 
+      if (!recommend) {
+        setIsFlightSearched(true);
+        return setFlightLoading(false);
+      }
+
       const initialFlightDetails: IFlightDetail = {
         paxInfo: {
           customerEmail: "",

@@ -1,7 +1,7 @@
 import { TFlightAvailability, THotelAvailability } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { Button, FlightItem, HotelItem, Modal } from "../common";
 import { useTheme } from "../providers/ThemeProvider";
 
@@ -76,16 +76,10 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
           router.push({ pathname: "/booking", params: { eventId } })
         }
       />
+
       <View className="h-3"></View>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-});
 
 export default PackageConfirmModal;
