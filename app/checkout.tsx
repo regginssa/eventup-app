@@ -752,6 +752,7 @@ const CheckoutScreen = () => {
 
     dispatch(addNewBooking(addFlightResponse.data));
     Alert.alert("Success", "Flight booked successfully!");
+
     router.replace({
       pathname: "/booked",
       params: { bookingId: addFlightResponse.data._id },

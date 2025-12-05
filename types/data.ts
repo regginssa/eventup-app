@@ -5,6 +5,7 @@ import {
   TEventFee,
   TEventLocation,
   TKycStatus,
+  TPackageType,
 } from ".";
 
 export interface IKyc {
@@ -376,6 +377,7 @@ export interface IBooking {
   userId: string;
   eventId: string;
   flight: TripDetails;
+  type: TPackageType;
   createdAt?: Date;
   updatedAt?: Date;
 }

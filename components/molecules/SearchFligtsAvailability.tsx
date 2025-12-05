@@ -73,8 +73,6 @@ const SearchsFlightAvailability: React.FC<SearchFlightsAvailabilityProps> = ({
 
       const { recommend } = response.data;
 
-      console.log("Availability Response: ", recommend);
-
       if (!recommend) {
         setIsFlightSearched(true);
         return setFlightLoading(false);

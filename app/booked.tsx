@@ -1,9 +1,16 @@
 import { Button, TicketQR } from "@/components/common";
 import { BookedContainer } from "@/components/organisms";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { RootState } from "@/redux/store";
+import { TPackageType } from "@/types";
+import { IBooking, TripDetails } from "@/types/data";
+import { formatDateTime } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { useSelector } from "react-redux";
 
 const BookedLightImage = require("@/assets/images/booked_image.png");
 const BookedDarkImage = require("@/assets/images/booked_image_dark.png");
@@ -74,12 +81,48 @@ const EventTicket = () => {
   );
 };
 
-const FlightDetails = () => {
+const FlightDetails = ({
+  flight,
+  packageType,
+}: {
+  flight: TripDetails | undefined;
+  packageType: TPackageType;
+}) => {
   const { theme } = useTheme();
+
+  const reservationItems =
+    flight?.TravelItinerary.ItineraryInfo.ReservationItems;
+
+  // Pick first segment for display
+  const firstSegment = reservationItems?.[0]?.ReservationItem;
+  const lastSegment =
+    reservationItems?.[reservationItems.length - 1]?.ReservationItem;
+
+  const airlineLabel = firstSegment
+    ? `Airline: ${firstSegment.MarketingAirlineCode} ${firstSegment.FlightNumber}`
+    : "Airline: N/A";
+
+  const departureLabel = firstSegment
+    ? `Departure: ${
+        firstSegment.DepartureAirportLocationCode
+      } - ${formatDateTime(firstSegment.DepartureDateTime as any)}`
+    : "Departure: N/A";
+
+  const arrivalLabel = lastSegment
+    ? `Arrival: ${lastSegment.ArrivalAirportLocationCode} - ${formatDateTime(
+        lastSegment.ArrivalDateTime as any
+      )}`
+    : "Arrival: N/A";
+
+  const classLabel = firstSegment
+    ? `Class: ${packageType === "standard" ? "Economy/Standard" : "VIP/Gold"}`
+    : "Class: N/A";
+
+  const confirmationCode = firstSegment?.AirlinePNR || "N/A";
 
   const items = [
     {
-      label: "Airline: Emirates EK 182",
+      label: airlineLabel,
       icon: (
         <MaterialIcons
           name="airlines"
@@ -89,7 +132,7 @@ const FlightDetails = () => {
       ),
     },
     {
-      label: "Departure: JFK New York - Aug 14, 2025 – 10:45 PM",
+      label: departureLabel,
       icon: (
         <MaterialCommunityIcons
           name="calendar-clock-outline"
@@ -99,7 +142,7 @@ const FlightDetails = () => {
       ),
     },
     {
-      label: "Arrival: Brussels International - Aug 15, 2025 – 11:20 AM",
+      label: arrivalLabel,
       icon: (
         <MaterialCommunityIcons
           name="airplane-landing"
@@ -109,7 +152,7 @@ const FlightDetails = () => {
       ),
     },
     {
-      label: "Class: Economy (Standard) / Business (Gold)",
+      label: classLabel,
       icon: (
         <MaterialIcons
           name="flight-class"
@@ -119,7 +162,7 @@ const FlightDetails = () => {
       ),
     },
     {
-      label: "Confirmation Code: 6YQ4D2",
+      label: `Confirmation Code: ${confirmationCode}`,
       icon: (
         <MaterialIcons
           name="event-seat"
@@ -136,28 +179,43 @@ const FlightDetails = () => {
         theme === "light" ? "bg-white" : "bg-[#171C1C]"
       } rounded-xl p-4 gap-3 overflow-hidden`}
     >
-      <Text
-        className={`font-poppins-semibold ${
-          theme === "light" ? "text-gray-700" : "text-gray-200"
-        }`}
-      >
-        Flight Details
-      </Text>
+      {!flight ? (
+        <View className="w-full flex flex-col items-center justify-center gap-2">
+          <MaterialCommunityIcons
+            name="airplane-off"
+            size={24}
+            color="#4b5563"
+          />
+          <Text className="font-poppins-semibold text-gray-600">
+            No available airlines
+          </Text>
+        </View>
+      ) : (
+        <>
+          <Text
+            className={`font-poppins-semibold ${
+              theme === "light" ? "text-gray-700" : "text-gray-200"
+            }`}
+          >
+            Flight Details
+          </Text>
 
-      <View className="w-full flex flex-col items-start gap-2">
-        {items.map((item, index) => (
-          <View key={index} className="flex flex-row items-start gap-1.5">
-            {item.icon}
-            <Text
-              className={`font-dm-sans text-sm ${
-                theme === "light" ? "text-gray-600" : "text-gray-400"
-              } line-clamp-2`}
-            >
-              {item.label}
-            </Text>
+          <View className="w-full flex flex-col items-start gap-2">
+            {items.map((item, index) => (
+              <View key={index} className="flex flex-row items-start gap-1.5">
+                {item.icon}
+                <Text
+                  className={`font-dm-sans text-sm ${
+                    theme === "light" ? "text-gray-600" : "text-gray-400"
+                  } line-clamp-2`}
+                >
+                  {item.label}
+                </Text>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
+        </>
+      )}
     </View>
   );
 };
@@ -426,7 +484,20 @@ const TripSummary = () => {
 };
 
 const BookedScreen = () => {
+  const [booking, setBooking] = useState<IBooking | null>(null);
+
+  const { bookingId } = useLocalSearchParams();
   const { theme } = useTheme();
+  const { bookings } = useSelector((state: RootState) => state.booking);
+
+  useEffect(() => {
+    if (bookingId) {
+      const booking = bookings.find((bk) => bk._id === bookingId);
+      if (booking) {
+        setBooking(booking);
+      }
+    }
+  }, [bookingId, bookings]);
 
   return (
     <BookedContainer>
@@ -440,7 +511,7 @@ const BookedScreen = () => {
       </View>
 
       <EventTicket />
-      <FlightDetails />
+      <FlightDetails flight={booking?.flight} packageType="standard" />
       <HotelBooking />
       <ChauffeurPickupInfo />
       <TripSummary />
