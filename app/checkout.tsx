@@ -5,8 +5,10 @@ import {
 } from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
+  createStripePaymentIntent,
   fetchStripeClientSecret,
   fetchStripeCustomerId,
+  refundStripePayment,
   saveStripePaymentMethod,
 } from "@/api/scripts/stripe";
 import { Button, CryptoPaymentQR, Spinner } from "@/components/common";
@@ -15,7 +17,7 @@ import { CheckoutContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
 import { addNewBooking } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { TCurrency, TPaymentMethod } from "@/types";
+import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
 import { IEvent } from "@/types/data";
 import { formatEventDate, formatName, getCurrencySymbol } from "@/utils/format";
 import {
@@ -26,6 +28,7 @@ import {
 } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import {
+  confirmPayment,
   initPaymentSheet,
   presentPaymentSheet,
 } from "@stripe/stripe-react-native";
@@ -715,6 +718,53 @@ const CheckoutScreen = () => {
         "Please select another flight"
       );
 
+    if (
+      !user.stripe.customer_id ||
+      !user.stripe.payment_methods.length ||
+      stripePaymentMethodId.trim().length === 0
+    ) {
+      return Alert.alert("Error", "Please add a card to proceed with booking.");
+    }
+
+    // Check stripe payment funds enough
+    const stripePayload = {
+      customerId: user.stripe.customer_id,
+      paymentMethodId: stripePaymentMethodId,
+      amount: totalPrice,
+      currency: currency,
+      bookingOption: "flight",
+      packageType: packageType as TPackageType,
+    };
+
+    const clientSecretResponse = await createStripePaymentIntent(
+      stripePayload as any
+    );
+
+    if (!clientSecretResponse.ok) {
+      return Alert.alert(
+        "Payment Error",
+        clientSecretResponse.message || "Failed to create payment intent."
+      );
+    }
+
+    const { id: paymentIntentId, clientSecret } = clientSecretResponse.data;
+
+    // Pay with stripe
+    const { error: confirmPaymentError } = await confirmPayment(clientSecret, {
+      paymentMethodType: "Card",
+      paymentMethodData: {
+        paymentMethodId: stripePaymentMethodId,
+      },
+    });
+
+    if (confirmPaymentError) {
+      return Alert.alert(
+        "Payment Confirmation Error",
+        confirmPaymentError.message
+      );
+    }
+
+    // Booking method
     const bookResponse = await bookingFlightMethod(flight.payload);
 
     const { errorMessage, success, uniqueId, tktTimeLimit } = bookResponse.data;
@@ -725,13 +775,19 @@ const CheckoutScreen = () => {
       return Alert.alert("Booking Flight Error", errorMessage);
     }
 
+    // Ticket order method
     const ticketResponse = await ticketFlightMethod(uniqueId);
 
     if (!ticketResponse.data.success) {
-      return Alert.alert(
+      Alert.alert(
         "Flight Ticket Order Error",
         ticketResponse.data.errorMessage
       );
+
+      // Refund the payment here if ticket order failed (not implemented)
+      const refundResponse = await refundStripePayment(paymentIntentId);
+
+      return Alert.alert("Refund Status", refundResponse.message);
     }
 
     const payload = {
@@ -758,6 +814,8 @@ const CheckoutScreen = () => {
       params: { bookingId: addFlightResponse.data._id },
     });
   };
+
+  const bookHotel = async () => {};
 
   const bookWithCard = async () => {
     await bookFlight();

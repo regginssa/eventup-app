@@ -40,3 +40,5 @@ export const ADD_NEW_FLIGHT = "/booking/add/flight";
 export const FETCH_STRIPE_CUSTOMER_ID = "/stripe/customer-id";
 export const FETCH_STRIPE_CLIENT_SECRET = "/stripe/client-secret";
 export const SAVE_STRIPE_PAYMENT_METHOD = "/stripe/save-payment-method";
+export const CREATE_STRIPE_PAYMENT_INTENT = "/stripe/payment-intent";
+export const REFUND_STRIPE_PAYMENT = "/stripe/payment-refund";

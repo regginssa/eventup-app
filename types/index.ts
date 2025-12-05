@@ -36,6 +36,8 @@ export type TPaymentMethod = "card" | "crypto" | "token";
 
 export type TPackageType = "standard" | "gold";
 
+export type TBookingOption = "flight" | "hotel" | "transfer";
+
 export type TPagination = {
   page: number;
   limit: number;
