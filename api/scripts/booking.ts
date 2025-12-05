@@ -4,8 +4,10 @@ import {
   BookingFlightResponse,
   TicketFlightResponse,
 } from "@/types/api";
+import { IBooking } from "@/types/data";
 import AxiosInstance from "../AxiosInstance";
 import {
+  ADD_NEW_FLIGHT,
   BOOKING_FLIGHT_METHOD,
   FETCH_HOTEL_DETAILS,
   FETCH_STANDARD_FLIGHTS_AVAILABILITY,
@@ -86,4 +88,29 @@ export const ticketFlightMethod = async (
 ): Promise<ApiResponse<TicketFlightResponse>> => {
   console.log(uniqueId);
   return await AxiosInstance.post(TICKET_FLIGHT_METHOD, { uniqueId });
+};
+
+export const addNewFlight = async ({
+  sessionId,
+  uniqueId,
+  fareSourceCode,
+  tktTimeLimit,
+  userId,
+  eventId,
+}: {
+  sessionId: string;
+  uniqueId: string;
+  fareSourceCode: string;
+  tktTimeLimit: Date;
+  userId: string;
+  eventId: string;
+}): Promise<ApiResponse<IBooking>> => {
+  return await AxiosInstance.post(ADD_NEW_FLIGHT, {
+    sessionId,
+    uniqueId,
+    fareSourceCode,
+    tktTimeLimit,
+    userId,
+    eventId,
+  });
 };

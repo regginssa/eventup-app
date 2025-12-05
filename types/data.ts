@@ -244,3 +244,138 @@ export interface IEvent {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+/* ---- Fare ---- */
+export interface Fare {
+  Amount: string;
+  CurrencyCode: string;
+  DecimalPlaces: number;
+}
+
+/* ---- Extra Service ---- */
+export interface ExtraService {
+  NameNumber: number;
+  Behavior?: string;
+  CheckInType?: string;
+  Description?: string;
+  IsMandatory?: boolean;
+  ServiceCost?: Fare;
+  ServiceId?: string;
+  Type?: string;
+}
+
+/* ---- Booking Notes ---- */
+export interface BookingNote {
+  NoteDetails?: string;
+  CreatedOn?: string;
+}
+
+/* ---- Passenger Details ---- */
+export interface CustomerInfo {
+  PassengerType: string;
+  PassengerTitle?: string;
+  PassengerFirstName?: string;
+  PassengerLastName?: string;
+  PassportNumber?: string;
+  ItemRPH?: number;
+  eTicketNumber?: string;
+  DateOfBirth?: string;
+  EmailAddress?: string;
+  Gender?: string;
+  PassengerNationality?: string;
+  PhoneNumber?: string;
+  PostCode?: string;
+}
+
+/* ---- Fare Breakdown ---- */
+export interface PassengerTypeQuantity {
+  Code?: string;
+  Quantity?: number;
+}
+
+export interface TripDetailsPassengerFare {
+  EquiFare: Fare;
+  ServiceTax: Fare;
+  Tax: Fare;
+  TotalFare: Fare;
+}
+
+export interface PaxFareBreakdown {
+  PassengerTypeQuantity: PassengerTypeQuantity;
+  TripDetailsPassengerFare: TripDetailsPassengerFare;
+}
+
+/* ---- Flight Segment ---- */
+export interface ReservationItem {
+  AirEquipmentType?: string;
+  AirlinePNR?: string;
+  ArrivalAirportLocationCode?: string;
+  ArrivalDateTime?: string;
+  ArrivalTerminal?: string;
+  Baggage?: string;
+  CabinClassText?: string;
+  DepartureAirportLocationCode?: string;
+  DepartureDateTime?: string;
+  DepartureTerminal?: string;
+  FlightNumber?: string;
+  ItemRPH?: number;
+  JourneyDuration?: string;
+  MarketingAirlineCode?: string;
+  NumberInParty?: number;
+  OperatingAirlineCode?: string;
+  ResBookDesigCode?: string;
+  StopQuantity?: number;
+}
+
+/* ---- Itinerary Info ---- */
+export interface ItineraryInfo {
+  CustomerInfos: { CustomerInfo: CustomerInfo }[];
+  ItineraryPricing: {
+    EquiFare: Fare;
+    ServiceTax: Fare;
+    Tax: Fare;
+    TotalFare: Fare;
+  };
+  ReservationItems: { ReservationItem: ReservationItem }[];
+  TripDetailsPTC_FareBreakdowns: {
+    TripDetailsPTC_FareBreakdown: PaxFareBreakdown;
+  }[];
+  ExtraServices?: {
+    Services: { Service: ExtraService }[];
+  };
+  BookingNotes?: BookingNote[];
+}
+
+/* ---- Travel Itinerary ---- */
+export interface TravelItinerary {
+  BookingStatus?: string;
+  CrossBorderIndicator?: boolean;
+  Destination?: string;
+  FareType?: string;
+  IsCommissionable?: boolean;
+  IsMOFare?: boolean;
+  Origin?: string;
+  TicketStatus?: string;
+  UniqueID?: string;
+  ItineraryInfo: ItineraryInfo;
+}
+
+/* ---- Trip Details ---- */
+export interface TripDetails {
+  Success: boolean;
+  Target: string;
+  TravelItinerary: TravelItinerary;
+  sessionId?: string | null;
+  fareSourceCode?: string | null;
+  tktTimeLimit?: Date;
+}
+
+/* ---- Booking ---- */
+export interface IBooking {
+  _id?: string;
+  userId: string;
+  eventId: string;
+  flight: TripDetails;
+  createdAt?: Date;
+  updatedAt?: Date;
+}

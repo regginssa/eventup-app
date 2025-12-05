@@ -1,14 +1,17 @@
 import { TFlight, THotel } from "@/types";
+import { IBooking } from "@/types/data";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface IBookingState {
   flight: TFlight | null;
   hotel: THotel | null;
+  bookings: IBooking[];
 }
 
 const initialState: IBookingState = {
   flight: null,
   hotel: null,
+  bookings: [],
 };
 
 const bookingSlice = createSlice({
@@ -21,9 +24,13 @@ const bookingSlice = createSlice({
     setBookingHotel(state, action: PayloadAction<THotel | null>) {
       state.hotel = action.payload;
     },
+    addNewBooking(state, action: PayloadAction<IBooking>) {
+      state.bookings.push(action.payload);
+    },
   },
 });
 
-export const { setBookingFlight, setBookingHotel } = bookingSlice.actions;
+export const { setBookingFlight, setBookingHotel, addNewBooking } =
+  bookingSlice.actions;
 
 export default bookingSlice.reducer;

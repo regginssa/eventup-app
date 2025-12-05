@@ -73,6 +73,8 @@ const SearchsFlightAvailability: React.FC<SearchFlightsAvailabilityProps> = ({
 
       const { recommend } = response.data;
 
+      console.log("Availability Response: ", recommend);
+
       if (!recommend) {
         setIsFlightSearched(true);
         return setFlightLoading(false);
@@ -90,6 +92,8 @@ const SearchsFlightAvailability: React.FC<SearchFlightsAvailabilityProps> = ({
           infant: Array.from({ length: flight.infants }, createEmptyPassenger),
         },
       };
+
+      console.log(initialFlightDetails);
 
       setFlightsAvailability({
         ...response.data,

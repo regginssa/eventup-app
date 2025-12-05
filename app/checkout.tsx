@@ -1,4 +1,8 @@
-import { bookingFlightMethod, ticketFlightMethod } from "@/api/scripts/booking";
+import {
+  addNewFlight,
+  bookingFlightMethod,
+  ticketFlightMethod,
+} from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
   fetchStripeClientSecret,
@@ -9,6 +13,7 @@ import { Button, CryptoPaymentQR, Spinner } from "@/components/common";
 import { StripePaymentMethodGroup } from "@/components/molecules";
 import { CheckoutContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
+import { addNewBooking } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TCurrency, TPaymentMethod } from "@/types";
 import { IEvent } from "@/types/data";
@@ -642,6 +647,7 @@ const CheckoutScreen = () => {
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
   const { flight, hotel } = useSelector((state: RootState) => state.booking);
+  const dispatch = useDispatch();
 
   const getEvent = useCallback(async () => {
     if (!eventId || typeof eventId !== "string") return;
@@ -711,7 +717,7 @@ const CheckoutScreen = () => {
 
     const bookResponse = await bookingFlightMethod(flight.payload);
 
-    const { errorMessage, success, uniqueId } = bookResponse.data;
+    const { errorMessage, success, uniqueId, tktTimeLimit } = bookResponse.data;
 
     const isSuccess = String(success).toLowerCase() === "true";
 
@@ -720,7 +726,6 @@ const CheckoutScreen = () => {
     }
 
     const ticketResponse = await ticketFlightMethod(uniqueId);
-    console.log("Ticket response: ", ticketResponse.data, uniqueId);
 
     if (!ticketResponse.data.success) {
       return Alert.alert(
@@ -728,6 +733,29 @@ const CheckoutScreen = () => {
         ticketResponse.data.errorMessage
       );
     }
+
+    const payload = {
+      sessionId: flight.session_id,
+      uniqueId: uniqueId,
+      fareSourceCode:
+        flight?.recommend?.FareItinerary?.AirItineraryFareInfo?.FareSourceCode,
+      tktTimeLimit: new Date(tktTimeLimit),
+      userId: user?._id as string,
+      eventId: eventId as string,
+    };
+
+    const addFlightResponse = await addNewFlight(payload);
+
+    if (!addFlightResponse.ok) {
+      return Alert.alert("Error", "Failed to save booking data.");
+    }
+
+    dispatch(addNewBooking(addFlightResponse.data));
+    Alert.alert("Success", "Flight booked successfully!");
+    router.replace({
+      pathname: "/booked",
+      params: { bookingId: addFlightResponse.data._id },
+    });
   };
 
   const bookWithCard = async () => {
@@ -735,6 +763,8 @@ const CheckoutScreen = () => {
   };
 
   const handleBook = async (paymentMethod: TPaymentMethod) => {
+    if (!user?._id || !eventId) return Alert.alert("Error", "Unauthorized");
+
     try {
       setIsBookLoading(true);
       switch (paymentMethod) {
