@@ -45,6 +45,25 @@ const SearchHotelsAvailability: React.FC<SearchHotelsAvailabilityProps> = ({
     }));
   };
 
+  const buildInitialPaxDetails = (formattedRooms: any[]) => {
+    return formattedRooms.map((room) => ({
+      room_no: room.room_no,
+      adult: {
+        title: Array(room.adult).fill("Mr"),
+        firstName: Array(room.adult).fill(""),
+        lastName: Array(room.adult).fill(""),
+      },
+      child:
+        room.child > 0
+          ? {
+              title: Array(room.child).fill("Mr"),
+              firstName: Array(room.child).fill(""),
+              lastName: Array(room.child).fill(""),
+            }
+          : undefined,
+    }));
+  };
+
   const handleHotel = async () => {
     if (!event.opening_date) return;
 
@@ -119,6 +138,9 @@ const SearchHotelsAvailability: React.FC<SearchHotelsAvailabilityProps> = ({
       setHotelLoading(true);
 
       const formattedHotelRooms = formatHotelRooms(hotel);
+      const initialPaxDetails = buildInitialPaxDetails(formattedHotelRooms);
+
+      console.log("Initial pax details for hotel", initialPaxDetails);
 
       const response = await fetchStandardHotelsAvailability(
         event._id as string,
@@ -129,13 +151,26 @@ const SearchHotelsAvailability: React.FC<SearchHotelsAvailabilityProps> = ({
 
       setHotelsAvailability(response.data);
       setIsHotelSearched(true);
-      dispatch(
-        setBookingHotel({
-          ...response.data,
-          checkin: new Date(hotelCheckin),
-          checkout: new Date(hotelCheckout),
-        })
-      );
+
+      if (response.data?.recommend) {
+        dispatch(
+          setBookingHotel({
+            ...response.data,
+            checkin: new Date(hotelCheckin),
+            checkout: new Date(hotelCheckout),
+            bookingRequest: {
+              customerEmail: "",
+              customerPhone: "",
+              rateBasisId: "",
+              paxDetails: initialPaxDetails,
+              sessionId: response.data.session_id,
+              hotelId: response.data.recommend.hotelId,
+              productId: response.data.recommend.productId,
+              tokenId: response.data.recommend.tokenId,
+            },
+          })
+        );
+      }
     } catch (error) {
       console.log("handle hotel availability error:", error);
     } finally {
@@ -200,7 +235,7 @@ const SearchHotelsAvailability: React.FC<SearchHotelsAvailabilityProps> = ({
                   rooms: hotel.rooms + 1,
                   data: [
                     ...hotel.data,
-                    { adults: 0, childs: 0, child_age: [] },
+                    { adults: 1, childs: 0, child_age: [] },
                   ],
                 })
               }

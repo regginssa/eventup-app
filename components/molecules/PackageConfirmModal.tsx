@@ -1,7 +1,11 @@
+import { fetchHotelRoomRates } from "@/api/scripts/booking";
+import { setBookingHotelRoomRates } from "@/redux/slices/booking.slice";
 import { TFlightAvailability, THotelAvailability } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Text, View } from "react-native";
+import { useState } from "react";
+import { Alert, Text, View } from "react-native";
+import { useDispatch } from "react-redux";
 import { Button, FlightItem, HotelItem, Modal } from "../common";
 import { useTheme } from "../providers/ThemeProvider";
 
@@ -22,9 +26,35 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   flight,
   hotel,
 }) => {
+  const [loading, setLoading] = useState<boolean>(false);
   const { theme } = useTheme();
 
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  const handleProceedToBooking = async () => {
+    if (hotel) {
+      if (!hotel.hotelId) {
+        return Alert.alert("Error", "Invalid hotel selected.");
+      }
+      try {
+        setLoading(true);
+
+        const response = await fetchHotelRoomRates(hotel.hotelId);
+
+        console.log("Fetched hotel room rates:", response.data);
+
+        dispatch(setBookingHotelRoomRates(response.data));
+      } catch (error: any) {
+      } finally {
+        setLoading(false);
+      }
+    }
+    router.push({
+      pathname: "/booking",
+      params: { eventId, packageType },
+    });
+  };
 
   return (
     <Modal
@@ -72,12 +102,8 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
         label="Proceed to Booking"
         buttonClassName="h-12"
         textClassName="text-lg"
-        onPress={() =>
-          router.push({
-            pathname: "/booking",
-            params: { eventId, packageType },
-          })
-        }
+        loading={loading}
+        onPress={handleProceedToBooking}
       />
 
       <View className="h-3"></View>

@@ -1,4 +1,4 @@
-import { IHotelDetails } from "@/types";
+import { IHotelDetails, IRoomRate } from "@/types";
 import {
   ApiResponse,
   BookingFlightResponse,
@@ -10,6 +10,7 @@ import {
   ADD_NEW_FLIGHT,
   BOOKING_FLIGHT_METHOD,
   FETCH_HOTEL_DETAILS,
+  FETCH_HOTEL_ROOM_RATES,
   FETCH_STANDARD_FLIGHTS_AVAILABILITY,
   FETCH_STANDARD_HOTELS_AVAILABILITY,
   FETCH_STANDARD_TRANSFERS_AVAILABILITY,
@@ -75,6 +76,12 @@ export const validateFlightFareMethod = async (
     session_id,
     fare_source_code,
   });
+};
+
+export const fetchHotelRoomRates = async (
+  hotelId: string
+): Promise<ApiResponse<IRoomRate[]>> => {
+  return await AxiosInstance.get(FETCH_HOTEL_ROOM_RATES + hotelId);
 };
 
 export const bookingFlightMethod = async (

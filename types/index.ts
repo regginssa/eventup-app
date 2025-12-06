@@ -235,6 +235,47 @@ export interface IHotelDetails {
   description: { content: string };
 }
 
+export interface IRoomRate {
+  productId: string;
+  roomType: string;
+  description: string;
+  roomCode: string;
+  fareType: string;
+  rateBasisId: string;
+  currency: string;
+  netPrice: string;
+  boardType: string;
+  maxOccupancyPerRoom: string;
+  inventoryType: string;
+  cancellationPolicy: string;
+  roomImages: string[];
+  facilities: string[];
+}
+
+export interface THotelBookingRequest {
+  sessionId: string;
+  productId: string;
+  tokenId: string;
+  rateBasisId: string;
+  clientRef?: string;
+  customerEmail: string;
+  customerPhone: string;
+  bookingNote?: string;
+  paxDetails: THotelPaxDetail[];
+}
+
+export interface THotelPaxDetail {
+  room_no: number;
+  adult: THotelGuestGroup;
+  child?: THotelGuestGroup;
+}
+
+export interface THotelGuestGroup {
+  title: string[]; // e.g., ["Mr", "Mrs"]
+  firstName: string[]; // matching array indexes
+  lastName: string[]; // matching array indexes
+}
+
 export interface THotelAvailability {
   hotelId: string;
   twxHotelId: string;
@@ -265,6 +306,7 @@ export interface THotelAvailability {
   tripAdvisorReview: number;
   special: string;
   details: IHotelDetails;
+  roomRates: IRoomRate[];
 }
 
 export interface PerNight {
@@ -280,4 +322,5 @@ export interface THotel {
   payload: any;
   checkin: Date;
   checkout: Date;
+  bookingRequest: THotelBookingRequest;
 }
