@@ -680,6 +680,7 @@ const CheckoutScreen = () => {
   useEffect(() => {
     if (!user?.stripe) return;
 
+    if (user.stripe.payment_methods.length === 0) return;
     setStripePaymentMethodId(
       user.stripe.payment_methods[0].payment_method_id || ""
     );
@@ -693,8 +694,6 @@ const CheckoutScreen = () => {
       ) || 0;
 
     const hotelPrice = Number(hotel?.selectedRoomRate?.netPrice) || 0;
-
-    console.log(hotel?.selectedRoomRate);
 
     const base = flightPrice + hotelPrice;
     const comm = base * 0.1;
@@ -878,6 +877,8 @@ const CheckoutScreen = () => {
   };
 
   const bookWithCard = async () => {
+    if (!user?.stripe.customer_id)
+      return Alert.alert("Error", "Please add your payment method first");
     let bookingId = null;
 
     if (flight) {
