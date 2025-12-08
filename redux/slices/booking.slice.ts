@@ -32,6 +32,17 @@ const bookingSlice = createSlice({
     addNewBooking(state, action: PayloadAction<IBooking>) {
       state.bookings.push(action.payload);
     },
+    updateBooking(
+      state,
+      action: PayloadAction<{ id: string; booking: IBooking }>
+    ) {
+      const index = state.bookings.findIndex(
+        (b) => b._id === action.payload.id
+      );
+      if (index !== -1) {
+        state.bookings[index] = action.payload.booking;
+      }
+    },
   },
 });
 
@@ -40,6 +51,7 @@ export const {
   setBookingHotel,
   setBookingHotelRoomRates,
   addNewBooking,
+  updateBooking,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

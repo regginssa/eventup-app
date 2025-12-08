@@ -50,8 +50,6 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
           tokenId: hotel.tokenId,
         });
 
-        console.log("Fetched hotel room rates:", response.data);
-
         dispatch(setBookingHotelRoomRates(response.data));
       } catch (error: any) {
       } finally {

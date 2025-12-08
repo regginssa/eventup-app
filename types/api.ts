@@ -112,3 +112,38 @@ export interface TicketFlightResponse {
   success: boolean;
   uniqueId: string;
 }
+
+export interface IBookingResponse {
+  status: string;
+  supplierConfirmationNum: string;
+  referenceNum: string;
+  clientRefNum: string;
+  productId: string;
+  roomBookDetails: RoomBookDetails;
+  error: string;
+}
+
+export interface RoomBookDetails {
+  hotelId: string;
+  checkIn: string; // YYYY-MM-DD
+  checkOut: string; // YYYY-MM-DD
+  days: number;
+  currency: string;
+  NetPrice: string;
+  fareType: string;
+  cancellationPolicy: string; // raw text format from API
+  customerEmail: string;
+  customerPhone: string;
+  rooms: RoomInfo[];
+}
+
+export interface RoomInfo {
+  name: string;
+  description: string;
+  boardType: string;
+  paxDetails: PaxDetails;
+}
+
+export interface PaxDetails {
+  name: string[];
+}

@@ -1,14 +1,17 @@
-import { IHotelDetails, IRoomRate } from "@/types";
+import { IHotelDetails, IRoomRate, TPackageType } from "@/types";
 import {
   ApiResponse,
   BookingFlightResponse,
+  IBookingResponse,
   TicketFlightResponse,
 } from "@/types/api";
 import { IBooking } from "@/types/data";
 import AxiosInstance from "../AxiosInstance";
 import {
   ADD_NEW_FLIGHT,
+  ADD_NEW_HOTEL,
   BOOKING_FLIGHT_METHOD,
+  BOOKING_HOTEL_METHOD,
   CHECK_HOTEL_ROOM_RATES,
   FETCH_HOTEL_DETAILS,
   FETCH_HOTEL_ROOM_RATES,
@@ -123,10 +126,15 @@ export const bookingFlightMethod = async (
   return await AxiosInstance.post(BOOKING_FLIGHT_METHOD, { payload });
 };
 
+export const bookingHotelMethod = async (
+  payload: any
+): Promise<ApiResponse<IBookingResponse>> => {
+  return await AxiosInstance.post(BOOKING_HOTEL_METHOD, { payload });
+};
+
 export const ticketFlightMethod = async (
   uniqueId: string
 ): Promise<ApiResponse<TicketFlightResponse>> => {
-  console.log(uniqueId);
   return await AxiosInstance.post(TICKET_FLIGHT_METHOD, { uniqueId });
 };
 
@@ -152,5 +160,25 @@ export const addNewFlight = async ({
     tktTimeLimit,
     userId,
     eventId,
+  });
+};
+
+export const addNewHotel = async (
+  supplierConfirmationNum: string,
+  referenceNum: string,
+  sessionId: string,
+  userId: string,
+  eventId: string,
+  type: TPackageType,
+  bookingId: any
+): Promise<ApiResponse<IBooking>> => {
+  return await AxiosInstance.post(ADD_NEW_HOTEL, {
+    supplierConfirmationNum,
+    referenceNum,
+    sessionId,
+    userId,
+    eventId,
+    type,
+    bookingId,
   });
 };

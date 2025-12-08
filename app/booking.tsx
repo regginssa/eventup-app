@@ -18,13 +18,16 @@ import {
   PassengerInputGroup,
 } from "@/components/molecules";
 import BookingContainer from "@/components/organisms/BookingContainer";
-import { setBookingFlight } from "@/redux/slices/booking.slice";
+import {
+  setBookingFlight,
+  setBookingHotel,
+  setBookingHotelRoomRates,
+} from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import {
   TFlight,
   TFlightAvailability,
   THotel,
-  THotelBookingRequest,
   THotelGuestGroup,
   THotelPaxDetail,
   TPassengerInfo,
@@ -742,88 +745,90 @@ const BookingScreen = () => {
     };
   };
 
-  const handleFlightCheckout = async () => {
-    if (
-      !flight?.session_id ||
-      !flight.recommend.FareItinerary.AirItineraryFareInfo.FareSourceCode
-    ) {
-      return Alert.alert(
-        "Invalid Flight Information",
-        "Your Flight information is incorrect"
-      );
-    }
-
-    const payload = buildRequestPayload(
-      flight.session_id,
-      user?.location.region_code as string,
-      user?.location.country_code as string,
-      flight?.recommend,
-      flightPaxDetails!,
-      flightCustomerEmail,
-      flightCustomerPhone,
-      flightBookingNote
-    );
-
+  const processFlightCheckout = async (): Promise<boolean> => {
     try {
-      setIsCheckLoading(true);
+      if (
+        !flight?.session_id ||
+        !flight.recommend?.FareItinerary?.AirItineraryFareInfo?.FareSourceCode
+      ) {
+        Alert.alert(
+          "Invalid Flight Information",
+          "Your flight information is incorrect"
+        );
+        return false;
+      }
 
       const response = await validateFlightFareMethod(
         flight.session_id,
         flight.recommend.FareItinerary.AirItineraryFareInfo.FareSourceCode
       );
 
-      const isValid = response.data;
-
-      if (isValid) {
-        dispatch(setBookingFlight({ ...flight, payload }));
-        router.push({
-          pathname: "/checkout",
-          params: { eventId, packageType },
-        });
-      } else {
+      if (!response.data) {
         Alert.alert(response.message);
+        return false;
       }
+
+      const payload = buildRequestPayload(
+        flight.session_id,
+        user?.location.region_code as string,
+        user?.location.country_code as string,
+        flight.recommend,
+        flightPaxDetails!,
+        flightCustomerEmail,
+        flightCustomerPhone,
+        flightBookingNote
+      );
+
+      dispatch(setBookingFlight({ ...flight, payload }));
+      return true;
     } catch (error: any) {
-      const message = error?.response?.data?.message;
-      Alert.alert(message);
-    } finally {
-      setIsCheckLoading(false);
+      Alert.alert(error?.response?.data?.message || "Flight checkout failed");
+      return false;
     }
   };
 
-  const handleHotelCheckout = async () => {
+  const processHotelCheckout = async (): Promise<boolean> => {
     try {
-      setIsCheckLoading(true);
-      const bookingRequests: THotelBookingRequest = {
-        sessionId: hotel?.session_id as string,
-        paxDetails: hotelPaxDetails,
-        customerEmail: hotelCustomerEmail,
-        customerPhone: hotelCustomerPhone,
-        bookingNote: hotelBookingNote,
-        rateBasisId: hotel?.recommend?.roomRates[selectedRooms[0]]
-          ?.rateBasisId as string,
-        productId: hotel?.recommend?.productId as string,
-        tokenId: hotel?.recommend?.tokenId as string,
-      };
+      const rateBasisId =
+        hotel?.recommend?.roomRates[selectedRooms[0]]?.rateBasisId;
+
+      if (!hotel?.session_id || !rateBasisId) {
+        Alert.alert(
+          "Invalid Hotel Information",
+          "Your hotel information is incorrect"
+        );
+        return false;
+      }
 
       const response = await checkHotelRoomRates({
-        sessionId: bookingRequests.sessionId,
-        productId: bookingRequests.productId,
-        tokenId: bookingRequests.tokenId,
-        rateBasisId: bookingRequests.rateBasisId,
+        sessionId: hotel.session_id,
+        productId: hotel.recommend?.productId as string,
+        tokenId: hotel.recommend?.tokenId as string,
+        rateBasisId,
       });
 
-      console.log("check hotel room rates response: ", response);
+      dispatch(setBookingHotelRoomRates(response.data));
+      dispatch(
+        setBookingHotel({
+          ...hotel,
+          bookingRequest: {
+            ...hotel.bookingRequest,
+            rateBasisId: response.data[0].rateBasisId,
+            customerEmail: hotelCustomerEmail,
+            customerPhone: hotelCustomerPhone,
+            bookingNote: hotelBookingNote,
+          },
+        })
+      );
+      return true;
     } catch (error: any) {
-      const message = error?.response?.data?.message;
-      Alert.alert(message);
-    } finally {
-      setIsCheckLoading(false);
+      Alert.alert(error?.response?.data?.message || "Hotel checkout failed");
+      return false;
     }
   };
 
   const handleCheckout = async () => {
-    const result = validate(
+    const validation = validate(
       flight,
       flightPaxDetails,
       hotel,
@@ -832,14 +837,35 @@ const BookingScreen = () => {
       hotelCustomerEmail,
       hotelCustomerPhone
     );
-    if (!result.valid) return Alert.alert("Invalid Booking", result.message);
 
-    if (flight?.recommend) {
-      await handleFlightCheckout();
+    if (!validation.valid) {
+      return Alert.alert("Invalid Booking", validation.message);
     }
 
-    if (hotel?.recommend) {
-      await handleHotelCheckout();
+    setIsCheckLoading(true);
+
+    try {
+      // Process flight if selected
+      if (flight?.recommend) {
+        const flightSuccess = await processFlightCheckout();
+        if (!flightSuccess) return;
+      }
+
+      // Process hotel if selected
+      if (hotel?.recommend) {
+        const hotelSuccess = await processHotelCheckout();
+        if (!hotelSuccess) return;
+      }
+
+      // Navigate only if all required processes succeeded
+      router.push({
+        pathname: "/checkout",
+        params: { eventId, packageType },
+      });
+    } catch (error: any) {
+      Alert.alert(error?.response?.data?.message || "Something went wrong");
+    } finally {
+      setIsCheckLoading(false);
     }
   };
 

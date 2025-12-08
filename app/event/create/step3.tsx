@@ -1,4 +1,4 @@
-import { Button, DateTimePicker } from "@/components/common";
+import { Button } from "@/components/common";
 import { CreateEventContainer } from "@/components/organisms";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -28,8 +28,6 @@ const CreateEventStep3Screen = () => {
       quality: 1,
     });
 
-    console.log("Image picked", result);
-
     if (!result.canceled) {
     }
   };
@@ -54,11 +52,8 @@ const CreateEventStep3Screen = () => {
       quality: 1,
     });
 
-    console.log(result);
-
     if (!result.canceled) {
       const asset = result.assets[0];
-      console.log("Picked photo:", asset);
     }
   };
 
@@ -135,7 +130,7 @@ const CreateEventStep3Screen = () => {
       </View>
 
       {/* Date picker must be here to let user input opening date */}
-      <DateTimePicker />
+      {/* <DateTimePicker /> */}
 
       <Button
         type="primary"

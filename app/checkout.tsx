@@ -1,6 +1,8 @@
 import {
   addNewFlight,
+  addNewHotel,
   bookingFlightMethod,
+  bookingHotelMethod,
   ticketFlightMethod,
 } from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
@@ -15,7 +17,7 @@ import { Button, CryptoPaymentQR, Spinner } from "@/components/common";
 import { StripePaymentMethodGroup } from "@/components/molecules";
 import { CheckoutContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
-import { addNewBooking } from "@/redux/slices/booking.slice";
+import { addNewBooking, updateBooking } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
 import { IEvent } from "@/types/data";
@@ -649,7 +651,9 @@ const CheckoutScreen = () => {
   const { eventId, packageType } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
-  const { flight, hotel } = useSelector((state: RootState) => state.booking);
+  const { flight, hotel, bookings } = useSelector(
+    (state: RootState) => state.booking
+  );
   const dispatch = useDispatch();
 
   const getEvent = useCallback(async () => {
@@ -688,7 +692,7 @@ const CheckoutScreen = () => {
           ?.TotalFare?.Amount
       ) || 0;
 
-    const hotelPrice = Number(hotel?.recommend?.total) || 0;
+    const hotelPrice = Number(hotel?.recommend?.roomRates[0].netPrice) || 0;
 
     const base = flightPrice + hotelPrice;
     const comm = base * 0.1;
@@ -706,29 +710,9 @@ const CheckoutScreen = () => {
     setServices(selectedServices);
   }, [flight, hotel]);
 
-  const bookFlight = async () => {
-    if (
-      !flight?.payload ||
-      !flight.session_id ||
-      !flight?.recommend?.FareItinerary?.AirItineraryFareInfo?.FareSourceCode ||
-      !user?.location.region_code
-    )
-      return Alert.alert(
-        "Invalid Flight Information",
-        "Please select another flight"
-      );
-
-    if (
-      !user.stripe.customer_id ||
-      !user.stripe.payment_methods.length ||
-      stripePaymentMethodId.trim().length === 0
-    ) {
-      return Alert.alert("Error", "Please add a card to proceed with booking.");
-    }
-
-    // Check stripe payment funds enough
+  const handleStripePayment = async () => {
     const stripePayload = {
-      customerId: user.stripe.customer_id,
+      customerId: user?.stripe.customer_id,
       paymentMethodId: stripePaymentMethodId,
       amount: totalPrice,
       currency: currency,
@@ -764,6 +748,32 @@ const CheckoutScreen = () => {
       );
     }
 
+    return paymentIntentId;
+  };
+
+  const bookFlight = async () => {
+    if (
+      !flight?.payload ||
+      !flight.session_id ||
+      !flight?.recommend?.FareItinerary?.AirItineraryFareInfo?.FareSourceCode ||
+      !user?.location.region_code
+    )
+      return Alert.alert(
+        "Invalid Flight Information",
+        "Please select another flight"
+      );
+
+    if (
+      !user.stripe.customer_id ||
+      !user.stripe.payment_methods.length ||
+      stripePaymentMethodId.trim().length === 0
+    ) {
+      return Alert.alert("Error", "Please add a card to proceed with booking.");
+    }
+
+    // Check stripe payment funds enough
+    const paymentIntentId = await handleStripePayment();
+
     // Booking method
     const bookResponse = await bookingFlightMethod(flight.payload);
 
@@ -772,7 +782,11 @@ const CheckoutScreen = () => {
     const isSuccess = String(success).toLowerCase() === "true";
 
     if (!isSuccess || !uniqueId) {
-      return Alert.alert("Booking Flight Error", errorMessage);
+      Alert.alert("Booking Flight Error", errorMessage);
+      // Refund the payment here if ticket order failed (not implemented)
+      const refundResponse = await refundStripePayment(paymentIntentId ?? "");
+
+      return Alert.alert("Refund Status", refundResponse.message);
     }
 
     // Ticket order method
@@ -785,7 +799,7 @@ const CheckoutScreen = () => {
       );
 
       // Refund the payment here if ticket order failed (not implemented)
-      const refundResponse = await refundStripePayment(paymentIntentId);
+      const refundResponse = await refundStripePayment(paymentIntentId ?? "");
 
       return Alert.alert("Refund Status", refundResponse.message);
     }
@@ -809,16 +823,71 @@ const CheckoutScreen = () => {
     dispatch(addNewBooking(addFlightResponse.data));
     Alert.alert("Success", "Flight booked successfully!");
 
-    router.replace({
-      pathname: "/booked",
-      params: { bookingId: addFlightResponse.data._id },
-    });
+    return addFlightResponse.data._id;
   };
 
-  const bookHotel = async () => {};
+  const bookHotel = async (bookingId: any) => {
+    if (!hotel?.bookingRequest) {
+      return Alert.alert("Error", "Invalid hotel information");
+    }
+
+    // Check stripe payment funds enough
+    const paymentIntentId = await handleStripePayment();
+
+    const bookResponse = await bookingHotelMethod(hotel.bookingRequest);
+
+    const { status, supplierConfirmationNum, referenceNum } = bookResponse.data;
+
+    if (status !== "CONFIRMED") {
+      Alert.alert("Error", "Booking hotel failed");
+      // Refund the payment here if ticket order failed (not implemented)
+      const refundResponse = await refundStripePayment(paymentIntentId ?? "");
+
+      return Alert.alert("Refund Status", refundResponse.message);
+    }
+
+    const addHotelResponse = await addNewHotel(
+      supplierConfirmationNum,
+      referenceNum,
+      hotel.session_id,
+      user?._id as string,
+      eventId as string,
+      packageType as TPackageType,
+      bookingId
+    );
+
+    if (!addHotelResponse.ok) {
+      return Alert.alert("Error", "Failed to save booking data.");
+    }
+
+    if (!bookingId) {
+      dispatch(addNewBooking(addHotelResponse.data));
+    } else {
+      dispatch(
+        updateBooking({
+          id: addHotelResponse.data._id as string,
+          booking: addHotelResponse.data,
+        })
+      );
+    }
+
+    return addHotelResponse.data._id;
+  };
 
   const bookWithCard = async () => {
-    await bookFlight();
+    let bookingId = null;
+
+    if (flight) {
+      bookingId = await bookFlight();
+    }
+
+    if (hotel) {
+      bookingId = await bookHotel(bookingId);
+    }
+
+    if (bookingId) {
+      router.replace({ pathname: "/booked", params: { bookingId } });
+    }
   };
 
   const handleBook = async (paymentMethod: TPaymentMethod) => {

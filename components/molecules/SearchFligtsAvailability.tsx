@@ -91,8 +91,6 @@ const SearchsFlightAvailability: React.FC<SearchFlightsAvailabilityProps> = ({
         },
       };
 
-      console.log(initialFlightDetails);
-
       setFlightsAvailability({
         ...response.data,
         recommend: {

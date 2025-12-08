@@ -88,8 +88,6 @@ const RegisterScreen = () => {
 
       const payload = await GoogleSignin.signIn();
 
-      console.log(payload);
-
       const { user: googleUser } = payload.data ?? {};
 
       if (!googleUser?.email || !googleUser?.id || !googleUser?.name) {
@@ -112,7 +110,7 @@ const RegisterScreen = () => {
       router.replace("/onboarding/step1");
     } catch (error: any) {
       const message = error?.response?.data?.message;
-      console.log(error);
+      console.error(error);
 
       if (error?.status === 400) {
         Alert.alert(message);

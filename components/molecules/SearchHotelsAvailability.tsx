@@ -170,7 +170,7 @@ const SearchHotelsAvailability: React.FC<SearchHotelsAvailabilityProps> = ({
         );
       }
     } catch (error) {
-      console.log("handle hotel availability error:", error);
+      console.error("handle hotel availability error:", error);
     } finally {
       setHotelLoading(false);
     }
