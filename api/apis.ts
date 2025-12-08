@@ -39,7 +39,7 @@ export const BOOKING_HOTEL_METHOD = "/booking/hotel";
 export const TICKET_FLIGHT_METHOD = "/booking/ticket/flight";
 export const ADD_NEW_FLIGHT = "/booking/add/flight";
 export const ADD_NEW_HOTEL = "/booking/add/hotel";
-export const UPDATE_BOOKING = "/booking/";
+export const BOOKING_BASE = "/booking/";
 
 // Stripe
 export const FETCH_STRIPE_CUSTOMER_ID = "/stripe/customer-id";

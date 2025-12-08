@@ -10,6 +10,7 @@ import AxiosInstance from "../AxiosInstance";
 import {
   ADD_NEW_FLIGHT,
   ADD_NEW_HOTEL,
+  BOOKING_BASE,
   BOOKING_FLIGHT_METHOD,
   BOOKING_HOTEL_METHOD,
   CHECK_HOTEL_ROOM_RATES,
@@ -181,4 +182,10 @@ export const addNewHotel = async (
     type,
     bookingId,
   });
+};
+
+export const fetchBooking = async (
+  id: string
+): Promise<ApiResponse<IBooking>> => {
+  return await AxiosInstance.get(BOOKING_BASE + id);
 };

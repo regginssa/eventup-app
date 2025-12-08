@@ -57,7 +57,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, selected, onSelect }) => {
         <Text className="font-poppins-semibold text-gray-700 text-sm mt-2">
           {room.boardType.split("|t|")[0]}
         </Text>
-        <View className="w-full flex flex-col gap-2 mt-2">
+        <View className="w-full flex flex-col gap-2 mt-2 mb-3">
           <View className="flex flex-row items-center gap-2">
             <MaterialIcons name="checkroom" size={16} color="#4b5563" />
 

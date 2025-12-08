@@ -29,6 +29,14 @@ const bookingSlice = createSlice({
         state.hotel.recommend.roomRates = action.payload;
       }
     },
+    setBookingHotelSelectedRoomRate(
+      state,
+      action: PayloadAction<IRoomRate | undefined>
+    ) {
+      if (state.hotel) {
+        state.hotel.selectedRoomRate = action.payload;
+      }
+    },
     addNewBooking(state, action: PayloadAction<IBooking>) {
       state.bookings.push(action.payload);
     },
@@ -50,6 +58,7 @@ export const {
   setBookingFlight,
   setBookingHotel,
   setBookingHotelRoomRates,
+  setBookingHotelSelectedRoomRate,
   addNewBooking,
   updateBooking,
 } = bookingSlice.actions;

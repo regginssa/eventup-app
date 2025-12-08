@@ -692,7 +692,9 @@ const CheckoutScreen = () => {
           ?.TotalFare?.Amount
       ) || 0;
 
-    const hotelPrice = Number(hotel?.recommend?.roomRates[0].netPrice) || 0;
+    const hotelPrice = Number(hotel?.selectedRoomRate?.netPrice) || 0;
+
+    console.log(hotel?.selectedRoomRate);
 
     const base = flightPrice + hotelPrice;
     const comm = base * 0.1;
@@ -702,13 +704,15 @@ const CheckoutScreen = () => {
     setCommissionPrice(Number(comm.toFixed(2)));
     setTotalPrice(Number(total.toFixed(2)));
 
-    setCurrency((hotel?.recommend?.currency?.toLowerCase() || "usd") as any);
+    setCurrency(
+      (hotel?.selectedRoomRate?.currency?.toLowerCase() || "usd") as any
+    );
 
     const selectedServices = [];
     if (flight?.recommend) selectedServices.push("Flight");
     if (hotel?.recommend) selectedServices.push("Hotel");
     setServices(selectedServices);
-  }, [flight, hotel]);
+  }, [flight?.recommend, hotel?.selectedRoomRate]);
 
   const handleStripePayment = async () => {
     const stripePayload = {
@@ -821,13 +825,12 @@ const CheckoutScreen = () => {
     }
 
     dispatch(addNewBooking(addFlightResponse.data));
-    Alert.alert("Success", "Flight booked successfully!");
 
     return addFlightResponse.data._id;
   };
 
   const bookHotel = async (bookingId: any) => {
-    if (!hotel?.bookingRequest) {
+    if (!hotel?.bookingRequest || !hotel.selectedRoomRate) {
       return Alert.alert("Error", "Invalid hotel information");
     }
 
@@ -886,7 +889,11 @@ const CheckoutScreen = () => {
     }
 
     if (bookingId) {
-      router.replace({ pathname: "/booked", params: { bookingId } });
+      Alert.alert("Success", "Booked successfully!");
+      router.replace({
+        pathname: "/booked",
+        params: { bookingId, eventId, packageType },
+      });
     }
   };
 

@@ -102,5 +102,5 @@ export const formatDateTime = (dateStr: string) => {
     minute: "2-digit",
     hour12: true,
   });
-  return `${datePart} - ${timePart}`;
+  return `${datePart}`;
 };

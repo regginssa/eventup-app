@@ -371,12 +371,65 @@ export interface TripDetails {
   tktTimeLimit?: Date;
 }
 
+export interface IPaxDetails {
+  name: string[];
+}
+
+export interface IRoom {
+  name?: string;
+  description?: string;
+  boardType?: string; // raw "BED AND BREAKFAST|t|ROOM ONLY"
+  paxDetails: IPaxDetails;
+}
+
+export interface IHotelBookingDetails {
+  hotelId: string;
+  hotelName?: string;
+  address?: string;
+  latitude?: string;
+  longitude?: string;
+  postalCode?: string;
+  email?: string;
+  phone?: string;
+  image?: string | null;
+  city?: string;
+  country?: string;
+  rating?: string;
+
+  checkIn?: Date;
+  checkOut?: Date;
+  days?: number;
+
+  currency?: string;
+  NetPrice?: number;
+  fareType?: string;
+  cancellationPolicy?: string;
+
+  cancelReferenceNum?: string | null;
+  customerEmail?: string | null;
+  customerPhone?: string;
+
+  bookingDateTime?: Date;
+
+  rooms: IRoom[];
+}
+
+export interface IHotel {
+  roomBookDetails: IHotelBookingDetails;
+  supplierConfirmationNum?: string;
+  referenceNum?: string;
+  clientRefNum?: string;
+  productId?: string;
+  sessionId?: string;
+}
+
 /* ---- Booking ---- */
 export interface IBooking {
   _id?: string;
   userId: string;
   eventId: string;
   flight: TripDetails;
+  hotel: IHotel;
   type: TPackageType;
   createdAt?: Date;
   updatedAt?: Date;

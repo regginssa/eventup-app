@@ -319,6 +319,7 @@ export interface THotel {
   session_id: string;
   availabilities: THotelAvailability[];
   recommend?: THotelAvailability;
+  selectedRoomRate?: IRoomRate;
   payload: any;
   checkin: Date;
   checkout: Date;

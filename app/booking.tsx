@@ -21,7 +21,7 @@ import BookingContainer from "@/components/organisms/BookingContainer";
 import {
   setBookingFlight,
   setBookingHotel,
-  setBookingHotelRoomRates,
+  setBookingHotelSelectedRoomRate,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import {
@@ -534,6 +534,7 @@ const BookingScreen = () => {
 
   useEffect(() => {
     init();
+    dispatch(setBookingHotelSelectedRoomRate(undefined));
   }, []);
 
   useEffect(() => {
@@ -806,8 +807,6 @@ const BookingScreen = () => {
         tokenId: hotel.recommend?.tokenId as string,
         rateBasisId,
       });
-
-      dispatch(setBookingHotelRoomRates(response.data));
       dispatch(
         setBookingHotel({
           ...hotel,
@@ -820,6 +819,8 @@ const BookingScreen = () => {
           },
         })
       );
+
+      dispatch(setBookingHotelSelectedRoomRate(response.data[0]));
       return true;
     } catch (error: any) {
       Alert.alert(error?.response?.data?.message || "Hotel checkout failed");
