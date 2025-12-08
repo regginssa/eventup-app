@@ -9,6 +9,7 @@ import AxiosInstance from "../AxiosInstance";
 import {
   ADD_NEW_FLIGHT,
   BOOKING_FLIGHT_METHOD,
+  CHECK_HOTEL_ROOM_RATES,
   FETCH_HOTEL_DETAILS,
   FETCH_HOTEL_ROOM_RATES,
   FETCH_STANDARD_FLIGHTS_AVAILABILITY,
@@ -94,6 +95,25 @@ export const fetchHotelRoomRates = async ({
     hotelId,
     productId,
     tokenId,
+  });
+};
+
+export const checkHotelRoomRates = async ({
+  sessionId,
+  productId,
+  tokenId,
+  rateBasisId,
+}: {
+  sessionId: string;
+  productId: string;
+  tokenId: string;
+  rateBasisId: string;
+}): Promise<ApiResponse<IRoomRate[]>> => {
+  return await AxiosInstance.post(CHECK_HOTEL_ROOM_RATES, {
+    sessionId,
+    productId,
+    tokenId,
+    rateBasisId,
   });
 };
 

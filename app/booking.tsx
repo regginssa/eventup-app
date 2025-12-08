@@ -1,4 +1,7 @@
-import { validateFlightFareMethod } from "@/api/scripts/booking";
+import {
+  checkHotelRoomRates,
+  validateFlightFareMethod,
+} from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
   Button,
@@ -21,6 +24,8 @@ import {
   TFlight,
   TFlightAvailability,
   THotel,
+  THotelBookingRequest,
+  THotelGuestGroup,
   THotelPaxDetail,
   TPassengerInfo,
   TPaxDetails,
@@ -393,7 +398,7 @@ const HotelForm = ({
                 </View>
 
                 <HotelRoomSelector
-                  paxCount={paxDetails.length}
+                  paxCount={1}
                   rooms={selected.roomRates}
                   selectedRooms={selectedRooms}
                   onSelect={handleSelect}
@@ -545,76 +550,110 @@ const BookingScreen = () => {
 
   const validate = (
     flight: TFlight | null,
-    paxDetails: TPaxDetails | undefined
+    paxDetails: TPaxDetails | undefined,
+    hotel: THotel | null,
+    hotelPaxDetails: THotelPaxDetail[],
+    selectedRooms: number[],
+    hotelCustomerEmail: string,
+    hotelCustomerPhone: string
   ): ValidateResult => {
-    // If no flight selected, skip passenger validation (user didn't choose a flight)
-    if (!flight?.recommend) return { valid: true };
+    /** --------------------- FLIGHT VALIDATION --------------------- **/
+    if (flight?.recommend) {
+      if (!paxDetails)
+        return { valid: false, message: "Passenger details missing" };
 
-    // Flight is selected -> paxDetails must exist
-    if (!paxDetails)
-      return { valid: false, message: "Passenger details missing" };
+      const adultTitles = ["Mr", "Mrs"];
+      const childTitles = ["Master", "Miss"];
 
-    const adultTitles = ["Mr", "Mrs"];
-    const childTitles = ["Master", "Miss"];
+      const validatePassenger = (
+        p: TPassengerInfo,
+        type: "adults" | "child" | "infant"
+      ) => {
+        if (
+          !p.firstName?.trim() ||
+          !p.lastName?.trim() ||
+          !p.nationality?.trim()
+        )
+          return { ok: false, reason: "Required fields missing" };
 
-    const validatePassenger = (
-      p: TPassengerInfo,
-      type: "adults" | "child" | "infant"
-    ) => {
-      // basic required fields
-      if (
-        !p.firstName?.trim() ||
-        !p.lastName?.trim() ||
-        !p.nationality?.trim()
-      ) {
-        return { ok: false, reason: "Required fields missing" };
-      }
+        if (type === "adults") {
+          if (!adultTitles.includes(p.title))
+            return { ok: false, reason: "Invalid title for adult" };
+        } else {
+          if (!childTitles.includes(p.title))
+            return { ok: false, reason: "Invalid title for child/infant" };
+        }
 
-      // title rules
-      if (type === "adults") {
-        if (!adultTitles.includes(p.title))
-          return { ok: false, reason: "Invalid title for adult" };
-      } else {
-        if (!childTitles.includes(p.title))
-          return { ok: false, reason: "Invalid title for child/infant" };
-      }
+        return { ok: true };
+      };
 
-      // Optional: additional format checks (DOB / passport dates) can be added
-      // Example simple YYYY-MM-DD format check if these fields are present and required:
-      // if (!/^\d{4}-\d{2}-\d{2}$/.test(p.dob)) return { ok: false, reason: "Invalid DOB format" };
-
-      return { ok: true };
-    };
-
-    const groups: (keyof TPaxDetails)[] = ["adults", "child", "infant"];
-
-    for (const group of groups) {
-      const list = paxDetails[group];
-      if (!Array.isArray(list)) continue;
-
-      for (let i = 0; i < list.length; i++) {
-        const passenger = list[i];
-        const res = validatePassenger(passenger, group);
-        if (!res.ok) {
-          return {
-            valid: false,
-            message: `${group.slice(0, -1).toUpperCase()} ${i + 1}: ${
-              res.reason
-            }`,
-          };
+      const groups: (keyof TPaxDetails)[] = ["adults", "child", "infant"];
+      for (const group of groups) {
+        for (let i = 0; i < paxDetails[group].length; i++) {
+          const res = validatePassenger(paxDetails[group][i], group);
+          if (!res.ok)
+            return {
+              valid: false,
+              message: `FLIGHT — ${group.slice(0, -1).toUpperCase()} ${
+                i + 1
+              }: ${res.reason}`,
+            };
         }
       }
     }
 
-    if (flightCustomerEmail.trim().length === 0) {
-      return { valid: false, message: "Flight customer email is required" };
-    }
+    /** --------------------- HOTEL VALIDATION --------------------- **/
+    if (hotel?.recommend) {
+      // 1 selected room only
+      if (selectedRooms.length !== 1) {
+        return { valid: false, message: "Please select exactly 1 hotel room" };
+      }
 
-    if (flightCustomerPhone.trim().length === 0) {
-      return {
-        valid: false,
-        message: "Flight customer phone number is required",
-      };
+      if (!hotelPaxDetails?.length) {
+        return { valid: false, message: "Hotel guest details missing" };
+      }
+
+      for (let r = 0; r < hotelPaxDetails.length; r++) {
+        const room = hotelPaxDetails[r];
+
+        const validateGroup = (
+          g?: THotelGuestGroup,
+          type?: "Adult" | "Child"
+        ) => {
+          if (!g) return;
+
+          const len = g.firstName.length;
+          for (let i = 0; i < len; i++) {
+            if (
+              !g.title[i]?.trim() ||
+              !g.firstName[i]?.trim() ||
+              !g.lastName[i]?.trim()
+            ) {
+              throw `HOTEL — Room ${room.room_no} ${type} ${
+                i + 1
+              }: Required fields missing`;
+            }
+          }
+        };
+
+        try {
+          validateGroup(room.adult, "Adult");
+          validateGroup(room.child, "Child");
+        } catch (message: any) {
+          return { valid: false, message };
+        }
+      }
+
+      if (!hotelCustomerEmail.trim()) {
+        return { valid: false, message: "Hotel customer email is required" };
+      }
+
+      if (!hotelCustomerPhone.trim()) {
+        return {
+          valid: false,
+          message: "Hotel customer phone number is required",
+        };
+      }
     }
 
     return { valid: true };
@@ -703,12 +742,7 @@ const BookingScreen = () => {
     };
   };
 
-  const handleCheckout = async () => {
-    const result = validate(flight, flightPaxDetails);
-    if (!result.valid) {
-      return Alert.alert("Invalid Passenger", result.message);
-    }
-
+  const handleFlightCheckout = async () => {
     if (
       !flight?.session_id ||
       !flight.recommend.FareItinerary.AirItineraryFareInfo.FareSourceCode
@@ -754,6 +788,58 @@ const BookingScreen = () => {
       Alert.alert(message);
     } finally {
       setIsCheckLoading(false);
+    }
+  };
+
+  const handleHotelCheckout = async () => {
+    try {
+      setIsCheckLoading(true);
+      const bookingRequests: THotelBookingRequest = {
+        sessionId: hotel?.session_id as string,
+        paxDetails: hotelPaxDetails,
+        customerEmail: hotelCustomerEmail,
+        customerPhone: hotelCustomerPhone,
+        bookingNote: hotelBookingNote,
+        rateBasisId: hotel?.recommend?.roomRates[selectedRooms[0]]
+          ?.rateBasisId as string,
+        productId: hotel?.recommend?.productId as string,
+        tokenId: hotel?.recommend?.tokenId as string,
+      };
+
+      const response = await checkHotelRoomRates({
+        sessionId: bookingRequests.sessionId,
+        productId: bookingRequests.productId,
+        tokenId: bookingRequests.tokenId,
+        rateBasisId: bookingRequests.rateBasisId,
+      });
+
+      console.log("check hotel room rates response: ", response);
+    } catch (error: any) {
+      const message = error?.response?.data?.message;
+      Alert.alert(message);
+    } finally {
+      setIsCheckLoading(false);
+    }
+  };
+
+  const handleCheckout = async () => {
+    const result = validate(
+      flight,
+      flightPaxDetails,
+      hotel,
+      hotelPaxDetails,
+      selectedRooms,
+      hotelCustomerEmail,
+      hotelCustomerPhone
+    );
+    if (!result.valid) return Alert.alert("Invalid Booking", result.message);
+
+    if (flight?.recommend) {
+      await handleFlightCheckout();
+    }
+
+    if (hotel?.recommend) {
+      await handleHotelCheckout();
     }
   };
 

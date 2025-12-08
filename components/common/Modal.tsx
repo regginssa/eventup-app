@@ -55,8 +55,8 @@ const Modal: React.FC<ModalProps> = ({
             </View>
 
             {/* Header */}
-            <View className="flex-row items-center justify-between mb-3">
-              <Text className="font-poppins-semibold text-lg text-gray-700">
+            <View className="flex-row items-center gap-4 mb-3">
+              <Text className="font-poppins-semibold text-lg text-gray-700 flex-1">
                 {title}
               </Text>
               <TouchableOpacity

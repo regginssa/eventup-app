@@ -38,7 +38,6 @@ const HotelGuestGroup: React.FC<HotelGuestGroupProps> = ({
       };
     });
 
-    console.log("Updated Guest Group:", updated);
     onChange(updated);
   };
 
