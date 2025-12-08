@@ -140,8 +140,6 @@ const SearchHotelsAvailability: React.FC<SearchHotelsAvailabilityProps> = ({
       const formattedHotelRooms = formatHotelRooms(hotel);
       const initialPaxDetails = buildInitialPaxDetails(formattedHotelRooms);
 
-      console.log("Initial pax details for hotel", initialPaxDetails);
-
       const response = await fetchStandardHotelsAvailability(
         event._id as string,
         formattedHotelRooms,

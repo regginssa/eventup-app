@@ -32,7 +32,7 @@ export const FETCH_STANDARD_TRANSFERS_AVAILABILITY =
 export const FETCH_HOTEL_DETAILS = "/booking/hotel/";
 // /:sessionId/:hotelId/:productId/:tokenId
 export const VALIDATE_FLIGHT_FARE_METHOD = "/booking/flight/validate/fare";
-export const FETCH_HOTEL_ROOM_RATES = "/booking/hotel/room-rates/";
+export const FETCH_HOTEL_ROOM_RATES = "/booking/hotel/room-rates";
 export const BOOKING_FLIGHT_METHOD = "/booking/flight";
 export const TICKET_FLIGHT_METHOD = "/booking/ticket/flight";
 export const ADD_NEW_FLIGHT = "/booking/add/flight";

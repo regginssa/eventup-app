@@ -78,10 +78,23 @@ export const validateFlightFareMethod = async (
   });
 };
 
-export const fetchHotelRoomRates = async (
-  hotelId: string
-): Promise<ApiResponse<IRoomRate[]>> => {
-  return await AxiosInstance.get(FETCH_HOTEL_ROOM_RATES + hotelId);
+export const fetchHotelRoomRates = async ({
+  sessionId,
+  hotelId,
+  productId,
+  tokenId,
+}: {
+  sessionId: string;
+  hotelId: string;
+  productId: string;
+  tokenId: string;
+}): Promise<ApiResponse<IRoomRate[]>> => {
+  return await AxiosInstance.post(FETCH_HOTEL_ROOM_RATES, {
+    sessionId,
+    hotelId,
+    productId,
+    tokenId,
+  });
 };
 
 export const bookingFlightMethod = async (

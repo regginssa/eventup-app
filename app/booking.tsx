@@ -3,18 +3,25 @@ import { fetchEvent } from "@/api/scripts/event";
 import {
   Button,
   FlightItem,
+  HotelItem,
   Input,
   Modal,
   Spinner,
   Textarea,
 } from "@/components/common";
-import { PassengerInputGroup } from "@/components/molecules";
+import {
+  HotelGuestGroup,
+  HotelRoomSelector,
+  PassengerInputGroup,
+} from "@/components/molecules";
 import BookingContainer from "@/components/organisms/BookingContainer";
 import { setBookingFlight } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import {
   TFlight,
   TFlightAvailability,
+  THotel,
+  THotelPaxDetail,
   TPassengerInfo,
   TPaxDetails,
 } from "@/types";
@@ -211,46 +218,59 @@ const FlightForm = ({
           )}
 
           <View className="w-full h-[1px] bg-gray-200"></View>
-          <View className="w-full">
-            <View className="flex flex-row items-center gap-1">
+          {paxDetails ? (
+            <View className="w-full">
+              <View className="flex flex-row items-center gap-1">
+                <MaterialCommunityIcons
+                  name="account-outline"
+                  size={18}
+                  color="#374151"
+                />
+                <Text className="font-poppins-semibold text-sm text-gray-700">
+                  Customer Information
+                </Text>
+              </View>
+              <View className="w-full p-4 flex flex-col gap-3">
+                <Input
+                  type="string"
+                  label="Customer email"
+                  placeholder="you@example.com"
+                  bordered={true}
+                  className="rounded-lg"
+                  value={email}
+                  onChange={setEmail}
+                />
+                <Input
+                  type="string"
+                  label="Customer phone"
+                  placeholder="+4811422424"
+                  bordered={true}
+                  className="rounded-lg"
+                  value={phone}
+                  onChange={setPhone}
+                />
+                <Textarea
+                  label="Booking note"
+                  placeholder="Note your booking"
+                  bordered={true}
+                  className="rounded-lg"
+                  value={note}
+                  onChange={setNote}
+                />
+              </View>
+            </View>
+          ) : (
+            <View className="w-full flex flex-col items-center justify-center gap-2">
               <MaterialCommunityIcons
-                name="account-outline"
-                size={18}
-                color="#374151"
+                name="airplane-off"
+                size={24}
+                color="#4b5563"
               />
-              <Text className="font-poppins-semibold text-sm text-gray-700">
-                Customer Information
+              <Text className="font-poppins-semibold text-gray-600">
+                No Flight
               </Text>
             </View>
-            <View className="w-full p-4 flex flex-col gap-3">
-              <Input
-                type="string"
-                label="Customer email"
-                placeholder="you@example.com"
-                bordered={true}
-                className="rounded-lg"
-                value={email}
-                onChange={setEmail}
-              />
-              <Input
-                type="string"
-                label="Customer phone"
-                placeholder="+4811422424"
-                bordered={true}
-                className="rounded-lg"
-                value={phone}
-                onChange={setPhone}
-              />
-              <Textarea
-                label="Booking note"
-                placeholder="Note your booking"
-                bordered={true}
-                className="rounded-lg"
-                value={note}
-                onChange={setNote}
-              />
-            </View>
-          </View>
+          )}
         </View>
       )}
 
@@ -268,11 +288,196 @@ const FlightForm = ({
               color="#4b5563"
             />
             <Text className="font-poppins-semibold text-gray-600">
-              No Flight Details
+              No Flight
             </Text>
           </View>
         ) : (
           <FlightItem flight={selected} hiddenHeader={true} />
+        )}
+      </Modal>
+    </View>
+  );
+};
+
+const HotelForm = ({
+  hotel,
+  email,
+  phone,
+  note,
+  paxDetails,
+  selectedRooms,
+  setSelectedRooms,
+  setEmail,
+  setPhone,
+  setNote,
+  setPaxDetails,
+}: {
+  hotel: THotel | null;
+  email: string;
+  phone: string;
+  note: string;
+  paxDetails: THotelPaxDetail[];
+  selectedRooms: number[];
+  setSelectedRooms: (val: number[]) => void;
+  setEmail: (val: string) => void;
+  setPhone: (val: string) => void;
+  setNote: (val: string) => void;
+  setPaxDetails: React.Dispatch<React.SetStateAction<THotelPaxDetail[]>>;
+}) => {
+  const [isOpen, setIsOpen] = useState<boolean>(true);
+  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
+
+  const selected = hotel?.recommend;
+
+  const handleSelect = (roomNo: number, index: number) => {
+    const updated = [...selectedRooms];
+    updated[roomNo] = index;
+    setSelectedRooms(updated);
+  };
+
+  return (
+    <View className="w-full bg-white rounded-xl p-4 gap-6">
+      <TouchableOpacity
+        activeOpacity={0.8}
+        className="w-full flex flex-row items-center justify-between"
+        onPress={() => setIsOpen(!isOpen)}
+      >
+        <View className="flex flex-row items-center gap-2">
+          <MaterialIcons name="hotel" size={20} color="#374151" />
+          <Text className="font-dm-sans-bold text-gray-700">Hotel</Text>
+        </View>
+
+        <Feather
+          name={`chevron-${isOpen ? "up" : "down"}`}
+          size={24}
+          color="#374151"
+        />
+      </TouchableOpacity>
+
+      {isOpen && (
+        <View className="w-full flex flex-col gap-3">
+          <View className="w-full flex flex-row items-center justify-between">
+            <View className="flex flex-row items-center gap-1">
+              <MaterialIcons name="edit-note" size={18} color="#374151" />
+              <Text className="font-poppins-semibold text-gray-700 text-sm">
+                Booking Information
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className=""
+              onPress={() => setIsDetailOpen(true)}
+            >
+              <Text className="font-poppins-semibold text-gray-700 text-xs">
+                View details
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {paxDetails.length > 0 && (
+            <HotelGuestGroup items={paxDetails} onChange={setPaxDetails} />
+          )}
+
+          {selected?.roomRates && (
+            <>
+              <View className="w-full h-[1px] bg-gray-200 mt-4 mb-4"></View>
+              {/* Room Details */}
+
+              <View className="">
+                <View className="flex flex-row items-center gap-1">
+                  <Fontisto name="room" size={18} color="#374151" />
+                  <Text className="font-poppins-semibold text-sm text-gray-700">
+                    Rooms details
+                  </Text>
+                </View>
+
+                <HotelRoomSelector
+                  paxCount={paxDetails.length}
+                  rooms={selected.roomRates}
+                  selectedRooms={selectedRooms}
+                  onSelect={handleSelect}
+                />
+              </View>
+            </>
+          )}
+
+          <View className="w-full h-[1px] bg-gray-200 mt-4 mb-4"></View>
+          {paxDetails.length > 0 ? (
+            <View className="w-full">
+              <View className="flex flex-row items-center gap-1">
+                <MaterialCommunityIcons
+                  name="account-outline"
+                  size={18}
+                  color="#374151"
+                />
+                <Text className="font-poppins-semibold text-sm text-gray-700">
+                  Customer Information
+                </Text>
+              </View>
+              <View className="w-full p-4 flex flex-col gap-3">
+                <Input
+                  type="string"
+                  label="Customer email"
+                  placeholder="you@example.com"
+                  bordered={true}
+                  className="rounded-lg"
+                  value={email}
+                  onChange={setEmail}
+                />
+                <Input
+                  type="string"
+                  label="Customer phone"
+                  placeholder="+4811422424"
+                  bordered={true}
+                  className="rounded-lg"
+                  value={phone}
+                  onChange={setPhone}
+                />
+                <Textarea
+                  label="Booking note"
+                  placeholder="Note your booking"
+                  bordered={true}
+                  className="rounded-lg"
+                  value={note}
+                  onChange={setNote}
+                />
+              </View>
+            </View>
+          ) : (
+            <View className="w-full flex flex-col items-center justify-center gap-2">
+              <MaterialCommunityIcons
+                name="bank-off-outline"
+                size={24}
+                color="#4b5563"
+              />
+              <Text className="font-poppins-semibold text-gray-600">
+                No Hotel
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      <Modal
+        title="Hotel Details"
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        scrolled={true}
+      >
+        {!selected ? (
+          <View className="w-full flex flex-col items-center justify-center gap-2">
+            <MaterialCommunityIcons
+              name="bank-off-outline"
+              size={24}
+              color="#4b5563"
+            />
+            <Text className="font-poppins-semibold text-gray-600">
+              No Hotel
+            </Text>
+          </View>
+        ) : (
+          <HotelItem hotel={selected} hiddenHeader={true} />
         )}
       </Modal>
     </View>
@@ -285,9 +490,15 @@ const BookingScreen = () => {
   const [flightCustomerEmail, setFlightCustomerEmail] = useState<string>("");
   const [flightCustomerPhone, setFlightCustomerPhone] = useState<string>("");
   const [flightBookingNote, setFlightBookingNote] = useState<string>("");
-  const [paxDetails, setPaxDetails] = useState<TPaxDetails | undefined>(
-    undefined
-  );
+  const [flightPaxDetails, setFlightPaxDetails] = useState<
+    TPaxDetails | undefined
+  >(undefined);
+
+  const [hotelCustomerEmail, setHotelCustomerEmail] = useState<string>("");
+  const [hotelCustomerPhone, setHotelCustomerPhone] = useState<string>("");
+  const [hotelBookingNote, setHotelBookingNote] = useState<string>("");
+  const [hotelPaxDetails, setHotelPaxDetails] = useState<THotelPaxDetail[]>([]);
+  const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
   const [isCheckLoading, setIsCheckLoading] = useState<boolean>(false);
 
   const { eventId, packageType } = useLocalSearchParams();
@@ -319,9 +530,16 @@ const BookingScreen = () => {
 
   useEffect(() => {
     if (flight?.recommend?.details?.paxDetails) {
-      setPaxDetails(flight.recommend.details.paxDetails);
+      setFlightPaxDetails(flight.recommend.details.paxDetails);
     }
-  }, [flight?.recommend?.details?.paxDetails]);
+
+    if (hotel?.bookingRequest.paxDetails) {
+      setHotelPaxDetails(hotel.bookingRequest.paxDetails);
+    }
+  }, [
+    flight?.recommend?.details?.paxDetails,
+    hotel?.bookingRequest.paxDetails,
+  ]);
 
   type ValidateResult = { valid: true } | { valid: false; message: string };
 
@@ -486,7 +704,7 @@ const BookingScreen = () => {
   };
 
   const handleCheckout = async () => {
-    const result = validate(flight, paxDetails);
+    const result = validate(flight, flightPaxDetails);
     if (!result.valid) {
       return Alert.alert("Invalid Passenger", result.message);
     }
@@ -506,7 +724,7 @@ const BookingScreen = () => {
       user?.location.region_code as string,
       user?.location.country_code as string,
       flight?.recommend,
-      paxDetails!,
+      flightPaxDetails!,
       flightCustomerEmail,
       flightCustomerPhone,
       flightBookingNote
@@ -551,8 +769,21 @@ const BookingScreen = () => {
           setEmail={setFlightCustomerEmail}
           setPhone={setFlightCustomerPhone}
           setNote={setFlightBookingNote}
-          paxDetails={paxDetails}
-          setPaxDetails={setPaxDetails}
+          paxDetails={flightPaxDetails}
+          setPaxDetails={setFlightPaxDetails}
+        />
+        <HotelForm
+          hotel={hotel}
+          email={hotelCustomerEmail}
+          phone={hotelCustomerPhone}
+          note={hotelBookingNote}
+          paxDetails={hotelPaxDetails}
+          selectedRooms={selectedRooms}
+          setSelectedRooms={setSelectedRooms}
+          setEmail={setHotelCustomerEmail}
+          setPhone={setHotelCustomerPhone}
+          setNote={setHotelBookingNote}
+          setPaxDetails={setHotelPaxDetails}
         />
       </View>
 

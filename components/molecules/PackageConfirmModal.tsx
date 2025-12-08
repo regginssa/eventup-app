@@ -1,11 +1,12 @@
 import { fetchHotelRoomRates } from "@/api/scripts/booking";
 import { setBookingHotelRoomRates } from "@/redux/slices/booking.slice";
+import { RootState } from "@/redux/store";
 import { TFlightAvailability, THotelAvailability } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Text, View } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Button, FlightItem, HotelItem, Modal } from "../common";
 import { useTheme } from "../providers/ThemeProvider";
 
@@ -30,17 +31,24 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   const { theme } = useTheme();
 
   const router = useRouter();
+  const { hotel: rdxHotel } = useSelector((state: RootState) => state.booking);
   const dispatch = useDispatch();
 
   const handleProceedToBooking = async () => {
-    if (hotel) {
+    if (hotel && rdxHotel?.session_id) {
       if (!hotel.hotelId) {
         return Alert.alert("Error", "Invalid hotel selected.");
       }
+
       try {
         setLoading(true);
 
-        const response = await fetchHotelRoomRates(hotel.hotelId);
+        const response = await fetchHotelRoomRates({
+          sessionId: rdxHotel.session_id,
+          hotelId: hotel.hotelId,
+          productId: hotel.productId,
+          tokenId: hotel.tokenId,
+        });
 
         console.log("Fetched hotel room rates:", response.data);
 
