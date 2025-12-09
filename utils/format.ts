@@ -63,6 +63,12 @@ export const normalizeDate = (d: Date) => {
   return nd.getTime();
 };
 
+export const normalizeDateUTC = (d: Date) => {
+  const nd = new Date(d);
+  nd.setUTCHours(0, 0, 0, 0);
+  return nd.getTime();
+};
+
 /**
  * Format a personal name so that only the first letter of each part is uppercase.
  * Examples:

@@ -17,13 +17,13 @@ import {
   TPassengerInfo,
 } from "@/types";
 import { IEvent } from "@/types/data";
-import { normalizeDate } from "@/utils/format";
-import { Entypo } from "@expo/vector-icons";
+import { normalizeDate, normalizeDateUTC } from "@/utils/format";
+import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, DateTimePicker, Spinner } from "../common";
+import { Button, DateTimePicker, RadioButton, Spinner } from "../common";
 import FlightAvailabilityGroup from "./FlightAvailabilityGroup";
 import HotelAvailabilityGroup from "./HotelAvailabilityGroup";
 
@@ -37,11 +37,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [currentNearestAirports, setCurrentNearestAirports] = useState<
     TAirport[]
   >([]);
-  const [originalNearestAirports, setOriginalNearestAirports] = useState<
-    TAirport[]
-  >([]);
+  const [homeNearestAirports, setHomeNearestAirports] = useState<TAirport[]>(
+    []
+  );
   const [departureLocation, setDepartureLocation] = useState<
-    "current" | "origin"
+    "current" | "home"
   >("current");
   const [departureDate, setDepartureDate] = useState<Date>(new Date());
   const [hotel, setHotel] = useState<{ rooms: number; data: any[] }>({
@@ -78,7 +78,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
   const init = useCallback(async () => {
     if (!user?.location.coordinate) return;
-
+    setLoading(true);
     const coords = await getUserLocationAndSave();
 
     const currentNearestAirports = await fetchNearestAirports(
@@ -96,8 +96,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     );
 
     if (originalNearestAirports.data) {
-      setOriginalNearestAirports(originalNearestAirports.data);
+      setHomeNearestAirports(originalNearestAirports.data);
     }
+    setLoading(false);
   }, [user]);
 
   useEffect(() => {
@@ -196,17 +197,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       ]?.FlightSegment.ArrivalDateTime;
 
     const flightArrival = new Date(flightArrivalDate);
-    const flightArrivalDateTime = normalizeDate(flightArrival);
-
-    console.log("flightArrivalDateTime:", flightArrivalDateTime);
-    console.log(
-      "event.opening_date:",
-      normalizeDate(new Date(event.opening_date as any))
+    const flightArrivalDateTime = normalizeDateUTC(flightArrival);
+    const eventOpeningDateTime = normalizeDateUTC(
+      new Date(event.opening_date as any)
     );
 
-    if (
-      flightArrivalDateTime < normalizeDate(new Date(event.opening_date as any))
-    ) {
+    if (flightArrivalDateTime > eventOpeningDateTime) {
       Alert.alert(
         "Invalid Flight Arrival Date",
         "The flight arrival date cannot be before the event date."
@@ -282,6 +278,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           productId: hotelRecommend.productId,
         },
         arrivalDate,
+        adults: hotel.data.reduce((sum, room) => sum + room.adults, 0),
+        childs: hotel.data.reduce((sum, room) => sum + room.childs, 0),
+        infants,
       },
       heTransfer: {
         hotel: {
@@ -291,6 +290,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           productId: hotelRecommend.productId,
         },
         arrivalDate: event.opening_date,
+        adults: hotel.data.reduce((sum, room) => sum + room.adults, 0),
+        childs: hotel.data.reduce((sum, room) => sum + room.childs, 0),
+        infants,
       },
     };
 
@@ -302,9 +304,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     console.log("transfers availability response: ", response);
   };
 
-  const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
-
   const handleSearch = async () => {
+    dispatch(setBookingFlight(null));
+    dispatch(setBookingHotel(null));
     if (!event._id) return Alert.alert("Event ID is missing.");
 
     const eventDateTime = normalizeDate(new Date(event.opening_date as any));
@@ -350,7 +352,80 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
   return (
     <View className="w-full flex flex-col gap-3">
-      <View className="w-full"></View>
+      <View className="">
+        <Text className="font-poppins-medium text-sm text-gray-700">
+          Where will you be departing from?
+        </Text>
+
+        <View className="w-full flex flex-col gap-2 mt-2">
+          <View>
+            <View className="w-full flex flex-row items-center gap-2">
+              <View className="flex flex-row items-center gap-1 flex-1">
+                <MaterialCommunityIcons
+                  name="map-marker-radius-outline"
+                  size={16}
+                  color="#4b5563"
+                />
+                <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                  Current Location
+                </Text>
+              </View>
+
+              <RadioButton
+                checked={departureLocation === "current"}
+                onPress={() => setDepartureLocation("current")}
+              />
+            </View>
+
+            {departureLocation === "current" && (
+              <View className="px-2 mt-2">
+                {currentNearestAirports.map((airport, index) => (
+                  <Text
+                    key={`current-location-nearest-airport-${index}`}
+                    className="line-clamp-2 text-gray-600 font-dm-sans-medium text-xs"
+                  >
+                    {index + 1}. {airport.name}
+                  </Text>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <View>
+            <View className="w-full flex flex-row items-center gap-2">
+              <View className="flex flex-row items-center gap-1 flex-1">
+                <MaterialCommunityIcons
+                  name="home-city-outline"
+                  size={16}
+                  color="#4b5563"
+                />
+                <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                  Home city / Saved location
+                </Text>
+              </View>
+
+              <RadioButton
+                checked={departureLocation === "home"}
+                onPress={() => setDepartureLocation("home")}
+              />
+            </View>
+
+            {departureLocation === "home" && (
+              <View className="px-2 mt-2">
+                {homeNearestAirports.map((airport, index) => (
+                  <Text
+                    key={`current-location-nearest-airport-${index}`}
+                    className="line-clamp-2 text-gray-600 font-dm-sans-medium text-xs"
+                  >
+                    {index + 1}. {airport.name}
+                  </Text>
+                ))}
+              </View>
+            )}
+          </View>
+        </View>
+      </View>
+      <View className="w-full h-[1px] bg-gray-200"></View>
       <DateTimePicker
         label="Tell us when you will depart"
         className="rounded-md"
