@@ -37,15 +37,6 @@ const HomeScreen = () => {
     const { page, limit } = pagination;
     const nextPage = page + 1;
 
-    const start = (nextPage - 1) * limit;
-    const end = nextPage * limit;
-
-    if (events.length >= end) {
-      setOrderedEvents(events.slice(start, end));
-      dispatch(setPagination({ ...pagination, page: nextPage }));
-      return;
-    }
-
     try {
       setLoading(true);
 

@@ -154,8 +154,8 @@ const SearchHotelsAvailability: React.FC<SearchHotelsAvailabilityProps> = ({
         dispatch(
           setBookingHotel({
             ...response.data,
-            checkin: new Date(hotelCheckin),
-            checkout: new Date(hotelCheckout),
+            checkin: hotelCheckin.toISOString(),
+            checkout: hotelCheckout.toISOString(),
             bookingRequest: {
               customerEmail: "",
               customerPhone: "",

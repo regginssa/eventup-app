@@ -321,7 +321,121 @@ export interface THotel {
   recommend?: THotelAvailability;
   selectedRoomRate?: IRoomRate;
   payload: any;
-  checkin: Date;
-  checkout: Date;
+  checkin: string;
+  checkout: string;
   bookingRequest: THotelBookingRequest;
+}
+
+export interface TTransferAvailability {
+  sessionId: string;
+  searchResult: SearchResult;
+  travelling: Travelling;
+}
+
+export interface SearchResult {
+  originType: string; // AP / RST / IATA etc.
+  originCode: string; // Example: SYD
+  originName: string | null;
+  originProperty: string | null;
+  originDetails: string | null;
+
+  endType: string; // RT / AC / AP etc.
+  endCode: string; // Example: SYC
+  endName: string | null;
+  endProperty: string | null;
+  endDetails: string | null;
+
+  travelling: string; // ISO8601 datetime: "2025-12-11T00:15:00"
+  adults: string;
+  children: string;
+  infants: string;
+  resultCount: string;
+}
+
+export interface Travelling {
+  products: Product[];
+}
+
+export interface Product {
+  general: ProductGeneral;
+  pricing: ProductPricing;
+}
+
+export interface ProductGeneral {
+  productId: string;
+  bookingTypeId: string;
+  transferTime: string; // minutes
+  productType: string; // e.g. "Shuttle", "Private Sedan"
+  productTypeId: string;
+
+  minPax: string | null;
+  maxPax: string | null;
+  luggage: string;
+  smallBagAllowance: string;
+
+  vehicleClass: string;
+  vehicleMake: string;
+
+  canxHours: string;
+  canxPerc: string;
+  canxOutOfHoursPP: string;
+
+  minStops: string;
+  maxStops: string;
+  numUnits: string;
+
+  supplierType: string;
+  supplierId: string;
+  productSource: string;
+
+  companyLogo: string;
+  vehicleImage: string;
+
+  transferCompany: string; // Provider / supplier name
+  rating: string | null;
+  ratingClass: string | null;
+  numberOfReviews: string | null;
+  priceExpires: string | null;
+  description: string;
+
+  isDeposit: string; // "0" | "1"
+  isCardPaymentAvailable: boolean;
+}
+
+export interface ProductPricing {
+  oldPrice: string;
+  price: string;
+  currency: string;
+  carbonOffset: string;
+
+  transactionFees: TransactionFees;
+  prices: PriceBreakup[];
+  extras?: ExtraService[];
+}
+
+export interface TransactionFees {
+  visa: string;
+  masterCard: string;
+  maestro: string;
+  visaDebit: string;
+  masterCardDebit: string;
+  amex: string;
+  payPal: string;
+}
+
+export interface PriceBreakup {
+  type: string; // Adult/Child/Infant/Vehicle
+  typeCode: string; // AD / CH / IN / VEH
+  description: string;
+  units: string;
+  oldPrice: string;
+  price: string;
+  currency: string;
+}
+
+export interface ExtraService {
+  type: string; // Child seat / Booster seat etc.
+  typeCode: string;
+  price: string;
+  currency: string;
 }

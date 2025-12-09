@@ -4,18 +4,16 @@ import { IEvent } from "@/types/data";
 import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useSelector } from "react-redux";
-import { Button, DateTimePicker } from "../common";
+import { Button } from "../common";
 
 interface SearchTransfersAvailabilityProps {
   event: IEvent;
 }
 
 type TTransfer = {
-  departureDate: Date;
-  arrivalDate: Date;
   adults: number;
   childs: number;
   infants: number;
@@ -26,15 +24,11 @@ const SearchTransfersAvailability: React.FC<
 > = ({ event }) => {
   const [transfers, setTransfers] = useState<string[]>(["ah"]);
   const [ahTransfer, setAhTransfer] = useState<TTransfer>({
-    departureDate: new Date(),
-    arrivalDate: new Date(),
     adults: 1,
     childs: 0,
     infants: 0,
   });
   const [heTransfer, setHeTransfer] = useState<TTransfer>({
-    departureDate: new Date(),
-    arrivalDate: new Date(),
     adults: 1,
     childs: 0,
     infants: 0,
@@ -57,57 +51,38 @@ const SearchTransfersAvailability: React.FC<
         flight?.recommend?.FareItinerary?.OriginDestinationOptions[0]
           ?.OriginDestinationOption.length - 1
       ]?.FlightSegment.ArrivalDateTime
-    );
+    ).toISOString();
 
-    // if (transfers.includes("ah")) {
-    //   if (
-    //     !flight?.recommend.FareItinerary.OriginDestinationOptions[0]
-    //       .OriginDestinationOption[0].FlightSegment.ArrivalAirportLocationCode
-    //   ) {
-    //     return Alert.alert("Please select a flight first.");
-    //   }
+    if (transfers.includes("ah")) {
+      if (
+        !flight?.recommend.FareItinerary.OriginDestinationOptions[0]
+          .OriginDestinationOption[0].FlightSegment.ArrivalAirportLocationCode
+      ) {
+        return Alert.alert("Please select a flight first.");
+      }
 
-    //   if (
-    //     !flight?.recommend.FareItinerary.OriginDestinationOptions[0]
-    //       .OriginDestinationOption[0].FlightSegment.ArrivalDateTime
-    //   ) {
-    //     return Alert.alert("Please select a flight first.");
-    //   }
-    // }
+      if (
+        !flight?.recommend.FareItinerary.OriginDestinationOptions[0]
+          .OriginDestinationOption[0].FlightSegment.ArrivalDateTime
+      ) {
+        return Alert.alert("Please select a flight first.");
+      }
+    }
 
-    // if (transfers.includes("he")) {
-    //   if (!hotel?.recommend) {
-    //     return Alert.alert("Please select a hotel first.");
-    //   }
+    if (transfers.includes("he")) {
+      if (!hotel?.recommend) {
+        return Alert.alert("Please select a hotel first.");
+      }
 
-    //   if (!event.opening_date) {
-    //     return Alert.alert("Event date is not available.");
-    //   }
-    //   const departureDateTime = normalizeDate(heTransfer.departureDate);
-    //   const arrivalDateTime = normalizeDate(heTransfer.arrivalDate);
-    //   const hotelCheckInDateTime = normalizeDate(new Date(hotel.checkin));
-
-    //   const eventOpenDateTimte = normalizeDate(new Date(event.opening_date));
-
-    //   if (departureDateTime < hotelCheckInDateTime) {
-    //     return Alert.alert("Departure date must be after hotel check-in date.");
-    //   }
-
-    //   if (arrivalDateTime < hotelCheckInDateTime) {
-    //     return Alert.alert("Arrival date must be after hotel check-in date.");
-    //   }
-
-    //   if (departureDateTime > eventOpenDateTimte) {
-    //     return Alert.alert("Departure date must be before event date.");
-    //   }
-
-    //   if (departureDateTime > arrivalDateTime) {
-    //     return Alert.alert("Departure date must be before arrival date.");
-    //   }
-    // }
+      if (!event?.opening_date) {
+        return Alert.alert("Event date is not available.");
+      }
+    }
 
     try {
       setLoading(true);
+
+      console.log("hotel checkin: ", hotel.checkin);
 
       const reqData = {
         ahTransfer: transfers.includes("ah")
@@ -125,8 +100,7 @@ const SearchTransfersAvailability: React.FC<
                 sessionId: hotel.session_id,
                 productId: hotel.recommend.productId,
               },
-              departureDate: flightArrival,
-              arrivalDate: hotel.checkin,
+              arrivalDate: flightArrival,
             }
           : null,
         heTransfer: transfers.includes("he")
@@ -137,11 +111,13 @@ const SearchTransfersAvailability: React.FC<
                 tokenId: hotel.recommend.tokenId,
                 sessionId: hotel.session_id,
                 productId: hotel.recommend.productId,
-                arrivalDate: event.opening_date,
               },
+              arrivalDate: event.opening_date,
             }
           : null,
       };
+
+      console.log("transfers reqData: ", reqData);
 
       const response = await fetchStandardTransfersAvailability(
         event._id,
@@ -155,12 +131,6 @@ const SearchTransfersAvailability: React.FC<
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (hotel?.checkin) {
-      setHeTransfer({ ...heTransfer, departureDate: hotel.checkin });
-    }
-  }, [hotel]);
 
   return (
     <>
@@ -407,14 +377,6 @@ const SearchTransfersAvailability: React.FC<
               )}
             </View>
           </View>
-
-          <DateTimePicker
-            label="Departure Date & Time"
-            value={heTransfer.departureDate}
-            onPick={(date: Date) =>
-              setHeTransfer({ ...heTransfer, departureDate: date })
-            }
-          />
 
           <View className="w-full flex flex-row items-center justify-between">
             <Text className="font-dm-sans-medium text-sm text-gray-600">
