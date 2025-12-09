@@ -2,10 +2,8 @@ import { updateUserNearestAirports } from "@/api/scripts/airports";
 import { fetchEvent } from "@/api/scripts/event";
 import { Avatar, Button, Spinner, Tabs } from "@/components/common";
 import {
+  BookSearchInputGroup,
   PackageConfirmModal,
-  SearchFlightsAvailability,
-  SearchHotelsAvailability,
-  SearchTransfersAvailability,
 } from "@/components/molecules";
 import { EventDetailContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
@@ -145,13 +143,7 @@ const StandardPackage = ({
         Standard
       </Text>
 
-      <SearchFlightsAvailability event={event} onConfirm={onConfirm} />
-
-      <View className="w-full h-[1px] bg-gray-200"></View>
-
-      <SearchHotelsAvailability event={event} onConfirm={onConfirm} />
-
-      <SearchTransfersAvailability event={event} />
+      <BookSearchInputGroup event={event} />
     </View>
   );
 };

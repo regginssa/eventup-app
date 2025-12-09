@@ -12,7 +12,5 @@ export { default as OnboardingStepper } from "./OnboardingStepper";
 export { default as PackageConfirmModal } from "./PackageConfirmModal";
 export { default as PassengerInputGroup } from "./PassengerInputGroup";
 export { default as ProfileDrawer } from "./ProfileDrawer";
-export { default as SearchFlightsAvailability } from "./SearchFligtsAvailability";
-export { default as SearchHotelsAvailability } from "./SearchHotelsAvailability";
-export { default as SearchTransfersAvailability } from "./SearchTransfersAvailability";
 export { default as StripePaymentMethodGroup } from "./StripePaymentMethodGroup";
+export { default as BookSearchInputGroup } from "./BookSearchInputGroup";

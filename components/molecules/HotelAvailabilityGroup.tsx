@@ -21,7 +21,6 @@ interface HotelAvailabilityGroupProps {
   availabilities: THotelAvailability[];
   isSearched: boolean;
   onSelect: (hotel: THotelAvailability) => void;
-  onConfirm: () => void;
 }
 
 const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
@@ -30,7 +29,6 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
   availabilities,
   isSearched,
   onSelect,
-  onConfirm,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isImageOpen, setIsImageOpen] = useState<boolean>(false);
@@ -114,9 +112,12 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
     <>
       {recommend && (
         <View className="w-full gap-4 overflow-hidden">
-          <Text className="font-dm-sans-bold text-gray-700">
-            Available Hotels
-          </Text>
+          <View className="flex flex-row items-center gap-2">
+            <MaterialIcons name="hotel" size={20} color="#374151" />
+            <Text className="font-dm-sans-bold text-gray-700">
+              Available Hotels
+            </Text>
+          </View>
 
           <View className="w-full px-2">
             <Text className="font-dm-sans-bold text-gray-700 text-sm">
@@ -129,13 +130,6 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
               onViewImages={handleViewImages}
             />
           </View>
-
-          <Button
-            type="primary"
-            label="Confirm recommend"
-            buttonClassName="h-12"
-            onPress={onConfirm}
-          />
 
           <Button
             type="text"

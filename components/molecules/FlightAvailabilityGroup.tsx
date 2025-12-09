@@ -15,7 +15,6 @@ interface FlightAvailabilityGroupProps {
   availabilities: TFlightAvailability[];
   isSearched: boolean;
   onSelect: (availability: TFlightAvailability) => void;
-  onConfirm: () => void;
 }
 
 const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
@@ -23,7 +22,6 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
   availabilities,
   isSearched,
   onSelect,
-  onConfirm,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -58,30 +56,20 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
     <>
       {recommend && (
         <View className="w-full gap-4">
-          <Text className="font-dm-sans-bold text-gray-700">
-            Available Flights
-          </Text>
-
-          <View className="w-full px-2">
-            <Text className="font-dm-sans-bold text-gray-700 text-sm">
-              Recommend
+          <View className="flex flex-row items-center gap-2">
+            <MaterialCommunityIcons name="airplane" size={20} color="#374151" />
+            <Text className="font-dm-sans-bold text-gray-700">
+              Available Flights
             </Text>
-
-            <FlightItem flight={recommend} hiddenHeader={true} />
           </View>
+
+          <FlightItem flight={recommend} hiddenHeader={true} />
 
           <Button
             type="text"
             label="See more"
             textClassName="text-gray-700"
             onPress={() => setIsOpen(true)}
-          />
-
-          <Button
-            type="primary"
-            label="Confirm recommend"
-            buttonClassName="h-12"
-            onPress={onConfirm}
           />
         </View>
       )}
