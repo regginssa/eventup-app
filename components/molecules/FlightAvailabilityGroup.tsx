@@ -69,6 +69,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
             type="text"
             label="See more"
             textClassName="text-gray-700"
+            buttonClassName="h-8"
             onPress={() => setIsOpen(true)}
           />
         </View>

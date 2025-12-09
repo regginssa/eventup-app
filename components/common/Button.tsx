@@ -130,7 +130,7 @@ const Button: React.FC<ButtonProps> = ({
     return (
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`flex-1 items-center justify-center ${buttonClassName}`}
+        className={`items-center justify-center ${buttonClassName}`}
         disabled={loading}
         onPress={onPress}
       >

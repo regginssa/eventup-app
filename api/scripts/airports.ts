@@ -1,13 +1,13 @@
+import { TAirport } from "@/types";
 import { ApiResponse } from "@/types/api";
-import { IUser } from "@/types/data";
 import AxiosInstance from "../AxiosInstance";
-import { UPDATE_USER_NEAREST_AIRPORTS } from "../apis";
+import { FETCH_NEAREST_AIRPORTS } from "../apis";
 
-export const updateUserNearestAirports = async (
+export const fetchNearestAirports = async (
   latitude: number,
   longitude: number
-): Promise<ApiResponse<IUser>> => {
-  return await AxiosInstance.patch(UPDATE_USER_NEAREST_AIRPORTS, {
+): Promise<ApiResponse<TAirport[]>> => {
+  return await AxiosInstance.post(FETCH_NEAREST_AIRPORTS, {
     latitude,
     longitude,
   });

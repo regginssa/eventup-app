@@ -20,7 +20,7 @@ export const FETCH_ALL_EVENTS = "/events/all";
 export const FETCH_EVENT = "/events/";
 
 // Airports apis
-export const UPDATE_USER_NEAREST_AIRPORTS = "/airports/multiple";
+export const FETCH_NEAREST_AIRPORTS = "/airports/nearest-multiple";
 
 // Booking apis
 export const FETCH_STANDARD_FLIGHTS_AVAILABILITY =

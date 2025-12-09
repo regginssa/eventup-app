@@ -1,4 +1,3 @@
-import { updateUserNearestAirports } from "@/api/scripts/airports";
 import { fetchEvent } from "@/api/scripts/event";
 import { Avatar, Button, Spinner, Tabs } from "@/components/common";
 import {
@@ -6,7 +5,6 @@ import {
   PackageConfirmModal,
 } from "@/components/molecules";
 import { EventDetailContainer } from "@/components/organisms";
-import { setAuthUser } from "@/redux/slices/auth.slice";
 import {
   setBookingFlight,
   setBookingHotel,
@@ -25,7 +23,6 @@ import {
 import MaskedView from "@react-native-masked-view/masked-view";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -135,10 +132,8 @@ const StandardPackage = ({
   event: IEvent;
   onConfirm: () => void;
 }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
   return (
-    <View className="bg-[#F7F3FF] rounded-xl p-4 gap-6">
+    <View className="bg-[#F7F3FF] rounded-xl p-4 gap-3">
       <Text className="font-poppins-semibold text-lg text-gray-800">
         Standard
       </Text>
@@ -345,6 +340,7 @@ const EventPackages = ({ event }: { event: IEvent }) => {
           label="See package details"
           buttonClassName="h-12"
           textClassName="text-lg"
+          disabled={!flight?.recommend || !hotel?.recommend}
           loading={loading}
           onPress={handleOnConfirm}
         />
@@ -575,24 +571,7 @@ const EventDetailScreen = () => {
   const [selectedTab, setSelectedTab] = useState<TDropdownItem>(tabs[0]);
 
   const { id } = useLocalSearchParams();
-  const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
-
-  const getUserLocationAndSave = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      throw new Error("Location permission not granted");
-    }
-
-    const location = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Highest,
-    });
-
-    return {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    };
-  };
 
   const init = useCallback(async () => {
     if (!id || typeof id !== "string") return;
@@ -606,17 +585,6 @@ const EventDetailScreen = () => {
 
       dispatch(setBookingFlight(null));
       dispatch(setBookingHotel(null));
-
-      if (user) {
-        const coords = await getUserLocationAndSave();
-
-        const response = await updateUserNearestAirports(
-          coords.latitude,
-          coords.longitude
-        );
-
-        dispatch(setAuthUser(response.data));
-      }
     } catch (error: any) {
       console.error(error);
     } finally {
