@@ -137,6 +137,16 @@ const StandardPackage = ({ event }: { event: IEvent }) => {
   );
 };
 
+const GoldPackage = ({ event }: { event: IEvent }) => {
+  return (
+    <View className="bg-[#F7F3FF] rounded-xl p-4 gap-3">
+      <Text className="font-poppins-semibold text-lg text-gray-800">Gold</Text>
+
+      <BookSearchInputGroup event={event} packageType="gold" />
+    </View>
+  );
+};
+
 const EventPackages = ({ event }: { event: IEvent }) => {
   const [eventPackage, setEventPackage] = useState<"standard" | "gold">(
     "standard"
@@ -327,7 +337,11 @@ const EventPackages = ({ event }: { event: IEvent }) => {
           </View>
         </View>
 
-        <StandardPackage event={event} />
+        {eventPackage === "standard" ? (
+          <StandardPackage event={event} />
+        ) : (
+          <GoldPackage event={event} />
+        )}
 
         <Button
           type="primary"

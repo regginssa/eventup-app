@@ -2,11 +2,7 @@ import { fetchEventsFeed } from "@/api/scripts/event";
 import { Input } from "@/components/common";
 import { EventsPreviewGroup } from "@/components/molecules";
 import { HomeContainer } from "@/components/organisms";
-import {
-  addManyEvents,
-  setAllEvents,
-  setPagination,
-} from "@/redux/slices/event.slice";
+import { setAllEvents, setPagination } from "@/redux/slices/event.slice";
 import { RootState } from "@/redux/store";
 import { TDropdownItem } from "@/types";
 import { IEvent } from "@/types/data";
@@ -34,35 +30,48 @@ const HomeScreen = () => {
   const handleNext = async () => {
     if (!user?._id || !pagination.hasMore) return;
 
-    const { page, limit } = pagination;
-    const nextPage = page + 1;
+    const nextPage = pagination.page + 1;
 
     try {
       setLoading(true);
 
-      const response = await fetchEventsFeed(user._id, nextPage, limit);
+      const response = await fetchEventsFeed(
+        user._id,
+        nextPage,
+        pagination.limit
+      );
 
       if (response.ok) {
-        dispatch(addManyEvents(response.data.events));
         dispatch(setPagination(response.data.pagination));
         setOrderedEvents(response.data.events);
       }
-    } catch (err) {
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePrev = () => {
-    const { page, limit } = pagination;
-    const prevPage = page - 1;
+  const handlePrev = async () => {
+    if (!user?._id) return;
+
+    const prevPage = pagination.page - 1;
     if (prevPage <= 0) return;
 
-    const start = (prevPage - 1) * limit;
-    const end = prevPage * limit;
+    try {
+      setLoading(true);
 
-    dispatch(setPagination({ ...pagination, page: prevPage }));
-    setOrderedEvents(events.slice(start, end));
+      const response = await fetchEventsFeed(
+        user._id,
+        prevPage,
+        pagination.limit
+      );
+
+      if (response.ok) {
+        dispatch(setPagination(response.data.pagination));
+        setOrderedEvents(response.data.events);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchFeed = useCallback(async () => {
@@ -213,7 +222,7 @@ const HomeScreen = () => {
           <View className="flex flex-row items-center gap-2">
             <MaterialIcons name="event-available" size={24} color="#374151" />
             <Text className="font-poppins-semibold text-sm text-gray-700">
-              {pagination.total} events are available
+              {pagination.total.toLocaleString("en-US")} events are available
             </Text>
           </View>
 

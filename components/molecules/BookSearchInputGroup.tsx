@@ -7,9 +7,9 @@ import {
 import {
   setBookingFlight,
   setBookingHotel,
+  setBookingTransfer,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { sampleTransfer } from "@/static/data";
 import {
   IFlightDetail,
   TAirport,
@@ -19,11 +19,7 @@ import {
   TPassengerInfo,
 } from "@/types";
 import { IEvent } from "@/types/data";
-import {
-  formatTravelproDateTime,
-  normalizeDate,
-  normalizeDateUTC,
-} from "@/utils/format";
+import { formatTravelproDateTime, normalizeDateUTC } from "@/utils/format";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
@@ -361,14 +357,26 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       packageType,
     };
 
-    console.log("transfers availability request data: ", reqData);
-
     const response = await fetchTransfersAvailability(
       event._id as string,
       reqData
     );
 
     console.log("transfers availability response: ", response);
+
+    if (response.data) {
+      if (response.data.ah.error) {
+        Alert.alert("Transfer from airport to hotel", response.data.ah.error);
+      }
+
+      if (response.data.he.error) {
+        Alert.alert("Transfer from hotel to event", response.data.he.error);
+      }
+
+      if (response.data.ah.session_id || response.data.he.session_id) {
+        dispatch(setBookingTransfer(response.data));
+      }
+    }
   };
 
   const handleSearch = async () => {
@@ -376,8 +384,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     dispatch(setBookingHotel(null));
     if (!event._id) return Alert.alert("Event ID is missing.");
 
-    const eventDateTime = normalizeDate(new Date(event.opening_date as any));
-    const departureDateTime = normalizeDate(departureDate);
+    const eventDateTime = normalizeDateUTC(new Date(event.opening_date as any));
+    const departureDateTime = normalizeDateUTC(departureDate);
 
     const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
 
@@ -821,7 +829,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           <View className="w-full h-[1px] bg-gray-200"></View>
 
           <TransferAvailabilityGroup
-            transfer={{ ah: sampleTransfer, he: sampleTransfer }}
+            transfer={rdTransfer}
             isSearched={isSearched}
           />
         </>

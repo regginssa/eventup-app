@@ -62,6 +62,7 @@ const bookingSlice = createSlice({
 export const {
   setBookingFlight,
   setBookingHotel,
+  setBookingTransfer,
   setBookingHotelRoomRates,
   setBookingHotelSelectedRoomRate,
   addNewBooking,

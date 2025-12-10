@@ -51,7 +51,7 @@ const FlightItem: React.FC<FlightItemProps> = ({ flight, hiddenHeader }) => {
         </View>
       )}
 
-      <View className="w-full px-2">
+      <View className="w-full px-2 flex flex-col items-start gap-2">
         {/* FROM */}
         <View className="w-full flex flex-row items-center justify-between">
           <View className="flex flex-row items-center gap-2">
@@ -202,7 +202,7 @@ const FlightItem: React.FC<FlightItemProps> = ({ flight, hiddenHeader }) => {
         </View>
 
         {/* PRICE */}
-        <View className="w-full flex flex-row items-center justify-between mt-2">
+        <View className="w-full flex flex-row items-center justify-between">
           <Text className="font-dm-sans-bold text-gray-700 text-lg">
             Total Price:
           </Text>
