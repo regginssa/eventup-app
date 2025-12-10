@@ -1,8 +1,8 @@
 import { fetchNearestAirports } from "@/api/scripts/airports";
 import {
-  fetchStandardFlightsAvailability,
-  fetchStandardHotelsAvailability,
-  fetchStandardTransfersAvailability,
+  fetchFlightsAvailability,
+  fetchHotelsAvailability,
+  fetchTransfersAvailability,
 } from "@/api/scripts/booking";
 import {
   setBookingFlight,
@@ -14,6 +14,7 @@ import {
   TAirport,
   TFlightAvailability,
   THotelAvailability,
+  TPackageType,
   TPassengerInfo,
 } from "@/types";
 import { IEvent } from "@/types/data";
@@ -29,10 +30,12 @@ import HotelAvailabilityGroup from "./HotelAvailabilityGroup";
 
 interface BookSearchInputGroupProps {
   event: IEvent;
+  packageType: TPackageType;
 }
 
 const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   event,
+  packageType,
 }) => {
   const [currentNearestAirports, setCurrentNearestAirports] = useState<
     TAirport[]
@@ -150,9 +153,14 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       adults: hotel.data.reduce((sum, room) => sum + room.adults, 0),
       childs: hotel.data.reduce((sum, room) => sum + room.childs, 0),
       infants,
+      airports:
+        departureLocation === "current"
+          ? currentNearestAirports
+          : homeNearestAirports,
+      packageType,
     };
 
-    const response = await fetchStandardFlightsAvailability(
+    const response = await fetchFlightsAvailability(
       event._id as string,
       payload
     );
@@ -216,11 +224,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     const checkout = new Date(event.opening_date as any);
     checkout.setDate(checkout.getDate() + 1);
 
-    const response = await fetchStandardHotelsAvailability(
+    const response = await fetchHotelsAvailability(
       event._id as string,
       formattedHotelRooms,
       flightArrival,
-      checkout
+      checkout,
+      packageType
     );
 
     const hotelRecommend = response.data?.recommend;
@@ -294,9 +303,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         childs: hotel.data.reduce((sum, room) => sum + room.childs, 0),
         infants,
       },
+      packageType,
     };
 
-    const response = await fetchStandardTransfersAvailability(
+    const response = await fetchTransfersAvailability(
       event._id as string,
       reqData
     );

@@ -14,45 +14,43 @@ import {
   BOOKING_FLIGHT_METHOD,
   BOOKING_HOTEL_METHOD,
   CHECK_HOTEL_ROOM_RATES,
+  FETCH_FLIGHTS_AVAILABILITY,
   FETCH_HOTEL_DETAILS,
   FETCH_HOTEL_ROOM_RATES,
-  FETCH_STANDARD_FLIGHTS_AVAILABILITY,
-  FETCH_STANDARD_HOTELS_AVAILABILITY,
-  FETCH_STANDARD_TRANSFERS_AVAILABILITY,
+  FETCH_HOTELS_AVAILABILITY,
+  FETCH_TRANSFERS_AVAILABILITY,
   TICKET_FLIGHT_METHOD,
   VALIDATE_FLIGHT_FARE_METHOD,
 } from "../apis";
 
-export const fetchStandardFlightsAvailability = async (
+export const fetchFlightsAvailability = async (
   eventId: string,
   flight: any
 ): Promise<ApiResponse<any>> => {
-  return await AxiosInstance.post(
-    FETCH_STANDARD_FLIGHTS_AVAILABILITY + eventId,
-    { flight }
-  );
+  return await AxiosInstance.post(FETCH_FLIGHTS_AVAILABILITY + eventId, {
+    flight,
+  });
 };
 
-export const fetchStandardHotelsAvailability = async (
+export const fetchHotelsAvailability = async (
   eventId: string,
   occupancy: any,
   checkin: Date,
-  checkout: Date
+  checkout: Date,
+  packageType: TPackageType
 ): Promise<ApiResponse<any>> => {
-  return await AxiosInstance.post(
-    FETCH_STANDARD_HOTELS_AVAILABILITY + eventId,
-    { occupancy, checkin, checkout }
-  );
+  return await AxiosInstance.post(FETCH_HOTELS_AVAILABILITY + eventId, {
+    occupancy,
+    checkin,
+    checkout,
+  });
 };
 
-export const fetchStandardTransfersAvailability = async (
+export const fetchTransfersAvailability = async (
   eventId: string,
   data: any
 ): Promise<ApiResponse<any>> => {
-  return await AxiosInstance.post(
-    FETCH_STANDARD_TRANSFERS_AVAILABILITY + eventId,
-    data
-  );
+  return await AxiosInstance.post(FETCH_TRANSFERS_AVAILABILITY + eventId, data);
 };
 
 export const fetchHotelDetails = async (

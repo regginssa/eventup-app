@@ -23,12 +23,9 @@ export const FETCH_EVENT = "/events/";
 export const FETCH_NEAREST_AIRPORTS = "/airports/nearest-multiple";
 
 // Booking apis
-export const FETCH_STANDARD_FLIGHTS_AVAILABILITY =
-  "/booking/standard-package/flights-availability/";
-export const FETCH_STANDARD_HOTELS_AVAILABILITY =
-  "/booking/standard-package/hotels-availability/";
-export const FETCH_STANDARD_TRANSFERS_AVAILABILITY =
-  "/booking/standard-package/transfers-availability/";
+export const FETCH_FLIGHTS_AVAILABILITY = "/booking/flights-availability/";
+export const FETCH_HOTELS_AVAILABILITY = "/booking/hotels-availability/";
+export const FETCH_TRANSFERS_AVAILABILITY = "/booking/transfers-availability/";
 export const FETCH_HOTEL_DETAILS = "/booking/hotel/";
 // /:sessionId/:hotelId/:productId/:tokenId
 export const VALIDATE_FLIGHT_FARE_METHOD = "/booking/flight/validate/fare";
