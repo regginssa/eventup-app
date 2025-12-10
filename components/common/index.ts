@@ -21,3 +21,4 @@ export { default as Spinner } from "./Spinner";
 export { default as Tabs } from "./Tabs";
 export { default as Textarea } from "./Textarea";
 export { default as TicketQR } from "./TicketQR";
+export { default as TransferItem } from "./TransferItem";

@@ -18,7 +18,11 @@ import {
   TPassengerInfo,
 } from "@/types";
 import { IEvent } from "@/types/data";
-import { normalizeDate, normalizeDateUTC } from "@/utils/format";
+import {
+  formatTravelproDateTime,
+  normalizeDate,
+  normalizeDateUTC,
+} from "@/utils/format";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
@@ -27,6 +31,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Button, DateTimePicker, RadioButton, Spinner } from "../common";
 import FlightAvailabilityGroup from "./FlightAvailabilityGroup";
 import HotelAvailabilityGroup from "./HotelAvailabilityGroup";
+import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
 
 interface BookSearchInputGroupProps {
   event: IEvent;
@@ -47,6 +52,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     "current" | "home"
   >("current");
   const [departureDate, setDepartureDate] = useState<Date>(new Date());
+  const [hotelDepartureDate, setHotelDepartureDate] = useState<Date>(
+    new Date()
+  );
   const [hotel, setHotel] = useState<{ rooms: number; data: any[] }>({
     rooms: 1,
     data: [{ adults: 1, childs: 0, child_age: [] }],
@@ -62,9 +70,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   );
 
   const { user } = useSelector((state: RootState) => state.auth);
-  const { flight, hotel: rdHotel } = useSelector(
-    (state: RootState) => state.booking
-  );
+  const {
+    flight,
+    hotel: rdHotel,
+    transfer: rdTransfer,
+  } = useSelector((state: RootState) => state.booking);
   const dispatch = useDispatch();
 
   const getUserLocationAndSave = async () => {
@@ -208,6 +218,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       })
     );
 
+    console.log("flight availability response: ", recommend);
+
     return recommend;
   };
 
@@ -273,6 +285,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       })
     );
 
+    console.log("hotel availability response: ", hotelRecommend);
+
     return { hotelRecommend, hotelSessionId: response.data?.session_id };
   };
 
@@ -287,6 +301,36 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     }
     if (!hotelRecommend) {
       Alert.alert("Hotel Not Selected");
+      return;
+    }
+
+    const flightArrivalDate =
+      flightRecommend?.FareItinerary?.OriginDestinationOptions[0]
+        ?.OriginDestinationOption[
+        flightRecommend?.FareItinerary?.OriginDestinationOptions[0]
+          ?.OriginDestinationOption.length - 1
+      ]?.FlightSegment.ArrivalDateTime;
+    const flightArrival = new Date(flightArrivalDate);
+    const flightArrivalDateTime = normalizeDateUTC(flightArrival);
+    const eventOpeningDateTime = normalizeDateUTC(
+      new Date(event.opening_date as any)
+    );
+
+    const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
+
+    if (flightArrivalDateTime > hotelDepartureDateTime) {
+      Alert.alert(
+        "Invalid Hotel Departure Date",
+        "The hotel departure date cannot be before the flight arrival date."
+      );
+      return;
+    }
+
+    if (hotelDepartureDateTime > eventOpeningDateTime) {
+      Alert.alert(
+        "Invalid Hotel Departure Date",
+        "The hotel departure date cannot be after the event date."
+      );
       return;
     }
 
@@ -322,9 +366,13 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         adults: hotel.data.reduce((sum, room) => sum + room.adults, 0),
         childs: hotel.data.reduce((sum, room) => sum + room.childs, 0),
         infants,
+        pickupDate: formatTravelproDateTime(hotelDepartureDate).date,
+        pickupTime: formatTravelproDateTime(hotelDepartureDate).time,
       },
       packageType,
     };
+
+    console.log("transfers availability request data: ", reqData);
 
     const response = await fetchTransfersAvailability(
       event._id as string,
@@ -425,7 +473,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             <View className="w-full flex flex-row items-center gap-2">
               <View className="flex flex-row items-start gap-1 flex-1">
                 <MaterialCommunityIcons
-                  name="home-city-outline"
+                  name="map-marker-account-outline"
                   size={16}
                   color="#4b5563"
                 />
@@ -458,10 +506,17 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       </View>
       <View className="w-full h-[1px] bg-gray-200"></View>
       <DateTimePicker
-        label="Tell us when you will depart"
+        label="Tell us when you will leave the airport in your location"
         className="rounded-md"
         value={departureDate}
         onPick={setDepartureDate}
+      />
+      <DateTimePicker
+        label="Tell us when you will leave the hotel for the event"
+        className="rounded-md"
+        mode="datetime"
+        value={hotelDepartureDate}
+        onPick={setHotelDepartureDate}
       />
 
       <View className="w-full h-[1px] bg-gray-200"></View>
@@ -758,6 +813,17 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 );
               }
             }}
+          />
+        </>
+      )}
+
+      {isSearched && (
+        <>
+          <View className="w-full h-[1px] bg-gray-200"></View>
+
+          <TransferAvailabilityGroup
+            transfer={rdTransfer}
+            isSearched={isSearched}
           />
         </>
       )}

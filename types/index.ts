@@ -439,3 +439,100 @@ export interface ExtraService {
   price: string;
   currency: string;
 }
+
+export interface ITransferAvailability {
+  sessionId: string;
+  searchResult: {
+    originType: string;
+    originCode: string;
+    originName: string;
+    originProperty?: string;
+    originDetails?: string;
+    endType: string;
+    endCode: string;
+    endName?: string;
+    endProperty?: string;
+    endDetails?: string;
+    travelling: string;
+    adults: string;
+    children: string;
+    infants: string;
+    resultCount: string;
+  };
+  travelling: {
+    products: Array<{
+      general: {
+        productId: string;
+        bookingTypeId: string;
+        transferTime: string; // minutes as string
+        productType: string;
+        productTypeId: string;
+        minPax?: string;
+        maxPax?: string;
+        perPerson?: string;
+        luggage: string;
+        smallBagAllowance: string;
+        vehicleClass?: string;
+        vehicleMake?: string;
+        canxHours?: string;
+        canxPerc?: string;
+        canxOutOfHoursPP?: string;
+        minStops?: string;
+        maxStops?: string;
+        numUnits: string;
+        supplierId: string;
+        productSource?: string;
+        supplierType: string;
+        companyLogo?: string;
+        vehicleImage: string;
+        transferCompany: string;
+        rating?: string;
+        ratingClass?: string;
+        numberOfReviews?: string;
+        priceExpires?: string;
+        description?: string;
+        isDeposit: string;
+        isCardPaymentAvailable: boolean;
+      };
+      pricing: {
+        oldPrice: string;
+        price: string;
+        currency: string;
+        carbonOffset?: string;
+        transactionFees: {
+          visa: string;
+          masterCard: string;
+          maestro: string;
+          visaDebit: string;
+          masterCardDebit: string;
+          amex: string;
+          payPal: string;
+        };
+        prices: Array<{
+          price: {
+            type: string;
+            typeCode: string;
+            description: string;
+            units: string;
+            oldPrice: string;
+            price: string;
+            currency: string;
+          };
+        }>;
+        extras?: Array<{
+          extra: {
+            type: string;
+            typeCode: string;
+            price: string;
+            currency: string;
+          };
+        }>;
+      };
+    }>;
+  };
+}
+
+export type TTransfer = {
+  ah: ITransferAvailability;
+  he: ITransferAvailability;
+};

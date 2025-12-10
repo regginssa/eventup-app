@@ -125,20 +125,14 @@ const Header = ({
   );
 };
 
-const StandardPackage = ({
-  event,
-  onConfirm,
-}: {
-  event: IEvent;
-  onConfirm: () => void;
-}) => {
+const StandardPackage = ({ event }: { event: IEvent }) => {
   return (
     <View className="bg-[#F7F3FF] rounded-xl p-4 gap-3">
       <Text className="font-poppins-semibold text-lg text-gray-800">
         Standard
       </Text>
 
-      <BookSearchInputGroup event={event} />
+      <BookSearchInputGroup event={event} packageType="standard" />
     </View>
   );
 };
@@ -333,7 +327,7 @@ const EventPackages = ({ event }: { event: IEvent }) => {
           </View>
         </View>
 
-        <StandardPackage event={event} onConfirm={handleOnConfirm} />
+        <StandardPackage event={event} />
 
         <Button
           type="primary"

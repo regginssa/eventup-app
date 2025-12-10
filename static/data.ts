@@ -1,4 +1,113 @@
+import { ITransferAvailability } from "@/types";
 import { IEvent } from "@/types/data";
+
+export const sampleTransfer: ITransferAvailability = {
+  sessionId: "MWNlYzkwOTUyZjcyNDA4MGYzYzRhMTJjNTY3N2I3NWY=",
+  searchResult: {
+    originType: "IATA",
+    originCode: "BLR",
+    originName: "Bangalore (Bengaluru Intl. Airport) (BLR)",
+    originProperty: "",
+    originDetails: "flight",
+    endType: "GIATA",
+    endCode: "101249",
+    endName: "Hyatt Bangalore MG Road",
+    endProperty: "",
+    endDetails: "accommodation",
+    travelling: "2023-10-20T02:00:00",
+    adults: "2",
+    children: "0",
+    infants: "0",
+    resultCount: "35",
+  },
+  travelling: {
+    products: [
+      {
+        general: {
+          productId:
+            "TRX-Y|4|D9EB6BEBD2AB4BE4A6115A20AF9FC5C220230726085657093",
+          bookingTypeId: "TRX-26485596",
+          transferTime: "56",
+          productType: "Private MPV",
+          productTypeId: "0",
+          minPax: "",
+          maxPax: "",
+          perPerson: "0",
+          luggage: "10",
+          smallBagAllowance: "10",
+          vehicleClass: "",
+          vehicleMake: "",
+          canxHours: "48",
+          canxPerc: "100.00",
+          canxOutOfHoursPP: "0",
+          minStops: "0",
+          maxStops: "0",
+          numUnits: "2",
+          supplierId: "2085",
+          productSource: "1",
+          supplierType: "0",
+          companyLogo: "",
+          vehicleImage:
+            "https://www.hoppa.com/images/vehicle_images/ret2_suv.jpg",
+          transferCompany: "TaxiBazaar",
+          rating: "1.00",
+          ratingClass: "1",
+          numberOfReviews: "2",
+          priceExpires: "60",
+          description: "",
+          isDeposit: "0",
+          isCardPaymentAvailable: true,
+        },
+        pricing: {
+          oldPrice: "12277.23",
+          price: "12277.23",
+          currency: "INR",
+          carbonOffset: "0.00",
+          transactionFees: {
+            visa: "0.00",
+            masterCard: "0.00",
+            maestro: "0.00",
+            visaDebit: "0.00",
+            masterCardDebit: "0.00",
+            amex: "0.00",
+            payPal: "0.00",
+          },
+          prices: [
+            {
+              price: {
+                type: "Vehicle",
+                typeCode: "VEH",
+                description: "Vehicle",
+                units: "2",
+                oldPrice: "12277.23",
+                price: "12277.23",
+                currency: "INR",
+              },
+            },
+          ],
+          extras: [
+            {
+              extra: {
+                type: "Child seat",
+                typeCode: "CHS",
+                price: "0.00",
+                currency: "INR",
+              },
+            },
+            {
+              extra: {
+                type: "Booster seat",
+                typeCode: "BAS",
+                price: "0.00",
+                currency: "INR",
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
 
 export const SAMPLE_EVENTS: IEvent[] = [
   {
