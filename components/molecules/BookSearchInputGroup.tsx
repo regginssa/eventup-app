@@ -9,6 +9,7 @@ import {
   setBookingHotel,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
+import { sampleTransfer } from "@/static/data";
 import {
   IFlightDetail,
   TAirport,
@@ -312,24 +313,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       ]?.FlightSegment.ArrivalDateTime;
     const flightArrival = new Date(flightArrivalDate);
     const flightArrivalDateTime = normalizeDateUTC(flightArrival);
-    const eventOpeningDateTime = normalizeDateUTC(
-      new Date(event.opening_date as any)
-    );
-
     const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
 
     if (flightArrivalDateTime > hotelDepartureDateTime) {
       Alert.alert(
         "Invalid Hotel Departure Date",
         "The hotel departure date cannot be before the flight arrival date."
-      );
-      return;
-    }
-
-    if (hotelDepartureDateTime > eventOpeningDateTime) {
-      Alert.alert(
-        "Invalid Hotel Departure Date",
-        "The hotel departure date cannot be after the event date."
       );
       return;
     }
@@ -390,11 +379,21 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     const eventDateTime = normalizeDate(new Date(event.opening_date as any));
     const departureDateTime = normalizeDate(departureDate);
 
+    const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
+
     if (eventDateTime < departureDateTime) {
       return Alert.alert(
         "Invalid Departure Date",
         "The departure date cannot be after the event date."
       );
+    }
+
+    if (hotelDepartureDateTime > eventDateTime) {
+      Alert.alert(
+        "Invalid Hotel Departure Date",
+        "The hotel departure date cannot be after the event date."
+      );
+      return;
     }
 
     try {
@@ -822,7 +821,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           <View className="w-full h-[1px] bg-gray-200"></View>
 
           <TransferAvailabilityGroup
-            transfer={rdTransfer}
+            transfer={{ ah: sampleTransfer, he: sampleTransfer }}
             isSearched={isSearched}
           />
         </>
