@@ -56,6 +56,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [isSearched, setIsSearched] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
+  const [currentCity, setCurrentCity] = useState<string | null>(null);
+  const [currentCountryCode, setCurrentCountryCode] = useState<string | null>(
+    null
+  );
 
   const { user } = useSelector((state: RootState) => state.auth);
   const { flight, hotel: rdHotel } = useSelector(
@@ -83,6 +87,22 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (!user?.location.coordinate) return;
     setLoading(true);
     const coords = await getUserLocationAndSave();
+
+    // Reverse geocode to get city and country from current location
+    try {
+      const reverseGeocode = await Location.reverseGeocodeAsync({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      });
+
+      if (reverseGeocode && reverseGeocode.length > 0) {
+        const address = reverseGeocode[0];
+        setCurrentCity(address.city || address.region || null);
+        setCurrentCountryCode(address.isoCountryCode || null);
+      }
+    } catch (error) {
+      console.error("Error reverse geocoding:", error);
+    }
 
     const currentNearestAirports = await fetchNearestAirports(
       coords.latitude,
@@ -370,14 +390,14 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         <View className="w-full flex flex-col gap-2 mt-2">
           <View>
             <View className="w-full flex flex-row items-center gap-2">
-              <View className="flex flex-row items-center gap-1 flex-1">
+              <View className="flex flex-row items-start gap-1 flex-1">
                 <MaterialCommunityIcons
                   name="map-marker-radius-outline"
                   size={16}
                   color="#4b5563"
                 />
-                <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                  Current Location
+                <Text className="font-dm-sans-medium text-gray-600 text-sm line-clamp-2">
+                  Current Location ({currentCity}, {currentCountryCode})
                 </Text>
               </View>
 
@@ -403,14 +423,15 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
           <View>
             <View className="w-full flex flex-row items-center gap-2">
-              <View className="flex flex-row items-center gap-1 flex-1">
+              <View className="flex flex-row items-start gap-1 flex-1">
                 <MaterialCommunityIcons
                   name="home-city-outline"
                   size={16}
                   color="#4b5563"
                 />
-                <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                  Home city / Saved location
+                <Text className="font-dm-sans-medium text-gray-600 text-sm line-clamp-2">
+                  Home region / Saved location ({user?.location.region},{" "}
+                  {user?.location.country_code || ""})
                 </Text>
               </View>
 
