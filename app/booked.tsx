@@ -19,7 +19,8 @@ import {
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import LottieView from "lottie-react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -574,6 +575,9 @@ const BookedScreen = () => {
   const [currency, setCurrency] = useState<TCurrency>("usd");
   const [event, setEvent] = useState<IEvent | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [hasLoadedSuccessfully, setHasLoadedSuccessfully] =
+    useState<boolean>(false);
+  const lottieRef = useRef<LottieView>(null);
 
   const { bookingId, eventId, packageType } = useLocalSearchParams();
   const dispatch = useDispatch();
@@ -625,8 +629,10 @@ const BookedScreen = () => {
       if (booking.flight) selectedServices.push("Flight");
       if (booking.hotel) selectedServices.push("Hotel");
       setServices(selectedServices);
+      setHasLoadedSuccessfully(true);
     } catch (error: any) {
       console.error(error);
+      setHasLoadedSuccessfully(false);
     } finally {
       setLoading(false);
     }
@@ -644,17 +650,26 @@ const BookedScreen = () => {
     <BookedContainer>
       {loading ? (
         <View className="flex-1 flex-col items-center justify-center">
-          <Spinner size="lg" />
+          <Spinner size="md" />
         </View>
       ) : (
         <>
           <View className="relative w-[381px] h-[221px]">
             <Image
               source={theme === "light" ? BookedLightImage : BookedDarkImage}
-              alt="Booking confirmed"
+              alt="Booking "
               contentFit="cover"
               style={styles.image}
             />
+            {hasLoadedSuccessfully && (
+              <LottieView
+                ref={lottieRef}
+                autoPlay
+                source={require("@/assets/animations/cong.json")}
+                loop={false}
+                style={styles.lottie}
+              />
+            )}
           </View>
 
           <EventTicket
@@ -697,6 +712,13 @@ const BookedScreen = () => {
 
 const styles = StyleSheet.create({
   image: {
+    width: "100%",
+    height: "100%",
+  },
+  lottie: {
+    position: "absolute",
+    top: 0,
+    left: 0,
     width: "100%",
     height: "100%",
   },
