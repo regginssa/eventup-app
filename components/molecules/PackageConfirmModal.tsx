@@ -1,7 +1,7 @@
 import { fetchHotelRoomRates } from "@/api/scripts/booking";
 import { setBookingHotelRoomRates } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { TFlightAvailability, THotelAvailability } from "@/types";
+import { TFlightAvailability, THotelAvailability, TTransfer } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -9,6 +9,7 @@ import { Alert, Text, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, FlightItem, HotelItem, Modal } from "../common";
 import { useTheme } from "../providers/ThemeProvider";
+import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
 
 interface PackageConfirmModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface PackageConfirmModalProps {
   eventId: string;
   flight?: TFlightAvailability;
   hotel?: THotelAvailability;
+  transfer: TTransfer | null;
 }
 
 const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
@@ -26,6 +28,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   eventId,
   flight,
   hotel,
+  transfer,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { theme } = useTheme();
@@ -100,6 +103,19 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
           </View>
         ) : (
           <HotelItem hotel={hotel} hiddenImages={true} />
+        )}
+      </View>
+
+      <View className="w-full gap-2 p-2 rounded-lg border border-gray-200 mb-3">
+        {!hotel ? (
+          <View className="w-full flex flex-col items-center justify-center gap-3">
+            <MaterialCommunityIcons name="car-off" size={24} color="#4b5563" />
+            <Text className="font-poppins-semibold text-gray-600">
+              No transfers
+            </Text>
+          </View>
+        ) : (
+          <TransferAvailabilityGroup transfer={transfer} />
         )}
       </View>
 

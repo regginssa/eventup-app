@@ -155,7 +155,9 @@ const EventPackages = ({ event }: { event: IEvent }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const router = useRouter();
-  const { flight, hotel } = useSelector((state: RootState) => state.booking);
+  const { flight, hotel, transfer } = useSelector(
+    (state: RootState) => state.booking
+  );
 
   const standardItems = [
     "Event ticket",
@@ -359,6 +361,7 @@ const EventPackages = ({ event }: { event: IEvent }) => {
         onClose={() => setIsOpen(false)}
         flight={flight?.recommend}
         hotel={hotel?.recommend}
+        transfer={transfer}
         packageType={eventPackage}
         eventId={event._id as string}
       />

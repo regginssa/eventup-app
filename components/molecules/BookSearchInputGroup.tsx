@@ -362,21 +362,21 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       reqData
     );
 
-    console.log("transfers availability response: ", response);
-
-    if (response.data) {
-      if (response.data.ah.error) {
-        Alert.alert("Transfer from airport to hotel", response.data.ah.error);
-      }
-
-      if (response.data.he.error) {
-        Alert.alert("Transfer from hotel to event", response.data.he.error);
-      }
-
-      if (response.data.ah.session_id || response.data.he.session_id) {
-        dispatch(setBookingTransfer(response.data));
-      }
+    if (response.data.ah.error) {
+      return Alert.alert(
+        "Transfer from airport to hotel",
+        response.data.ah.error
+      );
     }
+
+    if (response.data.he.error) {
+      return Alert.alert(
+        "Transfer from hotel to event",
+        response.data.he.error
+      );
+    }
+
+    dispatch(setBookingTransfer(response.data));
   };
 
   const handleSearch = async () => {
@@ -528,7 +528,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       <View className="w-full h-[1px] bg-gray-200"></View>
       <Text className="font-poppins-medium text-sm text-gray-700">
-        Tell us who’s traveling and how many rooms you need.
+        Tell us who's traveling and how many rooms you need.
       </Text>
 
       <View className="w-full flex flex-row items-center justify-between">
@@ -831,6 +831,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           <TransferAvailabilityGroup
             transfer={rdTransfer}
             isSearched={isSearched}
+            available={true}
           />
         </>
       )}

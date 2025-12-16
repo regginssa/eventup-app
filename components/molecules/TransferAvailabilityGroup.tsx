@@ -5,12 +5,14 @@ import { TransferItem } from "../common";
 
 interface TransferAvailabilityGroupProps {
   transfer: TTransfer | null;
-  isSearched: boolean;
+  isSearched?: boolean;
+  available?: boolean;
 }
 
 const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
   transfer,
   isSearched,
+  available,
 }) => {
   if (isSearched && !transfer) {
     return (
@@ -28,7 +30,7 @@ const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
       <View className="flex flex-row items-center gap-2">
         <MaterialCommunityIcons name="car-outline" size={20} color="#374151" />
         <Text className="font-dm-sans-bold text-gray-700">
-          Available Transfers
+          {available ? "Available" : ""} Transfers
         </Text>
       </View>
 

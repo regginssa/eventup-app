@@ -189,9 +189,11 @@ const TransferItem: React.FC<TransferItemProps> = ({ transfer }) => {
               Rating:
             </Text>
           </View>
-          {Array.from({ length: Number(rating) }).map((_, idx) => (
-            <MaterialIcons key={idx} name="star" size={18} color="#facc15" />
-          ))}
+          <View className="flex flex-row items-center gap-1">
+            {Array.from({ length: Number(rating) }).map((_, idx) => (
+              <MaterialIcons key={idx} name="star" size={18} color="#facc15" />
+            ))}
+          </View>
         </View>
       )}
 
