@@ -9,12 +9,14 @@ interface TransferAvailabilityGroupProps {
   transfer: TTransfer | null;
   isSearched?: boolean;
   available?: boolean;
+  hiddenSeeMore?: boolean;
 }
 
 const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
   transfer,
   isSearched,
   available,
+  hiddenSeeMore,
 }) => {
   const dispatch = useDispatch();
 
@@ -52,6 +54,7 @@ const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
 
       <TransferItem
         transfer={transfer?.ah}
+        hiddenSeeMore={hiddenSeeMore}
         onSelect={(selectedProduct: TTransferProduct) => {
           if (!transfer?.ah?.travelling?.products) return;
 
@@ -79,6 +82,7 @@ const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
 
       <TransferItem
         transfer={transfer?.he}
+        hiddenSeeMore={hiddenSeeMore}
         onSelect={(selectedProduct: TTransferProduct) => {
           if (!transfer?.ah?.travelling?.products) return;
 

@@ -535,7 +535,7 @@ export interface ITransferAvailability {
   bookingRequest: ITransferBookingRequest;
 }
 
-export interface IPaxDetails {
+export interface ITransferPaxDetails {
   lead_title: string; // Lead passenger's title (Mr/Ms/Dr)
   lead_first_name: string; // Lead passenger first name
   lead_last_name: string; // Lead passenger last name
@@ -576,7 +576,7 @@ export interface ITransferBookingRequest {
   product_id: string; // Product ID of the selected transfer
   booking_type_id: string; // Booking Type ID from the product
   client_reference?: string; // Optional client reference
-  pax_details: IPaxDetails; // Lead passenger details
+  pax_details: ITransferPaxDetails; // Lead passenger details
   accomodation_details: IAccommodationDetails; // Hotel/accommodation info
   payment_details?: IPaymentDetails; // Optional payment info (if prepayment)
   departure_airline?: IAirlineDetails; // Optional departure flight info

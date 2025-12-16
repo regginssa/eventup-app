@@ -22,9 +22,13 @@ import {
   setBookingFlight,
   setBookingHotel,
   setBookingHotelSelectedRoomRate,
+  setBookingTransferBookingRequest,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import {
+  ITransferAvailability,
+  ITransferBookingRequest,
+  ITransferPaxDetails,
   TFlight,
   TFlightAvailability,
   THotel,
@@ -441,7 +445,9 @@ const BookingScreen = () => {
   const { eventId, packageType } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
-  const { flight, hotel } = useSelector((state: RootState) => state.booking);
+  const { flight, hotel, transfer } = useSelector(
+    (state: RootState) => state.booking
+  );
 
   const dispatch = useDispatch();
 
@@ -592,7 +598,7 @@ const BookingScreen = () => {
     return { valid: true };
   };
 
-  const buildRequestPayload = (
+  const buildFlightBookingRequestPayload = (
     sessionId: string,
     areaCode: string,
     countryCode: string,
@@ -675,6 +681,65 @@ const BookingScreen = () => {
     };
   };
 
+  /**
+   * Build Transfer Booking Request payload from search availability
+   * @param transfer - Search availability response object
+   * @param paxDetails - Lead passenger details
+   * @returns ITransferBookingRequest
+   */
+  const buildTransferBookingRequestPayload = (
+    transfer: ITransferAvailability,
+    paxDetails: ITransferPaxDetails
+  ): ITransferBookingRequest => {
+    if (!transfer?.travelling?.products?.[0]) {
+      throw new Error("No products available in transfer.");
+    }
+
+    const product = transfer.travelling.products[0];
+
+    const request: ITransferBookingRequest = {
+      session_id: transfer.sessionId, // Session from search
+      product_id: product.general.productId, // Selected product id
+      booking_type_id: product.general.bookingTypeId, // Booking type id
+      pax_details: paxDetails, // Provided separately
+      accomodation_details: {
+        accomodation_name: transfer.searchResult.endName || "",
+        accomodation_address01: transfer.searchResult.endDetails || "",
+      },
+      payment_details: {
+        card_type: "VISA",
+        card_no: "4242 4242 4242 4242",
+        card_cvv: "123",
+        expiry_date: "2025-12",
+        card_holder_name: `${paxDetails.lead_first_name} ${paxDetails.lead_last_name}`,
+      },
+      departure_airline:
+        transfer.searchResult.originType === "AP"
+          ? {
+              airport_code: transfer.searchResult.originCode,
+              airline_code: "AI", // placeholder, can be dynamic
+              airline_number: "101", // placeholder, can be dynamic
+            }
+          : undefined,
+      arrival_airline:
+        transfer.searchResult.endType === "AP"
+          ? {
+              airport_code: transfer.searchResult.endCode,
+              airline_code: "EY", // placeholder
+              airline_number: "220", // placeholder
+            }
+          : undefined,
+      extras:
+        product.pricing.extras?.map((e) => ({
+          code: e.extra.typeCode || e.extra.type,
+          quantity: 1, // default quantity, can be dynamic if needed
+        })) || [],
+      remark: "Auto-booked transfer", // Optional remark
+    };
+
+    return request;
+  };
+
   const processFlightCheckout = async (): Promise<boolean> => {
     try {
       if (
@@ -698,7 +763,7 @@ const BookingScreen = () => {
         return false;
       }
 
-      const payload = buildRequestPayload(
+      const payload = buildFlightBookingRequestPayload(
         flight.session_id,
         user?.location.region_code as string,
         user?.location.country_code as string,
@@ -757,6 +822,37 @@ const BookingScreen = () => {
     }
   };
 
+  const processTransferCheckout = () => {
+    if (!transfer?.ah || !transfer.he) return;
+
+    const paxDetails: ITransferPaxDetails = {
+      lead_first_name: user?.name as string,
+      lead_last_name: user?.name as string,
+      address01: user?.location.address as string,
+      email_id: user?.email as string,
+      lead_title: "Mr",
+      phone: "+44 7386964640",
+      zip_code: "IP13EW",
+      address02: "",
+    };
+
+    const ahRequest = buildTransferBookingRequestPayload(
+      transfer.ah,
+      paxDetails
+    );
+    const heRequest = buildTransferBookingRequestPayload(
+      transfer.he,
+      paxDetails
+    );
+
+    dispatch(
+      setBookingTransferBookingRequest({ request: ahRequest, type: "ah" })
+    );
+    dispatch(
+      setBookingTransferBookingRequest({ request: heRequest, type: "he" })
+    );
+  };
+
   const handleCheckout = async () => {
     const validation = validate(
       flight,
@@ -783,6 +879,10 @@ const BookingScreen = () => {
       if (hotel?.recommend) {
         const hotelSuccess = await processHotelCheckout();
         if (!hotelSuccess) return;
+      }
+
+      if (transfer) {
+        processTransferCheckout();
       }
 
       // Navigate only if all required processes succeeded

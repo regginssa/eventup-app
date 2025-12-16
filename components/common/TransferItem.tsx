@@ -16,10 +16,15 @@ import TransferListItem from "./TransferListItem";
 
 interface TransferItemProps {
   transfer: ITransferAvailability | undefined;
+  hiddenSeeMore?: boolean;
   onSelect: (product: TTransferProduct) => void;
 }
 
-const TransferItem: React.FC<TransferItemProps> = ({ transfer, onSelect }) => {
+const TransferItem: React.FC<TransferItemProps> = ({
+  transfer,
+  hiddenSeeMore,
+  onSelect,
+}) => {
   if (!transfer) {
     return null;
   }
@@ -260,13 +265,15 @@ const TransferItem: React.FC<TransferItemProps> = ({ transfer, onSelect }) => {
           </Text>
         </View>
 
-        <Button
-          type="text"
-          label="See more"
-          textClassName="text-gray-700 mt-2"
-          buttonClassName="h-8"
-          onPress={() => setIsOpen(true)}
-        />
+        {!hiddenSeeMore && (
+          <Button
+            type="text"
+            label="See more"
+            textClassName="text-gray-700 mt-2"
+            buttonClassName="h-8"
+            onPress={() => setIsOpen(true)}
+          />
+        )}
       </View>
 
       <Modal

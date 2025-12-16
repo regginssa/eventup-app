@@ -119,17 +119,11 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
             </Text>
           </View>
 
-          <View className="w-full px-2">
-            <Text className="font-dm-sans-bold text-gray-700 text-sm">
-              Recommend
-            </Text>
-
-            <HotelItem
-              hotel={recommend}
-              hiddenHeader={true}
-              onViewImages={handleViewImages}
-            />
-          </View>
+          <HotelItem
+            hotel={recommend}
+            hiddenHeader={true}
+            onViewImages={handleViewImages}
+          />
 
           <Button
             type="text"

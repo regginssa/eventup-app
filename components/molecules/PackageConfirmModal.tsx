@@ -89,7 +89,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
         )}
       </View>
 
-      <View className="w-full gap-2 p-2 rounded-lg border border-gray-200 mb-3">
+      <View className="w-full gap-3 p-2 rounded-lg border border-gray-200 mb-3">
         {!hotel ? (
           <View className="w-full flex flex-col items-center justify-center gap-3">
             <MaterialCommunityIcons
@@ -106,8 +106,8 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
         )}
       </View>
 
-      <View className="w-full gap-2 p-2 rounded-lg border border-gray-200 mb-3">
-        {!hotel ? (
+      <View className="w-full gap-3 p-2 rounded-lg border border-gray-200 mb-3">
+        {!transfer ? (
           <View className="w-full flex flex-col items-center justify-center gap-3">
             <MaterialCommunityIcons name="car-off" size={24} color="#4b5563" />
             <Text className="font-poppins-semibold text-gray-600">
@@ -115,7 +115,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             </Text>
           </View>
         ) : (
-          <TransferAvailabilityGroup transfer={transfer} />
+          <TransferAvailabilityGroup transfer={transfer} hiddenSeeMore={true} />
         )}
       </View>
 

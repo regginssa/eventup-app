@@ -17,20 +17,22 @@ const HotelRoomSelector: React.FC<HotelRoomSelectorProps> = ({
   return (
     <View className="w-full mt-2">
       {Array.from({ length: paxCount }).map((_, index) => (
-        <ScrollView
-          key={`hotel-room-item-${index}`}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        >
-          {rooms.map((room, i) => (
-            <RoomCard
-              key={`room-option-${i}`}
-              room={room}
-              selected={selectedRooms[index] === i}
-              onSelect={() => onSelect(index, i)}
-            />
-          ))}
-        </ScrollView>
+        <View key={`hotel-room-item-${index}`} className="mb-2">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 10 }}
+          >
+            {rooms.map((room, i) => (
+              <RoomCard
+                key={`room-option-${i}`}
+                room={room}
+                selected={selectedRooms[index] === i}
+                onSelect={() => onSelect(i, index)}
+              />
+            ))}
+          </ScrollView>
+        </View>
       ))}
     </View>
   );
