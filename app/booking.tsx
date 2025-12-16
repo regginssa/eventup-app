@@ -174,31 +174,42 @@ const CustomerInfoForm = ({
   );
 };
 
-const FlightForm = ({
+const BookingForm = ({
   flight,
-
-  paxDetails,
-
-  setPaxDetails,
+  hotel,
+  flightPaxDetails,
+  hotelPaxDetails,
+  selectedRooms,
+  setFlightPaxDetails,
+  setHotelPaxDetails,
+  setSelectedRooms,
 }: {
   flight: TFlight | null;
-
-  paxDetails: TPaxDetails | undefined;
-
-  setPaxDetails: React.Dispatch<React.SetStateAction<TPaxDetails | undefined>>;
+  hotel: THotel | null;
+  flightPaxDetails: TPaxDetails | undefined;
+  hotelPaxDetails: THotelPaxDetail[];
+  selectedRooms: number[];
+  setFlightPaxDetails: React.Dispatch<
+    React.SetStateAction<TPaxDetails | undefined>
+  >;
+  setHotelPaxDetails: React.Dispatch<React.SetStateAction<THotelPaxDetail[]>>;
+  setSelectedRooms: (val: number[]) => void;
 }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(true);
-  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
+  const [flightOpen, setFlightOpen] = useState<boolean>(true);
+  const [hotelOpen, setHotelOpen] = useState<boolean>(true);
+  const [flightDetailOpen, setFlightDetailOpen] = useState<boolean>(false);
+  const [hotelDetailOpen, setHotelDetailOpen] = useState<boolean>(false);
 
-  const selected = flight?.recommend;
+  const flightSelected = flight?.recommend;
+  const hotelSelected = hotel?.recommend;
 
-  const handlePaxChange = (
+  const handleFlightPaxChange = (
     type: "adults" | "child" | "infant",
     idx: number,
     val: any,
     label: keyof TPassengerInfo
   ) => {
-    setPaxDetails((prev) => {
+    setFlightPaxDetails((prev) => {
       if (!prev) return prev;
 
       return {
@@ -210,221 +221,215 @@ const FlightForm = ({
     });
   };
 
-  return (
-    <View className="w-full bg-white rounded-xl p-4 gap-6">
-      <TouchableOpacity
-        activeOpacity={0.8}
-        className="w-full flex flex-row items-center justify-between"
-        onPress={() => setIsOpen(!isOpen)}
-      >
-        <View className="flex flex-row items-center gap-2">
-          <MaterialCommunityIcons name="airplane" size={20} color="#374151" />
-          <Text className="font-dm-sans-bold text-gray-700">Flight</Text>
-        </View>
-
-        <Feather
-          name={`chevron-${isOpen ? "up" : "down"}`}
-          size={24}
-          color="#374151"
-        />
-      </TouchableOpacity>
-
-      {isOpen && (
-        <View className="w-full flex flex-col gap-3">
-          <View className="w-full flex flex-row items-center justify-between">
-            <View className="flex flex-row items-center gap-1">
-              <MaterialIcons name="edit-note" size={18} color="#374151" />
-              <Text className="font-poppins-semibold text-gray-700 text-sm">
-                Booking Information
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className=""
-              onPress={() => setIsDetailOpen(true)}
-            >
-              <Text className="font-poppins-semibold text-gray-700 text-xs">
-                View details
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {paxDetails && (
-            <PassengerInputGroup
-              type="adult"
-              items={paxDetails?.adults ?? []}
-              onChange={(i, val, label) =>
-                handlePaxChange("adults", i, val, label)
-              }
-            />
-          )}
-
-          {paxDetails && (
-            <PassengerInputGroup
-              type="child"
-              items={paxDetails?.child ?? []}
-              onChange={(i, val, label) =>
-                handlePaxChange("child", i, val, label)
-              }
-            />
-          )}
-
-          {paxDetails && (
-            <PassengerInputGroup
-              type="infant"
-              items={paxDetails?.infant ?? []}
-              onChange={(i, val, label) =>
-                handlePaxChange("infant", i, val, label)
-              }
-            />
-          )}
-        </View>
-      )}
-
-      <Modal
-        title="Flight Details"
-        isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
-        scrolled={true}
-      >
-        {!selected ? (
-          <View className="w-full flex flex-col items-center justify-center gap-2">
-            <MaterialCommunityIcons
-              name="airplane-off"
-              size={24}
-              color="#4b5563"
-            />
-            <Text className="font-poppins-semibold text-gray-600">
-              No Flight
-            </Text>
-          </View>
-        ) : (
-          <FlightItem flight={selected} hiddenHeader={true} />
-        )}
-      </Modal>
-    </View>
-  );
-};
-
-const HotelForm = ({
-  hotel,
-
-  paxDetails,
-  selectedRooms,
-  setSelectedRooms,
-
-  setPaxDetails,
-}: {
-  hotel: THotel | null;
-
-  paxDetails: THotelPaxDetail[];
-  selectedRooms: number[];
-  setSelectedRooms: (val: number[]) => void;
-  setPaxDetails: React.Dispatch<React.SetStateAction<THotelPaxDetail[]>>;
-}) => {
-  const [isOpen, setIsOpen] = useState<boolean>(true);
-  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
-
-  const selected = hotel?.recommend;
-
-  const handleSelect = (roomNo: number, index: number) => {
+  const handleHotelSelect = (roomNo: number, index: number) => {
     const updated = [...selectedRooms];
     updated[roomNo] = index;
     setSelectedRooms(updated);
   };
 
   return (
-    <View className="w-full bg-white rounded-xl p-4 gap-6">
-      <TouchableOpacity
-        activeOpacity={0.8}
-        className="w-full flex flex-row items-center justify-between"
-        onPress={() => setIsOpen(!isOpen)}
-      >
-        <View className="flex flex-row items-center gap-2">
-          <MaterialIcons name="hotel" size={20} color="#374151" />
-          <Text className="font-dm-sans-bold text-gray-700">Hotel</Text>
-        </View>
-
-        <Feather
-          name={`chevron-${isOpen ? "up" : "down"}`}
-          size={24}
-          color="#374151"
-        />
-      </TouchableOpacity>
-
-      {isOpen && (
-        <View className="w-full flex flex-col gap-3">
-          <View className="w-full flex flex-row items-center justify-between">
-            <View className="flex flex-row items-center gap-1">
-              <MaterialIcons name="edit-note" size={18} color="#374151" />
-              <Text className="font-poppins-semibold text-gray-700 text-sm">
-                Booking Information
-              </Text>
+    <>
+      {/* Flight Section */}
+      {flight?.recommend && (
+        <View className="w-full bg-white rounded-xl p-4 gap-6">
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-full flex flex-row items-center justify-between"
+            onPress={() => setFlightOpen(!flightOpen)}
+          >
+            <View className="flex flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="airplane"
+                size={20}
+                color="#374151"
+              />
+              <Text className="font-dm-sans-bold text-gray-700">Flight</Text>
             </View>
 
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className=""
-              onPress={() => setIsDetailOpen(true)}
-            >
-              <Text className="font-poppins-semibold text-gray-700 text-xs">
-                View details
-              </Text>
-            </TouchableOpacity>
-          </View>
+            <Feather
+              name={`chevron-${flightOpen ? "up" : "down"}`}
+              size={24}
+              color="#374151"
+            />
+          </TouchableOpacity>
 
-          {paxDetails.length > 0 && (
-            <HotelGuestGroup items={paxDetails} onChange={setPaxDetails} />
-          )}
-
-          {selected?.roomRates && (
-            <>
-              <View className="w-full h-[1px] bg-gray-200 mt-4 mb-4"></View>
-              {/* Room Details */}
-
-              <View className="">
+          {flightOpen && (
+            <View className="w-full flex flex-col gap-3">
+              <View className="w-full flex flex-row items-center justify-between">
                 <View className="flex flex-row items-center gap-1">
-                  <Fontisto name="room" size={18} color="#374151" />
-                  <Text className="font-poppins-semibold text-sm text-gray-700">
-                    Rooms details
+                  <MaterialIcons name="edit-note" size={18} color="#374151" />
+                  <Text className="font-poppins-semibold text-gray-700 text-sm">
+                    Booking Information
                   </Text>
                 </View>
 
-                <HotelRoomSelector
-                  paxCount={1}
-                  rooms={selected.roomRates}
-                  selectedRooms={selectedRooms}
-                  onSelect={handleSelect}
-                />
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  className=""
+                  onPress={() => setFlightDetailOpen(true)}
+                >
+                  <Text className="font-poppins-semibold text-gray-700 text-xs">
+                    View details
+                  </Text>
+                </TouchableOpacity>
               </View>
-            </>
+
+              {flightPaxDetails && (
+                <PassengerInputGroup
+                  type="adult"
+                  items={flightPaxDetails?.adults ?? []}
+                  onChange={(i, val, label) =>
+                    handleFlightPaxChange("adults", i, val, label)
+                  }
+                  bookingType="flight"
+                />
+              )}
+
+              {flightPaxDetails && (
+                <PassengerInputGroup
+                  type="child"
+                  items={flightPaxDetails?.child ?? []}
+                  onChange={(i, val, label) =>
+                    handleFlightPaxChange("child", i, val, label)
+                  }
+                  bookingType="flight"
+                />
+              )}
+
+              {flightPaxDetails && (
+                <PassengerInputGroup
+                  type="infant"
+                  items={flightPaxDetails?.infant ?? []}
+                  onChange={(i, val, label) =>
+                    handleFlightPaxChange("infant", i, val, label)
+                  }
+                  bookingType="flight"
+                />
+              )}
+            </View>
           )}
+
+          <Modal
+            title="Flight Details"
+            isOpen={flightDetailOpen}
+            onClose={() => setFlightDetailOpen(false)}
+            scrolled={true}
+          >
+            {!flightSelected ? (
+              <View className="w-full flex flex-col items-center justify-center gap-2">
+                <MaterialCommunityIcons
+                  name="airplane-off"
+                  size={24}
+                  color="#4b5563"
+                />
+                <Text className="font-poppins-semibold text-gray-600">
+                  No Flight
+                </Text>
+              </View>
+            ) : (
+              <FlightItem flight={flightSelected} hiddenHeader={true} />
+            )}
+          </Modal>
         </View>
       )}
 
-      <Modal
-        title="Hotel Details"
-        isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
-        scrolled={true}
-      >
-        {!selected ? (
-          <View className="w-full flex flex-col items-center justify-center gap-2">
-            <MaterialCommunityIcons
-              name="bank-off-outline"
+      {/* Hotel Section */}
+      {hotel?.recommend && (
+        <View className="w-full bg-white rounded-xl p-4 gap-6">
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-full flex flex-row items-center justify-between"
+            onPress={() => setHotelOpen(!hotelOpen)}
+          >
+            <View className="flex flex-row items-center gap-2">
+              <MaterialIcons name="hotel" size={20} color="#374151" />
+              <Text className="font-dm-sans-bold text-gray-700">Hotel</Text>
+            </View>
+
+            <Feather
+              name={`chevron-${hotelOpen ? "up" : "down"}`}
               size={24}
-              color="#4b5563"
+              color="#374151"
             />
-            <Text className="font-poppins-semibold text-gray-600">
-              No Hotel
-            </Text>
-          </View>
-        ) : (
-          <HotelItem hotel={selected} hiddenHeader={true} />
-        )}
-      </Modal>
-    </View>
+          </TouchableOpacity>
+
+          {hotelOpen && (
+            <View className="w-full flex flex-col gap-3">
+              <View className="w-full flex flex-row items-center justify-between">
+                <View className="flex flex-row items-center gap-1">
+                  <MaterialIcons name="edit-note" size={18} color="#374151" />
+                  <Text className="font-poppins-semibold text-gray-700 text-sm">
+                    Booking Information
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  className=""
+                  onPress={() => setHotelDetailOpen(true)}
+                >
+                  <Text className="font-poppins-semibold text-gray-700 text-xs">
+                    View details
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {hotelPaxDetails.length > 0 && (
+                <HotelGuestGroup
+                  items={hotelPaxDetails}
+                  onChange={setHotelPaxDetails}
+                />
+              )}
+
+              {hotelSelected?.roomRates && (
+                <>
+                  <View className="w-full h-[1px] bg-gray-200 mt-4 mb-4"></View>
+                  {/* Room Details */}
+
+                  <View className="">
+                    <View className="flex flex-row items-center gap-1">
+                      <Fontisto name="room" size={18} color="#374151" />
+                      <Text className="font-poppins-semibold text-sm text-gray-700">
+                        Rooms details
+                      </Text>
+                    </View>
+
+                    <HotelRoomSelector
+                      paxCount={1}
+                      rooms={hotelSelected.roomRates}
+                      selectedRooms={selectedRooms}
+                      onSelect={handleHotelSelect}
+                    />
+                  </View>
+                </>
+              )}
+            </View>
+          )}
+
+          <Modal
+            title="Hotel Details"
+            isOpen={hotelDetailOpen}
+            onClose={() => setHotelDetailOpen(false)}
+            scrolled={true}
+          >
+            {!hotelSelected ? (
+              <View className="w-full flex flex-col items-center justify-center gap-2">
+                <MaterialCommunityIcons
+                  name="bank-off-outline"
+                  size={24}
+                  color="#4b5563"
+                />
+                <Text className="font-poppins-semibold text-gray-600">
+                  No Hotel
+                </Text>
+              </View>
+            ) : (
+              <HotelItem hotel={hotelSelected} hiddenHeader={true} />
+            )}
+          </Modal>
+        </View>
+      )}
+    </>
   );
 };
 
@@ -901,17 +906,15 @@ const BookingScreen = () => {
     <BookingContainer>
       <View className="flex-1 gap-4">
         <EventDetail loading={loading} event={event} />
-        <FlightForm
+        <BookingForm
           flight={flight}
-          paxDetails={flightPaxDetails}
-          setPaxDetails={setFlightPaxDetails}
-        />
-        <HotelForm
           hotel={hotel}
-          paxDetails={hotelPaxDetails}
+          flightPaxDetails={flightPaxDetails}
+          hotelPaxDetails={hotelPaxDetails}
           selectedRooms={selectedRooms}
+          setFlightPaxDetails={setFlightPaxDetails}
+          setHotelPaxDetails={setHotelPaxDetails}
           setSelectedRooms={setSelectedRooms}
-          setPaxDetails={setHotelPaxDetails}
         />
 
         {(flight?.recommend || hotel?.recommend) && (

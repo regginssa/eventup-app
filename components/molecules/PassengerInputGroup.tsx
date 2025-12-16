@@ -7,22 +7,36 @@ interface PassengerInputGroupProps {
   type: "adult" | "child" | "infant";
   items: TPassengerInfo[];
   onChange: (idx: number, val: any, label: keyof TPassengerInfo) => void;
+  bookingType?: "flight" | "hotel"; // Determines which titles to use for children
 }
 
 const adultsTitles: TDropdownItem[] = [
   { label: "Mr", value: "Mr" },
   { label: "Mrs", value: "Mrs" },
 ];
-const childTitles: TDropdownItem[] = [
+const flightChildTitles: TDropdownItem[] = [
   { label: "Master", value: "Master" },
   { label: "Miss", value: "Miss" },
+];
+const hotelChildTitles: TDropdownItem[] = [
+  { label: "Mr", value: "Mr" },
+  { label: "Mrs", value: "Mrs" },
 ];
 
 const PassengerInputGroup: React.FC<PassengerInputGroupProps> = ({
   type,
   items,
   onChange,
+  bookingType = "flight", // Default to flight for backward compatibility
 }) => {
+  const getChildTitles = () => {
+    return bookingType === "hotel" ? hotelChildTitles : flightChildTitles;
+  };
+
+  const getAvailableTitles = () => {
+    if (type === "adult") return adultsTitles;
+    return getChildTitles();
+  };
   return (
     <View className="w-full flex flex-col gap-4">
       {items.map((item, index) => (
@@ -40,13 +54,10 @@ const PassengerInputGroup: React.FC<PassengerInputGroupProps> = ({
             label="Title"
             bordered={true}
             className="rounded-lg"
-            items={type === "adult" ? adultsTitles : childTitles}
+            items={getAvailableTitles()}
             selectedItem={
-              type === "adult"
-                ? adultsTitles.find((a) => a.value === item.title)
-                : type === "child" || type === "infant"
-                ? childTitles.find((c) => c.value === item.title)
-                : (adultsTitles[0] as any)
+              getAvailableTitles().find((t) => t.value === item.title) ||
+              (getAvailableTitles()[0] as any)
             }
             onSelect={(selected: TDropdownItem) =>
               onChange(index, selected.value, "title")
