@@ -376,6 +376,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       );
     }
 
+    console.log("Transfer available response: ", response.data);
+
     dispatch(setBookingTransfer(response.data));
   };
 

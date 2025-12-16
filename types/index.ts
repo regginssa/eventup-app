@@ -440,6 +440,76 @@ export interface ExtraService {
   currency: string;
 }
 
+export type TTransferProduct = {
+  general: {
+    productId: string;
+    bookingTypeId: string;
+    transferTime: string; // minutes as string
+    productType: string;
+    productTypeId: string;
+    minPax?: string;
+    maxPax?: string;
+    perPerson?: string;
+    luggage: string;
+    smallBagAllowance: string;
+    vehicleClass?: string;
+    vehicleMake?: string;
+    canxHours?: string;
+    canxPerc?: string;
+    canxOutOfHoursPP?: string;
+    minStops?: string;
+    maxStops?: string;
+    numUnits: string;
+    supplierId: string;
+    productSource?: string;
+    supplierType: string;
+    companyLogo?: string;
+    vehicleImage: string;
+    transferCompany: string;
+    rating?: string;
+    ratingClass?: string;
+    numberOfReviews?: string;
+    priceExpires?: string;
+    description?: string;
+    isDeposit: string;
+    isCardPaymentAvailable: boolean;
+  };
+  pricing: {
+    oldPrice: string;
+    price: string;
+    currency: string;
+    carbonOffset?: string;
+    transactionFees: {
+      visa: string;
+      masterCard: string;
+      maestro: string;
+      visaDebit: string;
+      masterCardDebit: string;
+      amex: string;
+      payPal: string;
+    };
+    prices: Array<{
+      price: {
+        type: string;
+        typeCode: string;
+        description: string;
+        units: string;
+        oldPrice: string;
+        price: string;
+        currency: string;
+      };
+    }>;
+    extras?: Array<{
+      extra: {
+        type: string;
+        typeCode: string;
+        price: string;
+        currency: string;
+      };
+    }>;
+  };
+};
+
 export interface ITransferAvailability {
   sessionId: string;
   searchResult: {
@@ -460,76 +530,59 @@ export interface ITransferAvailability {
     resultCount: string;
   };
   travelling: {
-    products: Array<{
-      general: {
-        productId: string;
-        bookingTypeId: string;
-        transferTime: string; // minutes as string
-        productType: string;
-        productTypeId: string;
-        minPax?: string;
-        maxPax?: string;
-        perPerson?: string;
-        luggage: string;
-        smallBagAllowance: string;
-        vehicleClass?: string;
-        vehicleMake?: string;
-        canxHours?: string;
-        canxPerc?: string;
-        canxOutOfHoursPP?: string;
-        minStops?: string;
-        maxStops?: string;
-        numUnits: string;
-        supplierId: string;
-        productSource?: string;
-        supplierType: string;
-        companyLogo?: string;
-        vehicleImage: string;
-        transferCompany: string;
-        rating?: string;
-        ratingClass?: string;
-        numberOfReviews?: string;
-        priceExpires?: string;
-        description?: string;
-        isDeposit: string;
-        isCardPaymentAvailable: boolean;
-      };
-      pricing: {
-        oldPrice: string;
-        price: string;
-        currency: string;
-        carbonOffset?: string;
-        transactionFees: {
-          visa: string;
-          masterCard: string;
-          maestro: string;
-          visaDebit: string;
-          masterCardDebit: string;
-          amex: string;
-          payPal: string;
-        };
-        prices: Array<{
-          price: {
-            type: string;
-            typeCode: string;
-            description: string;
-            units: string;
-            oldPrice: string;
-            price: string;
-            currency: string;
-          };
-        }>;
-        extras?: Array<{
-          extra: {
-            type: string;
-            typeCode: string;
-            price: string;
-            currency: string;
-          };
-        }>;
-      };
-    }>;
+    products: TTransferProduct[];
   };
+  bookingRequest: ITransferBookingRequest;
+}
+
+export interface IPaxDetails {
+  lead_title: string; // Lead passenger's title (Mr/Ms/Dr)
+  lead_first_name: string; // Lead passenger first name
+  lead_last_name: string; // Lead passenger last name
+  phone: string; // Contact mobile number
+  email_id: string; // Lead passenger email
+  address01: string; // Address line 1
+  address02?: string; // Optional address line 2
+  zip_code: string; // Zip/postal code
+}
+
+export interface IAccommodationDetails {
+  accomodation_name: string; // Hotel / accommodation name
+  accomodation_address01: string; // Address line 1
+  accomodation_address02?: string; // Optional address line 2
+}
+
+export interface IPaymentDetails {
+  card_type: string; // e.g., VISA, MasterCard
+  card_no: string; // Card number (test card allowed)
+  card_cvv: string; // CVV code
+  expiry_date: string; // Expiry date in YYYY-MM format
+  card_holder_name: string; // Name on the card
+}
+
+export interface IAirlineDetails {
+  airport_code: string; // IATA airport code
+  airline_code: string; // Airline code
+  airline_number: string; // Flight number
+}
+
+export interface IExtraService {
+  code: string; // Extra service code (e.g., CHS = Child seat, BAS = Booster seat)
+  quantity: number; // Number of units
+}
+
+export interface ITransferBookingRequest {
+  session_id: string; // Session token from availability search
+  product_id: string; // Product ID of the selected transfer
+  booking_type_id: string; // Booking Type ID from the product
+  client_reference?: string; // Optional client reference
+  pax_details: IPaxDetails; // Lead passenger details
+  accomodation_details: IAccommodationDetails; // Hotel/accommodation info
+  payment_details?: IPaymentDetails; // Optional payment info (if prepayment)
+  departure_airline?: IAirlineDetails; // Optional departure flight info
+  arrival_airline?: IAirlineDetails; // Optional arrival flight info
+  extras?: IExtraService[]; // Optional extra services
+  remark?: string; // Optional customer remarks
 }
 
 export type TTransfer = {

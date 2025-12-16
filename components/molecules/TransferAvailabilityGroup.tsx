@@ -1,6 +1,8 @@
-import { TTransfer } from "@/types";
+import { setBookingTransfer } from "@/redux/slices/booking.slice";
+import { TTransfer, TTransferProduct } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
+import { useDispatch } from "react-redux";
 import { TransferItem } from "../common";
 
 interface TransferAvailabilityGroupProps {
@@ -14,6 +16,20 @@ const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
   isSearched,
   available,
 }) => {
+  const dispatch = useDispatch();
+
+  const moveProductToFirst = (
+    products: TTransferProduct[],
+    selected: TTransferProduct
+  ): TTransferProduct[] => {
+    return [
+      selected,
+      ...products.filter(
+        (p) => p.general.productId !== selected.general.productId
+      ),
+    ];
+  };
+
   if (isSearched && !transfer) {
     return (
       <View className="w-full flex flex-col items-center justify-center gap-2">
@@ -34,11 +50,57 @@ const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
         </Text>
       </View>
 
-      <TransferItem transfer={transfer?.ah} />
+      <TransferItem
+        transfer={transfer?.ah}
+        onSelect={(selectedProduct: TTransferProduct) => {
+          if (!transfer?.ah?.travelling?.products) return;
+
+          const reorderedProducts = moveProductToFirst(
+            transfer.ah.travelling.products,
+            selectedProduct
+          );
+
+          dispatch(
+            setBookingTransfer({
+              ...transfer,
+              ah: {
+                ...transfer.ah,
+                travelling: {
+                  ...transfer.ah.travelling,
+                  products: reorderedProducts,
+                },
+              },
+            })
+          );
+        }}
+      />
 
       <View className="w-full h-[1px] bg-gray-200"></View>
 
-      <TransferItem transfer={transfer?.he} />
+      <TransferItem
+        transfer={transfer?.he}
+        onSelect={(selectedProduct: TTransferProduct) => {
+          if (!transfer?.ah?.travelling?.products) return;
+
+          const reorderedProducts = moveProductToFirst(
+            transfer.ah.travelling.products,
+            selectedProduct
+          );
+
+          dispatch(
+            setBookingTransfer({
+              ...transfer,
+              he: {
+                ...transfer.he,
+                travelling: {
+                  ...transfer.he.travelling,
+                  products: reorderedProducts,
+                },
+              },
+            })
+          );
+        }}
+      />
     </View>
   );
 };
