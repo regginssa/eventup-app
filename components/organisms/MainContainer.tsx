@@ -21,7 +21,7 @@ const MainContainer: React.FC<MainContainerProps> = ({ children }) => {
         alt="bg"
         style={styles.image}
       />
-      <View className="flex-1">{children}</View>
+      <View className="flex-1 pt-2">{children}</View>
     </View>
   );
 };

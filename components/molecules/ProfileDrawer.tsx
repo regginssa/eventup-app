@@ -214,6 +214,7 @@ const Profile = ({ user }: { user: IUser }) => {
               key={index}
               activeOpacity={0.8}
               className="w-full flex flex-row items-center justify-between py-2"
+              onPress={() => router.push(item.href as any)}
             >
               <View className="flex flex-row items-center gap-2">
                 {item.icon}

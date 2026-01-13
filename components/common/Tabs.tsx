@@ -5,20 +5,26 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 interface TabsProps {
   tabs: TDropdownItem[];
   selectedTab: TDropdownItem;
+  tabClassName?: string;
   onSelct: (tab: TDropdownItem) => void;
 }
 
-const Tabs: React.FC<TabsProps> = ({ tabs, selectedTab, onSelct }) => {
+const Tabs: React.FC<TabsProps> = ({
+  tabs,
+  selectedTab,
+  onSelct,
+  tabClassName,
+}) => {
   return (
-    <View className="w-full flex flex-row items-center justify-between">
+    <View className="flex flex-row gap-2">
       {tabs.map((tab, index) => (
         <TouchableOpacity
           key={index}
           activeOpacity={0.8}
-          className="gap-2"
+          className={tabClassName}
           onPress={() => onSelct(tab)}
         >
-          <Text className="font-poppins-semibold text-gray-800 text-center">
+          <Text className="font-poppins-semibold text-gray-800 text-center whitespace-nowrap p-2">
             {tab.label}
           </Text>
 

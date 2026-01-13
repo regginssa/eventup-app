@@ -69,6 +69,7 @@ export default function RootLayout() {
             <Stack.Screen name="booking" />
             <Stack.Screen name="checkout" />
             <Stack.Screen name="booked" />
+            <Stack.Screen name="my-events" />
           </Stack>
           <InitContainer />
         </ThemeProvider>

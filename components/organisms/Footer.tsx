@@ -27,7 +27,7 @@ const Footer = () => {
       href: "/home",
     },
     {
-      label: "Event",
+      label: "Events",
       icon: (
         <MaterialIcons
           name="event-note"
@@ -35,6 +35,7 @@ const Footer = () => {
           color={theme === "light" ? "#1f2937" : "#e5e7eb"}
         />
       ),
+      href: "/my-events",
     },
     {
       icon: (
@@ -105,7 +106,7 @@ const Footer = () => {
               activeOpacity={0.8}
               className="flex flex-col items-center justify-center"
               onPress={
-                nav?.href ? () => router.replace(nav.href as any) : undefined
+                nav?.href ? () => router.push(nav.href as any) : undefined
               }
             >
               {nav.icon}

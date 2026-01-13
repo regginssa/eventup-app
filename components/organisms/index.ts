@@ -8,4 +8,5 @@ export { default as HomeContainer } from "./HomeContainer";
 export { default as InitContainer } from "./InitContainer";
 export { default as MainContainer } from "./MainContainer";
 export { default as MapContainer } from "./MapContainer";
+export { default as MyEventsScreenContainer } from "./MyEventsScreenContainer";
 export { default as OnboardingContainer } from "./OnboardingContainer";

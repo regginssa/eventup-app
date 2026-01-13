@@ -81,7 +81,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
       ) : events.length === 0 ? (
         <View className="flex-1 items-center justify-center gap-2">
           <MaterialCommunityIcons
-            name="emoticon-sad-outline"
+            name="database-off-outline"
             size={48}
             color="#1f2937"
           />
