@@ -14,6 +14,7 @@ import {
   BOOKING_FLIGHT_METHOD,
   BOOKING_HOTEL_METHOD,
   CHECK_HOTEL_ROOM_RATES,
+  FETCH_ALL_BOOKINGS,
   FETCH_FLIGHTS_AVAILABILITY,
   FETCH_HOTEL_DETAILS,
   FETCH_HOTEL_ROOM_RATES,
@@ -186,4 +187,10 @@ export const fetchBooking = async (
   id: string
 ): Promise<ApiResponse<IBooking>> => {
   return await AxiosInstance.get(BOOKING_BASE + id);
+};
+
+export const fetchAllBookings = async (
+  userId: string
+): Promise<ApiResponse<IBooking[]>> => {
+  return await AxiosInstance.get(FETCH_ALL_BOOKINGS + userId);
 };

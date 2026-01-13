@@ -1,6 +1,5 @@
-import { fetchBooking } from "@/api/scripts/booking";
-import { fetchEvent } from "@/api/scripts/event";
-import { Tabs } from "@/components/common";
+import { fetchAllBookings } from "@/api/scripts/booking";
+import { Spinner, Tabs } from "@/components/common";
 import { EventsPreviewGroup } from "@/components/molecules";
 import { MyEventsScreenContainer } from "@/components/organisms";
 import { RootState } from "@/redux/store";
@@ -12,6 +11,7 @@ import { useSelector } from "react-redux";
 const tabs: TDropdownItem[] = [
   { label: "Booked", value: "booked" },
   { label: "Created", value: "created" },
+  { label: "Pending", value: "pending" },
   { label: "Completed", value: "completed" },
 ];
 
@@ -24,33 +24,40 @@ const MyEventsScreen = () => {
 
   const fetchBookedEvents = useCallback(async (userId: string) => {
     try {
-      const bookingRes = await fetchBooking(userId);
+      const bookingRes = await fetchAllBookings(userId);
 
       if (bookingRes.ok) {
-        const { eventId } = bookingRes.data;
-
-        const eventRes = await fetchEvent(eventId);
-        if (eventRes.ok) {
-          setEvents((prev) => [...prev, eventRes.data]);
-        }
+        const events = bookingRes.data
+          .map((booking) => booking.event)
+          .filter((event) => event != null);
+        setEvents(events);
       }
     } catch (error) {
       console.error("fetch booked events error: ", error);
     }
   }, []);
 
-  useEffect(() => {});
+  useEffect(() => {
+    if (!user?._id) return;
+    setLoading(true);
+    fetchBookedEvents(user._id);
+    setLoading(false);
+  }, [user?._id]);
 
   return (
     <MyEventsScreenContainer>
-      <Tabs
-        tabs={tabs}
-        selectedTab={selectedTab}
-        onSelct={setSelectedTab}
-        tabClassName="flex-1"
-      />
-
-      <EventsPreviewGroup events={[]} />
+      {loading ? (
+        <Spinner size="md" />
+      ) : (
+        <>
+          <Tabs
+            tabs={tabs}
+            selectedTab={selectedTab}
+            onSelct={setSelectedTab}
+          />
+          <EventsPreviewGroup events={events} />
+        </>
+      )}
     </MyEventsScreenContainer>
   );
 };

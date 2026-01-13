@@ -82,7 +82,7 @@ const Footer = () => {
             <TouchableOpacity
               key={index}
               activeOpacity={0.8}
-              className={`flex flex-col items-center justify-center mb-28 ${
+              className={`flex flex-col items-center justify-center mb-28 mr-2 ${
                 theme === "light" ? "bg-white" : "bg-[#171C1C]"
               } rounded-full w-16 h-16`}
               style={styles.plus}

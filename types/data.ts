@@ -428,6 +428,7 @@ export interface IBooking {
   _id?: string;
   userId: string;
   eventId: string;
+  event: IEvent;
   flight: TripDetails;
   hotel: IHotel;
   type: TPackageType;

@@ -590,8 +590,11 @@ const EventDetailScreen = () => {
     try {
       setLoading(true);
 
+      console.log("id: ", id);
+
       const response = await fetchEvent(id);
 
+      console.log("response: ", response.data);
       setEvent(response.data);
 
       dispatch(setBookingFlight(null));
@@ -629,6 +632,7 @@ const EventDetailScreen = () => {
               tabs={tabs}
               selectedTab={selectedTab}
               onSelct={setSelectedTab}
+              tabClassName="flex-1"
             />
 
             {selectedTab.value === "packages" ? (
