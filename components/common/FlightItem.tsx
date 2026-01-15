@@ -1,46 +1,50 @@
-import { TFlightAvailability } from "@/types";
 import { formatEventDate, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
+export type TFlightItemData = {
+  from: string;
+  to: string;
+
+  departureDate: string;
+  arrivalDate: string;
+
+  stops: number;
+
+  airlineCode: string;
+  airlineName: string;
+
+  flightNumber: string;
+
+  seatsLeft: number;
+
+  refundable: boolean;
+
+  price: {
+    total: string;
+    currency: string;
+  };
+};
+
 interface FlightItemProps {
-  flight: TFlightAvailability;
+  data: TFlightItemData;
   hiddenHeader?: boolean;
 }
 
-const FlightItem: React.FC<FlightItemProps> = ({ flight, hiddenHeader }) => {
-  const flightDepartureDate =
-    flight?.FareItinerary?.OriginDestinationOptions[0]
-      ?.OriginDestinationOption[0]?.FlightSegment?.DepartureDateTime;
-  const flightArrivalDate =
-    flight?.FareItinerary?.OriginDestinationOptions[0]?.OriginDestinationOption[
-      flight?.FareItinerary?.OriginDestinationOptions[0]
-        ?.OriginDestinationOption.length - 1
-    ]?.FlightSegment.ArrivalDateTime;
-  const flightDepartureCode =
-    flight?.FareItinerary?.OriginDestinationOptions[0]
-      ?.OriginDestinationOption[0]?.FlightSegment?.DepartureAirportLocationCode;
-  const flightArrivalCode =
-    flight?.FareItinerary?.OriginDestinationOptions[0]?.OriginDestinationOption[
-      flight?.FareItinerary?.OriginDestinationOptions[0]
-        ?.OriginDestinationOption.length - 1
-    ]?.FlightSegment.ArrivalAirportLocationCode;
-  const flightAirlineName =
-    flight?.FareItinerary?.OriginDestinationOptions[0]
-      ?.OriginDestinationOption[0].FlightSegment?.MarketingAirlineName;
-  const stops = flight?.FareItinerary?.OriginDestinationOptions[0]?.TotalStops;
-  const flightNo =
-    flight?.FareItinerary?.OriginDestinationOptions[0]
-      ?.OriginDestinationOption[0].FlightSegment.FlightNumber;
-  const seatsLeft =
-    flight?.FareItinerary?.OriginDestinationOptions[0]
-      ?.OriginDestinationOption[0]?.SeatsRemaining?.Number;
-  const refundable = flight?.FareItinerary?.AirItineraryFareInfo?.IsRefundable;
-  const currency =
-    flight?.FareItinerary?.AirItineraryFareInfo.ItinTotalFares.TotalFare?.CurrencyCode.toLowerCase();
-  const totalPrice =
-    flight?.FareItinerary?.AirItineraryFareInfo?.ItinTotalFares?.TotalFare
-      ?.Amount;
+const FlightItem: React.FC<FlightItemProps> = ({ data, hiddenHeader }) => {
+  const {
+    from,
+    to,
+    departureDate,
+    arrivalDate,
+    stops,
+    airlineCode,
+    airlineName,
+    flightNumber,
+    seatsLeft,
+    refundable,
+    price,
+  } = data;
 
   return (
     <>
@@ -60,9 +64,7 @@ const FlightItem: React.FC<FlightItemProps> = ({ flight, hiddenHeader }) => {
               From:
             </Text>
           </View>
-          <Text className="font-poppins-semibold text-gray-600">
-            {flightDepartureCode}
-          </Text>
+          <Text className="font-poppins-semibold text-gray-600">{from}</Text>
         </View>
 
         {/* TO */}
@@ -77,9 +79,7 @@ const FlightItem: React.FC<FlightItemProps> = ({ flight, hiddenHeader }) => {
               To:
             </Text>
           </View>
-          <Text className="font-poppins-semibold text-gray-600">
-            {flightArrivalCode}
-          </Text>
+          <Text className="font-poppins-semibold text-gray-600">{to}</Text>
         </View>
 
         {/* DEPARTURE */}
@@ -95,9 +95,7 @@ const FlightItem: React.FC<FlightItemProps> = ({ flight, hiddenHeader }) => {
             </Text>
           </View>
           <Text className="font-poppins-semibold text-gray-600">
-            {flightDepartureDate
-              ? formatEventDate(new Date(flightDepartureDate))
-              : "-"}
+            {departureDate ? formatEventDate(new Date(departureDate)) : "-"}
           </Text>
         </View>
 
@@ -115,9 +113,7 @@ const FlightItem: React.FC<FlightItemProps> = ({ flight, hiddenHeader }) => {
           </View>
 
           <Text className="font-poppins-semibold text-gray-600">
-            {flightArrivalDate
-              ? formatEventDate(new Date(flightArrivalDate))
-              : "-"}
+            {arrivalDate ? formatEventDate(new Date(arrivalDate)) : "-"}
           </Text>
         </View>
 
@@ -147,7 +143,7 @@ const FlightItem: React.FC<FlightItemProps> = ({ flight, hiddenHeader }) => {
           </View>
 
           <Text className="font-poppins-semibold text-gray-600">
-            {flightAirlineName}
+            {airlineName} ({airlineCode})
           </Text>
         </View>
 
@@ -161,7 +157,7 @@ const FlightItem: React.FC<FlightItemProps> = ({ flight, hiddenHeader }) => {
           </View>
 
           <Text className="font-poppins-semibold text-gray-600">
-            {flightNo}
+            {flightNumber}
           </Text>
         </View>
 
@@ -197,7 +193,7 @@ const FlightItem: React.FC<FlightItemProps> = ({ flight, hiddenHeader }) => {
           </View>
 
           <Text className="font-poppins-semibold text-gray-600">
-            {refundable}
+            {refundable ? "Yes" : "No"}
           </Text>
         </View>
 
@@ -208,9 +204,9 @@ const FlightItem: React.FC<FlightItemProps> = ({ flight, hiddenHeader }) => {
           </Text>
           <Text className="font-poppins-bold text-gray-600 text-xl">
             <Text className="text-base">
-              {getCurrencySymbol(currency as any)}
+              {getCurrencySymbol(price?.currency as any)}
             </Text>
-            {totalPrice}
+            {price?.total}
           </Text>
         </View>
       </View>

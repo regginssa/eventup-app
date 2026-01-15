@@ -1,13 +1,14 @@
 import { fetchHotelRoomRates } from "@/api/scripts/booking";
 import { setBookingHotelRoomRates } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { TFlightAvailability, THotelAvailability, TTransfer } from "@/types";
+import { THotelAvailability, TTransfer } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Text, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, FlightItem, HotelItem, Modal } from "../common";
+import { TFlightItemData } from "../common/FlightItem";
 import { useTheme } from "../providers/ThemeProvider";
 import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
 
@@ -16,7 +17,7 @@ interface PackageConfirmModalProps {
   onClose: () => void;
   packageType: "standard" | "gold";
   eventId: string;
-  flight?: TFlightAvailability;
+  flight?: TFlightItemData;
   hotel?: THotelAvailability;
   transfer: TTransfer | null;
 }
@@ -85,7 +86,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             </Text>
           </View>
         ) : (
-          <FlightItem flight={flight} />
+          <FlightItem data={flight} />
         )}
       </View>
 

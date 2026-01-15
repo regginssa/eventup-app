@@ -1,3 +1,4 @@
+import { TFlightItemData } from "@/components/common/FlightItem";
 import { IHotelDetails, IRoomRate, TPackageType } from "@/types";
 import {
   ApiResponse,
@@ -15,6 +16,7 @@ import {
   BOOKING_HOTEL_METHOD,
   CHECK_HOTEL_ROOM_RATES,
   FETCH_ALL_BOOKINGS,
+  FETCH_FLIGHTS,
   FETCH_FLIGHTS_AVAILABILITY,
   FETCH_HOTEL_DETAILS,
   FETCH_HOTEL_ROOM_RATES,
@@ -181,6 +183,12 @@ export const addNewHotel = async (
     type,
     bookingId,
   });
+};
+
+export const fetchFlights = async (
+  payload: any
+): Promise<ApiResponse<TFlightItemData[]>> => {
+  return await AxiosInstance.post(FETCH_FLIGHTS, { payload });
 };
 
 export const fetchBooking = async (

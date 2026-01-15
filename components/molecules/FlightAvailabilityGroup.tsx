@@ -1,4 +1,3 @@
-import { TFlightAvailability } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
@@ -9,12 +8,13 @@ import {
   View,
 } from "react-native";
 import { Button, FlightItem, Modal } from "../common";
+import { TFlightItemData } from "../common/FlightItem";
 
 interface FlightAvailabilityGroupProps {
-  recommend?: TFlightAvailability;
-  availabilities: TFlightAvailability[];
+  recommend?: TFlightItemData;
+  availabilities: TFlightItemData[];
   isSearched: boolean;
-  onSelect: (availability: TFlightAvailability) => void;
+  onSelect: (availability: TFlightItemData) => void;
 }
 
 const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
@@ -25,7 +25,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const renderItem = ({ item }: { item: TFlightAvailability }) => {
+  const renderItem = ({ item }: { item: TFlightItemData }) => {
     return (
       <TouchableOpacity
         activeOpacity={0.8}
@@ -36,7 +36,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
           setIsOpen(false);
         }}
       >
-        <FlightItem flight={item} />
+        <FlightItem data={item} />
       </TouchableOpacity>
     );
   };
@@ -63,7 +63,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
             </Text>
           </View>
 
-          <FlightItem flight={recommend} hiddenHeader={true} />
+          <FlightItem data={recommend} hiddenHeader={true} />
 
           <Button
             type="text"

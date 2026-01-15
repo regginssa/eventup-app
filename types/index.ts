@@ -1,3 +1,5 @@
+import { TFlightItemData } from "@/components/common/FlightItem";
+
 export type TCoordinate = {
   latitude: number;
   longitude: number;
@@ -220,8 +222,8 @@ export interface StopQuantityInfo {
 
 export interface TFlight {
   session_id: string;
-  availabilities: TFlightAvailability[];
-  recommend: TFlightAvailability;
+  availabilities: TFlightItemData[];
+  recommend: TFlightItemData;
   payload: any;
 }
 

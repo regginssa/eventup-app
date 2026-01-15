@@ -1,6 +1,6 @@
 import { fetchNearestAirports } from "@/api/scripts/airports";
 import {
-  fetchFlightsAvailability,
+  fetchFlights,
   fetchHotelsAvailability,
   fetchTransfersAvailability,
 } from "@/api/scripts/booking";
@@ -11,21 +11,24 @@ import {
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import {
-  IFlightDetail,
   TAirport,
-  TFlightAvailability,
   THotelAvailability,
   TPackageType,
   TPassengerInfo,
 } from "@/types";
 import { IEvent } from "@/types/data";
-import { formatTravelproDateTime, normalizeDateUTC } from "@/utils/format";
+import {
+  formatBookingDate,
+  formatTravelproDateTime,
+  normalizeDateUTC,
+} from "@/utils/format";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, DateTimePicker, RadioButton, Spinner } from "../common";
+import { TFlightItemData } from "../common/FlightItem";
 import FlightAvailabilityGroup from "./FlightAvailabilityGroup";
 import HotelAvailabilityGroup from "./HotelAvailabilityGroup";
 import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
@@ -65,6 +68,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [currentCountryCode, setCurrentCountryCode] = useState<string | null>(
     null
   );
+  const [currentLocationCoords, setCurrentLocationCoords] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   const { user } = useSelector((state: RootState) => state.auth);
   const {
@@ -94,6 +101,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (!user?.location.coordinate) return;
     setLoading(true);
     const coords = await getUserLocationAndSave();
+
+    setCurrentLocationCoords(coords);
 
     // Reverse geocode to get city and country from current location
     try {
@@ -174,50 +183,53 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     }));
   };
 
+  // childs: hotel.data.reduce((sum, room) => sum + room.childs, 0),
+  // infants,
+  // airports:
+  //   departureLocation === "current"
+  //     ? currentNearestAirports
+  //     : homeNearestAirports,
+
   const searchFlights = async () => {
     const payload = {
-      departureDate,
+      type: packageType,
+      eventId: event._id,
+      departureDate: formatBookingDate(departureDate),
       adults: hotel.data.reduce((sum, room) => sum + room.adults, 0),
-      childs: hotel.data.reduce((sum, room) => sum + room.childs, 0),
-      infants,
-      airports:
+      originLocationCoords:
         departureLocation === "current"
-          ? currentNearestAirports
-          : homeNearestAirports,
-      packageType,
+          ? currentLocationCoords
+          : user?.location.coordinate,
     };
 
-    const response = await fetchFlightsAvailability(
-      event._id as string,
-      payload
-    );
+    const response = await fetchFlights(payload);
 
-    const { recommend } = response.data;
-    if (!recommend) return null;
+    console.log("flight search response: ", response.data);
 
-    const initialFlightDetails: IFlightDetail = {
-      paxInfo: {
-        customerEmail: "",
-        customerPhone: "",
-        bookingNote: "",
-      },
-      paxDetails: {
-        adults: Array.from({ length: payload.adults }, createEmptyPassenger),
-        child: Array.from({ length: payload.childs }, createEmptyPassenger),
-        infant: Array.from({ length: payload.infants }, createEmptyPassenger),
-      },
-    };
+    // const { recommend } = response.data;
+    // if (!recommend) return null;
 
-    dispatch(
-      setBookingFlight({
-        ...response.data,
-        recommend: { ...recommend, details: initialFlightDetails },
-      })
-    );
+    // const initialFlightDetails: IFlightDetail = {
+    //   paxInfo: {
+    //     customerEmail: "",
+    //     customerPhone: "",
+    //     bookingNote: "",
+    //   },
+    //   paxDetails: {
+    //     adults: Array.from({ length: payload.adults }, createEmptyPassenger),
+    //     child: Array.from({ length: payload.childs }, createEmptyPassenger),
+    //     infant: Array.from({ length: payload.infants }, createEmptyPassenger),
+    //   },
+    // };
 
-    console.log("flight availability response: ", recommend);
+    // dispatch(
+    //   setBookingFlight({
+    //     ...response.data,
+    //     recommend: { ...recommend, details: initialFlightDetails },
+    //   })
+    // );
 
-    return recommend;
+    return null;
   };
 
   const searchHotels = async (flightRecommend: any) => {
@@ -414,16 +426,16 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       const flightRecommend = await searchFlights();
       if (!flightRecommend) throw new Error("No flight found");
 
-      setSearchBtnLabel("Searching hotels...");
-      const hotelResult = await searchHotels(flightRecommend);
-      if (!hotelResult?.hotelRecommend) throw new Error("No hotel found");
+      // setSearchBtnLabel("Searching hotels...");
+      // const hotelResult = await searchHotels(flightRecommend);
+      // if (!hotelResult?.hotelRecommend) throw new Error("No hotel found");
 
-      setSearchBtnLabel("Searching transfers...");
-      await searchTransfers(
-        hotelResult.hotelRecommend,
-        hotelResult.hotelSessionId,
-        flightRecommend
-      );
+      // setSearchBtnLabel("Searching transfers...");
+      // await searchTransfers(
+      //   hotelResult.hotelRecommend,
+      //   hotelResult.hotelSessionId,
+      //   flightRecommend
+      // );
     } catch (error) {
       console.log("handleSearch error: ", error);
     } finally {
@@ -792,7 +804,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             recommend={flight?.recommend}
             availabilities={flight?.availabilities || []}
             isSearched={isSearched}
-            onSelect={(availability: TFlightAvailability) => {
+            onSelect={(availability: TFlightItemData) => {
               if (flight) {
                 dispatch(
                   setBookingFlight({ ...flight, recommend: availability })
