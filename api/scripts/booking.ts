@@ -188,7 +188,7 @@ export const addNewHotel = async (
 export const fetchFlights = async (
   payload: any
 ): Promise<ApiResponse<TFlightItemData[]>> => {
-  return await AxiosInstance.post(FETCH_FLIGHTS, { payload });
+  return await AxiosInstance.post(FETCH_FLIGHTS, payload);
 };
 
 export const fetchBooking = async (

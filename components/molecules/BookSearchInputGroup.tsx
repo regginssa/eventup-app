@@ -1,4 +1,3 @@
-import { fetchNearestAirports } from "@/api/scripts/airports";
 import {
   fetchFlights,
   fetchHotelsAvailability,
@@ -120,23 +119,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       console.error("Error reverse geocoding:", error);
     }
 
-    const currentNearestAirports = await fetchNearestAirports(
-      coords.latitude,
-      coords.longitude
-    );
-
-    if (currentNearestAirports.data) {
-      setCurrentNearestAirports(currentNearestAirports.data);
-    }
-
-    const originalNearestAirports = await fetchNearestAirports(
-      user.location.coordinate.latitude,
-      user.location.coordinate.longitude
-    );
-
-    if (originalNearestAirports.data) {
-      setHomeNearestAirports(originalNearestAirports.data);
-    }
     setLoading(false);
   }, [user]);
 
