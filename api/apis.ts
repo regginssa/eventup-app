@@ -41,6 +41,7 @@ export const FETCH_ALL_BOOKINGS = "/booking/all/";
 
 export const FETCH_FLIGHT_OFFERS = "/booking/flight-offers";
 export const FETCH_HOTEL_OFFERS = "/booking/hotel-offers";
+export const FETCH_TRANSFER_OFFERS = "/booking/transfer-offers";
 
 // Stripe
 export const FETCH_STRIPE_CUSTOMER_ID = "/stripe/customer-id";

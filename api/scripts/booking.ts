@@ -22,6 +22,7 @@ import {
   FETCH_HOTEL_OFFERS,
   FETCH_HOTEL_ROOM_RATES,
   FETCH_HOTELS_AVAILABILITY,
+  FETCH_TRANSFER_OFFERS,
   FETCH_TRANSFERS_AVAILABILITY,
   TICKET_FLIGHT_METHOD,
   VALIDATE_FLIGHT_FARE_METHOD,
@@ -205,6 +206,17 @@ export const fetchHotelOffers = async (
 ): Promise<ApiResponse<any>> => {
   return await AxiosInstance.get(
     FETCH_HOTEL_OFFERS + "?" + new URLSearchParams(params).toString()
+  );
+};
+
+// ------------ Transfer booking engine ------------
+
+// Fetch transfer offers
+export const fetchTransferOffers = async (
+  params: any
+): Promise<ApiResponse<any>> => {
+  return await AxiosInstance.get(
+    FETCH_TRANSFER_OFFERS + "?" + new URLSearchParams(params).toString()
   );
 };
 

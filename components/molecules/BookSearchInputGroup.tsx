@@ -1,21 +1,20 @@
 import {
   fetchFlightOffers,
   fetchHotelOffers,
-  fetchTransfersAvailability,
+  fetchTransferOffers,
 } from "@/api/scripts/booking";
 import {
   setBookingFlight,
   setBookingHotel,
-  setBookingTransfer,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { TPackageType, TPassengerInfo } from "@/types";
+import { TPackageType } from "@/types";
 import { TAmadeusHotelOffer } from "@/types/amadeus";
 import { IEvent } from "@/types/data";
 import {
   formatBookingDate,
-  formatTravelproDateTime,
   normalizeDateUTC,
+  toLocalISOString,
 } from "@/utils/format";
 import {
   mapAmadeusFlightOfferToFlightItemData,
@@ -121,52 +120,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     init();
   }, [init]);
 
-  const createEmptyPassenger = (): TPassengerInfo => ({
-    title: "Mr",
-    firstName: "",
-    lastName: "",
-    dob: "1991-11-12",
-    nationality: "",
-    passportNo: "",
-    passportIssueCountry: "",
-    passportExpiryDate: "",
-  });
-
-  const formatHotelRooms = (hotel: any) => {
-    return hotel.data.map((room: any, index: number) => ({
-      room_no: index + 1,
-      adult: room.adults,
-      child: room.childs,
-      child_age: room.child_age.length > 0 ? room.child_age : [0],
-    }));
-  };
-
-  const buildInitialPaxDetails = (formattedRooms: any[]) => {
-    return formattedRooms.map((room) => ({
-      room_no: room.room_no,
-      adult: {
-        title: Array(room.adult).fill("Mr"),
-        firstName: Array(room.adult).fill(""),
-        lastName: Array(room.adult).fill(""),
-      },
-      child:
-        room.child > 0
-          ? {
-              title: Array(room.child).fill("Mr"),
-              firstName: Array(room.child).fill(""),
-              lastName: Array(room.child).fill(""),
-            }
-          : undefined,
-    }));
-  };
-
-  // childs: hotel.data.reduce((sum, room) => sum + room.childs, 0),
-  // infants,
-  // airports:
-  //   departureLocation === "current"
-  //     ? currentNearestAirports
-  //     : homeNearestAirports,
-
   const searchFlights = async () => {
     const params = {
       type: packageType,
@@ -182,8 +135,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           ? currentLocationCoords?.longitude
           : user?.location.coordinate.longitude,
     };
-
-    console.log("flight offers params: ", params);
 
     const response = await fetchFlightOffers(params);
 
@@ -246,29 +197,24 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     );
 
     dispatch(setBookingHotel({ ...rdHotel, data }));
+
+    return data[0];
   };
 
   const searchTransfers = async (
-    hotelRecommend: any,
-    hotelSessionId: any,
-    flightRecommend: any
+    flight: TFlightItemData,
+    hotel: THotelItemData
   ) => {
-    if (!flightRecommend) {
+    if (!flight) {
       Alert.alert("Flight Not Selected");
       return;
     }
-    if (!hotelRecommend) {
+    if (!hotel) {
       Alert.alert("Hotel Not Selected");
       return;
     }
 
-    const flightArrivalDate =
-      flightRecommend?.FareItinerary?.OriginDestinationOptions[0]
-        ?.OriginDestinationOption[
-        flightRecommend?.FareItinerary?.OriginDestinationOptions[0]
-          ?.OriginDestinationOption.length - 1
-      ]?.FlightSegment.ArrivalDateTime;
-    const flightArrival = new Date(flightArrivalDate);
+    const flightArrival = new Date(flight.arrivalDate);
     const flightArrivalDateTime = normalizeDateUTC(flightArrival);
     const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
 
@@ -280,66 +226,26 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return;
     }
 
-    const lastSegment =
-      flightRecommend?.FareItinerary?.OriginDestinationOptions[0]?.OriginDestinationOption?.slice(
-        -1
-      )[0];
+    console.log("hotel: ", hotel);
 
-    const arrivalDate = lastSegment?.FlightSegment.ArrivalDateTime;
-
-    const reqData = {
-      ahTransfer: {
-        airportCode: lastSegment?.FlightSegment.ArrivalAirportLocationCode,
-        hotel: {
-          hotelId: hotelRecommend.hotelId,
-          tokenId: hotelRecommend.tokenId,
-          sessionId: hotelSessionId,
-          productId: hotelRecommend.productId,
-        },
-        arrivalDate,
-        adults: hotel.data.reduce((sum, room) => sum + room.adults, 0),
-        childs: hotel.data.reduce((sum, room) => sum + room.childs, 0),
-        infants,
-      },
-      heTransfer: {
-        hotel: {
-          hotelId: hotelRecommend.hotelId,
-          tokenId: hotelRecommend.tokenId,
-          sessionId: hotelSessionId,
-          productId: hotelRecommend.productId,
-        },
-        arrivalDate: event.opening_date,
-        adults: hotel.data.reduce((sum, room) => sum + room.adults, 0),
-        childs: hotel.data.reduce((sum, room) => sum + room.childs, 0),
-        infants,
-        pickupDate: formatTravelproDateTime(hotelDepartureDate).date,
-        pickupTime: formatTravelproDateTime(hotelDepartureDate).time,
-      },
-      packageType,
+    const params = {
+      eventId: event._id,
+      airportCode: flight.to,
+      hotelCode: hotel.hotelId,
+      hotelGeoCode: `${hotel.latitude},${hotel.longitude}`,
+      startAirportLeaveDateTime: flight.arrivalDate,
+      startHotelLeaveDateTime: toLocalISOString(hotelDepartureDate),
+      passengers: hotel.adults,
+      transferType: packageType === "standard" ? "SHARED" : "PRIVATE",
     };
 
-    const response = await fetchTransfersAvailability(
-      event._id as string,
-      reqData
-    );
+    const response = await fetchTransferOffers(params);
 
-    if (response.data.ah.error) {
-      return Alert.alert(
-        "Transfer from airport to hotel",
-        response.data.ah.error
-      );
+    if (!response.data) {
+      return null;
     }
 
-    if (response.data.he.error) {
-      return Alert.alert(
-        "Transfer from hotel to event",
-        response.data.he.error
-      );
-    }
-
-    console.log("Transfer available response: ", response.data);
-
-    dispatch(setBookingTransfer(response.data));
+    console.log("transfer offers response: ", response.data);
   };
 
   const handleSearch = async () => {
@@ -379,12 +285,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       const hotelData = await searchHotels(flightData);
       if (!hotelData) throw new Error("No hotel found");
 
-      // setSearchBtnLabel("Searching transfers...");
-      // await searchTransfers(
-      //   hotelResult.hotelRecommend,
-      //   hotelResult.hotelSessionId,
-      //   flightRecommend
-      // );
+      setSearchBtnLabel("Searching transfers...");
+      await searchTransfers(flightData, hotelData);
     } catch (error) {
       console.log("handleSearch error: ", error);
     } finally {

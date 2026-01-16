@@ -103,3 +103,197 @@ export type TAmadeusHotelOffer = {
   }>;
   self: string;
 };
+
+// Amadeus Transfer Offer API response type
+export type TAmadeusTransferOffer = {
+  type: "transfer-offer";
+  id: string;
+  transferType: "PRIVATE" | "SHARED" | string;
+  start: {
+    dateTime: string;
+    locationCode: string;
+  };
+  end: {
+    address?: {
+      line: string;
+      zip?: string;
+      countryCode: string;
+      cityName: string;
+      latitude: number;
+      longitude: number;
+    };
+    googlePlaceId?: string;
+    name?: string;
+    locationCode?: string;
+  };
+  stopOvers?: Array<{
+    duration: string;
+    sequenceNumber: number;
+    location: {
+      locationCode?: string;
+      address?: {
+        line: string;
+        zip?: string;
+        countryCode: string;
+        cityName: string;
+        latitude: number;
+        longitude: number;
+      };
+      googlePlaceId?: string;
+      name?: string;
+    };
+  }>;
+  vehicle: {
+    code: string;
+    category: string;
+    description: string;
+    seats: Array<{
+      count: number;
+    }>;
+    baggages: Array<{
+      count: number;
+      size: string;
+    }>;
+    imageURL?: string;
+  };
+  serviceProvider: {
+    code: string;
+    name: string;
+    logoUrl?: string;
+    termsUrl?: string;
+    contacts?: {
+      phoneNumber?: string;
+      email?: string;
+    };
+    settings?: string[];
+  };
+  quotation: {
+    monetaryAmount: string;
+    currencyCode: string;
+    isEstimated: boolean;
+    base?: {
+      monetaryAmount: string;
+    };
+    discount?: {
+      monetaryAmount: string;
+    };
+    fees?: Array<{
+      indicator: string;
+      monetaryAmount: string;
+    }>;
+    totalTaxes?: {
+      monetaryAmount: string;
+    };
+    totalFees?: {
+      monetaryAmount: string;
+    };
+  };
+  converted?: {
+    monetaryAmount: string;
+    currencyCode: string;
+    isEstimated: boolean;
+    base?: {
+      monetaryAmount: string;
+    };
+    discount?: {
+      monetaryAmount: string;
+    };
+    fees?: Array<{
+      indicator: string;
+      monetaryAmount: string;
+    }>;
+    totalTaxes?: {
+      monetaryAmount: string;
+    };
+    totalFees?: {
+      monetaryAmount: string;
+    };
+  };
+  extraServices?: Array<{
+    code: string;
+    itemId: string;
+    description: string;
+    quotation: {
+      monetaryAmount: string;
+      currencyCode: string;
+      base?: {
+        monetaryAmount: string;
+      };
+      totalTaxes?: {
+        monetaryAmount: string;
+      };
+    };
+    converted?: {
+      monetaryAmount: string;
+      currencyCode: string;
+      base?: {
+        monetaryAmount: string;
+      };
+      totalTaxes?: {
+        monetaryAmount: string;
+      };
+    };
+    isBookable: boolean;
+    taxIncluded: boolean;
+    includedInTotal: boolean;
+  }>;
+  equipment?: Array<{
+    code: string;
+    description: string;
+    quotation: {
+      monetaryAmount: string;
+      currencyCode: string;
+      base?: {
+        monetaryAmount: string;
+      };
+      totalTaxes?: {
+        monetaryAmount: string;
+      };
+    };
+    converted?: {
+      monetaryAmount: string;
+      currencyCode: string;
+      base?: {
+        monetaryAmount: string;
+      };
+      totalTaxes?: {
+        monetaryAmount: string;
+      };
+    };
+    isBookable: boolean;
+    taxIncluded: boolean;
+    includedInTotal: boolean;
+  }>;
+  cancellationRules?: Array<{
+    feeType: "PERCENTAGE" | "FIXED" | string;
+    feeValue: string;
+    metricType: "DAYS" | "HOURS" | string;
+    metricMin: string;
+    metricMax: string;
+  }>;
+  methodsOfPaymentAccepted?: string[];
+  discountCodes?: Array<{
+    type: string;
+    value: string;
+  }>;
+  distance?: {
+    value: number;
+    unit: "KM" | "MI" | string;
+  };
+  startConnectedSegment?: {
+    transportationType: "FLIGHT" | "TRAIN" | string;
+    transportationNumber: string;
+    departure: {
+      localDateTime: string;
+      iataCode: string;
+    };
+    arrival: {
+      localDateTime: string;
+      iataCode: string;
+    };
+  };
+  passengerCharacteristics?: Array<{
+    passengerTypeCode: "ADT" | "CHD" | "INF" | string;
+    age: number;
+  }>;
+};
