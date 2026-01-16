@@ -9,18 +9,14 @@ import {
   setBookingTransfer,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import {
-  TAirport,
-  THotelAvailability,
-  TPackageType,
-  TPassengerInfo,
-} from "@/types";
+import { THotelAvailability, TPackageType, TPassengerInfo } from "@/types";
 import { IEvent } from "@/types/data";
 import {
   formatBookingDate,
   formatTravelproDateTime,
   normalizeDateUTC,
 } from "@/utils/format";
+import { mapAmadeusFlightOfferToFlightItemData } from "@/utils/map";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
@@ -41,12 +37,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   event,
   packageType,
 }) => {
-  const [currentNearestAirports, setCurrentNearestAirports] = useState<
-    TAirport[]
-  >([]);
-  const [homeNearestAirports, setHomeNearestAirports] = useState<TAirport[]>(
-    []
-  );
   const [departureLocation, setDepartureLocation] = useState<
     "current" | "home"
   >("current");
@@ -186,7 +176,15 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     const response = await fetchFlights(payload);
 
-    console.log("flight search response: ", response.data);
+    if (!response.data) {
+      return null;
+    }
+
+    const data = response.data.map((offer) =>
+      mapAmadeusFlightOfferToFlightItemData(offer)
+    );
+
+    dispatch(setBookingFlight({ ...flight, data }));
 
     // const { recommend } = response.data;
     // if (!recommend) return null;
@@ -210,8 +208,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     //     recommend: { ...recommend, details: initialFlightDetails },
     //   })
     // );
-
-    return null;
   };
 
   const searchHotels = async (flightRecommend: any) => {
@@ -458,7 +454,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               />
             </View>
 
-            {departureLocation === "current" && (
+            {/* {departureLocation === "current" && (
               <View className="px-2 mt-2">
                 {currentNearestAirports.map((airport, index) => (
                   <Text
@@ -469,7 +465,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                   </Text>
                 ))}
               </View>
-            )}
+            )} */}
           </View>
 
           <View>
@@ -492,7 +488,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               />
             </View>
 
-            {departureLocation === "home" && (
+            {/* {departureLocation === "home" && (
               <View className="px-2 mt-2">
                 {homeNearestAirports.map((airport, index) => (
                   <Text
@@ -503,7 +499,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                   </Text>
                 ))}
               </View>
-            )}
+            )} */}
           </View>
         </View>
       </View>
@@ -783,14 +779,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           <View className="w-full h-[1px] bg-gray-200"></View>
 
           <FlightAvailabilityGroup
-            recommend={flight?.recommend}
-            availabilities={flight?.availabilities || []}
+            selected={flight?.data[0]}
+            items={flight?.data || []}
             isSearched={isSearched}
             onSelect={(availability: TFlightItemData) => {
               if (flight) {
-                dispatch(
-                  setBookingFlight({ ...flight, recommend: availability })
-                );
+                dispatch(setBookingFlight({ ...flight }));
               }
             }}
           />

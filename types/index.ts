@@ -221,10 +221,9 @@ export interface StopQuantityInfo {
 }
 
 export interface TFlight {
-  session_id: string;
-  availabilities: TFlightItemData[];
-  recommend: TFlightItemData;
-  payload: any;
+  sessionId?: string;
+  data: TFlightItemData[];
+  payload?: any;
 }
 
 export interface IHotelDetails {

@@ -11,15 +11,15 @@ import { Button, FlightItem, Modal } from "../common";
 import { TFlightItemData } from "../common/FlightItem";
 
 interface FlightAvailabilityGroupProps {
-  recommend?: TFlightItemData;
-  availabilities: TFlightItemData[];
+  selected?: TFlightItemData;
+  items: TFlightItemData[];
   isSearched: boolean;
   onSelect: (availability: TFlightItemData) => void;
 }
 
 const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
-  recommend,
-  availabilities,
+  selected,
+  items,
   isSearched,
   onSelect,
 }) => {
@@ -41,7 +41,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
     );
   };
 
-  if (isSearched && !recommend) {
+  if (isSearched && !selected) {
     return (
       <View className="w-full flex flex-col items-center justify-center gap-2">
         <MaterialCommunityIcons name="airplane-off" size={24} color="#4b5563" />
@@ -54,7 +54,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
 
   return (
     <>
-      {recommend && (
+      {selected && (
         <View className="w-full gap-4">
           <View className="flex flex-row items-center gap-2">
             <MaterialCommunityIcons name="airplane" size={20} color="#374151" />
@@ -63,7 +63,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
             </Text>
           </View>
 
-          <FlightItem data={recommend} hiddenHeader={true} />
+          <FlightItem data={selected} hiddenHeader={true} />
 
           <Button
             type="text"
@@ -81,7 +81,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
         onClose={() => setIsOpen(false)}
       >
         <FlatList
-          data={availabilities}
+          data={items}
           keyExtractor={(_, index) => index.toString()}
           renderItem={renderItem}
           contentContainerStyle={{ gap: 16 }}

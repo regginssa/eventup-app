@@ -1,5 +1,5 @@
-import { TFlightItemData } from "@/components/common/FlightItem";
 import { IHotelDetails, IRoomRate, TPackageType } from "@/types";
+import { TAmadeusFlightOffer } from "@/types/amadeus";
 import {
   ApiResponse,
   BookingFlightResponse,
@@ -187,7 +187,7 @@ export const addNewHotel = async (
 
 export const fetchFlights = async (
   payload: any
-): Promise<ApiResponse<TFlightItemData[]>> => {
+): Promise<ApiResponse<TAmadeusFlightOffer[]>> => {
   return await AxiosInstance.post(FETCH_FLIGHTS, payload);
 };
 
