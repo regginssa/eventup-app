@@ -21,6 +21,7 @@ import {
   FETCH_HOTEL_DETAILS,
   FETCH_HOTEL_ROOM_RATES,
   FETCH_HOTELS_AVAILABILITY,
+  FETCH_HOTELS_LIST,
   FETCH_TRANSFERS_AVAILABILITY,
   TICKET_FLIGHT_METHOD,
   VALIDATE_FLIGHT_FARE_METHOD,
@@ -189,6 +190,15 @@ export const fetchFlights = async (
   payload: any
 ): Promise<ApiResponse<TAmadeusFlightOffer[]>> => {
   return await AxiosInstance.post(FETCH_FLIGHTS, payload);
+};
+
+//-------------------------------- Hotel booking engine --------------------------------
+
+// Fetch hotels list
+export const fetchHotelsList = async (
+  params: any
+): Promise<ApiResponse<any>> => {
+  return await AxiosInstance.get(FETCH_HOTELS_LIST, params);
 };
 
 export const fetchBooking = async (

@@ -38,7 +38,9 @@ export const ADD_NEW_FLIGHT = "/booking/add/flight";
 export const ADD_NEW_HOTEL = "/booking/add/hotel";
 export const BOOKING_BASE = "/booking/";
 export const FETCH_ALL_BOOKINGS = "/booking/all/";
+
 export const FETCH_FLIGHTS = "/booking/flights-search";
+export const FETCH_HOTELS_LIST = "/booking/hotels-list";
 
 // Stripe
 export const FETCH_STRIPE_CUSTOMER_ID = "/stripe/customer-id";

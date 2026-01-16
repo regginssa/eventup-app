@@ -1,6 +1,6 @@
 import {
   fetchFlights,
-  fetchHotelsAvailability,
+  fetchHotelsList,
   fetchTransfersAvailability,
 } from "@/api/scripts/booking";
 import {
@@ -210,18 +210,14 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     // );
   };
 
-  const searchHotels = async (flightRecommend: any) => {
-    if (!flightRecommend) {
+  const searchHotels = async (flight: TFlightItemData) => {
+    if (!flight) {
       Alert.alert("Flight Not Selected", "Please select a flight first.");
       return null;
     }
 
-    const flightArrivalDate =
-      flightRecommend?.FareItinerary?.OriginDestinationOptions[0]
-        ?.OriginDestinationOption[
-        flightRecommend?.FareItinerary?.OriginDestinationOptions[0]
-          ?.OriginDestinationOption.length - 1
-      ]?.FlightSegment.ArrivalDateTime;
+    const flightArrivalDate = flight.arrivalDate;
+    console.log("flightArrivalDate: ", flightArrivalDate);
 
     const flightArrival = new Date(flightArrivalDate);
     const flightArrivalDateTime = normalizeDateUTC(flightArrival);
@@ -237,44 +233,21 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return null;
     }
 
-    const formattedHotelRooms = formatHotelRooms(hotel);
-    const initialPaxDetails = buildInitialPaxDetails(formattedHotelRooms);
-
     const checkout = new Date(event.opening_date as any);
     checkout.setDate(checkout.getDate() + 1);
 
-    const response = await fetchHotelsAvailability(
-      event._id as string,
-      formattedHotelRooms,
-      flightArrival,
-      checkout,
-      packageType
-    );
+    const params = {
+      type: packageType,
+      eventId: event._id,
+      checkInDate: flightArrival,
+      checkOutDate: checkout,
+      adults: 1,
+      roomQuantity: hotel.rooms,
+    };
 
-    const hotelRecommend = response.data?.recommend;
-    if (!hotelRecommend) return null;
+    const response = await fetchHotelsList(params);
 
-    dispatch(
-      setBookingHotel({
-        ...response.data,
-        checkin: flightArrival.toISOString(),
-        checkout: checkout.toISOString(),
-        bookingRequest: {
-          customerEmail: "",
-          customerPhone: "",
-          rateBasisId: "",
-          paxDetails: initialPaxDetails,
-          sessionId: response.data.session_id,
-          hotelId: hotelRecommend.hotelId,
-          productId: hotelRecommend.productId,
-          tokenId: hotelRecommend.tokenId,
-        },
-      })
-    );
-
-    console.log("hotel availability response: ", hotelRecommend);
-
-    return { hotelRecommend, hotelSessionId: response.data?.session_id };
+    console.log("hotels list response: ", response.data);
   };
 
   const searchTransfers = async (
@@ -519,6 +492,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       />
 
       <View className="w-full h-[1px] bg-gray-200"></View>
+
       <Text className="font-poppins-medium text-sm text-gray-700">
         Tell us who's traveling and how many rooms you need.
       </Text>
