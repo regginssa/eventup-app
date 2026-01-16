@@ -1,19 +1,63 @@
-import { THotelAvailability } from "@/types";
-import { getCurrencySymbol } from "@/utils/format";
+import { formatEventDate, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { BadgeGroup } from "../molecules";
 
+// THotelItemData - essential fields from Amadeus Hotel Offer
+export type THotelItemData = {
+  // Hotel basic info
+  hotelId: string;
+  hotelName: string;
+  cityCode: string;
+  latitude: number;
+  longitude: number;
+
+  // Booking dates
+  checkInDate: string;
+  checkOutDate: string;
+
+  // Room info
+  roomType: string;
+  roomCategory: string;
+  roomDescription: string;
+  beds: number;
+  bedType: string;
+
+  // Guests
+  adults: number;
+
+  // Price
+  price: {
+    total: string;
+    currency: string;
+    base?: string;
+  };
+
+  // Cancellation/Refund policy
+  cancellationPolicy: string;
+  cancellationType: string;
+  paymentType: string;
+
+  // Optional fields (may not be in Amadeus response but useful if available)
+  city?: string;
+  address?: string;
+  hotelRating?: number;
+  distanceValue?: number;
+  distanceUnit?: string;
+  facilities?: string[];
+  thumbNailUrl?: string;
+};
+
 interface HotelItemProps {
-  hotel: THotelAvailability;
+  data: THotelItemData;
   hiddenHeader?: boolean;
   hiddenImages?: boolean;
   onViewImages?: () => Promise<void>;
 }
 
 const HotelItem: React.FC<HotelItemProps> = ({
-  hotel,
+  data,
   hiddenHeader,
   hiddenImages,
   onViewImages,
@@ -28,12 +72,12 @@ const HotelItem: React.FC<HotelItemProps> = ({
       )}
       <View className="w-full px-2 flex flex-col items-start gap-2">
         {/* IMAGE + NAME */}
-        <View className="flex-row gap-3 mt-2">
+        <View className="flex-row gap-3">
           <View className="w-20 h-20 relative rounded-lg overflow-hidden">
-            {hotel.thumbNailUrl ? (
+            {data.thumbNailUrl ? (
               <Image
-                source={{ uri: hotel.thumbNailUrl }}
-                alt={hotel.hotelName}
+                source={{ uri: data.thumbNailUrl }}
+                alt={data.hotelName}
                 style={styles.image}
                 contentFit="cover"
               />
@@ -52,90 +96,206 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
           <View className="flex-1">
             <Text className="font-poppins-bold text-gray-800 text-base">
-              {hotel.hotelName}
+              {data.hotelName}
             </Text>
 
             <Text className="font-dm-sans-medium text-gray-500">
-              {hotel.city}
+              {data.city || data.cityCode}
             </Text>
 
             {/* STARS */}
-            <View className="flex-row items-center gap-1 mt-1">
-              {Array.from({ length: hotel.hotelRating }).map((_, idx) => (
-                <MaterialIcons
-                  key={idx}
-                  name="star"
-                  size={14}
-                  color="#facc15"
-                />
-              ))}
-            </View>
+            {data.hotelRating && data.hotelRating > 0 && (
+              <View className="flex-row items-center gap-1 mt-1">
+                {Array.from({ length: data.hotelRating }).map((_, idx) => (
+                  <MaterialIcons
+                    key={idx}
+                    name="star"
+                    size={14}
+                    color="#facc15"
+                  />
+                ))}
+              </View>
+            )}
           </View>
         </View>
+
+        {/* CHECK-IN DATE */}
+        {data.checkInDate && (
+          <View className="w-full flex flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="calendar-clock-outline"
+                size={16}
+                color="#4b5563"
+              />
+              <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                Check-in:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600">
+              {formatEventDate(new Date(data.checkInDate))}
+            </Text>
+          </View>
+        )}
+
+        {/* CHECK-OUT DATE */}
+        {data.checkOutDate && (
+          <View className="w-full flex flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="calendar-check-outline"
+                size={16}
+                color="#4b5563"
+              />
+              <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                Check-out:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600">
+              {formatEventDate(new Date(data.checkOutDate))}
+            </Text>
+          </View>
+        )}
+
+        {/* ROOM DESCRIPTION */}
+        {data.roomDescription && (
+          <View className="w-full flex flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="bed" size={16} color="#4b5563" />
+              <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                Room:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600 w-1/2 text-right">
+              {data.roomCategory || data.roomType}
+            </Text>
+          </View>
+        )}
+
+        {/* ROOM DETAILS */}
+        {(data.beds > 0 || data.bedType) && (
+          <View className="w-full flex flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="bed-king-outline"
+                size={16}
+                color="#4b5563"
+              />
+              <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                Bed:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600">
+              {data.beds} {data.bedType}
+            </Text>
+          </View>
+        )}
+
+        {/* ADULTS */}
+        {data.adults > 0 && (
+          <View className="w-full flex flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="account-outline"
+                size={16}
+                color="#4b5563"
+              />
+              <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                Adults:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600">
+              {data.adults}
+            </Text>
+          </View>
+        )}
 
         {/* DISTANCE */}
-        <View className="flex-row items-start justify-between mt-3">
-          <View className="flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="map-marker-distance"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-gray-600 text-sm">
-              Distance From City Center:
+        {data.distanceValue && data.distanceUnit && (
+          <View className="w-full flex flex-row items-start justify-between mt-3">
+            <View className="flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="map-marker-distance"
+                size={16}
+                color="#4b5563"
+              />
+              <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                Distance From City Center:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600">
+              {data.distanceValue} {data.distanceUnit}
             </Text>
           </View>
-          <Text className="font-poppins-semibold text-gray-600">
-            {hotel.distanceValue} {hotel.distanceUnit}
-          </Text>
-        </View>
+        )}
 
         {/* ADDRESS */}
-        <View className="flex-row items-start justify-between mt-2">
-          <View className="flex-row items-center gap-2">
-            <MaterialIcons name="location-pin" size={16} color="#4b5563" />
-            <Text className="font-dm-sans-medium text-gray-600 text-sm">
-              Address:
+        {data.address && (
+          <View className="w-full flex flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="location-pin" size={16} color="#4b5563" />
+              <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                Address:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600 w-1/2 text-right">
+              {data.address}
             </Text>
           </View>
-          <Text className="font-poppins-semibold text-gray-600 w-1/2 text-right">
-            {hotel.address}
-          </Text>
-        </View>
+        )}
 
         {/* REFUNDABILITY */}
-        <View className="flex-row items-start justify-between mt-2">
-          <View className="flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="credit-card-refund-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-gray-600 text-sm">
-              Refundability:
+        {data.cancellationPolicy && (
+          <View className="w-full flex flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="credit-card-refund-outline"
+                size={16}
+                color="#4b5563"
+              />
+              <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                Cancellation Policy:
+              </Text>
+            </View>
+
+            <Text className="font-poppins-semibold text-gray-600 w-1/2 text-right">
+              {data.cancellationPolicy}
             </Text>
           </View>
+        )}
 
-          <Text className="font-poppins-semibold text-gray-600">
-            {hotel.fareType}
-          </Text>
-        </View>
+        {/* PAYMENT TYPE */}
+        {data.paymentType && (
+          <View className="w-full flex flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="payment" size={16} color="#4b5563" />
+              <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                Payment:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600 capitalize">
+              {data.paymentType}
+            </Text>
+          </View>
+        )}
 
         {/* FACILITIES */}
-        <View className="w-full flex flex-col gap-2 mt-2">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialIcons name="checkroom" size={16} color="#4b5563" />
+        {data.facilities && data.facilities.length > 0 && (
+          <View className="w-full flex flex-col gap-2">
+            <View className="flex flex-row items-center gap-2">
+              <MaterialIcons name="checkroom" size={16} color="#4b5563" />
 
-            <Text className="font-dm-sans-medium text-gray-600 text-sm">
-              Facilities:
-            </Text>
+              <Text className="font-dm-sans-medium text-gray-600 text-sm">
+                Facilities:
+              </Text>
+            </View>
+            <BadgeGroup badges={data.facilities} showCount={3} />
           </View>
-          <BadgeGroup badges={hotel.facilities} showCount={3} />
-        </View>
+        )}
 
-        {/* HOTEL IMAGES */}
+        {/* data IMAGES */}
         {!hiddenImages && (
-          <View className="flex-row items-start justify-between mt-3">
+          <View className="w-full flex flex-row items-start justify-between mt-3">
             <View className="flex-row items-center gap-2">
               <MaterialCommunityIcons
                 name="image-search"
@@ -159,13 +319,15 @@ const HotelItem: React.FC<HotelItemProps> = ({
         )}
 
         {/* PRICE */}
-        <View className="flex-row justify-between mt-3">
+        <View className="w-full flex flex-row justify-between mt-3">
           <Text className="font-dm-sans-bold text-gray-800 text-lg">
             Total Price:
           </Text>
           <Text className="font-poppins-bold text-gray-700 text-xl">
-            {getCurrencySymbol(hotel.currency.toLowerCase() as any)}
-            {hotel.total}
+            {getCurrencySymbol(
+              (data.price.currency.toLowerCase() as any) || "usd"
+            )}
+            {data.price.total}
           </Text>
         </View>
       </View>

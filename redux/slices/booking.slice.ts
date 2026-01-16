@@ -1,10 +1,4 @@
-import {
-  IRoomRate,
-  ITransferBookingRequest,
-  TFlight,
-  THotel,
-  TTransfer,
-} from "@/types";
+import { ITransferBookingRequest, TFlight, THotel, TTransfer } from "@/types";
 import { IBooking } from "@/types/data";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -34,19 +28,6 @@ const bookingSlice = createSlice({
     },
     setBookingTransfer(state, action: PayloadAction<TTransfer | null>) {
       state.transfer = action.payload;
-    },
-    setBookingHotelRoomRates(state, action: PayloadAction<IRoomRate[]>) {
-      if (state.hotel?.recommend) {
-        state.hotel.recommend.roomRates = action.payload;
-      }
-    },
-    setBookingHotelSelectedRoomRate(
-      state,
-      action: PayloadAction<IRoomRate | undefined>
-    ) {
-      if (state.hotel) {
-        state.hotel.selectedRoomRate = action.payload;
-      }
     },
     setBookingTransferBookingRequest(
       state,
@@ -81,8 +62,6 @@ export const {
   setBookingFlight,
   setBookingHotel,
   setBookingTransfer,
-  setBookingHotelRoomRates,
-  setBookingHotelSelectedRoomRate,
   setBookingTransferBookingRequest,
   addNewBooking,
   updateBooking,

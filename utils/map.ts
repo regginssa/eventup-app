@@ -1,5 +1,6 @@
 import { TFlightItemData } from "@/components/common/FlightItem";
-import { TAmadeusFlightOffer } from "@/types/amadeus";
+import { THotelItemData } from "@/components/common/HotelItem";
+import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "@/types/amadeus";
 
 /**
  * Maps Amadeus Flight Offer API response to TFlightItemData format
@@ -60,5 +61,70 @@ export const mapAmadeusFlightOfferToFlightItemData = (
     seatsLeft,
     refundable,
     price,
+  };
+};
+
+/**
+ * Maps Amadeus Hotel Offer API response to THotelItemData format
+ * Takes the first offer from the offers array
+ */
+export const mapAmadeusHotelOfferToHotelItemData = (
+  offer: TAmadeusHotelOffer,
+  offerIndex: number = 0
+): THotelItemData => {
+  const hotelOffer = offer.offers?.[offerIndex];
+
+  // Hotel basic info
+  const hotelId = offer.hotel?.hotelId || "";
+  const hotelName = offer.hotel?.name || "";
+  const cityCode = offer.hotel?.cityCode || "";
+  const latitude = offer.hotel?.latitude || 0;
+  const longitude = offer.hotel?.longitude || 0;
+
+  // Booking dates
+  const checkInDate = hotelOffer?.checkInDate || "";
+  const checkOutDate = hotelOffer?.checkOutDate || "";
+
+  // Room info
+  const roomType = hotelOffer?.room?.type || "";
+  const roomCategory = hotelOffer?.room?.typeEstimated?.category || "";
+  const roomDescription = hotelOffer?.room?.description?.text || "";
+  const beds = hotelOffer?.room?.typeEstimated?.beds || 0;
+  const bedType = hotelOffer?.room?.typeEstimated?.bedType || "";
+
+  // Guests
+  const adults = hotelOffer?.guests?.adults || 0;
+
+  // Price
+  const price = {
+    total: hotelOffer?.price?.total || "0",
+    currency: hotelOffer?.price?.currency?.toLowerCase() || "usd",
+    base: hotelOffer?.price?.base,
+  };
+
+  // Cancellation/Refund policy
+  const cancellationPolicy =
+    hotelOffer?.policies?.cancellation?.description?.text || "";
+  const cancellationType = hotelOffer?.policies?.cancellation?.type || "";
+  const paymentType = hotelOffer?.policies?.paymentType || "";
+
+  return {
+    hotelId,
+    hotelName,
+    cityCode,
+    latitude,
+    longitude,
+    checkInDate,
+    checkOutDate,
+    roomType,
+    roomCategory,
+    roomDescription,
+    beds,
+    bedType,
+    adults,
+    price,
+    cancellationPolicy,
+    cancellationType,
+    paymentType,
   };
 };

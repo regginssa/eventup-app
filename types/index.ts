@@ -1,4 +1,5 @@
 import { TFlightItemData } from "@/components/common/FlightItem";
+import { THotelItemData } from "@/components/common/HotelItem";
 
 export type TCoordinate = {
   latitude: number;
@@ -317,14 +318,7 @@ export interface PerNight {
 }
 
 export interface THotel {
-  session_id: string;
-  availabilities: THotelAvailability[];
-  recommend?: THotelAvailability;
-  selectedRoomRate?: IRoomRate;
-  payload: any;
-  checkin: string;
-  checkout: string;
-  bookingRequest: THotelBookingRequest;
+  data: THotelItemData[];
 }
 
 export interface TTransferAvailability {

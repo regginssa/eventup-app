@@ -36,3 +36,70 @@ export type TAmadeusFlightOffer = {
   }>;
   validatingAirlineCodes?: string[];
 };
+
+// Amadeus Hotel Offer API response type
+export type TAmadeusHotelOffer = {
+  type: "hotel-offers";
+  hotel: {
+    type: "hotel";
+    hotelId: string;
+    chainCode: string;
+    dupeId: string;
+    name: string;
+    cityCode: string;
+    latitude: number;
+    longitude: number;
+  };
+  available: boolean;
+  offers: Array<{
+    id: string;
+    checkInDate: string;
+    checkOutDate: string;
+    rateCode: string;
+    rateFamilyEstimated: {
+      code: string;
+      type: string;
+    };
+    room: {
+      type: string;
+      typeEstimated: {
+        category: string;
+        beds: number;
+        bedType: string;
+      };
+      description: {
+        text: string;
+        lang: string;
+      };
+    };
+    guests: {
+      adults: number;
+    };
+    price: {
+      currency: string;
+      base: string;
+      total: string;
+      variations: {
+        average: {
+          base: string;
+        };
+        changes: Array<{
+          startDate: string;
+          endDate: string;
+          total: string;
+        }>;
+      };
+    };
+    policies: {
+      paymentType: string;
+      cancellation: {
+        description: {
+          text: string;
+        };
+        type: string;
+      };
+    };
+    self: string;
+  }>;
+  self: string;
+};

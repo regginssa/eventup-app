@@ -1,7 +1,4 @@
-import { fetchHotelDetails } from "@/api/scripts/booking";
-import { setBookingHotel } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { THotelAvailability } from "@/types";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useState } from "react";
@@ -14,19 +11,18 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, HotelItem, Modal, Spinner } from "../common";
+import { THotelItemData } from "../common/HotelItem";
 
 interface HotelAvailabilityGroupProps {
-  sessionId?: string;
-  recommend?: THotelAvailability | null;
-  availabilities: THotelAvailability[];
+  items: THotelItemData[];
+  selected?: THotelItemData;
   isSearched: boolean;
-  onSelect: (hotel: THotelAvailability) => void;
+  onSelect: (hotel: THotelItemData) => void;
 }
 
 const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
-  sessionId,
-  recommend,
-  availabilities,
+  items,
+  selected,
   isSearched,
   onSelect,
 }) => {
@@ -38,7 +34,7 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
   const { hotel } = useSelector((state: RootState) => state.booking);
   const dispatch = useDispatch();
 
-  const renderItem = ({ item }: { item: THotelAvailability }) => {
+  const renderItem = ({ item }: { item: THotelItemData }) => {
     return (
       <TouchableOpacity
         activeOpacity={0.9}
@@ -49,51 +45,14 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
           setIsOpen(false);
         }}
       >
-        <HotelItem hotel={item} hiddenHeader={true} hiddenImages={true} />
+        <HotelItem data={item} hiddenHeader={true} hiddenImages={true} />
       </TouchableOpacity>
     );
   };
 
-  const handleViewImages = async () => {
-    if (
-      !sessionId ||
-      !recommend?.hotelId ||
-      !recommend.productId ||
-      !recommend.tokenId
-    )
-      return;
+  const handleViewImages = async () => {};
 
-    try {
-      setLoading(true);
-      setIsImageOpen(true);
-
-      const { hotelId, productId, tokenId } = recommend;
-
-      const response = await fetchHotelDetails(
-        sessionId,
-        hotelId,
-        productId,
-        tokenId
-      );
-
-      if (response.data) {
-        dispatch(
-          setBookingHotel({
-            ...(hotel as any),
-            recommend: { ...hotel?.recommend, details: response.data },
-          })
-        );
-
-        const images = response.data.hotelImages.map((hi) => hi.url);
-        setImages(images);
-      }
-    } catch (error: any) {
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (isSearched && !recommend) {
+  if (isSearched && !selected) {
     return (
       <View className="w-full flex flex-col items-center justify-center gap-2">
         <MaterialCommunityIcons
@@ -110,7 +69,7 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
 
   return (
     <>
-      {recommend && (
+      {selected && (
         <View className="w-full gap-4 overflow-hidden">
           <View className="flex flex-row items-center gap-2">
             <MaterialIcons name="hotel" size={20} color="#374151" />
@@ -120,7 +79,7 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
           </View>
 
           <HotelItem
-            hotel={recommend}
+            data={selected}
             hiddenHeader={true}
             onViewImages={handleViewImages}
           />
@@ -141,7 +100,7 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
         onClose={() => setIsOpen(false)}
       >
         <FlatList
-          data={availabilities}
+          data={items}
           keyExtractor={(item) => item.hotelId}
           renderItem={renderItem}
           contentContainerStyle={{ gap: 16 }}
@@ -149,7 +108,7 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
       </Modal>
 
       <Modal
-        title={recommend?.hotelName || ""}
+        title={selected?.hotelName || ""}
         isOpen={isImageOpen}
         onClose={() => setIsImageOpen(false)}
       >
@@ -176,7 +135,7 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
               >
                 <Image
                   source={{ uri: item }}
-                  alt={recommend?.hotelName}
+                  alt={selected?.hotelName}
                   contentFit="cover"
                   style={styles.image}
                 />

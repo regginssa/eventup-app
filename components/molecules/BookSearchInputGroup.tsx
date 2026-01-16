@@ -1,6 +1,6 @@
 import {
-  fetchFlights,
-  fetchHotelsList,
+  fetchFlightOffers,
+  fetchHotelOffers,
   fetchTransfersAvailability,
 } from "@/api/scripts/booking";
 import {
@@ -9,14 +9,18 @@ import {
   setBookingTransfer,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { THotelAvailability, TPackageType, TPassengerInfo } from "@/types";
+import { TPackageType, TPassengerInfo } from "@/types";
+import { TAmadeusHotelOffer } from "@/types/amadeus";
 import { IEvent } from "@/types/data";
 import {
   formatBookingDate,
   formatTravelproDateTime,
   normalizeDateUTC,
 } from "@/utils/format";
-import { mapAmadeusFlightOfferToFlightItemData } from "@/utils/map";
+import {
+  mapAmadeusFlightOfferToFlightItemData,
+  mapAmadeusHotelOfferToHotelItemData,
+} from "@/utils/map";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
@@ -24,6 +28,7 @@ import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, DateTimePicker, RadioButton, Spinner } from "../common";
 import { TFlightItemData } from "../common/FlightItem";
+import { THotelItemData } from "../common/HotelItem";
 import FlightAvailabilityGroup from "./FlightAvailabilityGroup";
 import HotelAvailabilityGroup from "./HotelAvailabilityGroup";
 import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
@@ -163,18 +168,24 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   //     : homeNearestAirports,
 
   const searchFlights = async () => {
-    const payload = {
+    const params = {
       type: packageType,
       eventId: event._id,
       departureDate: formatBookingDate(departureDate),
       adults: hotel.data.reduce((sum, room) => sum + room.adults, 0),
-      originLocationCoords:
+      originLocationCoordsLatitude:
         departureLocation === "current"
-          ? currentLocationCoords
-          : user?.location.coordinate,
+          ? currentLocationCoords?.latitude
+          : user?.location.coordinate.latitude,
+      originLocationCoordsLongitude:
+        departureLocation === "current"
+          ? currentLocationCoords?.longitude
+          : user?.location.coordinate.longitude,
     };
 
-    const response = await fetchFlights(payload);
+    console.log("flight offers params: ", params);
+
+    const response = await fetchFlightOffers(params);
 
     if (!response.data) {
       return null;
@@ -186,28 +197,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     dispatch(setBookingFlight({ ...flight, data }));
 
-    // const { recommend } = response.data;
-    // if (!recommend) return null;
-
-    // const initialFlightDetails: IFlightDetail = {
-    //   paxInfo: {
-    //     customerEmail: "",
-    //     customerPhone: "",
-    //     bookingNote: "",
-    //   },
-    //   paxDetails: {
-    //     adults: Array.from({ length: payload.adults }, createEmptyPassenger),
-    //     child: Array.from({ length: payload.childs }, createEmptyPassenger),
-    //     infant: Array.from({ length: payload.infants }, createEmptyPassenger),
-    //   },
-    // };
-
-    // dispatch(
-    //   setBookingFlight({
-    //     ...response.data,
-    //     recommend: { ...recommend, details: initialFlightDetails },
-    //   })
-    // );
+    return data[0];
   };
 
   const searchHotels = async (flight: TFlightItemData) => {
@@ -239,15 +229,23 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     const params = {
       type: packageType,
       eventId: event._id,
-      checkInDate: flightArrival,
-      checkOutDate: checkout,
+      checkInDate: formatBookingDate(flightArrival),
+      checkOutDate: formatBookingDate(checkout),
       adults: 1,
       roomQuantity: hotel.rooms,
     };
 
-    const response = await fetchHotelsList(params);
+    const response = await fetchHotelOffers(params);
 
-    console.log("hotels list response: ", response.data);
+    if (!response.data) {
+      return null;
+    }
+
+    const data = response.data.map((offer: TAmadeusHotelOffer) =>
+      mapAmadeusHotelOfferToHotelItemData(offer)
+    );
+
+    dispatch(setBookingHotel({ ...rdHotel, data }));
   };
 
   const searchTransfers = async (
@@ -374,12 +372,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       setIsSearched(false);
 
       setSearchBtnLabel("Searching flights...");
-      const flightRecommend = await searchFlights();
-      if (!flightRecommend) throw new Error("No flight found");
+      const flightData = await searchFlights();
+      if (!flightData) throw new Error("No flight found");
 
-      // setSearchBtnLabel("Searching hotels...");
-      // const hotelResult = await searchHotels(flightRecommend);
-      // if (!hotelResult?.hotelRecommend) throw new Error("No hotel found");
+      setSearchBtnLabel("Searching hotels...");
+      const hotelData = await searchHotels(flightData);
+      if (!hotelData) throw new Error("No hotel found");
 
       // setSearchBtnLabel("Searching transfers...");
       // await searchTransfers(
@@ -538,7 +536,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         </View>
       </View>
 
-      <View className="w-full flex flex-row items-center justify-between">
+      {/* <View className="w-full flex flex-row items-center justify-between">
         <Text className="font-dm-sans-medium text-sm text-gray-600">
           Infant{" "}
           <Text className="font-poppins-medium text-gray-500">(0-2 years)</Text>
@@ -563,7 +561,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             <Entypo name="plus" size={14} color="#1f2937" />
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */}
 
       {hotel.data.map((dt, index) => (
         <View key={index} className="w-full gap-4">
@@ -619,7 +617,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           </View>
 
           {/* Children */}
-          <View className="w-full flex flex-row items-center justify-between">
+          {/* <View className="w-full flex flex-row items-center justify-between">
             <Text className="font-dm-sans-medium text-sm text-gray-600">
               Children{" "}
               <Text className="font-poppins-medium text-gray-500">
@@ -628,7 +626,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             </Text>
 
             <View className="flex flex-row items-center gap-4">
-              {/* minus child */}
               <TouchableOpacity
                 activeOpacity={0.8}
                 className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
@@ -655,7 +652,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 {dt.childs}
               </Text>
 
-              {/* add child */}
               <TouchableOpacity
                 activeOpacity={0.8}
                 className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
@@ -678,10 +674,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 <Entypo name="plus" size={14} color="#1f2937" />
               </TouchableOpacity>
             </View>
-          </View>
+          </View> */}
 
           {/* Children Age */}
-          {dt.child_age.map((age: any, childIndex: number) => (
+          {/* {dt.child_age.map((age: any, childIndex: number) => (
             <View
               key={childIndex}
               className="w-full flex flex-row items-center justify-between pl-4"
@@ -691,7 +687,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               </Text>
 
               <View className="flex flex-row items-center gap-4">
-                {/* minus age */}
                 <TouchableOpacity
                   activeOpacity={0.8}
                   className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
@@ -719,7 +714,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                   {age}
                 </Text>
 
-                {/* plus age */}
                 <TouchableOpacity
                   activeOpacity={0.8}
                   className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
@@ -744,7 +738,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 </TouchableOpacity>
               </View>
             </View>
-          ))}
+          ))} */}
         </View>
       ))}
 
@@ -770,18 +764,18 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           <View className="w-full h-[1px] bg-gray-200"></View>
 
           <HotelAvailabilityGroup
-            sessionId={rdHotel?.session_id}
-            recommend={rdHotel?.recommend}
-            availabilities={rdHotel?.availabilities || []}
+            items={rdHotel?.data || []}
+            selected={rdHotel?.data[0]}
             isSearched={isSearched}
-            onSelect={(availability: THotelAvailability) => {
+            onSelect={(selected: THotelItemData) => {
               if (rdHotel) {
-                dispatch(
-                  setBookingHotel({
-                    ...rdHotel,
-                    recommend: availability,
-                  })
-                );
+                const reorderedData = [
+                  selected,
+                  ...rdHotel.data.filter(
+                    (item) => item.hotelId !== selected.hotelId
+                  ),
+                ];
+                dispatch(setBookingHotel({ ...rdHotel, data: reorderedData }));
               }
             }}
           />

@@ -16,12 +16,12 @@ import {
   BOOKING_HOTEL_METHOD,
   CHECK_HOTEL_ROOM_RATES,
   FETCH_ALL_BOOKINGS,
-  FETCH_FLIGHTS,
+  FETCH_FLIGHT_OFFERS,
   FETCH_FLIGHTS_AVAILABILITY,
   FETCH_HOTEL_DETAILS,
+  FETCH_HOTEL_OFFERS,
   FETCH_HOTEL_ROOM_RATES,
   FETCH_HOTELS_AVAILABILITY,
-  FETCH_HOTELS_LIST,
   FETCH_TRANSFERS_AVAILABILITY,
   TICKET_FLIGHT_METHOD,
   VALIDATE_FLIGHT_FARE_METHOD,
@@ -186,19 +186,26 @@ export const addNewHotel = async (
   });
 };
 
-export const fetchFlights = async (
-  payload: any
+// ------------ Flight booking engine ------------
+
+// Fetch flight offers
+export const fetchFlightOffers = async (
+  params: any
 ): Promise<ApiResponse<TAmadeusFlightOffer[]>> => {
-  return await AxiosInstance.post(FETCH_FLIGHTS, payload);
+  return await AxiosInstance.get(
+    FETCH_FLIGHT_OFFERS + "?" + new URLSearchParams(params).toString()
+  );
 };
 
-//-------------------------------- Hotel booking engine --------------------------------
+// ------------ Hotel booking engine ------------
 
-// Fetch hotels list
-export const fetchHotelsList = async (
+// Fetch hotel offers
+export const fetchHotelOffers = async (
   params: any
 ): Promise<ApiResponse<any>> => {
-  return await AxiosInstance.get(FETCH_HOTELS_LIST, params);
+  return await AxiosInstance.get(
+    FETCH_HOTEL_OFFERS + "?" + new URLSearchParams(params).toString()
+  );
 };
 
 export const fetchBooking = async (
