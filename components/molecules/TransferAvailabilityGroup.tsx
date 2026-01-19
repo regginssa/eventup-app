@@ -1,36 +1,20 @@
-import { TTransfer, TTransferProduct } from "@/types";
+import { TTransfer } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
-import { useDispatch } from "react-redux";
 import { TransferItem } from "../common";
 
 interface TransferAvailabilityGroupProps {
   transfer: TTransfer | null;
   isSearched?: boolean;
   available?: boolean;
-  hiddenSeeMore?: boolean;
 }
 
 const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
   transfer,
   isSearched,
   available,
-  hiddenSeeMore,
 }) => {
-  const dispatch = useDispatch();
-
-  const moveProductToFirst = (
-    products: TTransferProduct[],
-    selected: TTransferProduct
-  ): TTransferProduct[] => {
-    return [
-      selected,
-      ...products.filter(
-        (p) => p.general.productId !== selected.general.productId
-      ),
-    ];
-  };
-
+  
   if (isSearched && !transfer) {
     return (
       <View className="w-full flex flex-col items-center justify-center gap-2">
