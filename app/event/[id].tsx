@@ -350,7 +350,7 @@ const EventPackages = ({ event }: { event: IEvent }) => {
           label="See package details"
           buttonClassName="h-12"
           textClassName="text-lg"
-          disabled={!flight?.recommend || !hotel?.recommend}
+          // disabled=
           loading={loading}
           onPress={handleOnConfirm}
         />
@@ -359,8 +359,8 @@ const EventPackages = ({ event }: { event: IEvent }) => {
       <PackageConfirmModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        flight={flight?.recommend}
-        hotel={hotel?.recommend}
+        flight={flight?.offers[0]}
+        hotel={hotel?.data[0]}
         transfer={transfer}
         packageType={eventPackage}
         eventId={event._id as string}

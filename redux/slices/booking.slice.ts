@@ -1,4 +1,5 @@
 import { TFlight, THotel, TTransfer } from "@/types";
+import { TAmadeusFlightOffer } from "@/types/amadeus";
 import { IBooking } from "@/types/data";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -22,6 +23,15 @@ const bookingSlice = createSlice({
   reducers: {
     setBookingFlight(state, action: PayloadAction<TFlight | null>) {
       state.flight = action.payload;
+    },
+    updateBookingFlightOfferById(state, action: PayloadAction<{ id: string; offer: TAmadeusFlightOffer }>) {
+      const index = state.flight?.offers.findIndex(
+        (f) => f.id === action.payload.id
+      );
+
+      if (index !== -1) {
+        state.flight!.offers[index as number] = action.payload.offer;
+      }
     },
     setBookingHotel(state, action: PayloadAction<THotel | null>) {
       state.hotel = action.payload;
@@ -48,8 +58,12 @@ const bookingSlice = createSlice({
 
 export const {
   setBookingFlight,
+  updateBookingFlightOfferById,
+  
   setBookingHotel,
+  
   setBookingTransfer,
+  
   addNewBooking,
   updateBooking,
 } = bookingSlice.actions;

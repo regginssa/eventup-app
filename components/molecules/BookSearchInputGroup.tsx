@@ -481,10 +481,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
           <View className="w-full flex flex-row items-center justify-between">
             <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Adults{" "}
-              <Text className="font-poppins-medium text-gray-500">
-                (12 years+)
-              </Text>
+              Adults
             </Text>
 
             <View className="flex flex-row items-center gap-4">

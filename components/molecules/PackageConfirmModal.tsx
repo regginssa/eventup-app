@@ -1,14 +1,15 @@
-import { fetchHotelRoomRates } from "@/api/scripts/booking";
-import { setBookingHotelRoomRates } from "@/redux/slices/booking.slice";
+import { fetchFlightOffersPricing } from "@/api/scripts/booking";
+import { updateBookingFlightOfferById } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { THotelAvailability, TTransfer } from "@/types";
+import { TTransfer } from "@/types";
+import { TAmadeusFlightOffer } from "@/types/amadeus";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, FlightItem, HotelItem, Modal } from "../common";
-import { TFlightItemData } from "../common/FlightItem";
+import { THotelItemData } from "../common/HotelItem";
 import { useTheme } from "../providers/ThemeProvider";
 import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
 
@@ -17,8 +18,8 @@ interface PackageConfirmModalProps {
   onClose: () => void;
   packageType: "standard" | "gold";
   eventId: string;
-  flight?: TFlightItemData;
-  hotel?: THotelAvailability;
+  flight?: TAmadeusFlightOffer;
+  hotel?: THotelItemData;
   transfer: TTransfer | null;
 }
 
@@ -39,31 +40,28 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   const dispatch = useDispatch();
 
   const handleProceedToBooking = async () => {
-    if (hotel && rdxHotel?.session_id) {
-      if (!hotel.hotelId) {
-        return Alert.alert("Error", "Invalid hotel selected.");
+
+    try {
+      setLoading(true);
+
+      if (flight) {
+        const response = await fetchFlightOffersPricing({offers: [flight]});
+        
+        if (response.ok) {
+          dispatch(updateBookingFlightOfferById({ id: flight.id, offer: response.data[0] }));
+        }
       }
-
-      try {
-        setLoading(true);
-
-        const response = await fetchHotelRoomRates({
-          sessionId: rdxHotel.session_id,
-          hotelId: hotel.hotelId,
-          productId: hotel.productId,
-          tokenId: hotel.tokenId,
-        });
-
-        dispatch(setBookingHotelRoomRates(response.data));
-      } catch (error: any) {
-      } finally {
-        setLoading(false);
-      }
+      
+    } catch (error: any) {
+      console.log("error updating flight offer price: ", error);
+    } finally {
+      setLoading(false);
     }
-    router.push({
-      pathname: "/booking",
-      params: { eventId, packageType },
-    });
+   
+    // router.push({
+    //   pathname: "/booking",
+    //   params: { eventId, packageType },
+    // });
   };
 
   return (
@@ -103,7 +101,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             </Text>
           </View>
         ) : (
-          <HotelItem hotel={hotel} hiddenImages={true} />
+          <HotelItem data={hotel} hiddenImages={true} />
         )}
       </View>
 
@@ -116,7 +114,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             </Text>
           </View>
         ) : (
-          <TransferAvailabilityGroup transfer={transfer} hiddenSeeMore={true} />
+          <TransferAvailabilityGroup transfer={transfer}  />
         )}
       </View>
 
