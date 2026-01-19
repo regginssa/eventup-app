@@ -1,6 +1,11 @@
 import { TFlightItemData } from "@/components/common/FlightItem";
 import { THotelItemData } from "@/components/common/HotelItem";
-import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "@/types/amadeus";
+import { TTransferItemData } from "@/components/common/TransferItem";
+import {
+  TAmadeusFlightOffer,
+  TAmadeusHotelOffer,
+  TAmadeusTransferOffer,
+} from "@/types/amadeus";
 
 /**
  * Maps Amadeus Flight Offer API response to TFlightItemData format
@@ -126,5 +131,125 @@ export const mapAmadeusHotelOfferToHotelItemData = (
     cancellationPolicy,
     cancellationType,
     paymentType,
+    address: {
+      countryCode: offer?.hotel?.address?.countryCode || "",
+      postalCode: offer?.hotel?.address?.postalCode || "",
+      stateCode: offer?.hotel?.address?.stateCode || "",
+      cityName: offer?.hotel?.address?.cityName || "",
+      lines: offer?.hotel?.address?.lines || [],
+    },
+  };
+};
+
+/**
+ * Maps Amadeus Transfer Offer API response to TTransferItemData format
+ */
+export const mapAmadeusTransferOfferToTransferItemData = (
+  offer: TAmadeusTransferOffer
+): TTransferItemData => {
+  // Extract from location
+  const from =
+    offer.start?.locationCode ||
+    offer.startConnectedSegment?.departure?.iataCode ||
+    "";
+
+  // Extract to location
+  const to =
+    offer.end?.name ||
+    offer.end?.address?.line ||
+    offer.end?.locationCode ||
+    offer.startConnectedSegment?.arrival?.iataCode ||
+    "";
+
+  // Travel date
+  const travelDate = offer.start?.dateTime || "";
+
+  // Count passengers from passengerCharacteristics
+  let adults = 0;
+  let children = 0;
+  let infants = 0;
+
+  offer.passengerCharacteristics?.forEach((pax) => {
+    if (pax.passengerTypeCode === "ADT") {
+      adults++;
+    } else if (pax.passengerTypeCode === "CHD") {
+      children++;
+    } else if (pax.passengerTypeCode === "INF") {
+      infants++;
+    }
+  });
+
+  // Vehicle info
+  const vehicleType = offer.vehicle?.category || "";
+  const vehicleDescription = offer.vehicle?.description || "";
+  const vehicleImage = offer.vehicle?.imageURL;
+  const seats = offer.vehicle?.seats?.[0]?.count || 0;
+
+  // Format luggage info
+  const luggageParts: string[] = [];
+  offer.vehicle?.baggages?.forEach((bag) => {
+    luggageParts.push(`${bag.count}x ${bag.size}`);
+  });
+  const luggage = luggageParts.join(", ") || "";
+
+  // Service provider
+  const transferCompany = offer.serviceProvider?.name || "";
+  const companyLogo = offer.serviceProvider?.logoUrl;
+
+  // Estimate transfer time from distance (rough estimate: 1km = 1 minute in city, 1km = 0.5 minute on highway)
+  let transferTime: string | undefined;
+  if (offer.distance) {
+    const estimatedMinutes = Math.ceil(offer.distance.value * 0.8); // Rough estimate
+    transferTime = estimatedMinutes.toString();
+  }
+
+  // Price
+  const price = {
+    total: offer.quotation?.monetaryAmount || "0",
+    currency: offer.quotation?.currencyCode?.toLowerCase() || "usd",
+    base: offer.quotation?.base?.monetaryAmount,
+  };
+
+  // Distance
+  const distance = offer.distance
+    ? {
+        value: offer.distance.value,
+        unit: offer.distance.unit,
+      }
+    : undefined;
+
+  // Cancellation policy (from cancellation rules)
+  const cancellationPolicy = offer.cancellationRules
+    ?.map((rule) => {
+      if (rule.feeType === "PERCENTAGE") {
+        return `${rule.feeValue}% fee if cancelled ${rule.metricMin}-${rule.metricMax} ${rule.metricType.toLowerCase()} before`;
+      } else if (rule.feeType === "FIXED") {
+        return `$${rule.feeValue} fee if cancelled ${rule.metricMin}-${rule.metricMax} ${rule.metricType.toLowerCase()} before`;
+      }
+      return "";
+    })
+    .filter(Boolean)
+    .join("; ");
+
+  return {
+    id: offer.id,
+    transferType: offer.transferType,
+    from,
+    to,
+    travelDate,
+    adults,
+    children,
+    infants,
+    vehicleType,
+    vehicleDescription,
+    vehicleImage,
+    seats,
+    luggage,
+    transferCompany,
+    companyLogo,
+    transferTime,
+    price,
+    distance,
+    cancellationPolicy,
   };
 };

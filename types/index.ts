@@ -1,5 +1,6 @@
 import { TFlightItemData } from "@/components/common/FlightItem";
 import { THotelItemData } from "@/components/common/HotelItem";
+import { TTransferItemData } from "@/components/common/TransferItem";
 
 export type TCoordinate = {
   latitude: number;
@@ -581,6 +582,6 @@ export interface ITransferBookingRequest {
 }
 
 export type TTransfer = {
-  ah: ITransferAvailability;
-  he: ITransferAvailability;
+  ah: TTransferItemData;
+  he: TTransferItemData;
 };

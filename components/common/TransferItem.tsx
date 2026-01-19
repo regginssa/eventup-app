@@ -1,85 +1,98 @@
-import { ITransferAvailability, TTransferProduct } from "@/types";
 import { formatEventDate, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useState } from "react";
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import Button from "./Button";
-import Modal from "./Modal";
-import TransferListItem from "./TransferListItem";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+// TTransferItemData - essential fields from Amadeus Transfer Offer
+export type TTransferItemData = {
+  // Transfer ID
+  id: string;
+  transferType: string;
+
+  // Locations
+  from: string;
+  to: string;
+
+  // Travel date
+  travelDate: string;
+
+  // Passengers
+  adults: number;
+  children: number;
+  infants: number;
+
+  // Vehicle info
+  vehicleType: string;
+  vehicleDescription: string;
+  vehicleImage?: string;
+  seats: number;
+  luggage: string; // Formatted luggage info
+
+  // Service provider
+  transferCompany: string;
+  companyLogo?: string;
+
+  // Transfer details
+  transferTime?: string; // in minutes (estimated or actual)
+
+  // Price
+  price: {
+    total: string;
+    currency: string;
+    base?: string;
+  };
+
+  // Optional fields
+  distance?: {
+    value: number;
+    unit: string;
+  };
+  cancellationPolicy?: string;
+  rating?: number;
+};
 
 interface TransferItemProps {
-  transfer: ITransferAvailability | undefined;
-  hiddenSeeMore?: boolean;
-  onSelect: (product: TTransferProduct) => void;
+  data?: TTransferItemData;
+  hiddenHeader?: boolean;
+  onSelect?: (data: TTransferItemData) => void;
 }
 
-const TransferItem: React.FC<TransferItemProps> = ({
-  transfer,
-  hiddenSeeMore,
-  onSelect,
-}) => {
-  if (!transfer) {
-    return null;
-  }
+const TransferItem: React.FC<TransferItemProps> = ({ data, hiddenHeader, onSelect }) => {
+  if (!data) return null;
+  
+  const {
+    from,
+    to,
+    travelDate,
+    adults,
+    children,
+    infants,
+    vehicleType,
+    vehicleDescription,
+    vehicleImage,
+    luggage,
+    transferCompany,
+    transferTime,
+    price,
+    rating,
+  } = data;
 
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const product = transfer?.travelling?.products?.[0];
-  const journeyFrom = transfer?.searchResult?.originName || "";
-  const journeyTo = transfer?.searchResult?.endName || "";
-  const travelDate = transfer?.searchResult?.travelling || "";
-  const adults = transfer?.searchResult?.adults || "0";
-  const children = transfer?.searchResult?.children || "0";
-  const infants = transfer?.searchResult?.infants || "0";
-
-  const vehicleType = product?.general?.productType || "";
-  const transferCompany = product?.general?.transferCompany || "";
-  const transferTime = product?.general?.transferTime || "";
-  const luggage = product?.general?.luggage || "";
-  const smallBagAllowance = product?.general?.smallBagAllowance || "";
-  const rating = product?.general?.rating || "";
-  const numberOfReviews = product?.general?.numberOfReviews || "";
-  const canxHours = product?.general?.canxHours || "";
-  const canxPerc = product?.general?.canxPerc || "";
-
-  const price = product?.pricing?.price || "";
-  const currency = product?.pricing?.currency?.toUpperCase() || "";
-
-  const extras =
-    product?.pricing?.extras?.map((e) => ({
-      type: e.extra.type,
-      price: e.extra.price,
-      currency: e.extra.currency,
-    })) || [];
-
-  const vehicleImage = product?.general?.vehicleImage || "";
-
-  const renderItem = ({ item }: { item: TTransferProduct }) => {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.8}
-        className="w-full gap-4 p-2 bg-white border border-gray-200 rounded-xl"
-        style={styles.listContainer}
-        onPress={() => {
-          onSelect(item);
-          setIsOpen(false);
-        }}
-      >
-        <TransferListItem item={item} />
-      </TouchableOpacity>
-    );
+  const handleSelect = () => {
+    if (onSelect) {
+      onSelect(data);
+    }
   };
 
   return (
     <>
-      <View className="w-full px-2 overflow-hidden flex flex-col gap-2">
+      {!hiddenHeader && (
+        <View className="flex flex-row items-center gap-2">
+          <MaterialCommunityIcons name="car" size={20} color="#374151" />
+          <Text className="font-dm-sans-bold text-gray-700">Transfer</Text>
+        </View>
+      )}
+
+      <TouchableOpacity activeOpacity={0.8} className="w-full px-2 overflow-hidden flex flex-col gap-2" onPress={handleSelect}>
         {/* FROM */}
         <View className="w-full flex flex-row items-start gap-4 justify-between">
           <View className="flex flex-row items-center gap-2">
@@ -89,7 +102,7 @@ const TransferItem: React.FC<TransferItemProps> = ({
             </Text>
           </View>
           <Text className="font-poppins-semibold text-gray-600 line-clamp-2 flex-1 text-right">
-            {journeyFrom || "-"}
+            {from || "-"}
           </Text>
         </View>
 
@@ -106,26 +119,28 @@ const TransferItem: React.FC<TransferItemProps> = ({
             </Text>
           </View>
           <Text className="font-poppins-semibold text-gray-600 text-right flex-1 line-clamp-2">
-            {journeyTo || "-"}
+            {to || "-"}
           </Text>
         </View>
 
         {/* TRAVEL DATE */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="calendar-clock-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Travel Date:
+        {travelDate && (
+          <View className="w-full flex flex-row items-center justify-between">
+            <View className="flex flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="calendar-clock-outline"
+                size={16}
+                color="#4b5563"
+              />
+              <Text className="font-dm-sans-medium text-sm text-gray-600">
+                Travel Date:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600">
+              {formatEventDate(new Date(travelDate))}
             </Text>
           </View>
-          <Text className="font-poppins-semibold text-gray-600">
-            {travelDate ? formatEventDate(new Date(travelDate)) : "-"}
-          </Text>
-        </View>
+        )}
 
         {/* PASSENGERS */}
         <View className="w-full flex flex-row items-center justify-between">
@@ -140,85 +155,108 @@ const TransferItem: React.FC<TransferItemProps> = ({
             </Text>
           </View>
           <Text className="font-poppins-semibold text-gray-600">
-            {adults !== "0" && `${adults} Adult${adults !== "1" ? "s" : ""}`}
-            {children !== "0" &&
-              `${adults !== "0" ? ", " : ""}${children} Child${
-                children !== "1" ? "ren" : ""
+            {adults > 0 && `${adults} Adult${adults !== 1 ? "s" : ""}`}
+            {children > 0 &&
+              `${adults > 0 ? ", " : ""}${children} Child${
+                children !== 1 ? "ren" : ""
               }`}
-            {infants !== "0" &&
-              `${
-                adults !== "0" || children !== "0" ? ", " : ""
-              }${infants} Infant${infants !== "1" ? "s" : ""}`}
-            {adults === "0" && children === "0" && infants === "0" && "-"}
+            {infants > 0 &&
+              `${adults > 0 || children > 0 ? ", " : ""}${infants} Infant${
+                infants !== 1 ? "s" : ""
+              }`}
+            {adults === 0 && children === 0 && infants === 0 && "-"}
           </Text>
         </View>
 
         {/* VEHICLE TYPE */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons name="car" size={16} color="#4b5563" />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Vehicle Type:
+        {vehicleType && (
+          <View className="w-full flex flex-row items-center justify-between">
+            <View className="flex flex-row items-center gap-2">
+              <MaterialCommunityIcons name="car" size={16} color="#4b5563" />
+              <Text className="font-dm-sans-medium text-sm text-gray-600">
+                Vehicle Type:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600">
+              {vehicleType}
             </Text>
           </View>
-          <Text className="font-poppins-semibold text-gray-600">
-            {vehicleType || "-"}
-          </Text>
-        </View>
+        )}
+
+        {/* VEHICLE DESCRIPTION */}
+        {vehicleDescription && (
+          <View className="w-full flex flex-row items-start justify-between">
+            <View className="flex flex-row items-center gap-2">
+              <MaterialIcons name="description" size={16} color="#4b5563" />
+              <Text className="font-dm-sans-medium text-sm text-gray-600">
+                Description:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600 w-1/2 text-right">
+              {vehicleDescription}
+            </Text>
+          </View>
+        )}
 
         {/* TRANSFER COMPANY */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="office-building-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Company:
+        {transferCompany && (
+          <View className="w-full flex flex-row items-center justify-between">
+            <View className="flex flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="office-building-outline"
+                size={16}
+                color="#4b5563"
+              />
+              <Text className="font-dm-sans-medium text-sm text-gray-600">
+                Company:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600">
+              {transferCompany}
             </Text>
           </View>
-          <Text className="font-poppins-semibold text-gray-600">
-            {transferCompany || "-"}
-          </Text>
-        </View>
+        )}
 
         {/* TRANSFER TIME */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="clock-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Transfer Time:
+        {transferTime && (
+          <View className="w-full flex flex-row items-center justify-between">
+            <View className="flex flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="clock-outline"
+                size={16}
+                color="#4b5563"
+              />
+              <Text className="font-dm-sans-medium text-sm text-gray-600">
+                Transfer Time:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600">
+              {transferTime} min
             </Text>
           </View>
-          <Text className="font-poppins-semibold text-gray-600">
-            {transferTime ? `${transferTime} min` : "-"}
-          </Text>
-        </View>
+        )}
 
         {/* LUGGAGE */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="bag-checked"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Luggage:
+        {luggage && (
+          <View className="w-full flex flex-row items-center justify-between">
+            <View className="flex flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="bag-checked"
+                size={16}
+                color="#4b5563"
+              />
+              <Text className="font-dm-sans-medium text-sm text-gray-600">
+                Luggage:
+              </Text>
+            </View>
+            <Text className="font-poppins-semibold text-gray-600">
+              {luggage}
             </Text>
           </View>
-          <Text className="font-poppins-semibold text-gray-600">
-            {luggage || "-"}
-          </Text>
-        </View>
+        )}
 
         {/* RATING */}
-        {rating && (
+        {rating && rating > 0 && (
           <View className="w-full flex flex-row items-center justify-between">
             <View className="flex flex-row items-center gap-2">
               <MaterialCommunityIcons
@@ -231,7 +269,7 @@ const TransferItem: React.FC<TransferItemProps> = ({
               </Text>
             </View>
             <View className="flex flex-row items-center gap-1">
-              {Array.from({ length: Number(rating) }).map((_, idx) => (
+              {Array.from({ length: rating }).map((_, idx) => (
                 <MaterialIcons
                   key={idx}
                   name="star"
@@ -243,51 +281,33 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </View>
         )}
 
-        <View className="w-full relative overflow-hidden rounded-lg h-[150px]">
-          <Image
-            source={{ uri: vehicleImage }}
-            style={styles.image}
-            contentFit="cover"
-            alt="Vehicle Image"
-          />
-        </View>
+        {/* VEHICLE IMAGE */}
+        {vehicleImage && (
+          <View className="w-full relative overflow-hidden rounded-lg h-[150px]">
+            <Image
+              source={{ uri: vehicleImage }}
+              style={styles.image}
+              contentFit="cover"
+              alt="Vehicle Image"
+            />
+          </View>
+        )}
 
         {/* PRICE */}
-        <View className="w-full flex flex-row items-center justify-between">
+        <View className="w-full flex flex-row items-center justify-between mt-3">
           <Text className="font-dm-sans-bold text-gray-700 text-lg">
             Total Price:
           </Text>
           <Text className="font-poppins-bold text-gray-600 text-xl">
             <Text className="text-base">
-              {getCurrencySymbol(currency.toLowerCase() as any)}
+              {getCurrencySymbol(
+                (price.currency.toLowerCase() as any) || "usd"
+              )}
             </Text>
-            {price}
+            {price.total}
           </Text>
         </View>
-
-        {!hiddenSeeMore && (
-          <Button
-            type="text"
-            label="See more"
-            textClassName="text-gray-700 mt-2"
-            buttonClassName="h-8"
-            onPress={() => setIsOpen(true)}
-          />
-        )}
-      </View>
-
-      <Modal
-        title="Available transfers"
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-      >
-        <FlatList
-          data={transfer.travelling.products}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={renderItem}
-          contentContainerStyle={{ gap: 16 }}
-        />
-      </Modal>
+      </TouchableOpacity>
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { ITransferBookingRequest, TFlight, THotel, TTransfer } from "@/types";
+import { TFlight, THotel, TTransfer } from "@/types";
 import { IBooking } from "@/types/data";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -29,18 +29,6 @@ const bookingSlice = createSlice({
     setBookingTransfer(state, action: PayloadAction<TTransfer | null>) {
       state.transfer = action.payload;
     },
-    setBookingTransferBookingRequest(
-      state,
-      action: PayloadAction<{
-        request: ITransferBookingRequest;
-        type: "ah" | "he";
-      }>
-    ) {
-      if (!state.transfer) return;
-
-      const { type, request } = action.payload;
-      state.transfer[type].bookingRequest = request;
-    },
     addNewBooking(state, action: PayloadAction<IBooking>) {
       state.bookings.push(action.payload);
     },
@@ -62,7 +50,6 @@ export const {
   setBookingFlight,
   setBookingHotel,
   setBookingTransfer,
-  setBookingTransferBookingRequest,
   addNewBooking,
   updateBooking,
 } = bookingSlice.actions;

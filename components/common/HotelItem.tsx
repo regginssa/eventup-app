@@ -41,7 +41,13 @@ export type THotelItemData = {
 
   // Optional fields (may not be in Amadeus response but useful if available)
   city?: string;
-  address?: string;
+  address: {
+    countryCode: string;
+    postalCode: string;
+    stateCode: string;
+    cityName: string;
+    lines: string[];
+  }
   hotelRating?: number;
   distanceValue?: number;
   distanceUnit?: string;
@@ -239,7 +245,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
               </Text>
             </View>
             <Text className="font-poppins-semibold text-gray-600 w-1/2 text-right">
-              {data.address}
+              {data.address.lines.join(", ")}
             </Text>
           </View>
         )}

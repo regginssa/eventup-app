@@ -6,19 +6,21 @@ import {
 import {
   setBookingFlight,
   setBookingHotel,
+  setBookingTransfer,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TPackageType } from "@/types";
-import { TAmadeusHotelOffer } from "@/types/amadeus";
+import { TAmadeusHotelOffer, TAmadeusTransferOffer } from "@/types/amadeus";
 import { IEvent } from "@/types/data";
 import {
   formatBookingDate,
   normalizeDateUTC,
-  toLocalISOString,
+  toLocalISOString
 } from "@/utils/format";
 import {
   mapAmadeusFlightOfferToFlightItemData,
   mapAmadeusHotelOfferToHotelItemData,
+  mapAmadeusTransferOfferToTransferItemData,
 } from "@/utils/map";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -226,17 +228,19 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return;
     }
 
-    console.log("hotel: ", hotel);
-
     const params = {
       eventId: event._id,
       airportCode: flight.to,
-      hotelCode: hotel.hotelId,
+      airportLeaveDateTime: flight.arrivalDate,
+      hotelAddressLine: hotel.address.lines.join(", "),
+      hotelCityName: hotel.address.cityName,
+      hotelZipCode: hotel.address.postalCode,
+      hotelCountryCode: hotel.address.countryCode,
+      hotelName: hotel.hotelName,
       hotelGeoCode: `${hotel.latitude},${hotel.longitude}`,
-      startAirportLeaveDateTime: flight.arrivalDate,
-      startHotelLeaveDateTime: toLocalISOString(hotelDepartureDate),
-      passengers: hotel.adults,
       transferType: packageType === "standard" ? "SHARED" : "PRIVATE",
+      hotelLeaveDateTime: toLocalISOString(hotelDepartureDate),
+      passengers: hotel.adults,
     };
 
     const response = await fetchTransferOffers(params);
@@ -244,8 +248,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (!response.data) {
       return null;
     }
-
-    console.log("transfer offers response: ", response.data);
+    
+    const data = response.data.airportToHotel.map((offer: TAmadeusTransferOffer) => mapAmadeusTransferOfferToTransferItemData(offer));
+  
+    dispatch(setBookingTransfer({ ...rdTransfer, ah: data[0], he: data[1]  }));
+    
   };
 
   const handleSearch = async () => {

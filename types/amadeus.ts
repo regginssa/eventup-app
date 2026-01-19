@@ -49,6 +49,13 @@ export type TAmadeusHotelOffer = {
     cityCode: string;
     latitude: number;
     longitude: number;
+    address: {
+      countryCode: string;
+      postalCode: string;
+      stateCode: string;
+      cityName: string;
+      lines: string[];
+    };
   };
   available: boolean;
   offers: Array<{

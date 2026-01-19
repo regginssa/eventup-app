@@ -1,4 +1,3 @@
-import { setBookingTransfer } from "@/redux/slices/booking.slice";
 import { TTransfer, TTransferProduct } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
@@ -53,57 +52,15 @@ const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
       </View>
 
       <TransferItem
-        transfer={transfer?.ah}
-        hiddenSeeMore={hiddenSeeMore}
-        onSelect={(selectedProduct: TTransferProduct) => {
-          if (!transfer?.ah?.travelling?.products) return;
-
-          const reorderedProducts = moveProductToFirst(
-            transfer.ah.travelling.products,
-            selectedProduct
-          );
-
-          dispatch(
-            setBookingTransfer({
-              ...transfer,
-              ah: {
-                ...transfer.ah,
-                travelling: {
-                  ...transfer.ah.travelling,
-                  products: reorderedProducts,
-                },
-              },
-            })
-          );
-        }}
+        data={transfer?.ah}
+        hiddenHeader
       />
 
       <View className="w-full h-[1px] bg-gray-200"></View>
 
       <TransferItem
-        transfer={transfer?.he}
-        hiddenSeeMore={hiddenSeeMore}
-        onSelect={(selectedProduct: TTransferProduct) => {
-          if (!transfer?.ah?.travelling?.products) return;
-
-          const reorderedProducts = moveProductToFirst(
-            transfer.ah.travelling.products,
-            selectedProduct
-          );
-
-          dispatch(
-            setBookingTransfer({
-              ...transfer,
-              he: {
-                ...transfer.he,
-                travelling: {
-                  ...transfer.he.travelling,
-                  products: reorderedProducts,
-                },
-              },
-            })
-          );
-        }}
+        data={transfer?.he}
+        hiddenHeader
       />
     </View>
   );
