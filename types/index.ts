@@ -1,6 +1,6 @@
-import { TFlightItemData } from "@/components/common/FlightItem";
 import { THotelItemData } from "@/components/common/HotelItem";
 import { TTransferItemData } from "@/components/common/TransferItem";
+import { TAmadeusFlightOffer } from "./amadeus";
 
 export type TCoordinate = {
   latitude: number;
@@ -224,8 +224,7 @@ export interface StopQuantityInfo {
 
 export interface TFlight {
   sessionId?: string;
-  data: TFlightItemData[];
-  payload?: any;
+  offers: TAmadeusFlightOffer[];
 }
 
 export interface IHotelDetails {

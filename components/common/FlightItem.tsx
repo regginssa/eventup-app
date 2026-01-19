@@ -1,4 +1,6 @@
+import { TAmadeusFlightOffer } from "@/types/amadeus";
 import { formatEventDate, getCurrencySymbol } from "@/utils/format";
+import { mapAmadeusFlightOfferToFlightItemData } from "@/utils/map";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
@@ -27,24 +29,14 @@ export type TFlightItemData = {
 };
 
 interface FlightItemProps {
-  data: TFlightItemData;
+  data: TAmadeusFlightOffer;
   hiddenHeader?: boolean;
 }
 
 const FlightItem: React.FC<FlightItemProps> = ({ data, hiddenHeader }) => {
-  const {
-    from,
-    to,
-    departureDate,
-    arrivalDate,
-    stops,
-    airlineCode,
-    airlineName,
-    flightNumber,
-    seatsLeft,
-    refundable,
-    price,
-  } = data;
+  if (!data) return null;
+
+  const { from, to, departureDate, arrivalDate, stops, airlineCode, airlineName, flightNumber, seatsLeft, refundable, price } = mapAmadeusFlightOfferToFlightItemData(data);
 
   return (
     <>

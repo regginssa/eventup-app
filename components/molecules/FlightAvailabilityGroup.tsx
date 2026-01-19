@@ -1,3 +1,4 @@
+import { TAmadeusFlightOffer } from "@/types/amadeus";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
@@ -8,13 +9,12 @@ import {
   View,
 } from "react-native";
 import { Button, FlightItem, Modal } from "../common";
-import { TFlightItemData } from "../common/FlightItem";
 
 interface FlightAvailabilityGroupProps {
-  selected?: TFlightItemData;
-  items: TFlightItemData[];
+  selected?: TAmadeusFlightOffer;
+  items: TAmadeusFlightOffer[];
   isSearched: boolean;
-  onSelect: (availability: TFlightItemData) => void;
+  onSelect: (availability: TAmadeusFlightOffer) => void;
 }
 
 const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
@@ -25,7 +25,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const renderItem = ({ item }: { item: TFlightItemData }) => {
+  const renderItem = ({ item }: { item: TAmadeusFlightOffer }) => {
     return (
       <TouchableOpacity
         activeOpacity={0.8}

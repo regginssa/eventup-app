@@ -10,7 +10,7 @@ import {
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TPackageType } from "@/types";
-import { TAmadeusHotelOffer, TAmadeusTransferOffer } from "@/types/amadeus";
+import { TAmadeusFlightOffer, TAmadeusHotelOffer, TAmadeusTransferOffer } from "@/types/amadeus";
 import { IEvent } from "@/types/data";
 import {
   formatBookingDate,
@@ -144,13 +144,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return null;
     }
 
-    const data = response.data.map((offer) =>
-      mapAmadeusFlightOfferToFlightItemData(offer)
-    );
+    dispatch(setBookingFlight({ ...flight, offers: response.data }));
 
-    dispatch(setBookingFlight({ ...flight, data }));
-
-    return data[0];
+    const flightData = mapAmadeusFlightOfferToFlightItemData(response.data[0]);
+    return flightData;
   };
 
   const searchHotels = async (flight: TFlightItemData) => {
@@ -658,12 +655,18 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           <View className="w-full h-[1px] bg-gray-200"></View>
 
           <FlightAvailabilityGroup
-            selected={flight?.data[0]}
-            items={flight?.data || []}
+            selected={flight?.offers[0]}
+            items={flight?.offers || []}
             isSearched={isSearched}
-            onSelect={(availability: TFlightItemData) => {
+            onSelect={(selected: TAmadeusFlightOffer) => {
               if (flight) {
-                dispatch(setBookingFlight({ ...flight }));
+                const reorderedData = [
+                  selected,
+                  ...flight.offers.filter(
+                    (item) => item.id !== selected.id
+                  ),
+                ];
+                dispatch(setBookingFlight({ ...flight, offers: reorderedData }));
               }
             }}
           />
