@@ -40,8 +40,16 @@ export const BOOKING_BASE = "/booking/";
 export const FETCH_ALL_BOOKINGS = "/booking/all/";
 
 export const FETCH_FLIGHT_OFFERS = "/booking/flight-offers";
+export const FETCH_FLIGHT_OFFERS_PRICING = "/booking/flight-offers-pricing";
+export const CREATE_FLIGHT_ORDER = "/booking/flight-order";
+export const GET_FLIGHT_ORDER = "/booking/flight-order/";
+export const CANCEL_FLIGHT_ORDER = "/booking/flight-order/";
+
 export const FETCH_HOTEL_OFFERS = "/booking/hotel-offers";
+export const CREATE_HOTEL_ORDER = "/booking/hotel-order";
+
 export const FETCH_TRANSFER_OFFERS = "/booking/transfer-offers";
+export const CREATE_TRANSFER_ORDER = "/booking/transfer-order";
 
 // Stripe
 export const FETCH_STRIPE_CUSTOMER_ID = "/stripe/customer-id";
