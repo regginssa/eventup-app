@@ -238,6 +238,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       hotelCountryCode: hotel.address.countryCode,
       hotelName: hotel.hotelName,
       hotelGeoCode: `${hotel.latitude},${hotel.longitude}`,
+      hotelCode: hotel.hotelId,
       transferType: packageType === "standard" ? "SHARED" : "PRIVATE",
       hotelLeaveDateTime: toLocalISOString(hotelDepartureDate),
       passengers: hotel.adults,
@@ -249,9 +250,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return null;
     }
     
-    const data = response.data.airportToHotel.map((offer: TAmadeusTransferOffer) => mapAmadeusTransferOfferToTransferItemData(offer));
+    const ahData = response.data.airportToHotel.map((offer: TAmadeusTransferOffer) => mapAmadeusTransferOfferToTransferItemData(offer));
+    const heData = response.data.hotelToEvent.map((offer: TAmadeusTransferOffer) => mapAmadeusTransferOfferToTransferItemData(offer));
   
-    dispatch(setBookingTransfer({ ...rdTransfer, ah: data[0], he: data[1]  }));
+    dispatch(setBookingTransfer({ ...rdTransfer, ah: ahData[0], he: heData[0]  }));
     
   };
 

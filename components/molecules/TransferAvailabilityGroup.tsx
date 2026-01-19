@@ -61,6 +61,7 @@ const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
       <TransferItem
         data={transfer?.he}
         hiddenHeader
+        isHotelToEvent
       />
     </View>
   );

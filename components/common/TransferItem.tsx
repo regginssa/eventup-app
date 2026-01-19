@@ -54,10 +54,11 @@ export type TTransferItemData = {
 interface TransferItemProps {
   data?: TTransferItemData;
   hiddenHeader?: boolean;
+  isHotelToEvent?: boolean;
   onSelect?: (data: TTransferItemData) => void;
 }
 
-const TransferItem: React.FC<TransferItemProps> = ({ data, hiddenHeader, onSelect }) => {
+const TransferItem: React.FC<TransferItemProps> = ({ data, hiddenHeader, isHotelToEvent, onSelect }) => {
   if (!data) return null;
   
   const {
@@ -102,7 +103,7 @@ const TransferItem: React.FC<TransferItemProps> = ({ data, hiddenHeader, onSelec
             </Text>
           </View>
           <Text className="font-poppins-semibold text-gray-600 line-clamp-2 flex-1 text-right">
-            {from || "-"}
+            {from || "-"} {isHotelToEvent && " (hotel)"}
           </Text>
         </View>
 
