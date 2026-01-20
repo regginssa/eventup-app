@@ -677,7 +677,29 @@ const CheckoutScreen = () => {
     );
   }, [user]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    let base = 0;
+    let services: string[] = [];
+
+    if (flight?.offers) {
+      services.push("Flight");
+      const flightPrice = flight?.offers[0]?.price.total || 0;
+      base += Number(flightPrice);
+    }
+
+    if (hotel?.offers) {
+      services.push("Hotel");
+      const hotelPrice = hotel?.offers[0]?.offers[0]?.price?.total || 0;
+      base += Number(hotelPrice);
+    }
+
+    const total = base + base * 0.1;
+
+    setBasePrice(Number(base.toFixed(2)));
+    setTotalPrice(Number(total.toFixed(2)));
+    setCommissionPrice(Number((base * 0.1).toFixed(2)));
+    setServices(services);
+  }, [flight, hotel]);
 
   const handleStripePayment = async () => {
     const stripePayload = {

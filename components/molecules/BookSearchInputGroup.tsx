@@ -419,6 +419,34 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       <View className="w-full flex flex-row items-center justify-between">
         <Text className="font-dm-sans-medium text-sm text-gray-600">
+          Travelers
+        </Text>
+
+        <View className="flex flex-row items-center gap-4">
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
+            disabled={travelers <= 1}
+            onPress={() => travelers > 2 && setTravelers(travelers - 1)}
+          >
+            <Entypo name="minus" size={14} color="#1f2937" />
+          </TouchableOpacity>
+          <Text className="font-poppins-semibold text-gray-800">
+            {travelers}
+          </Text>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
+            disabled={travelers >= 8}
+            onPress={() => travelers < 8 && setTravelers(travelers + 1)}
+          >
+            <Entypo name="plus" size={14} color="#1f2937" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View className="w-full flex flex-row items-center justify-between">
+        <Text className="font-dm-sans-medium text-sm text-gray-600">
           Hotel Rooms
         </Text>
 
@@ -473,34 +501,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           </TouchableOpacity>
         </View>
       </View> */}
-
-      <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-dm-sans-medium text-sm text-gray-600">
-          Travelers
-        </Text>
-
-        <View className="flex flex-row items-center gap-4">
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-            disabled={travelers <= 1}
-            onPress={() => travelers > 2 && setTravelers(travelers - 1)}
-          >
-            <Entypo name="minus" size={14} color="#1f2937" />
-          </TouchableOpacity>
-          <Text className="font-poppins-semibold text-gray-800">
-            {travelers}
-          </Text>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-            disabled={travelers >= 8}
-            onPress={() => travelers < 8 && setTravelers(travelers + 1)}
-          >
-            <Entypo name="plus" size={14} color="#1f2937" />
-          </TouchableOpacity>
-        </View>
-      </View>
 
       {isSearched && (
         <>
