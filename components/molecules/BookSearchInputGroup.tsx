@@ -10,12 +10,16 @@ import {
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TPackageType } from "@/types";
-import { TAmadeusFlightOffer, TAmadeusHotelOffer, TAmadeusTransferOffer } from "@/types/amadeus";
+import {
+  TAmadeusFlightOffer,
+  TAmadeusHotelOffer,
+  TAmadeusTransferOffer,
+} from "@/types/amadeus";
 import { IEvent } from "@/types/data";
 import {
   formatBookingDate,
   normalizeDateUTC,
-  toLocalISOString
+  toLocalISOString,
 } from "@/utils/format";
 import {
   mapAmadeusFlightOfferToFlightItemData,
@@ -48,20 +52,19 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   >("current");
   const [departureDate, setDepartureDate] = useState<Date>(new Date());
   const [hotelDepartureDate, setHotelDepartureDate] = useState<Date>(
-    new Date()
+    new Date(),
   );
   const [hotel, setHotel] = useState<{ rooms: number; data: any[] }>({
     rooms: 1,
     data: [{ adults: 1, childs: 0, child_age: [] }],
   });
-  const [infants, setInfants] = useState<number>(0);
   const [searchBtnLabel, setSearchBtnLabel] = useState<string>("");
   const [isSearched, setIsSearched] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
   const [currentCity, setCurrentCity] = useState<string | null>(null);
   const [currentCountryCode, setCurrentCountryCode] = useState<string | null>(
-    null
+    null,
   );
   const [currentLocationCoords, setCurrentLocationCoords] = useState<{
     latitude: number;
@@ -162,13 +165,13 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     const flightArrival = new Date(flightArrivalDate);
     const flightArrivalDateTime = normalizeDateUTC(flightArrival);
     const eventOpeningDateTime = normalizeDateUTC(
-      new Date(event.opening_date as any)
+      new Date(event.opening_date as any),
     );
 
     if (flightArrivalDateTime > eventOpeningDateTime) {
       Alert.alert(
         "Invalid Flight Arrival Date",
-        "The flight arrival date cannot be before the event date."
+        "The flight arrival date cannot be before the event date.",
       );
       return null;
     }
@@ -181,7 +184,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       eventId: event._id,
       checkInDate: formatBookingDate(flightArrival),
       checkOutDate: formatBookingDate(checkout),
-      adults: 1,
+      adults: hotel.data.reduce((sum, room) => sum + room.adults, 0),
       roomQuantity: hotel.rooms,
     };
 
@@ -192,7 +195,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     }
 
     const data = response.data.map((offer: TAmadeusHotelOffer) =>
-      mapAmadeusHotelOfferToHotelItemData(offer)
+      mapAmadeusHotelOfferToHotelItemData(offer),
     );
 
     dispatch(setBookingHotel({ ...rdHotel, data }));
@@ -202,7 +205,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
   const searchTransfers = async (
     flight: TFlightItemData,
-    hotel: THotelItemData
+    hotel: THotelItemData,
   ) => {
     if (!flight) {
       Alert.alert("Flight Not Selected");
@@ -220,7 +223,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (flightArrivalDateTime > hotelDepartureDateTime) {
       Alert.alert(
         "Invalid Hotel Departure Date",
-        "The hotel departure date cannot be before the flight arrival date."
+        "The hotel departure date cannot be before the flight arrival date.",
       );
       return;
     }
@@ -246,12 +249,19 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (!response.data) {
       return null;
     }
-    
-    const ahData = response.data.airportToHotel.map((offer: TAmadeusTransferOffer) => mapAmadeusTransferOfferToTransferItemData(offer));
-    const heData = response.data.hotelToEvent.map((offer: TAmadeusTransferOffer) => mapAmadeusTransferOfferToTransferItemData(offer));
-  
-    dispatch(setBookingTransfer({ ...rdTransfer, ah: ahData[0], he: heData[0]  }));
-    
+
+    const ahData = response.data.airportToHotel.map(
+      (offer: TAmadeusTransferOffer) =>
+        mapAmadeusTransferOfferToTransferItemData(offer),
+    );
+    const heData = response.data.hotelToEvent.map(
+      (offer: TAmadeusTransferOffer) =>
+        mapAmadeusTransferOfferToTransferItemData(offer),
+    );
+
+    dispatch(
+      setBookingTransfer({ ...rdTransfer, ah: ahData[0], he: heData[0] }),
+    );
   };
 
   const handleSearch = async () => {
@@ -267,14 +277,14 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (eventDateTime < departureDateTime) {
       return Alert.alert(
         "Invalid Departure Date",
-        "The departure date cannot be after the event date."
+        "The departure date cannot be after the event date.",
       );
     }
 
     if (hotelDepartureDateTime > eventDateTime) {
       Alert.alert(
         "Invalid Hotel Departure Date",
-        "The hotel departure date cannot be after the event date."
+        "The hotel departure date cannot be after the event date.",
       );
       return;
     }
@@ -493,7 +503,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                   setHotel({
                     ...hotel,
                     data: hotel.data.map((da, i) =>
-                      i === index ? { ...da, adults: da.adults - 1 } : da
+                      i === index ? { ...da, adults: da.adults - 1 } : da,
                     ),
                   })
                 }
@@ -511,7 +521,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                   setHotel({
                     ...hotel,
                     data: hotel.data.map((da, i) =>
-                      i === index ? { ...da, adults: da.adults + 1 } : da
+                      i === index ? { ...da, adults: da.adults + 1 } : da,
                     ),
                   })
                 }
@@ -659,11 +669,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               if (flight) {
                 const reorderedData = [
                   selected,
-                  ...flight.offers.filter(
-                    (item) => item.id !== selected.id
-                  ),
+                  ...flight.offers.filter((item) => item.id !== selected.id),
                 ];
-                dispatch(setBookingFlight({ ...flight, offers: reorderedData }));
+                dispatch(
+                  setBookingFlight({ ...flight, offers: reorderedData }),
+                );
               }
             }}
           />
@@ -683,7 +693,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 const reorderedData = [
                   selected,
                   ...rdHotel.data.filter(
-                    (item) => item.hotelId !== selected.hotelId
+                    (item) => item.hotelId !== selected.hotelId,
                   ),
                 ];
                 dispatch(setBookingHotel({ ...rdHotel, data: reorderedData }));

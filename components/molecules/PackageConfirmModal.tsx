@@ -1,16 +1,14 @@
 import { fetchFlightOffersPricing } from "@/api/scripts/booking";
 import { updateBookingFlightOfferById } from "@/redux/slices/booking.slice";
-import { RootState } from "@/redux/store";
 import { TTransfer } from "@/types";
 import { TAmadeusFlightOffer } from "@/types/amadeus";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Button, FlightItem, HotelItem, Modal } from "../common";
 import { THotelItemData } from "../common/HotelItem";
-import { useTheme } from "../providers/ThemeProvider";
 import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
 
 interface PackageConfirmModalProps {
@@ -33,35 +31,36 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   transfer,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const { theme } = useTheme();
 
   const router = useRouter();
-  const { hotel: rdxHotel } = useSelector((state: RootState) => state.booking);
   const dispatch = useDispatch();
 
   const handleProceedToBooking = async () => {
-
     try {
       setLoading(true);
 
       if (flight) {
-        const response = await fetchFlightOffersPricing({offers: [flight]});
-        
+        const response = await fetchFlightOffersPricing({ offers: [flight] });
+
         if (response.ok) {
-          dispatch(updateBookingFlightOfferById({ id: flight.id, offer: response.data[0] }));
+          dispatch(
+            updateBookingFlightOfferById({
+              id: flight.id,
+              offer: response.data[0],
+            }),
+          );
         }
       }
-      
+
+      router.push({
+        pathname: "/booking",
+        params: { eventId, packageType },
+      });
     } catch (error: any) {
       console.log("error updating flight offer price: ", error);
     } finally {
       setLoading(false);
     }
-   
-    // router.push({
-    //   pathname: "/booking",
-    //   params: { eventId, packageType },
-    // });
   };
 
   return (
@@ -114,7 +113,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             </Text>
           </View>
         ) : (
-          <TransferAvailabilityGroup transfer={transfer}  />
+          <TransferAvailabilityGroup transfer={transfer} />
         )}
       </View>
 
