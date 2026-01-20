@@ -228,7 +228,7 @@ export interface StopQuantityInfo {
 
 export interface TFlight {
   offers: TAmadeusFlightOffer[];
-  request: TAmadeusFlightBookingRequest;
+  request?: TAmadeusFlightBookingRequest;
 }
 
 export interface IHotelDetails {
@@ -323,7 +323,7 @@ export interface PerNight {
 
 export interface THotel {
   offers: TAmadeusHotelOffer[];
-  request: TAmadeusHotelBookingRequest;
+  request?: TAmadeusHotelBookingRequest;
 }
 
 export interface TTransferAvailability {

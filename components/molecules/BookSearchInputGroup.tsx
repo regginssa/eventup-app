@@ -6,7 +6,9 @@ import {
 import {
   setBookingFlight,
   setBookingHotel,
+  setBookingHotelRooms,
   setBookingTransfer,
+  setBookingTravelers,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TPackageType } from "@/types";
@@ -54,10 +56,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [hotelDepartureDate, setHotelDepartureDate] = useState<Date>(
     new Date(),
   );
-  const [hotel, setHotel] = useState<{ rooms: number; data: any[] }>({
-    rooms: 1,
-    data: [{ adults: 1, childs: 0, child_age: [] }],
-  });
+  const [hotelRooms, setHotelRooms] = useState<number>(1);
   const [searchBtnLabel, setSearchBtnLabel] = useState<string>("");
   const [isSearched, setIsSearched] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -70,6 +69,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [travelers, setTravelers] = useState<number>(1);
 
   const { user } = useSelector((state: RootState) => state.auth);
   const {
@@ -130,7 +130,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       type: packageType,
       eventId: event._id,
       departureDate: formatBookingDate(departureDate),
-      adults: hotel.data.reduce((sum, room) => sum + room.adults, 0),
+      adults: travelers,
       originLocationCoordsLatitude:
         departureLocation === "current"
           ? currentLocationCoords?.latitude
@@ -148,6 +148,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     }
 
     dispatch(setBookingFlight({ ...flight, offers: response.data }));
+    dispatch(setBookingTravelers(travelers));
 
     const flightData = mapAmadeusFlightOfferToFlightItemData(response.data[0]);
     return flightData;
@@ -183,8 +184,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       eventId: event._id,
       checkInDate: formatBookingDate(flightArrival),
       checkOutDate: formatBookingDate(checkout),
-      adults: hotel.data.reduce((sum, room) => sum + room.adults, 0),
-      roomQuantity: hotel.rooms,
+      adults: travelers,
+      roomQuantity: hotelRooms,
     };
 
     const response = await fetchHotelOffers(params);
@@ -199,6 +200,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         offers: response.data,
       }),
     );
+    dispatch(setBookingHotelRooms(hotelRooms));
 
     const hotelOffer = mapAmadeusHotelOfferToHotelItemData(response.data[0]);
 
@@ -424,32 +426,21 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           <TouchableOpacity
             activeOpacity={0.8}
             className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-            disabled={hotel.rooms <= 1}
+            disabled={hotelRooms <= 1}
             onPress={() => {
-              const newData = hotel.data.slice(0, -1);
-              setHotel({
-                ...hotel,
-                rooms: hotel.rooms - 1,
-                data: newData,
-              });
+              hotelRooms > 2 && setHotelRooms(hotelRooms - 1);
             }}
           >
             <Entypo name="minus" size={14} color="#1f2937" />
           </TouchableOpacity>
           <Text className="font-poppins-semibold text-gray-800">
-            {hotel.rooms}
+            {hotelRooms}
           </Text>
           <TouchableOpacity
             activeOpacity={0.8}
             className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-            disabled={hotel.rooms >= 5}
-            onPress={() =>
-              setHotel({
-                ...hotel,
-                rooms: hotel.rooms + 1,
-                data: [...hotel.data, { adults: 1, childs: 0, child_age: [] }],
-              })
-            }
+            disabled={hotelRooms >= 5}
+            onPress={() => hotelRooms < 5 && setHotelRooms(hotelRooms + 1)}
           >
             <Entypo name="plus" size={14} color="#1f2937" />
           </TouchableOpacity>
@@ -483,181 +474,33 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         </View>
       </View> */}
 
-      {hotel.data.map((dt, index) => (
-        <View key={index} className="w-full gap-4">
-          <View className="w-full h-[1px] bg-gray-200"></View>
+      <View className="w-full flex flex-row items-center justify-between">
+        <Text className="font-dm-sans-medium text-sm text-gray-600">
+          Travelers
+        </Text>
 
-          <Text className="font-poppins-semibold text-sm text-gray-700">
-            Room No {index + 1}
+        <View className="flex flex-row items-center gap-4">
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
+            disabled={travelers <= 1}
+            onPress={() => travelers > 2 && setTravelers(travelers - 1)}
+          >
+            <Entypo name="minus" size={14} color="#1f2937" />
+          </TouchableOpacity>
+          <Text className="font-poppins-semibold text-gray-800">
+            {travelers}
           </Text>
-
-          <View className="w-full flex flex-row items-center justify-between">
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Adults
-            </Text>
-
-            <View className="flex flex-row items-center gap-4">
-              <TouchableOpacity
-                activeOpacity={0.8}
-                className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-                disabled={dt.adults <= 1}
-                onPress={() =>
-                  setHotel({
-                    ...hotel,
-                    data: hotel.data.map((da, i) =>
-                      i === index ? { ...da, adults: da.adults - 1 } : da,
-                    ),
-                  })
-                }
-              >
-                <Entypo name="minus" size={14} color="#1f2937" />
-              </TouchableOpacity>
-              <Text className="font-poppins-semibold text-gray-800">
-                {dt.adults}
-              </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-                disabled={dt.adults >= 8}
-                onPress={() =>
-                  setHotel({
-                    ...hotel,
-                    data: hotel.data.map((da, i) =>
-                      i === index ? { ...da, adults: da.adults + 1 } : da,
-                    ),
-                  })
-                }
-              >
-                <Entypo name="plus" size={14} color="#1f2937" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Children */}
-          {/* <View className="w-full flex flex-row items-center justify-between">
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Children{" "}
-              <Text className="font-poppins-medium text-gray-500">
-                (2-11 years)
-              </Text>
-            </Text>
-
-            <View className="flex flex-row items-center gap-4">
-              <TouchableOpacity
-                activeOpacity={0.8}
-                className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-                disabled={dt.childs <= 0}
-                onPress={() =>
-                  setHotel({
-                    ...hotel,
-                    data: hotel.data.map((da, i) =>
-                      i === index
-                        ? {
-                            ...da,
-                            childs: da.childs - 1,
-                            child_age: da.child_age.slice(0, -1),
-                          }
-                        : da
-                    ),
-                  })
-                }
-              >
-                <Entypo name="minus" size={14} color="#1f2937" />
-              </TouchableOpacity>
-
-              <Text className="font-poppins-semibold text-gray-800">
-                {dt.childs}
-              </Text>
-
-              <TouchableOpacity
-                activeOpacity={0.8}
-                className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-                disabled={dt.childs >= 4}
-                onPress={() =>
-                  setHotel({
-                    ...hotel,
-                    data: hotel.data.map((da, i) =>
-                      i === index
-                        ? {
-                            ...da,
-                            childs: da.childs + 1,
-                            child_age: [...da.child_age, 2], // default age
-                          }
-                        : da
-                    ),
-                  })
-                }
-              >
-                <Entypo name="plus" size={14} color="#1f2937" />
-              </TouchableOpacity>
-            </View>
-          </View> */}
-
-          {/* Children Age */}
-          {/* {dt.child_age.map((age: any, childIndex: number) => (
-            <View
-              key={childIndex}
-              className="w-full flex flex-row items-center justify-between pl-4"
-            >
-              <Text className="font-dm-sans-medium text-sm text-gray-600">
-                Child {childIndex + 1} Age
-              </Text>
-
-              <View className="flex flex-row items-center gap-4">
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-                  disabled={age <= 2}
-                  onPress={() =>
-                    setHotel({
-                      ...hotel,
-                      data: hotel.data.map((da, i) =>
-                        i === index
-                          ? {
-                              ...da,
-                              child_age: da.child_age.map((ag: any, ai: any) =>
-                                ai === childIndex ? ag - 1 : ag
-                              ),
-                            }
-                          : da
-                      ),
-                    })
-                  }
-                >
-                  <Entypo name="minus" size={14} color="#1f2937" />
-                </TouchableOpacity>
-
-                <Text className="font-poppins-semibold text-gray-800">
-                  {age}
-                </Text>
-
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-                  disabled={age >= 11}
-                  onPress={() =>
-                    setHotel({
-                      ...hotel,
-                      data: hotel.data.map((da, i) =>
-                        i === index
-                          ? {
-                              ...da,
-                              child_age: da.child_age.map((ag: any, ai: any) =>
-                                ai === childIndex ? ag + 1 : ag
-                              ),
-                            }
-                          : da
-                      ),
-                    })
-                  }
-                >
-                  <Entypo name="plus" size={14} color="#1f2937" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))} */}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
+            disabled={travelers >= 8}
+            onPress={() => travelers < 8 && setTravelers(travelers + 1)}
+          >
+            <Entypo name="plus" size={14} color="#1f2937" />
+          </TouchableOpacity>
         </View>
-      ))}
+      </View>
 
       {isSearched && (
         <>

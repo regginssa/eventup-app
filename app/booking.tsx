@@ -176,13 +176,13 @@ const BookingScreen = () => {
   const { eventId, packageType } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
-  const { flight, hotel, transfer } = useSelector(
+  const { flight, hotel, travelers, hotelRooms } = useSelector(
     (state: RootState) => state.booking,
   );
   const [flightTravelers, setFlightTravelers] = useState<TFlightTraveler[]>([]);
   const [hotelTravelers, setHotelTravelers] = useState<THotelTraveler[]>([]);
   const [isConfirmed, setIsConfirmed] = useState<boolean[]>(
-    Array.from({ length: 2 }, () => false),
+    Array.from({ length: travelers }, () => false),
   );
 
   const dispatch = useDispatch();
@@ -310,7 +310,7 @@ const BookingScreen = () => {
         <EventDetail loading={loading} event={event} />
 
         <TravelerDetailsForm
-          travelers={2}
+          travelers={travelers}
           onTravelerDetailsConfirm={handleTravelerDetailsConfirm}
           isConfirmed={isConfirmed}
         />

@@ -12,6 +12,8 @@ interface IBookingState {
   flight: TFlight | null;
   hotel: THotel | null;
   transfer: TTransfer | null;
+  travelers: number;
+  hotelRooms: number;
   bookings: IBooking[];
 }
 
@@ -19,6 +21,8 @@ const initialState: IBookingState = {
   flight: null,
   hotel: null,
   transfer: null,
+  travelers: 1,
+  hotelRooms: 1,
   bookings: [],
 };
 
@@ -64,6 +68,13 @@ const bookingSlice = createSlice({
       state.hotel!.request = action.payload;
     },
 
+    setBookingTravelers(state, action: PayloadAction<number>) {
+      state.travelers = action.payload;
+    },
+    setBookingHotelRooms(state, action: PayloadAction<number>) {
+      state.hotelRooms = action.payload;
+    },
+
     setBookingTransfer(state, action: PayloadAction<TTransfer | null>) {
       state.transfer = action.payload;
     },
@@ -94,6 +105,9 @@ export const {
   setBookingHotelRequest,
 
   setBookingTransfer,
+
+  setBookingTravelers,
+  setBookingHotelRooms,
 
   addNewBooking,
   updateBooking,
