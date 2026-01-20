@@ -23,6 +23,7 @@ interface CountryPickerProps {
   invalid?: boolean;
   invalidText?: string;
   className?: string;
+  bordered?: boolean;
   value: Country | null;
   onPick: (val: Country) => void;
 }
@@ -33,6 +34,7 @@ const CountryPicker: React.FC<CountryPickerProps> = ({
   invalid,
   invalidText,
   className,
+  bordered,
   value,
   onPick,
 }) => {
@@ -86,6 +88,7 @@ const CountryPicker: React.FC<CountryPickerProps> = ({
       <TouchableOpacity
         activeOpacity={0.8}
         className={`py-1 px-4 gap-2 bg-white rounded-md flex flex-row items-center ${className}`}
+        style={[{ borderWidth: bordered ? 1 : 0, borderColor: "#d1d5db" }]}
         onPress={() => setIsOpen(true)}
       >
         <AntDesign name="global" size={16} color="#4b5563" />

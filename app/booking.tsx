@@ -1,6 +1,8 @@
 import { fetchEvent } from "@/api/scripts/event";
 import { Button, Spinner } from "@/components/common";
-import { PassengerDetailInputGroup } from "@/components/molecules";
+import TravelerDetailInputGroup, {
+  TFlightTraveler,
+} from "@/components/molecules/TravelerDetailInputGroup";
 import BookingContainer from "@/components/organisms/BookingContainer";
 import { RootState } from "@/redux/store";
 import { IEvent } from "@/types/data";
@@ -9,7 +11,7 @@ import { Fontisto, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const EventDetail = ({
@@ -75,20 +77,66 @@ const EventDetail = ({
   );
 };
 
-interface PassengerDetailsFormProps {
-  passengers: number;
+interface TravelerDetailsFormProps {
+  travelers: number;
+  onTravelerDetailsConfirm: (
+    travelerDetails: TFlightTraveler,
+    id: number,
+  ) => void;
+  isConfirmed: boolean[];
 }
 
-const PassengerDetailsForm: React.FC<PassengerDetailsFormProps> = ({
-  passengers,
+const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
+  travelers,
+  onTravelerDetailsConfirm,
+  isConfirmed,
 }) => {
   return (
-    <View className="w-full bg-white rounded-xl p-4 gap-6">
-      <Text className="font-poppins-semibold text-lg text-gray-800">
-        Passenger Details
-      </Text>
-      <PassengerDetailInputGroup />
-    </View>
+    <>
+      <View className="w-full bg-white rounded-xl p-4 gap-6">
+        <Text className="font-poppins-semibold text-lg text-gray-800">
+          Traveler Details
+        </Text>
+
+        {Array.from({ length: travelers }).map((_, index) => (
+          <TravelerDetailInputGroup
+            key={index}
+            id={index + 1}
+            title={`Traveler ${index + 1}`}
+            onConfirm={(travelerDetails) =>
+              onTravelerDetailsConfirm(travelerDetails, index + 1)
+            }
+          />
+        ))}
+      </View>
+
+      <View className="w-full bg-white rounded-xl p-4 gap-6">
+        {Array.from({ length: travelers }).map((_, index) => (
+          <View
+            key={index}
+            className="w-full flex flex-row items-center justify-between"
+          >
+            <Text className="font-poppins-semibold text-sm text-gray-800">
+              Traveler {index + 1}
+            </Text>
+
+            {isConfirmed[index] ? (
+              <MaterialCommunityIcons
+                name="check-circle-outline"
+                size={24}
+                color="green"
+              />
+            ) : (
+              <MaterialCommunityIcons
+                name="alert-circle-outline"
+                size={24}
+                color="red"
+              />
+            )}
+          </View>
+        ))}
+      </View>
+    </>
   );
 };
 
@@ -101,6 +149,10 @@ const BookingScreen = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const { flight, hotel, transfer } = useSelector(
     (state: RootState) => state.booking,
+  );
+  const [passengers, setPassengers] = useState<TFlightTraveler[]>([]);
+  const [isConfirmed, setIsConfirmed] = useState<boolean[]>(
+    Array.from({ length: 2 }, () => false),
   );
 
   const dispatch = useDispatch();
@@ -125,15 +177,46 @@ const BookingScreen = () => {
     init();
   }, []);
 
+  const handleTravelerDetailsConfirm = (
+    passengerDetails: TFlightTraveler,
+    id: number,
+  ) => {
+    setPassengers((prev) => {
+      const newPassengers = [...prev];
+      newPassengers[id - 1] = passengerDetails;
+      return newPassengers;
+    });
+    setIsConfirmed((prev) => {
+      const newIsConfirmed = [...prev];
+      newIsConfirmed[id - 1] = true;
+      return newIsConfirmed;
+    });
+  };
+
+  const handleCheckout = async () => {
+    if (isConfirmed.every((confirmed) => !confirmed))
+      return Alert.alert("Error", "Please confirm all passenger details");
+  };
+
   return (
     <BookingContainer>
       <View className="flex-1 gap-4">
         <EventDetail loading={loading} event={event} />
 
-        <PassengerDetailsForm passengers={2} />
+        <TravelerDetailsForm
+          travelers={2}
+          onTravelerDetailsConfirm={handleTravelerDetailsConfirm}
+          isConfirmed={isConfirmed}
+        />
       </View>
 
-      <Button type="primary" label="Checkout" buttonClassName="h-12" />
+      <Button
+        type="primary"
+        label="Checkout"
+        buttonClassName="h-12"
+        disabled={isConfirmed.every((confirmed) => !confirmed)}
+        onPress={handleCheckout}
+      />
     </BookingContainer>
   );
 };
