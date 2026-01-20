@@ -194,13 +194,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return null;
     }
 
-    const data = response.data.map((offer: TAmadeusHotelOffer) =>
-      mapAmadeusHotelOfferToHotelItemData(offer),
-    );
+    dispatch(setBookingHotel({ ...rdHotel, offers: response.data }));
 
-    dispatch(setBookingHotel({ ...rdHotel, data }));
+    const hotelOffer = mapAmadeusHotelOfferToHotelItemData(response.data[0]);
 
-    return data[0];
+    return hotelOffer;
   };
 
   const searchTransfers = async (
@@ -685,18 +683,20 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           <View className="w-full h-[1px] bg-gray-200"></View>
 
           <HotelAvailabilityGroup
-            items={rdHotel?.data || []}
-            selected={rdHotel?.data[0]}
+            items={rdHotel?.offers || []}
+            selected={rdHotel?.offers[0]}
             isSearched={isSearched}
-            onSelect={(selected: THotelItemData) => {
+            onSelect={(selected: TAmadeusHotelOffer) => {
               if (rdHotel) {
                 const reorderedData = [
                   selected,
-                  ...rdHotel.data.filter(
-                    (item) => item.hotelId !== selected.hotelId,
+                  ...rdHotel.offers.filter(
+                    (item) => item.hotel?.hotelId !== selected.hotel?.hotelId,
                   ),
                 ];
-                dispatch(setBookingHotel({ ...rdHotel, data: reorderedData }));
+                dispatch(
+                  setBookingHotel({ ...rdHotel, offers: reorderedData }),
+                );
               }
             }}
           />

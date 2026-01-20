@@ -1,6 +1,5 @@
-import { THotelItemData } from "@/components/common/HotelItem";
 import { TTransferItemData } from "@/components/common/TransferItem";
-import { TAmadeusFlightOffer } from "./amadeus";
+import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "./amadeus";
 
 export type TCoordinate = {
   latitude: number;
@@ -318,7 +317,7 @@ export interface PerNight {
 }
 
 export interface THotel {
-  data: THotelItemData[];
+  offers: TAmadeusHotelOffer[];
 }
 
 export interface TTransferAvailability {

@@ -46,6 +46,7 @@ export const GET_FLIGHT_ORDER = "/booking/flight-order/";
 export const CANCEL_FLIGHT_ORDER = "/booking/flight-order/";
 
 export const FETCH_HOTEL_OFFERS = "/booking/hotel-offers";
+export const FETCH_HOTEL_OFFER_PRICING = "/booking/hotel-offer-pricing/";
 export const CREATE_HOTEL_ORDER = "/booking/hotel-order";
 
 export const FETCH_TRANSFER_OFFERS = "/booking/transfer-offers";

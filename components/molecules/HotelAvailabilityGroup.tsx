@@ -1,4 +1,5 @@
 import { RootState } from "@/redux/store";
+import { TAmadeusHotelOffer } from "@/types/amadeus";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useState } from "react";
@@ -11,13 +12,12 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, HotelItem, Modal, Spinner } from "../common";
-import { THotelItemData } from "../common/HotelItem";
 
 interface HotelAvailabilityGroupProps {
-  items: THotelItemData[];
-  selected?: THotelItemData;
+  items: TAmadeusHotelOffer[];
+  selected?: TAmadeusHotelOffer;
   isSearched: boolean;
-  onSelect: (hotel: THotelItemData) => void;
+  onSelect: (hotel: TAmadeusHotelOffer) => void;
 }
 
 const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
@@ -34,7 +34,7 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
   const { hotel } = useSelector((state: RootState) => state.booking);
   const dispatch = useDispatch();
 
-  const renderItem = ({ item }: { item: THotelItemData }) => {
+  const renderItem = ({ item }: { item: TAmadeusHotelOffer }) => {
     return (
       <TouchableOpacity
         activeOpacity={0.9}
@@ -101,14 +101,14 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
       >
         <FlatList
           data={items}
-          keyExtractor={(item) => item.hotelId}
+          keyExtractor={(item) => item.hotel?.hotelId || ""}
           renderItem={renderItem}
           contentContainerStyle={{ gap: 16 }}
         />
       </Modal>
 
       <Modal
-        title={selected?.hotelName || ""}
+        title={selected?.hotel?.name || ""}
         isOpen={isImageOpen}
         onClose={() => setIsImageOpen(false)}
       >
@@ -135,7 +135,7 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
               >
                 <Image
                   source={{ uri: item }}
-                  alt={selected?.hotelName}
+                  alt={selected?.hotel?.name}
                   contentFit="cover"
                   style={styles.image}
                 />

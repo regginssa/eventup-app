@@ -1,4 +1,6 @@
+import { TAmadeusHotelOffer } from "@/types/amadeus";
 import { formatEventDate, getCurrencySymbol } from "@/utils/format";
+import { mapAmadeusHotelOfferToHotelItemData } from "@/utils/map";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -47,7 +49,7 @@ export type THotelItemData = {
     stateCode: string;
     cityName: string;
     lines: string[];
-  }
+  };
   hotelRating?: number;
   distanceValue?: number;
   distanceUnit?: string;
@@ -56,18 +58,22 @@ export type THotelItemData = {
 };
 
 interface HotelItemProps {
-  data: THotelItemData;
+  data: TAmadeusHotelOffer;
   hiddenHeader?: boolean;
   hiddenImages?: boolean;
   onViewImages?: () => Promise<void>;
 }
 
 const HotelItem: React.FC<HotelItemProps> = ({
-  data,
+  data: offer,
   hiddenHeader,
   hiddenImages,
   onViewImages,
 }) => {
+  if (!offer) return null;
+
+  const data = mapAmadeusHotelOfferToHotelItemData(offer);
+
   return (
     <>
       {!hiddenHeader && (
@@ -331,7 +337,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </Text>
           <Text className="font-poppins-bold text-gray-700 text-xl">
             {getCurrencySymbol(
-              (data.price.currency.toLowerCase() as any) || "usd"
+              (data.price.currency.toLowerCase() as any) || "usd",
             )}
             {data.price.total}
           </Text>

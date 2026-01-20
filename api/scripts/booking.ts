@@ -1,7 +1,5 @@
 import { TAmadeusFlightOffer } from "@/types/amadeus";
-import {
-  ApiResponse
-} from "@/types/api";
+import { ApiResponse } from "@/types/api";
 import { IBooking } from "@/types/data";
 import AxiosInstance from "../AxiosInstance";
 import {
@@ -13,52 +11,45 @@ import {
   FETCH_ALL_BOOKINGS,
   FETCH_FLIGHT_OFFERS,
   FETCH_FLIGHT_OFFERS_PRICING,
+  FETCH_HOTEL_OFFER_PRICING,
   FETCH_HOTEL_OFFERS,
   FETCH_TRANSFER_OFFERS,
-  GET_FLIGHT_ORDER
+  GET_FLIGHT_ORDER,
 } from "../apis";
 
 // ------------ Flight booking engine ------------
 
 // Fetch flight offers
 export const fetchFlightOffers = async (
-  params: any
+  params: any,
 ): Promise<ApiResponse<TAmadeusFlightOffer[]>> => {
   return await AxiosInstance.get(
-    FETCH_FLIGHT_OFFERS + "?" + new URLSearchParams(params).toString()
+    FETCH_FLIGHT_OFFERS + "?" + new URLSearchParams(params).toString(),
   );
 };
 
 // Fetch flight offers pricing
 export const fetchFlightOffersPricing = async (
-  params: any
+  params: any,
 ): Promise<ApiResponse<any>> => {
-  return await AxiosInstance.post(
-    FETCH_FLIGHT_OFFERS_PRICING,
-    params
-  );
+  return await AxiosInstance.post(FETCH_FLIGHT_OFFERS_PRICING, params);
 };
 
 // Create flight order
 export const createFlightOrder = async (
-  params: any
+  params: any,
 ): Promise<ApiResponse<any>> => {
-  return await AxiosInstance.post(
-    CREATE_FLIGHT_ORDER,
-    params
-  );
+  return await AxiosInstance.post(CREATE_FLIGHT_ORDER, params);
 };
 
 // Get flight order
-export const getFlightOrder = async (
-  id: string
-): Promise<ApiResponse<any>> => {
+export const getFlightOrder = async (id: string): Promise<ApiResponse<any>> => {
   return await AxiosInstance.get(GET_FLIGHT_ORDER + id);
 };
 
 // Cancel flight order
 export const cancelFlightOrder = async (
-  id: string
+  id: string,
 ): Promise<ApiResponse<any>> => {
   return await AxiosInstance.post(CANCEL_FLIGHT_ORDER + id);
 };
@@ -67,16 +58,23 @@ export const cancelFlightOrder = async (
 
 // Fetch hotel offers
 export const fetchHotelOffers = async (
-  params: any
+  params: any,
 ): Promise<ApiResponse<any>> => {
   return await AxiosInstance.get(
-    FETCH_HOTEL_OFFERS + "?" + new URLSearchParams(params).toString()
+    FETCH_HOTEL_OFFERS + "?" + new URLSearchParams(params).toString(),
   );
+};
+
+// Fetch hotel offer pricing
+export const fetchHotelOfferPricing = async (
+  id: string,
+): Promise<ApiResponse<any>> => {
+  return await AxiosInstance.get(FETCH_HOTEL_OFFER_PRICING + id);
 };
 
 // Create hotel order
 export const createHotelOrder = async (
-  params: any
+  params: any,
 ): Promise<ApiResponse<any>> => {
   return await AxiosInstance.post(CREATE_HOTEL_ORDER, params);
 };
@@ -85,16 +83,16 @@ export const createHotelOrder = async (
 
 // Fetch transfer offers
 export const fetchTransferOffers = async (
-  params: any
+  params: any,
 ): Promise<ApiResponse<any>> => {
   return await AxiosInstance.get(
-    FETCH_TRANSFER_OFFERS + "?" + new URLSearchParams(params).toString()
+    FETCH_TRANSFER_OFFERS + "?" + new URLSearchParams(params).toString(),
   );
 };
 
 // Create transfer order
 export const createTransferOrder = async (
-  params: any
+  params: any,
 ): Promise<ApiResponse<any>> => {
   return await AxiosInstance.post(CREATE_TRANSFER_ORDER, params);
 };
@@ -103,15 +101,14 @@ export const createTransferOrder = async (
 
 // Fetch all bookings
 export const fetchAllBookings = async (
-  userId: string
+  userId: string,
 ): Promise<ApiResponse<IBooking[]>> => {
   return await AxiosInstance.get(FETCH_ALL_BOOKINGS + userId);
 };
 
-
 // Fetch booking
 export const fetchBooking = async (
-  id: string
+  id: string,
 ): Promise<ApiResponse<IBooking>> => {
   return await AxiosInstance.get(BOOKING_BASE + id);
 };
