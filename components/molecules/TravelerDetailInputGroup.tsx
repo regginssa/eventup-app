@@ -1,9 +1,11 @@
+import { RootState } from "@/redux/store";
 import { TDropdownItem } from "@/types";
 import { formatBookingDate } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { Country } from "react-native-country-picker-modal";
+import { useSelector } from "react-redux";
 import {
   Button,
   CountryPicker,
@@ -11,6 +13,7 @@ import {
   Dropdown,
   Input,
 } from "../common";
+import HotelOfferGroup from "./HotelOfferGroup";
 
 const documentTypes = [
   { label: "PASSPORT", value: "passport" },
@@ -52,10 +55,27 @@ export type TFlightTraveler = {
   };
 };
 
+export type THotelTraveler = {
+  info: {
+    tid: string;
+    title: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email: string;
+  };
+  offerId: string;
+};
+
+export type TTraveler = {
+  flightTravelerDetails: TFlightTraveler;
+  hotelTravelerDetails: THotelTraveler;
+};
+
 interface TravelerDetailInputGroupProps {
   id: number;
   title?: string;
-  onConfirm: (travelerDetails: TFlightTraveler, id: number) => void;
+  onConfirm: (travelerDetails: TTraveler) => void;
 }
 
 const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
@@ -83,51 +103,69 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
   );
   const [validityCountry, setValidityCountry] = useState<Country | null>(null);
   const [nationality, setNationality] = useState<Country | null>(null);
+  const [selectedHotelOfferIndex, setSelectedHotelOfferIndex] = useState(0);
+
+  const { hotel } = useSelector((state: RootState) => state.booking);
 
   const validate = () => {
     if (firstName.trim().length === 0) {
+      Alert.alert("First Name is required");
       return false;
     }
     if (lastName.trim().length === 0) {
+      Alert.alert("Last Name is required");
       return false;
     }
     if (!dateOfBirth) {
+      Alert.alert("Date of Birth is required");
       return false;
     }
     if (!gender) {
+      Alert.alert("Gender is required");
       return false;
     }
     if (email.trim().length === 0) {
+      Alert.alert("Email is required");
       return false;
     }
     if (phone.trim().length === 0) {
+      Alert.alert("Phone is required");
       return false;
     }
     if (!documentType) {
+      Alert.alert("Document Type is required");
       return false;
     }
     if (birthPlace.trim().length === 0) {
+      Alert.alert("Birth Place is required");
       return false;
     }
     if (issuanceLocation.trim().length === 0) {
+      Alert.alert("Issuance Location is required");
       return false;
     }
     if (!issuanceDate) {
+      Alert.alert("Issuance Date is required");
       return false;
     }
     if (number.trim().length === 0) {
+      Alert.alert("Number is required");
       return false;
     }
     if (!expiryDate) {
+      Alert.alert("Expiry Date is required");
       return false;
     }
     if (!issuranceCountry) {
+      Alert.alert("Issurance Country is required");
       return false;
     }
     if (!validityCountry) {
+      Alert.alert("Validity Country is required");
       return false;
     }
     if (!nationality) {
+      Alert.alert("Nationality is required");
       return false;
     }
     return true;
@@ -136,28 +174,44 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
   const handleConfirmInformation = () => {
     if (!validate()) return;
 
-    onConfirm(
-      {
-        id: id.toString(),
-        dateOfBirth: formatBookingDate(dateOfBirth),
-        name: { firstName: firstName, lastName: lastName },
-        gender: gender.value as string,
-        contact: {
-          emailAddress: email,
-          phones: [
-            { deviceType: "MOBILE", countryCallingCode: "1", number: phone },
-          ],
-        },
-        document: {
-          type: documentType.value as string,
-          number: number,
-          country: issuranceCountry?.cca2 as string,
-          issuanceDate: formatBookingDate(issuanceDate),
-          expiryDate: formatBookingDate(expiryDate),
-        },
+    const flightTravelerDetails: TFlightTraveler = {
+      id: id.toString(),
+      dateOfBirth: formatBookingDate(dateOfBirth),
+      name: { firstName: firstName, lastName: lastName },
+      gender: gender.label as string,
+      contact: {
+        emailAddress: email,
+        phones: [
+          { deviceType: "MOBILE", countryCallingCode: "1", number: phone },
+        ],
       },
-      id,
-    );
+      document: {
+        type: documentType.value as string,
+        number: number,
+        country: issuranceCountry?.cca2 as string,
+        issuanceDate: formatBookingDate(issuanceDate),
+        expiryDate: formatBookingDate(expiryDate),
+      },
+    };
+
+    const hotelTravelerDetails: THotelTraveler = {
+      info: {
+        tid: id.toString(),
+        title: gender.label as string,
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+        email: email,
+      },
+      offerId: hotel?.offers[0].offers[selectedHotelOfferIndex].id as string,
+    };
+
+    onConfirm({
+      flightTravelerDetails,
+      hotelTravelerDetails,
+    });
+
+    setIsOpen(false);
   };
 
   return (
@@ -319,6 +373,12 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
             onPick={setNationality}
             bordered
             className="rounded-md"
+          />
+
+          <HotelOfferGroup
+            offers={hotel?.offers[0].offers || []}
+            selectedIndex={selectedHotelOfferIndex}
+            onSelect={setSelectedHotelOfferIndex}
           />
 
           <Button

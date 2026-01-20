@@ -1,3 +1,5 @@
+import { TFlightTraveler } from "@/components/molecules/TravelerDetailInputGroup";
+
 // Amadeus Flight Offer API response type
 export type TAmadeusFlightOffer = {
   id: string;
@@ -35,6 +37,41 @@ export type TAmadeusFlightOffer = {
     }>;
   }>;
   validatingAirlineCodes?: string[];
+};
+
+export type TAmadeusFlightBookingRequest = {
+  flightOffers: TAmadeusFlightOffer[];
+  travelers: TFlightTraveler[];
+  remarks: {
+    general: {
+      subType: string;
+      text: string;
+    }[];
+  };
+  // ticketingAgreement: {
+  //   option: "DELAY_TO_CANCEL";
+  //   delay: "6D";
+  // };
+  contacts: {
+    addresseeName: {
+      firstName: string;
+      lastName: string;
+    };
+    companyName: string;
+    purpose: string;
+    phones: {
+      deviceType: string;
+      countryCallingCode: string;
+      number: string;
+    }[];
+    emailAddress: string;
+    address: {
+      lines: string[];
+      postalCode: string;
+      cityName: string;
+      countryCode: string;
+    };
+  }[];
 };
 
 // Amadeus Hotel Offer API response type
@@ -109,6 +146,40 @@ export type TAmadeusHotelOffer = {
     self: string;
   }>;
   self: string;
+};
+
+// Amadeus Hotel Booking API request type
+export type TAmadeusHotelBookingRequest = {
+  guests: {
+    tid: number;
+    title: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email: string;
+  }[];
+  travelAgent: {
+    contact: {
+      email: string;
+    };
+  };
+  roomAssociations: {
+    guestReferences: {
+      guestReference: string;
+    }[];
+    hotelOfferId: string;
+  }[];
+  payment: {
+    method: string;
+    paymentCard: {
+      paymentCardInfo: {
+        vendorCode: string;
+        cardNumber: string;
+        expiryDate: string;
+        holderName: string;
+      };
+    };
+  };
 };
 
 // Amadeus Transfer Offer API response type

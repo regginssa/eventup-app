@@ -1,23 +1,14 @@
-import {
-  addNewFlight,
-  addNewHotel,
-  bookingFlightMethod,
-  bookingHotelMethod,
-  ticketFlightMethod,
-} from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
   createStripePaymentIntent,
   fetchStripeClientSecret,
   fetchStripeCustomerId,
-  refundStripePayment,
   saveStripePaymentMethod,
 } from "@/api/scripts/stripe";
 import { Button, CryptoPaymentQR, Spinner } from "@/components/common";
 import { StripePaymentMethodGroup } from "@/components/molecules";
 import { CheckoutContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
-import { addNewBooking, updateBooking } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
 import { IEvent } from "@/types/data";
@@ -652,7 +643,7 @@ const CheckoutScreen = () => {
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
   const { flight, hotel, bookings } = useSelector(
-    (state: RootState) => state.booking
+    (state: RootState) => state.booking,
   );
   const dispatch = useDispatch();
 
@@ -682,36 +673,11 @@ const CheckoutScreen = () => {
 
     if (user.stripe.payment_methods.length === 0) return;
     setStripePaymentMethodId(
-      user.stripe.payment_methods[0].payment_method_id || ""
+      user.stripe.payment_methods[0].payment_method_id || "",
     );
   }, [user]);
 
-  useEffect(() => {
-    const flightPrice =
-      Number(
-        flight?.recommend?.FareItinerary?.AirItineraryFareInfo?.ItinTotalFares
-          ?.TotalFare?.Amount
-      ) || 0;
-
-    const hotelPrice = Number(hotel?.selectedRoomRate?.netPrice) || 0;
-
-    const base = flightPrice + hotelPrice;
-    const comm = base * 0.1;
-    const total = base + comm;
-
-    setBasePrice(Number(base.toFixed(2)));
-    setCommissionPrice(Number(comm.toFixed(2)));
-    setTotalPrice(Number(total.toFixed(2)));
-
-    setCurrency(
-      (hotel?.selectedRoomRate?.currency?.toLowerCase() || "usd") as any
-    );
-
-    const selectedServices = [];
-    if (flight?.recommend) selectedServices.push("Flight");
-    if (hotel?.recommend) selectedServices.push("Hotel");
-    setServices(selectedServices);
-  }, [flight?.recommend, hotel?.selectedRoomRate]);
+  useEffect(() => {}, []);
 
   const handleStripePayment = async () => {
     const stripePayload = {
@@ -724,13 +690,13 @@ const CheckoutScreen = () => {
     };
 
     const clientSecretResponse = await createStripePaymentIntent(
-      stripePayload as any
+      stripePayload as any,
     );
 
     if (!clientSecretResponse.ok) {
       return Alert.alert(
         "Payment Error",
-        clientSecretResponse.message || "Failed to create payment intent."
+        clientSecretResponse.message || "Failed to create payment intent.",
       );
     }
 
@@ -747,155 +713,11 @@ const CheckoutScreen = () => {
     if (confirmPaymentError) {
       return Alert.alert(
         "Payment Confirmation Error",
-        confirmPaymentError.message
+        confirmPaymentError.message,
       );
     }
 
     return paymentIntentId;
-  };
-
-  const bookFlight = async () => {
-    if (
-      !flight?.payload ||
-      !flight.session_id ||
-      !flight?.recommend?.FareItinerary?.AirItineraryFareInfo?.FareSourceCode ||
-      !user?.location.region_code
-    )
-      return Alert.alert(
-        "Invalid Flight Information",
-        "Please select another flight"
-      );
-
-    if (
-      !user.stripe.customer_id ||
-      !user.stripe.payment_methods.length ||
-      stripePaymentMethodId.trim().length === 0
-    ) {
-      return Alert.alert("Error", "Please add a card to proceed with booking.");
-    }
-
-    // Check stripe payment funds enough
-    const paymentIntentId = await handleStripePayment();
-
-    // Booking method
-    const bookResponse = await bookingFlightMethod(flight.payload);
-
-    const { errorMessage, success, uniqueId, tktTimeLimit } = bookResponse.data;
-
-    const isSuccess = String(success).toLowerCase() === "true";
-
-    if (!isSuccess || !uniqueId) {
-      Alert.alert("Booking Flight Error", errorMessage);
-      // Refund the payment here if ticket order failed (not implemented)
-      const refundResponse = await refundStripePayment(paymentIntentId ?? "");
-
-      return Alert.alert("Refund Status", refundResponse.message);
-    }
-
-    // Ticket order method
-    const ticketResponse = await ticketFlightMethod(uniqueId);
-
-    if (!ticketResponse.data.success) {
-      Alert.alert(
-        "Flight Ticket Order Error",
-        ticketResponse.data.errorMessage
-      );
-
-      // Refund the payment here if ticket order failed (not implemented)
-      const refundResponse = await refundStripePayment(paymentIntentId ?? "");
-
-      return Alert.alert("Refund Status", refundResponse.message);
-    }
-
-    const payload = {
-      sessionId: flight.session_id,
-      uniqueId: uniqueId,
-      fareSourceCode:
-        flight?.recommend?.FareItinerary?.AirItineraryFareInfo?.FareSourceCode,
-      tktTimeLimit: new Date(tktTimeLimit),
-      userId: user?._id as string,
-      eventId: eventId as string,
-    };
-
-    const addFlightResponse = await addNewFlight(payload);
-
-    if (!addFlightResponse.ok) {
-      return Alert.alert("Error", "Failed to save booking data.");
-    }
-
-    dispatch(addNewBooking(addFlightResponse.data));
-
-    return addFlightResponse.data._id;
-  };
-
-  const bookHotel = async (bookingId: any) => {
-    if (!hotel?.bookingRequest || !hotel.selectedRoomRate) {
-      return Alert.alert("Error", "Invalid hotel information");
-    }
-
-    // Check stripe payment funds enough
-    const paymentIntentId = await handleStripePayment();
-
-    const bookResponse = await bookingHotelMethod(hotel.bookingRequest);
-
-    const { status, supplierConfirmationNum, referenceNum } = bookResponse.data;
-
-    if (status !== "CONFIRMED") {
-      Alert.alert("Error", "Booking hotel failed");
-      // Refund the payment here if ticket order failed (not implemented)
-      const refundResponse = await refundStripePayment(paymentIntentId ?? "");
-
-      return Alert.alert("Refund Status", refundResponse.message);
-    }
-
-    const addHotelResponse = await addNewHotel(
-      supplierConfirmationNum,
-      referenceNum,
-      hotel.session_id,
-      user?._id as string,
-      eventId as string,
-      packageType as TPackageType,
-      bookingId
-    );
-
-    if (!addHotelResponse.ok) {
-      return Alert.alert("Error", "Failed to save booking data.");
-    }
-
-    if (!bookingId) {
-      dispatch(addNewBooking(addHotelResponse.data));
-    } else {
-      dispatch(
-        updateBooking({
-          id: addHotelResponse.data._id as string,
-          booking: addHotelResponse.data,
-        })
-      );
-    }
-
-    return addHotelResponse.data._id;
-  };
-
-  const bookWithCard = async () => {
-    if (!user?.stripe.customer_id)
-      return Alert.alert("Error", "Please add your payment method first");
-    let bookingId = null;
-
-    if (flight) {
-      bookingId = await bookFlight();
-    }
-
-    if (hotel) {
-      bookingId = await bookHotel(bookingId);
-    }
-
-    if (bookingId) {
-      Alert.alert("Success", "Booked successfully!");
-      router.replace({
-        pathname: "/booked",
-        params: { bookingId, eventId, packageType },
-      });
-    }
   };
 
   const handleBook = async (paymentMethod: TPaymentMethod) => {
@@ -905,7 +727,6 @@ const CheckoutScreen = () => {
       setIsBookLoading(true);
       switch (paymentMethod) {
         case "card":
-          await bookWithCard();
           break;
 
         case "crypto":

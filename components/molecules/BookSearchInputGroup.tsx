@@ -160,7 +160,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     }
 
     const flightArrivalDate = flight.arrivalDate;
-    console.log("flightArrivalDate: ", flightArrivalDate);
 
     const flightArrival = new Date(flightArrivalDate);
     const flightArrivalDateTime = normalizeDateUTC(flightArrival);
@@ -194,7 +193,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return null;
     }
 
-    dispatch(setBookingHotel({ ...rdHotel, offers: response.data }));
+    dispatch(
+      setBookingHotel({
+        ...rdHotel,
+        offers: response.data,
+      }),
+    );
 
     const hotelOffer = mapAmadeusHotelOfferToHotelItemData(response.data[0]);
 

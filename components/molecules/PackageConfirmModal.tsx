@@ -1,7 +1,4 @@
-import {
-  fetchFlightOffersPricing,
-  fetchHotelOfferPricing,
-} from "@/api/scripts/booking";
+import { fetchFlightOffersPricing } from "@/api/scripts/booking";
 import { updateBookingFlightOfferById } from "@/redux/slices/booking.slice";
 import { TTransfer } from "@/types";
 import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "@/types/amadeus";
@@ -33,7 +30,6 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   transfer,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedOfferIndex, setSelectedOfferIndex] = useState<number>(0);
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -52,15 +48,6 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
               offer: response.data[0],
             }),
           );
-        }
-      }
-
-      if (hotel) {
-        // Use the selected offer's ID for pricing
-        const selectedOffer = hotel.offers?.[selectedOfferIndex];
-        if (selectedOffer?.id) {
-          const response = await fetchHotelOfferPricing(selectedOffer.id);
-          // TODO: Handle the pricing response and update booking state
         }
       }
 
@@ -112,12 +99,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             </Text>
           </View>
         ) : (
-          <HotelItem
-            data={hotel}
-            hiddenImages={true}
-            selectedOfferIndex={selectedOfferIndex}
-            onOfferChange={setSelectedOfferIndex}
-          />
+          <HotelItem data={hotel} hiddenImages={true} />
         )}
       </View>
 

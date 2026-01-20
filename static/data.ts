@@ -1,4 +1,5 @@
 import { ITransferAvailability } from "@/types";
+import { TAmadeusHotelOffer } from "@/types/amadeus";
 import { IEvent } from "@/types/data";
 
 export const sampleTransfer: ITransferAvailability = {
@@ -225,3 +226,146 @@ export const SAMPLE_EVENTS: IEvent[] = [
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTquHt3RKzKZ5Kqz4aJPj7SikVq9EWMe7gk2ScDQNa-mu2pC8la4Y2KEvXXIL4QbwuN4AU&usqp=CAU",
   },
 ];
+
+export const SAMPLE_HOTEL_OFFER: TAmadeusHotelOffer = {
+  type: "hotel-offers",
+  available: true,
+  hotel: {
+    type: "hotel",
+    hotelId: "FNNYCFIF",
+    chainCode: "FN",
+    dupeId: "700128019",
+    name: "Fairfield Inn and Suites by Marriott New York Manhattan Times Square",
+    cityCode: "NYC",
+    latitude: 40.75631,
+    longitude: -73.99159,
+    address: {
+      countryCode: "US",
+      postalCode: "10018",
+      stateCode: "NY",
+      cityName: "NEW YORK",
+      lines: ["330 WEST 40TH STREET"],
+    },
+  },
+  offers: [
+    {
+      id: "9XE04OUL6L",
+      checkInDate: "2026-01-20",
+      checkOutDate: "2026-01-22",
+      rateCode: "RAC",
+      rateFamilyEstimated: {
+        code: "BAR",
+        type: "PUBLISHED",
+      },
+      room: {
+        type: "REG",
+        typeEstimated: {
+          category: "STANDARD_ROOM",
+          beds: 1,
+          bedType: "KING",
+        },
+        description: {
+          text:
+            "Flexible Rate, includes buffet breakfast daily\n" +
+            "1 King, Mini fridge, Coffee/tea maker",
+          lang: "EN",
+        },
+      },
+      guests: {
+        adults: 1,
+      },
+      price: {
+        currency: "USD",
+        base: "338.00",
+        total: "394.86",
+        variations: {
+          average: {
+            base: "169.00",
+          },
+          changes: [
+            {
+              startDate: "2026-01-20",
+              endDate: "2026-01-21",
+              total: "197.43",
+            },
+            {
+              startDate: "2026-01-21",
+              endDate: "2026-01-22",
+              total: "197.43",
+            },
+          ],
+        },
+      },
+      policies: {
+        paymentType: "guarantee",
+        cancellation: {
+          type: "FREE_CANCELLATION",
+          description: {
+            text: "Free cancellation before 18:00 on the day of arrival.",
+          },
+        },
+      },
+      self: "https://test.api.amadeus.com/v3/shopping/hotel-offers/9XE04OUL6L",
+    },
+    {
+      id: "9XE04OUL6D",
+      checkInDate: "2026-01-20",
+      checkOutDate: "2026-01-22",
+      rateCode: "RAC",
+      rateFamilyEstimated: {
+        code: "BAR",
+        type: "PUBLISHED",
+      },
+      room: {
+        type: "REG",
+        typeEstimated: {
+          category: "STANDARD_ROOM",
+          beds: 1,
+          bedType: "KING",
+        },
+        description: {
+          text:
+            "Flexible Rate, includes buffet breakfast daily\n" +
+            "1 King, Mini fridge, Coffee/tea maker",
+          lang: "EN",
+        },
+      },
+      guests: {
+        adults: 1,
+      },
+      price: {
+        currency: "USD",
+        base: "338.00",
+        total: "394.86",
+        variations: {
+          average: {
+            base: "169.00",
+          },
+          changes: [
+            {
+              startDate: "2026-01-20",
+              endDate: "2026-01-21",
+              total: "197.43",
+            },
+            {
+              startDate: "2026-01-21",
+              endDate: "2026-01-22",
+              total: "197.43",
+            },
+          ],
+        },
+      },
+      policies: {
+        paymentType: "guarantee",
+        cancellation: {
+          type: "FREE_CANCELLATION",
+          description: {
+            text: "Free cancellation before 18:00 on the day of arrival.",
+          },
+        },
+      },
+      self: "https://test.api.amadeus.com/v3/shopping/hotel-offers/9XE04OUL6L",
+    },
+  ],
+  self: "https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=FNNYCFIF&adults=1&checkInDate=2026-01-20&checkOutDate=2026-01-22&currency=USD&roomQuantity=1",
+};

@@ -149,14 +149,14 @@ const GoldPackage = ({ event }: { event: IEvent }) => {
 
 const EventPackages = ({ event }: { event: IEvent }) => {
   const [eventPackage, setEventPackage] = useState<"standard" | "gold">(
-    "standard"
+    "standard",
   );
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const router = useRouter();
   const { flight, hotel, transfer } = useSelector(
-    (state: RootState) => state.booking
+    (state: RootState) => state.booking,
   );
 
   const standardItems = [
@@ -360,7 +360,7 @@ const EventPackages = ({ event }: { event: IEvent }) => {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         flight={flight?.offers[0]}
-        hotel={hotel?.data[0]}
+        hotel={hotel?.offers[0]}
         transfer={transfer}
         packageType={eventPackage}
         eventId={event._id as string}
@@ -590,11 +590,8 @@ const EventDetailScreen = () => {
     try {
       setLoading(true);
 
-      console.log("id: ", id);
-
       const response = await fetchEvent(id);
 
-      console.log("response: ", response.data);
       setEvent(response.data);
 
       dispatch(setBookingFlight(null));

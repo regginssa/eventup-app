@@ -1,10 +1,22 @@
 import { fetchEvent } from "@/api/scripts/event";
-import { Button, Spinner } from "@/components/common";
+import { Button, FlightItem, HotelItem, Spinner } from "@/components/common";
 import TravelerDetailInputGroup, {
   TFlightTraveler,
+  THotelTraveler,
+  TTraveler,
 } from "@/components/molecules/TravelerDetailInputGroup";
 import BookingContainer from "@/components/organisms/BookingContainer";
+import {
+  setBookingFlightRequest,
+  setBookingHotelRequest,
+} from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
+import {
+  TAmadeusFlightBookingRequest,
+  TAmadeusFlightOffer,
+  TAmadeusHotelBookingRequest,
+  TAmadeusHotelOffer,
+} from "@/types/amadeus";
 import { IEvent } from "@/types/data";
 import { formatEventDate } from "@/utils/format";
 import { Fontisto, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -79,10 +91,7 @@ const EventDetail = ({
 
 interface TravelerDetailsFormProps {
   travelers: number;
-  onTravelerDetailsConfirm: (
-    travelerDetails: TFlightTraveler,
-    id: number,
-  ) => void;
+  onTravelerDetailsConfirm: (travelerDetails: TTraveler, id: number) => void;
   isConfirmed: boolean[];
 }
 
@@ -140,6 +149,26 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
   );
 };
 
+interface SummaryProps {
+  flight?: TAmadeusFlightOffer;
+  hotel?: TAmadeusHotelOffer;
+}
+
+const Summary: React.FC<SummaryProps> = ({ flight, hotel }) => {
+  if (!flight || !hotel) return null;
+
+  return (
+    <View className="w-full bg-white rounded-xl p-4 gap-6">
+      <Text className="font-poppins-semibold text-lg text-gray-800">
+        Summary
+      </Text>
+
+      <FlightItem data={flight} />
+      <HotelItem data={hotel} hiddenImages={true} />
+    </View>
+  );
+};
+
 const BookingScreen = () => {
   const [event, setEvent] = useState<IEvent | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -150,7 +179,8 @@ const BookingScreen = () => {
   const { flight, hotel, transfer } = useSelector(
     (state: RootState) => state.booking,
   );
-  const [passengers, setPassengers] = useState<TFlightTraveler[]>([]);
+  const [flightTravelers, setFlightTravelers] = useState<TFlightTraveler[]>([]);
+  const [hotelTravelers, setHotelTravelers] = useState<THotelTraveler[]>([]);
   const [isConfirmed, setIsConfirmed] = useState<boolean[]>(
     Array.from({ length: 2 }, () => false),
   );
@@ -178,14 +208,21 @@ const BookingScreen = () => {
   }, []);
 
   const handleTravelerDetailsConfirm = (
-    passengerDetails: TFlightTraveler,
+    travelerDetails: TTraveler,
     id: number,
   ) => {
-    setPassengers((prev) => {
-      const newPassengers = [...prev];
-      newPassengers[id - 1] = passengerDetails;
-      return newPassengers;
+    setFlightTravelers((prev) => {
+      const newFlightTravelers = [...prev];
+      newFlightTravelers[id - 1] = travelerDetails.flightTravelerDetails;
+      return newFlightTravelers;
     });
+
+    setHotelTravelers((prev) => {
+      const newHotelTravelers = [...prev];
+      newHotelTravelers[id - 1] = travelerDetails.hotelTravelerDetails;
+      return newHotelTravelers;
+    });
+
     setIsConfirmed((prev) => {
       const newIsConfirmed = [...prev];
       newIsConfirmed[id - 1] = true;
@@ -194,8 +231,77 @@ const BookingScreen = () => {
   };
 
   const handleCheckout = async () => {
-    if (isConfirmed.every((confirmed) => !confirmed))
+    if (isConfirmed.some((confirmed) => !confirmed))
       return Alert.alert("Error", "Please confirm all passenger details");
+
+    const flightBookingRequest: TAmadeusFlightBookingRequest = {
+      flightOffers: flight?.offers.map((offer) => offer.id) as any,
+      travelers: flightTravelers,
+      contacts: [
+        {
+          addresseeName: {
+            firstName: "Lukasz",
+            lastName: "Szymborski",
+          },
+          companyName: "CHARLIE UNICORN AI",
+          purpose: "STANDARD",
+          phones: [
+            {
+              deviceType: "MOBILE",
+              countryCallingCode: "48",
+              number: "504412991",
+            },
+          ],
+          emailAddress: "team@charlieunicornai.eu",
+          address: {
+            lines: ["Kolejowa 10/12"],
+            postalCode: "00-811",
+            cityName: "Warsaw",
+            countryCode: "PL",
+          },
+        },
+      ],
+      remarks: {
+        general: [
+          {
+            subType: "GENERAL_MISCELLANEOUS",
+            text: "ONLINE BOOKING FROM CHARLIE UNICORN AI",
+          },
+        ],
+      },
+    };
+
+    const hotelBookingRequest: TAmadeusHotelBookingRequest = {
+      guests: hotelTravelers.map((traveler) => traveler.info) as any,
+      travelAgent: {
+        contact: {
+          email: user?.email as string,
+        },
+      },
+      roomAssociations: hotelTravelers.map((traveler) => ({
+        guestReferences: [{ guestReference: traveler.info.tid.toString() }],
+        hotelOfferId: traveler.offerId,
+      })),
+      payment: {
+        method: "",
+        paymentCard: {
+          paymentCardInfo: {
+            vendorCode: "",
+            cardNumber: "",
+            expiryDate: "",
+            holderName: "",
+          },
+        },
+      },
+    };
+
+    dispatch(setBookingFlightRequest(flightBookingRequest));
+    dispatch(setBookingHotelRequest(hotelBookingRequest));
+
+    router.push({
+      pathname: "/checkout",
+      params: { eventId, packageType },
+    });
   };
 
   return (
@@ -208,13 +314,18 @@ const BookingScreen = () => {
           onTravelerDetailsConfirm={handleTravelerDetailsConfirm}
           isConfirmed={isConfirmed}
         />
+
+        <Summary
+          flight={flight?.offers[0] as TAmadeusFlightOffer}
+          hotel={hotel?.offers[0] as TAmadeusHotelOffer}
+        />
       </View>
 
       <Button
         type="primary"
         label="Checkout"
         buttonClassName="h-12"
-        disabled={isConfirmed.every((confirmed) => !confirmed)}
+        disabled={isConfirmed.some((confirmed) => !confirmed)}
         onPress={handleCheckout}
       />
     </BookingContainer>

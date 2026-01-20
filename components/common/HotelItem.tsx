@@ -65,8 +65,6 @@ interface HotelItemProps {
   hiddenHeader?: boolean;
   hiddenImages?: boolean;
   onViewImages?: () => Promise<void>;
-  selectedOfferIndex?: number; // Which offer to display (default: 0)
-  onOfferChange?: (offerIndex: number) => void; // Callback when user selects a different offer
 }
 
 const HotelItem: React.FC<HotelItemProps> = ({
@@ -74,18 +72,13 @@ const HotelItem: React.FC<HotelItemProps> = ({
   hiddenHeader,
   hiddenImages,
   onViewImages,
-  selectedOfferIndex = 0,
-  onOfferChange,
 }) => {
   if (!offer) return null;
-
-  // Check if there are multiple offers
-  const hasMultipleOffers = offer.offers && offer.offers.length > 1;
 
   // Map the offer data, with error handling
   let data: THotelItemData;
   try {
-    data = mapAmadeusHotelOfferToHotelItemData(offer, selectedOfferIndex);
+    data = mapAmadeusHotelOfferToHotelItemData(offer);
   } catch (error) {
     console.error("Error mapping hotel offer:", error);
     return (
@@ -156,13 +149,13 @@ const HotelItem: React.FC<HotelItemProps> = ({
         </View>
 
         {/* OFFER SELECTOR - Show if multiple offers available */}
-        {hasMultipleOffers && offer.offers && (
+        {/* {hasMultipleOffers && offer?.offers && (
           <View className="w-full flex flex-col gap-2 mt-2">
             <Text className="font-dm-sans-medium text-gray-600 text-sm">
               Select Room/Rate Option:
             </Text>
             <View className="flex flex-row flex-wrap gap-2">
-              {offer.offers.map((hotelOffer, index) => {
+              {offer?.offers?.map((hotelOffer, index) => {
                 const isSelected = index === selectedOfferIndex;
                 const offerPrice = hotelOffer?.price?.total || "0";
                 const offerCurrency = hotelOffer?.price?.currency || "USD";
@@ -224,7 +217,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
               })}
             </View>
           </View>
-        )}
+        )} */}
 
         {/* CHECK-IN DATE */}
         {data.checkInDate && (
