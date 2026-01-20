@@ -11,7 +11,7 @@ import {
  * Maps Amadeus Flight Offer API response to TFlightItemData format
  */
 export const mapAmadeusFlightOfferToFlightItemData = (
-  offer: TAmadeusFlightOffer
+  offer: TAmadeusFlightOffer,
 ): TFlightItemData => {
   const itinerary = offer.itineraries?.[0];
   const segments = itinerary?.segments || [];
@@ -44,8 +44,8 @@ export const mapAmadeusFlightOfferToFlightItemData = (
   const refundable =
     offer.travelerPricings?.[0]?.fareDetailsBySegment?.some((segment) =>
       segment.amenities?.some((amenity) =>
-        amenity.description?.toUpperCase().includes("REFUNDABLE")
-      )
+        amenity.description?.toUpperCase().includes("REFUNDABLE"),
+      ),
     ) || false;
 
   // Get price
@@ -71,49 +71,83 @@ export const mapAmadeusFlightOfferToFlightItemData = (
 
 /**
  * Maps Amadeus Hotel Offer API response to THotelItemData format
- * Takes the first offer from the offers array
+ *
+ * Explanation:
+ * - A TAmadeusHotelOffer represents a hotel with multiple booking options
+ * - The `offers` array contains different room/rate options (different prices,
+ *   cancellation policies, room types) for the same hotel
+ * - Each item in `offers` is a different booking option
+ *
+ * This function extracts:
+ * - Hotel information (shared across all offers): name, location, address
+ * - Offer-specific information: dates, room type, price, cancellation policy
+ *
+ * @param offer - The hotel offer object containing hotel info and offers array
+ * @param offerIndex - Index of the specific offer to extract (default: 0 for first offer)
+ * @returns Mapped hotel item data ready for display
+ * @throws Error if offers array is empty or offerIndex is out of bounds
  */
 export const mapAmadeusHotelOfferToHotelItemData = (
   offer: TAmadeusHotelOffer,
-  offerIndex: number = 0
+  offerIndex: number = 0,
 ): THotelItemData => {
-  const hotelOffer = offer.offers?.[offerIndex];
+  // Validate that offers array exists and has items
+  if (!offer.offers || offer.offers.length === 0) {
+    throw new Error(
+      `Hotel offer has no available offers. Hotel: ${
+        offer.hotel?.name || "Unknown"
+      }`,
+    );
+  }
 
-  // Hotel basic info
+  // Validate offerIndex is within bounds
+  if (offerIndex < 0 || offerIndex >= offer.offers.length) {
+    throw new Error(
+      `Invalid offerIndex ${offerIndex}. Hotel has ${offer.offers.length} offer(s).`,
+    );
+  }
+
+  const hotelOffer = offer.offers[offerIndex];
+
+  // Offer ID (needed for booking and pricing)
+  const offerId = hotelOffer?.id || "";
+
+  // Hotel basic info (shared across all offers)
   const hotelId = offer.hotel?.hotelId || "";
   const hotelName = offer.hotel?.name || "";
   const cityCode = offer.hotel?.cityCode || "";
   const latitude = offer.hotel?.latitude || 0;
   const longitude = offer.hotel?.longitude || 0;
 
-  // Booking dates
+  // Booking dates (specific to this offer)
   const checkInDate = hotelOffer?.checkInDate || "";
   const checkOutDate = hotelOffer?.checkOutDate || "";
 
-  // Room info
+  // Room info (specific to this offer)
   const roomType = hotelOffer?.room?.type || "";
   const roomCategory = hotelOffer?.room?.typeEstimated?.category || "";
   const roomDescription = hotelOffer?.room?.description?.text || "";
   const beds = hotelOffer?.room?.typeEstimated?.beds || 0;
   const bedType = hotelOffer?.room?.typeEstimated?.bedType || "";
 
-  // Guests
+  // Guests (specific to this offer)
   const adults = hotelOffer?.guests?.adults || 0;
 
-  // Price
+  // Price (specific to this offer)
   const price = {
     total: hotelOffer?.price?.total || "0",
     currency: hotelOffer?.price?.currency?.toLowerCase() || "usd",
     base: hotelOffer?.price?.base,
   };
 
-  // Cancellation/Refund policy
+  // Cancellation/Refund policy (specific to this offer)
   const cancellationPolicy =
     hotelOffer?.policies?.cancellation?.description?.text || "";
   const cancellationType = hotelOffer?.policies?.cancellation?.type || "";
   const paymentType = hotelOffer?.policies?.paymentType || "";
 
   return {
+    offerId,
     hotelId,
     hotelName,
     cityCode,
@@ -145,7 +179,7 @@ export const mapAmadeusHotelOfferToHotelItemData = (
  * Maps Amadeus Transfer Offer API response to TTransferItemData format
  */
 export const mapAmadeusTransferOfferToTransferItemData = (
-  offer: TAmadeusTransferOffer
+  offer: TAmadeusTransferOffer,
 ): TTransferItemData => {
   // Extract from location
   const from =
@@ -222,9 +256,13 @@ export const mapAmadeusTransferOfferToTransferItemData = (
   const cancellationPolicy = offer.cancellationRules
     ?.map((rule) => {
       if (rule.feeType === "PERCENTAGE") {
-        return `${rule.feeValue}% fee if cancelled ${rule.metricMin}-${rule.metricMax} ${rule.metricType.toLowerCase()} before`;
+        return `${rule.feeValue}% fee if cancelled ${rule.metricMin}-${
+          rule.metricMax
+        } ${rule.metricType.toLowerCase()} before`;
       } else if (rule.feeType === "FIXED") {
-        return `$${rule.feeValue} fee if cancelled ${rule.metricMin}-${rule.metricMax} ${rule.metricType.toLowerCase()} before`;
+        return `$${rule.feeValue} fee if cancelled ${rule.metricMin}-${
+          rule.metricMax
+        } ${rule.metricType.toLowerCase()} before`;
       }
       return "";
     })

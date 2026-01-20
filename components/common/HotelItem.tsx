@@ -8,6 +8,9 @@ import { BadgeGroup } from "../molecules";
 
 // THotelItemData - essential fields from Amadeus Hotel Offer
 export type THotelItemData = {
+  // Offer ID (needed for booking)
+  offerId: string;
+
   // Hotel basic info
   hotelId: string;
   hotelName: string;
@@ -62,6 +65,8 @@ interface HotelItemProps {
   hiddenHeader?: boolean;
   hiddenImages?: boolean;
   onViewImages?: () => Promise<void>;
+  selectedOfferIndex?: number; // Which offer to display (default: 0)
+  onOfferChange?: (offerIndex: number) => void; // Callback when user selects a different offer
 }
 
 const HotelItem: React.FC<HotelItemProps> = ({
@@ -69,10 +74,29 @@ const HotelItem: React.FC<HotelItemProps> = ({
   hiddenHeader,
   hiddenImages,
   onViewImages,
+  selectedOfferIndex = 0,
+  onOfferChange,
 }) => {
   if (!offer) return null;
 
-  const data = mapAmadeusHotelOfferToHotelItemData(offer);
+  // Check if there are multiple offers
+  const hasMultipleOffers = offer.offers && offer.offers.length > 1;
+
+  // Map the offer data, with error handling
+  let data: THotelItemData;
+  try {
+    data = mapAmadeusHotelOfferToHotelItemData(offer, selectedOfferIndex);
+  } catch (error) {
+    console.error("Error mapping hotel offer:", error);
+    return (
+      <View className="w-full px-2 py-4">
+        <Text className="font-poppins-semibold text-red-600">
+          Error loading hotel data:{" "}
+          {error instanceof Error ? error.message : "Unknown error"}
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <>
@@ -130,6 +154,77 @@ const HotelItem: React.FC<HotelItemProps> = ({
             )}
           </View>
         </View>
+
+        {/* OFFER SELECTOR - Show if multiple offers available */}
+        {hasMultipleOffers && offer.offers && (
+          <View className="w-full flex flex-col gap-2 mt-2">
+            <Text className="font-dm-sans-medium text-gray-600 text-sm">
+              Select Room/Rate Option:
+            </Text>
+            <View className="flex flex-row flex-wrap gap-2">
+              {offer.offers.map((hotelOffer, index) => {
+                const isSelected = index === selectedOfferIndex;
+                const offerPrice = hotelOffer?.price?.total || "0";
+                const offerCurrency = hotelOffer?.price?.currency || "USD";
+                const offerRoomCategory =
+                  hotelOffer?.room?.typeEstimated?.category ||
+                  hotelOffer?.room?.type ||
+                  "Room";
+                const isRefundable =
+                  hotelOffer?.policies?.cancellation?.type !== "FULL_STAY";
+
+                return (
+                  <TouchableOpacity
+                    key={hotelOffer?.id || index}
+                    activeOpacity={0.7}
+                    onPress={() => onOfferChange?.(index)}
+                    className={`px-3 py-2 rounded-lg border-2 ${
+                      isSelected
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 bg-white"
+                    }`}
+                  >
+                    <View className="flex flex-col gap-1">
+                      <Text
+                        className={`font-poppins-semibold text-sm ${
+                          isSelected ? "text-blue-700" : "text-gray-700"
+                        }`}
+                      >
+                        {offerRoomCategory}
+                      </Text>
+                      <Text
+                        className={`font-dm-sans-medium text-xs ${
+                          isSelected ? "text-blue-600" : "text-gray-600"
+                        }`}
+                      >
+                        {getCurrencySymbol(
+                          (offerCurrency.toLowerCase() as any) || "usd",
+                        )}
+                        {offerPrice}
+                      </Text>
+                      {isRefundable && (
+                        <View className="flex flex-row items-center gap-1">
+                          <MaterialCommunityIcons
+                            name="check-circle"
+                            size={12}
+                            color={isSelected ? "#3b82f6" : "#10b981"}
+                          />
+                          <Text
+                            className={`font-dm-sans-medium text-xs ${
+                              isSelected ? "text-blue-600" : "text-green-600"
+                            }`}
+                          >
+                            Refundable
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        )}
 
         {/* CHECK-IN DATE */}
         {data.checkInDate && (
