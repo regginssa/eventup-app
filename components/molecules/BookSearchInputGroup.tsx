@@ -29,7 +29,7 @@ import {
   mapAmadeusTransferOfferToTransferItemData,
 } from "@/utils/map";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, DateTimePicker, RadioButton, Spinner } from "../common";

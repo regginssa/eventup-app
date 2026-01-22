@@ -613,18 +613,6 @@ const EventDetailScreen = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
 
-  const fetchEventData = useCallback(async () => {
-    if (!id || typeof id !== "string") return;
-
-    try {
-      const response = await fetchEvent(id);
-
-      setEvent(response.data);
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
-  }, [id]);
-
   const getUserLocationAndSave = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -641,9 +629,19 @@ const EventDetailScreen = () => {
     };
   };
 
+  const fetchEventData = async () => {
+    if (!id || typeof id !== "string") return;
+    try {
+      const response = await fetchEvent(id);
+
+      setEvent(response.data);
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  };
+
   const fetchUserCurrentLocation = async () => {
     if (!user?.location.coordinate) return;
-    setLoading(true);
     const coords = await getUserLocationAndSave();
 
     setCurrentLocationCoords(coords);
@@ -664,15 +662,17 @@ const EventDetailScreen = () => {
   };
 
   const init = useCallback(async () => {
+    setLoading(true);
     await fetchEventData();
     await fetchUserCurrentLocation();
     dispatch(setBookingFlight(null));
     dispatch(setBookingHotel(null));
-  }, [id, user]);
+    setLoading(false);
+  }, [id]);
 
   useEffect(() => {
     init();
-  }, [init]);
+  }, []);
 
   return (
     <EventDetailContainer>
