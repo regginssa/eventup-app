@@ -11,13 +11,13 @@ import {
   setBookingTravelers,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { TPackageType } from "@/types";
+import { TCoordinate, TPackageType } from "@/types";
 import {
   TAmadeusFlightOffer,
   TAmadeusHotelOffer,
   TAmadeusTransferOffer,
 } from "@/types/amadeus";
-import { IEvent } from "@/types/data";
+import { IEvent } from "@/types/event";
 import {
   formatBookingDate,
   normalizeDateUTC,
@@ -29,7 +29,6 @@ import {
   mapAmadeusTransferOfferToTransferItemData,
 } from "@/utils/map";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
-import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -43,32 +42,31 @@ import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
 interface BookSearchInputGroupProps {
   event: IEvent;
   packageType: TPackageType;
+  currentLocationCoords: TCoordinate | null;
+  currentCity: string | null;
+  currentCountryCode: string | null;
 }
 
 const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   event,
   packageType,
+  currentLocationCoords,
+  currentCity,
+  currentCountryCode,
 }) => {
   const [departureLocation, setDepartureLocation] = useState<
     "current" | "home"
   >("current");
   const [departureDate, setDepartureDate] = useState<Date>(new Date());
   const [hotelDepartureDate, setHotelDepartureDate] = useState<Date>(
-    new Date(),
+    new Date()
   );
   const [hotelRooms, setHotelRooms] = useState<number>(1);
   const [searchBtnLabel, setSearchBtnLabel] = useState<string>("");
   const [isSearched, setIsSearched] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
-  const [currentCity, setCurrentCity] = useState<string | null>(null);
-  const [currentCountryCode, setCurrentCountryCode] = useState<string | null>(
-    null,
-  );
-  const [currentLocationCoords, setCurrentLocationCoords] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+
   const [travelers, setTravelers] = useState<number>(1);
 
   const { user } = useSelector((state: RootState) => state.auth);
@@ -78,52 +76,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     transfer: rdTransfer,
   } = useSelector((state: RootState) => state.booking);
   const dispatch = useDispatch();
-
-  const getUserLocationAndSave = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      throw new Error("Location permission not granted");
-    }
-
-    const location = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Highest,
-    });
-
-    return {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    };
-  };
-
-  const init = useCallback(async () => {
-    if (!user?.location.coordinate) return;
-    setLoading(true);
-    const coords = await getUserLocationAndSave();
-
-    setCurrentLocationCoords(coords);
-
-    // Reverse geocode to get city and country from current location
-    try {
-      const reverseGeocode = await Location.reverseGeocodeAsync({
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-      });
-
-      if (reverseGeocode && reverseGeocode.length > 0) {
-        const address = reverseGeocode[0];
-        setCurrentCity(address.city || address.region || null);
-        setCurrentCountryCode(address.isoCountryCode || null);
-      }
-    } catch (error) {
-      console.error("Error reverse geocoding:", error);
-    }
-
-    setLoading(false);
-  }, [user]);
-
-  useEffect(() => {
-    init();
-  }, [init]);
 
   const searchFlights = async () => {
     const params = {
@@ -165,18 +117,18 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     const flightArrival = new Date(flightArrivalDate);
     const flightArrivalDateTime = normalizeDateUTC(flightArrival);
     const eventOpeningDateTime = normalizeDateUTC(
-      new Date(event.opening_date as any),
+      new Date(event.dates.start.date as string)
     );
 
     if (flightArrivalDateTime > eventOpeningDateTime) {
       Alert.alert(
         "Invalid Flight Arrival Date",
-        "The flight arrival date cannot be before the event date.",
+        "The flight arrival date cannot be before the event date."
       );
       return null;
     }
 
-    const checkout = new Date(event.opening_date as any);
+    const checkout = new Date(event.dates.start.date as string);
     checkout.setDate(checkout.getDate() + 1);
 
     const params = {
@@ -198,7 +150,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       setBookingHotel({
         ...rdHotel,
         offers: response.data,
-      }),
+      })
     );
     dispatch(setBookingHotelRooms(hotelRooms));
 
@@ -209,7 +161,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
   const searchTransfers = async (
     flight: TFlightItemData,
-    hotel: THotelItemData,
+    hotel: THotelItemData
   ) => {
     if (!flight) {
       Alert.alert("Flight Not Selected");
@@ -227,7 +179,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (flightArrivalDateTime > hotelDepartureDateTime) {
       Alert.alert(
         "Invalid Hotel Departure Date",
-        "The hotel departure date cannot be before the flight arrival date.",
+        "The hotel departure date cannot be before the flight arrival date."
       );
       return;
     }
@@ -256,15 +208,15 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     const ahData = response.data.airportToHotel.map(
       (offer: TAmadeusTransferOffer) =>
-        mapAmadeusTransferOfferToTransferItemData(offer),
+        mapAmadeusTransferOfferToTransferItemData(offer)
     );
     const heData = response.data.hotelToEvent.map(
       (offer: TAmadeusTransferOffer) =>
-        mapAmadeusTransferOfferToTransferItemData(offer),
+        mapAmadeusTransferOfferToTransferItemData(offer)
     );
 
     dispatch(
-      setBookingTransfer({ ...rdTransfer, ah: ahData[0], he: heData[0] }),
+      setBookingTransfer({ ...rdTransfer, ah: ahData[0], he: heData[0] })
     );
   };
 
@@ -273,7 +225,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     dispatch(setBookingHotel(null));
     if (!event._id) return Alert.alert("Event ID is missing.");
 
-    const eventDateTime = normalizeDateUTC(new Date(event.opening_date as any));
+    const eventDateTime = normalizeDateUTC(
+      new Date(event.dates.start.date as string)
+    );
     const departureDateTime = normalizeDateUTC(departureDate);
 
     const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
@@ -281,14 +235,14 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (eventDateTime < departureDateTime) {
       return Alert.alert(
         "Invalid Departure Date",
-        "The departure date cannot be after the event date.",
+        "The departure date cannot be after the event date."
       );
     }
 
     if (hotelDepartureDateTime > eventDateTime) {
       Alert.alert(
         "Invalid Hotel Departure Date",
-        "The hotel departure date cannot be after the event date.",
+        "The hotel departure date cannot be after the event date."
       );
       return;
     }
@@ -517,7 +471,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                   ...flight.offers.filter((item) => item.id !== selected.id),
                 ];
                 dispatch(
-                  setBookingFlight({ ...flight, offers: reorderedData }),
+                  setBookingFlight({ ...flight, offers: reorderedData })
                 );
               }
             }}
@@ -538,11 +492,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 const reorderedData = [
                   selected,
                   ...rdHotel.offers.filter(
-                    (item) => item.hotel?.hotelId !== selected.hotel?.hotelId,
+                    (item) => item.hotel?.hotelId !== selected.hotel?.hotelId
                   ),
                 ];
                 dispatch(
-                  setBookingHotel({ ...rdHotel, offers: reorderedData }),
+                  setBookingHotel({ ...rdHotel, offers: reorderedData })
                 );
               }
             }}

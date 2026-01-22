@@ -1,6 +1,6 @@
 import { TBookingOption, TPackageType } from "@/types";
 import { ApiResponse } from "@/types/api";
-import { IUser } from "@/types/data";
+import { IUser } from "@/types/user";
 import AxiosInstance from "../AxiosInstance";
 import {
   CREATE_STRIPE_PAYMENT_INTENT,

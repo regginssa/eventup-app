@@ -23,20 +23,45 @@ export const formatEventLabel = (key: string) => {
     .trim();
 };
 
-export const formatEventDate = (date: Date) => {
+export const formatEventDateTime = (date: string, time: string) => {
   if (!date) return "";
 
-  const d = new Date(date);
-  const options = { month: "short", day: "numeric" };
-  const datePart = d.toLocaleDateString("en-US", options as any);
+  const [, month, day] = date.split("-");
 
-  let hours = d.getHours();
-  const minutes = d.getMinutes();
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12 || 12;
-  const minStr = minutes.toString().padStart(2, "0");
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
-  return `${datePart}, ${hours}.${minStr} ${ampm}`;
+  return `${day}, ${months[Number(month) - 1]} ${time
+    .split(":")
+    .slice(0, 2)
+    .join(":")}`;
+};
+
+export const formatTimezoneShort = (timeZone: string) => {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      timeZoneName: "short",
+    }).formatToParts(new Date());
+
+    return (
+      parts.find((p) => p.type === "timeZoneName")?.value || timeZone || "N/A"
+    );
+  } catch {
+    return timeZone || "N/A";
+  }
 };
 
 export const formatBookingDate = (date: Date): string => {

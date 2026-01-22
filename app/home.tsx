@@ -4,7 +4,7 @@ import { EventsPreviewGroup } from "@/components/molecules";
 import { HomeContainer } from "@/components/organisms";
 import { RootState } from "@/redux/store";
 import { TDropdownItem, TPagination } from "@/types";
-import { IEvent } from "@/types/data";
+import { IEvent } from "@/types/event";
 import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
@@ -36,16 +36,17 @@ const HomeScreen = () => {
     page: 1,
     limit: 10,
     total: 0,
-    hasMore: false,
+    hasMore: true,
   });
 
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
 
   const handleNext = async () => {
-    if (!user?._id || !pagination.hasMore) return;
+    if (!user?._id) return;
 
     const nextPage = pagination.page + 1;
+    if (nextPage > Math.ceil(pagination.total / pagination.limit)) return;
 
     try {
       setLoading(true);
@@ -176,32 +177,38 @@ const HomeScreen = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             className={`w-16 h-16 rounded-full flex items-center justify-center text-gray-400 ${
-              pagination.page === 1 || loading ? "bg-gray-200" : "bg-white"
+              pagination.page === 1 || loading || !pagination.hasMore
+                ? "bg-gray-200"
+                : "bg-white"
             }`}
-            disabled={pagination.page === 1 || loading}
+            disabled={pagination.page === 1 || loading || !pagination.hasMore}
             style={styles.tune}
             onPress={handlePrev}
           >
             <AntDesign
               name="arrow-left"
               size={24}
-              color={pagination.page === 1 || loading ? "#9ca3af" : "#1f2937"}
+              color={
+                pagination.page === 1 || loading || !pagination.hasMore
+                  ? "#9ca3af"
+                  : "#1f2937"
+              }
             />
           </TouchableOpacity>
 
           <TouchableOpacity
             activeOpacity={0.8}
             className={`w-16 h-16 rounded-full flex items-center justify-center text-gray-400 ${
-              !pagination.hasMore || loading ? "bg-gray-200" : "bg-white"
+              loading || !pagination.hasMore ? "bg-gray-200" : "bg-white"
             }`}
-            disabled={!pagination.hasMore || loading}
+            disabled={loading || !pagination.hasMore}
             style={styles.tune}
             onPress={handleNext}
           >
             <AntDesign
               name="arrow-right"
               size={24}
-              color={!pagination.hasMore || loading ? "#9ca3af" : "#1f2937"}
+              color={loading || !pagination.hasMore ? "#9ca3af" : "#1f2937"}
             />
           </TouchableOpacity>
         </View>

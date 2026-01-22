@@ -1,5 +1,5 @@
 import { ApiResponse } from "@/types/api";
-import { IKyc } from "@/types/data";
+import { IKyc } from "@/types/user";
 import AxiosInstance from "../AxiosInstance";
 import { FETCH_IDENTITY_VERIFICATION_SESSION } from "../apis";
 

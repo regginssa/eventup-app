@@ -1,5 +1,5 @@
 import { ApiResponse, EventsFeedResponse } from "@/types/api";
-import { IEvent } from "@/types/data";
+import { IEvent } from "@/types/event";
 import { FETCH_ALL_EVENTS, FETCH_EVENT, FETCH_EVENTS_FEED } from "../apis";
 import AxiosInstance from "../AxiosInstance";
 

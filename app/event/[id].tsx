@@ -10,9 +10,13 @@ import {
   setBookingHotel,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { TDropdownItem } from "@/types";
-import { IEvent } from "@/types/data";
-import { formatEventDate, formatEventLabel } from "@/utils/format";
+import { TCoordinate, TDropdownItem } from "@/types";
+import { IEvent } from "@/types/event";
+import {
+  formatEventDateTime,
+  formatEventLabel,
+  formatTimezoneShort,
+} from "@/utils/format";
 import {
   Feather,
   Fontisto,
@@ -23,11 +27,13 @@ import {
 import MaskedView from "@react-native-masked-view/masked-view";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { FlagButton } from "react-native-country-picker-modal";
 import { useDispatch, useSelector } from "react-redux";
+import { EventDates } from "../../types/event";
 
 const VerifiedBadge = require("@/assets/images/icons/verified_badge.png");
 
@@ -58,14 +64,14 @@ const Header = ({
   category,
   city,
   country,
-  opening_date,
+  dates,
 }: {
   image: string;
   title: string;
   category: string;
   city?: string;
   country: string;
-  opening_date: Date;
+  dates: EventDates;
 }) => {
   return (
     <View className="w-full gap-5 overflow-hidden">
@@ -117,7 +123,11 @@ const Header = ({
         <View className="flex flex-row items-center gap-2">
           <Ionicons name="calendar-outline" size={16} color="#374151" />
           <Text className="font-dm-sans-medium text-sm text-gray-700">
-            {formatEventDate(opening_date as Date)}
+            {formatEventDateTime(
+              dates.start.date as string,
+              dates.start.time as string
+            )}{" "}
+            ({formatTimezoneShort(dates.timezone as string)})
           </Text>
         </View>
       </View>
@@ -125,38 +135,26 @@ const Header = ({
   );
 };
 
-const StandardPackage = ({ event }: { event: IEvent }) => {
-  return (
-    <View className="bg-[#F7F3FF] rounded-xl p-4 gap-3">
-      <Text className="font-poppins-semibold text-lg text-gray-800">
-        Standard
-      </Text>
-
-      <BookSearchInputGroup event={event} packageType="standard" />
-    </View>
-  );
-};
-
-const GoldPackage = ({ event }: { event: IEvent }) => {
-  return (
-    <View className="bg-[#F7F3FF] rounded-xl p-4 gap-3">
-      <Text className="font-poppins-semibold text-lg text-gray-800">Gold</Text>
-
-      <BookSearchInputGroup event={event} packageType="gold" />
-    </View>
-  );
-};
-
-const EventPackages = ({ event }: { event: IEvent }) => {
+const EventPackages = ({
+  event,
+  currentLocationCoords,
+  currentCity,
+  currentCountryCode,
+}: {
+  event: IEvent;
+  currentLocationCoords: TCoordinate | null;
+  currentCity: string | null;
+  currentCountryCode: string | null;
+}) => {
   const [eventPackage, setEventPackage] = useState<"standard" | "gold">(
-    "standard",
+    "standard"
   );
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const router = useRouter();
   const { flight, hotel, transfer } = useSelector(
-    (state: RootState) => state.booking,
+    (state: RootState) => state.booking
   );
 
   const standardItems = [
@@ -340,9 +338,33 @@ const EventPackages = ({ event }: { event: IEvent }) => {
         </View>
 
         {eventPackage === "standard" ? (
-          <StandardPackage event={event} />
+          <View className="bg-[#F7F3FF] rounded-xl p-4 gap-3">
+            <Text className="font-poppins-semibold text-lg text-gray-800">
+              Standard
+            </Text>
+
+            <BookSearchInputGroup
+              event={event}
+              packageType="standard"
+              currentLocationCoords={currentLocationCoords}
+              currentCity={currentCity}
+              currentCountryCode={currentCountryCode}
+            />
+          </View>
         ) : (
-          <GoldPackage event={event} />
+          <View className="bg-[#F7F3FF] rounded-xl p-4 gap-3">
+            <Text className="font-poppins-semibold text-lg text-gray-800">
+              Gold
+            </Text>
+
+            <BookSearchInputGroup
+              event={event}
+              packageType="gold"
+              currentLocationCoords={currentLocationCoords}
+              currentCity={currentCity}
+              currentCountryCode={currentCountryCode}
+            />
+          </View>
         )}
 
         <Button
@@ -580,49 +602,94 @@ const EventDetailScreen = () => {
   const [event, setEvent] = useState<IEvent | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<TDropdownItem>(tabs[0]);
+  const [currentLocationCoords, setCurrentLocationCoords] =
+    useState<TCoordinate | null>(null);
+  const [currentCity, setCurrentCity] = useState<string | null>(null);
+  const [currentCountryCode, setCurrentCountryCode] = useState<string | null>(
+    null
+  );
 
   const { id } = useLocalSearchParams();
+  const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
 
-  const init = useCallback(async () => {
+  const fetchEventData = useCallback(async () => {
     if (!id || typeof id !== "string") return;
 
     try {
-      setLoading(true);
-
       const response = await fetchEvent(id);
 
       setEvent(response.data);
-
-      dispatch(setBookingFlight(null));
-      dispatch(setBookingHotel(null));
     } catch (error: any) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+      throw new Error(error.message);
     }
   }, [id]);
 
+  const getUserLocationAndSave = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      throw new Error("Location permission not granted");
+    }
+
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Highest,
+    });
+
+    return {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    };
+  };
+
+  const fetchUserCurrentLocation = async () => {
+    if (!user?.location.coordinate) return;
+    setLoading(true);
+    const coords = await getUserLocationAndSave();
+
+    setCurrentLocationCoords(coords);
+    try {
+      const reverseGeocode = await Location.reverseGeocodeAsync({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      });
+
+      if (reverseGeocode && reverseGeocode.length > 0) {
+        const address = reverseGeocode[0];
+        setCurrentCity(address.city || address.region || null);
+        setCurrentCountryCode(address.isoCountryCode || null);
+      }
+    } catch (error) {
+      console.error("Error reverse geocoding:", error);
+    }
+  };
+
+  const init = useCallback(async () => {
+    await fetchEventData();
+    await fetchUserCurrentLocation();
+    dispatch(setBookingFlight(null));
+    dispatch(setBookingHotel(null));
+  }, [id, user]);
+
   useEffect(() => {
     init();
-  }, []);
+  }, [init]);
 
   return (
     <EventDetailContainer>
       <View className="flex-1 bg-white rounded-2xl p-4 gap-5">
         {loading ? (
           <Spinner size="md" />
-        ) : !event ? (
-          <EmptyEventData />
-        ) : (
+        ) : event ? (
           <>
             <Header
-              image={event.image as string}
-              title={event.title as string}
-              category={formatEventLabel(event.category as string)}
-              city={event?.venue?.city as string}
-              country={event.country as string}
-              opening_date={event.opening_date as Date}
+              image={event.images?.[0] as string}
+              title={event.name}
+              category={formatEventLabel(
+                event.classifications.category as string
+              )}
+              city={event.location.city?.name}
+              country={event.location.country.name as string}
+              dates={event.dates}
             />
 
             <Tabs
@@ -633,7 +700,12 @@ const EventDetailScreen = () => {
             />
 
             {selectedTab.value === "packages" ? (
-              <EventPackages event={event} />
+              <EventPackages
+                event={event}
+                currentLocationCoords={currentLocationCoords}
+                currentCity={currentCity}
+                currentCountryCode={currentCountryCode}
+              />
             ) : selectedTab.value === "overview" ? (
               <EventOverview
                 hoster={{
@@ -644,13 +716,14 @@ const EventDetailScreen = () => {
                   is_verified: true,
                   title: "Event Hunter",
                 }}
-                detail={event.detail}
-                notes={event.notes}
+                detail={event.description}
               />
             ) : (
               <EventItinerary />
             )}
           </>
+        ) : (
+          <EmptyEventData />
         )}
       </View>
     </EventDetailContainer>

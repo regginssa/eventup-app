@@ -1,4 +1,5 @@
-import { IEvent, IUser } from "./data";
+import { IEvent } from "./event";
+import { IUser } from "./user";
 
 export interface ApiResponse<T> {
   ok: boolean;
@@ -18,10 +19,6 @@ export interface EventsFeedResponse {
     limit: number;
     total: number;
     hasMore: boolean;
-  };
-  filterInfo: {
-    tierUsed: number;
-    relaxed: boolean;
   };
 }
 

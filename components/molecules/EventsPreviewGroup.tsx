@@ -1,7 +1,10 @@
-import { IEvent } from "@/types/data";
-import { formatEventDate, formatEventLabel } from "@/utils/format";
+import { IEvent } from "@/types/event";
 import {
-  Fontisto,
+  formatEventDateTime,
+  formatEventLabel,
+  formatTimezoneShort,
+} from "@/utils/format";
+import {
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
@@ -108,7 +111,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
               key={index}
               style={styles.item}
             >
-              {!event.image ? (
+              {!event.images || event.images.length === 0 ? (
                 <View
                   style={styles.image}
                   className="flex flex-col items-center justify-center"
@@ -120,8 +123,8 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                 </View>
               ) : (
                 <Image
-                  source={event.image}
-                  alt={event.title}
+                  source={event.images[0]}
+                  alt={event.name}
                   style={styles.image}
                 />
               )}
@@ -147,7 +150,9 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                     </View>
 
                     <Text className="font-dm-sans text-sm text-white">
-                      {formatEventLabel(event.category as string)}
+                      {formatEventLabel(
+                        event.classifications.category as string
+                      )}
                     </Text>
                   </View>
 
@@ -167,31 +172,37 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
 
                 <View className="w-full">
                   <Text className="font-poppins-semibold text-white">
-                    {event.title}
+                    {event.name}
                   </Text>
 
-                  <View className="w-full flex flex-row items-end justify-between">
+                  <View className="w-full flex flex-row items-end justify-between mt-2">
                     <View className="gap-1">
                       <View className="flex flex-row items-center gap-2">
-                        <Fontisto
-                          name="map-marker-alt"
-                          size={20}
+                        <MaterialCommunityIcons
+                          name="map-marker-outline"
+                          size={16}
                           color="white"
                         />
                         <Text className="font-dm-sans-medium text-sm text-white">
-                          {event.venue?.city
-                            ? `${event.venue.city}, ${event.country_code}`
-                            : event.country}
+                          {event.location.city?.name
+                            ? `${event.location.city.name}, ${event.location.country.code}`
+                            : event.location.country.name}
                         </Text>
                       </View>
+
                       <View className="flex flex-row items-center gap-2">
-                        <Ionicons
+                        <MaterialCommunityIcons
                           name="calendar-outline"
                           size={16}
                           color="white"
                         />
                         <Text className="font-dm-sans-medium text-sm text-white">
-                          {formatEventDate(event.opening_date as Date)}
+                          {formatEventDateTime(
+                            event.dates.start.date as string,
+                            event.dates.start.time as string
+                          )}{" "}
+                          ({formatTimezoneShort(event.dates.timezone as string)}
+                          )
                         </Text>
                       </View>
                     </View>
@@ -199,7 +210,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                     <Button
                       type="primary"
                       label="View package"
-                      buttonClassName="w-[125px] h-12"
+                      buttonClassName="w-[125px] h-10"
                       textClassName="text-sm"
                       onPress={() => router.push(`/event/${event._id}` as any)}
                     />

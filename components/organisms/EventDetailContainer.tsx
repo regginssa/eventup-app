@@ -16,7 +16,7 @@ const EventDetailContainer: React.FC<EventDetailContainerProps> = ({
   return (
     <MainContainer>
       <SafeAreaView className="flex-1 px-5 gap-5">
-        <View className="w-full flex flex-row items-center justify-between pb-5 sticky top-0">
+        <View className="w-full flex flex-row items-center justify-between sticky top-0">
           <TouchableOpacity
             activeOpacity={0.8}
             className="w-10 h-10 rounded-full bg-white flex flex-col items-center justify-center"
