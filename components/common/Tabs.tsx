@@ -24,9 +24,12 @@ const Tabs: React.FC<TabsProps> = ({
           className={tabClassName}
           onPress={() => onSelct(tab)}
         >
-          <Text className="font-poppins-semibold text-gray-800 text-center whitespace-nowrap p-2">
-            {tab.label}
-          </Text>
+          <View className="flex flex-row items-center justify-center gap-1 p-2">
+            {tab.icon}
+            <Text className="font-poppins-semibold text-gray-800 text-center whitespace-nowrap">
+              {tab.label}
+            </Text>
+          </View>
 
           <View className="w-full h-[1px]">
             {selectedTab.value === tab.value && (

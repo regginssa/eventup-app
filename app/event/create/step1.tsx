@@ -57,6 +57,7 @@ const CreateEventStep1Screen = () => {
         id: "",
         title,
         detail,
+        kind: "user",
         category: category?.value.toString() || undefined,
         subcategories: subcategories.map((s) => s.value.toString()),
         vibe: vibe.map((v) => v.value.toString()),

@@ -43,7 +43,7 @@ const HomeContainer: React.FC<HomeContainerProps> = ({ children }) => {
             <AntDesign name="bars" size={20} color="#1f2937" />
           </TouchableOpacity>
         </View>
-        <View className="flex-1 gap-5">{children}</View>
+        <View className="flex-1 gap-3">{children}</View>
       </SafeAreaView>
 
       <ProfileDrawer isOpen={isOpen} onClose={() => setIsOpen(false)} />

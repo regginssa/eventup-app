@@ -30,6 +30,7 @@ export type TKycStatus =
 export type TDropdownItem = {
   label: string;
   value: string | number;
+  icon?: React.ReactNode;
 };
 
 export type TEventKind = "user" | "ai";

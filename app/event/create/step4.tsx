@@ -13,6 +13,8 @@ const CreateEventStep4Screen = () => {
 
   const router = useRouter();
 
+  const handleJoinNow = async () => {};
+
   return (
     <CreateEventContainer
       step={4}

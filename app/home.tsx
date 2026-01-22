@@ -1,10 +1,9 @@
 import { fetchEventsFeed } from "@/api/scripts/event";
-import { Input } from "@/components/common";
+import { Input, Tabs } from "@/components/common";
 import { EventsPreviewGroup } from "@/components/molecules";
 import { HomeContainer } from "@/components/organisms";
-import { setAllEvents, setPagination } from "@/redux/slices/event.slice";
 import { RootState } from "@/redux/store";
-import { TDropdownItem } from "@/types";
+import { TDropdownItem, TPagination } from "@/types";
 import { IEvent } from "@/types/data";
 import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
@@ -12,20 +11,36 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
+
+const tabs: TDropdownItem[] = [
+  {
+    label: "AI-Generated",
+    value: "ai",
+    icon: <AntDesign name="open-ai" size={16} color="#374151" />,
+  },
+  {
+    label: "User-Created",
+    value: "user",
+    icon: <AntDesign name="user" size={16} color="#374151" />,
+  },
+];
 
 const HomeScreen = () => {
-  const [orderedEvents, setOrderedEvents] = useState<IEvent[]>([]);
+  const [selectedTab, setSelectedTab] = useState<TDropdownItem>(tabs[0]);
+  const [events, setEvents] = useState<IEvent[]>([]);
   const [search, setSearch] = useState<string>("");
   const [isBottom, setIsBottom] = useState<boolean>(false);
-  const [categories, setCategories] = useState<TDropdownItem[]>([]);
-  const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
+  const [pagination, setPagination] = useState<TPagination>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    hasMore: false,
+  });
 
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
-  const { events, pagination } = useSelector((state: RootState) => state.event);
-  const dispatch = useDispatch();
 
   const handleNext = async () => {
     if (!user?._id || !pagination.hasMore) return;
@@ -42,8 +57,8 @@ const HomeScreen = () => {
       );
 
       if (response.ok) {
-        dispatch(setPagination(response.data.pagination));
-        setOrderedEvents(response.data.events);
+        setPagination(response.data.pagination);
+        setEvents(response.data.events);
       }
     } finally {
       setLoading(false);
@@ -66,8 +81,8 @@ const HomeScreen = () => {
       );
 
       if (response.ok) {
-        dispatch(setPagination(response.data.pagination));
-        setOrderedEvents(response.data.events);
+        setPagination(response.data.pagination);
+        setEvents(response.data.events);
       }
     } finally {
       setLoading(false);
@@ -79,22 +94,16 @@ const HomeScreen = () => {
     try {
       setLoading(true);
 
-      dispatch(setPagination({ ...pagination, page: 1, total: 0 }));
+      setPagination({ ...pagination, page: 1, total: 0 });
 
       const response = await fetchEventsFeed(user._id, 1, 10);
 
       if (response.ok) {
         const { events, pagination } = response.data;
 
-        dispatch(setAllEvents(events));
-        dispatch(
-          setPagination({
-            ...pagination,
-            page: 1,
-          })
-        );
+        setPagination({ ...pagination, page: 1 });
 
-        setOrderedEvents(events);
+        setEvents(events);
       }
     } catch (error: any) {
     } finally {
@@ -129,95 +138,6 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* <View className="w-full gap-2">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <FilterItemDropdown
-              label="Category"
-              items={EVENT_CATEGORIES}
-              selectedItems={categories}
-              onSelect={(val: TDropdownItem) => {
-                if (categories.some((ca) => ca.value === val.value)) {
-                  setCategories(
-                    categories.filter((ca) => ca.value !== val.value)
-                  );
-                } else {
-                  setCategories([...categories, val]);
-                }
-              }}
-            />
-            <FilterItemDropdown
-              label="Upcoming"
-              items={EVENT_CATEGORIES}
-              selectedItems={categories}
-              onSelect={(val: TDropdownItem) => {
-                if (categories.some((ca) => ca.value === val.value)) {
-                  setCategories(
-                    categories.filter((ca) => ca.value !== val.value)
-                  );
-                } else {
-                  setCategories([...categories, val]);
-                }
-              }}
-            />
-            <FilterItemDropdown
-              label="Date"
-              items={EVENT_CATEGORIES}
-              selectedItems={categories}
-              onSelect={(val: TDropdownItem) => {
-                if (categories.some((ca) => ca.value === val.value)) {
-                  setCategories(
-                    categories.filter((ca) => ca.value !== val.value)
-                  );
-                } else {
-                  setCategories([...categories, val]);
-                }
-              }}
-            />
-          </ScrollView>
-
-          {categories.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
-              {categories.map((ca, index) => (
-                <View
-                  key={ca.value}
-                  className="bg-white flex flex-row items-center justify-center gap-2 rounded-lg p-2"
-                >
-                  <Text className="text-gray-700 font-dm-sans text-sm">
-                    {formatEventLabel(ca.label)}
-                  </Text>
-                  <Pressable
-                    hitSlop={6}
-                    className="w-6 h-6 rounded-full bg-[#E5E7EB] flex items-center justify-center"
-                    onPress={() =>
-                      setCategories(
-                        categories.filter((c) => c.value !== ca.value)
-                      )
-                    }
-                  >
-                    <AntDesign name="close" size={10} color="#4b5563" />
-                  </Pressable>
-                </View>
-              ))}
-            </ScrollView>
-          )}
-        </View> */}
-
         <View className="w-full flex flex-row items-center justify-between">
           <View className="flex flex-row items-center gap-2">
             <MaterialIcons name="event-available" size={24} color="#374151" />
@@ -235,9 +155,16 @@ const HomeScreen = () => {
         </View>
       </View>
 
+      <Tabs
+        tabs={tabs}
+        tabClassName="flex-1"
+        selectedTab={selectedTab}
+        onSelct={setSelectedTab}
+      />
+
       <View className="flex-1 ">
         <EventsPreviewGroup
-          events={orderedEvents}
+          events={events}
           loading={loading}
           onReachedBottomChange={setIsBottom}
         />
