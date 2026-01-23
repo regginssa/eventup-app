@@ -17,9 +17,9 @@ import {
   TAmadeusHotelBookingRequest,
   TAmadeusHotelOffer,
 } from "@/types/amadeus";
-import { IEvent } from "@/types/data";
-import { formatEventDate } from "@/utils/format";
-import { Fontisto, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { IEvent } from "@/types/event";
+import { formatDateTime } from "@/utils/format";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -56,28 +56,48 @@ const EventDetail = ({
         <>
           <View className="w-full flex flex-row items-center gap-4 overflow-hidden">
             <Image
-              source={event.image}
+              source={event.images?.[0] as string}
               contentFit="cover"
               style={{ width: 100, height: 100, borderRadius: 6 }}
             />
             <View className="gap-4 flex-1">
               <Text className="font-poppins-semibold text-gray-700 line-clamp-2">
-                {event.title}
+                {event.name as string}
               </Text>
 
               <View className="gap-2">
                 <View className="flex flex-row items-center gap-2">
-                  <Fontisto name="map-marker-alt" size={20} color="#374151" />
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    size={16}
+                    color="#374151"
+                  />
                   <Text className="font-dm-sans-medium text-sm text-gray-700">
-                    {event?.venue?.city
-                      ? `${event.venue.city}, ${event.country}`
-                      : event?.country}
+                    {event?.location?.city
+                      ? `${event.location.city.name}, ${event.location.country.name}`
+                      : event?.location?.country.name}
                   </Text>
                 </View>
                 <View className="flex flex-row items-center gap-2">
-                  <Ionicons name="calendar-outline" size={16} color="#374151" />
+                  <MaterialCommunityIcons
+                    name="calendar-outline"
+                    size={16}
+                    color="#374151"
+                  />
                   <Text className="font-dm-sans-medium text-sm text-gray-700">
-                    {formatEventDate(event?.opening_date as Date)}
+                    {event?.dates?.start.time} /{" "}
+                    {formatDateTime(event?.dates?.start.date as string)}
+                  </Text>
+                </View>
+
+                <View className="flex flex-row items-center gap-2">
+                  <MaterialCommunityIcons
+                    name="clock-outline"
+                    size={16}
+                    color="#374151"
+                  />
+                  <Text className="font-dm-sans-medium text-sm text-gray-700">
+                    {event?.dates?.timezone ?? "--"}
                   </Text>
                 </View>
               </View>
@@ -180,12 +200,12 @@ const BookingScreen = () => {
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
   const { flight, hotel, travelers, hotelRooms } = useSelector(
-    (state: RootState) => state.booking,
+    (state: RootState) => state.booking
   );
   const [flightTravelers, setFlightTravelers] = useState<TFlightTraveler[]>([]);
   const [hotelTravelers, setHotelTravelers] = useState<THotelTraveler[]>([]);
   const [isConfirmed, setIsConfirmed] = useState<boolean[]>(
-    Array.from({ length: travelers }, () => false),
+    Array.from({ length: travelers }, () => false)
   );
 
   const dispatch = useDispatch();
@@ -212,7 +232,7 @@ const BookingScreen = () => {
 
   const handleTravelerDetailsConfirm = (
     travelerDetails: TTraveler,
-    id: number,
+    id: number
   ) => {
     setFlightTravelers((prev) => {
       const newFlightTravelers = [...prev];
@@ -238,7 +258,7 @@ const BookingScreen = () => {
       return Alert.alert("Error", "Please confirm all passenger details");
 
     const flightBookingRequest: TAmadeusFlightBookingRequest = {
-      flightOffers: flight?.offers.map((offer) => offer.id) as any,
+      flightOffers: [flight?.offers[0]] as any,
       travelers: flightTravelers,
       contacts: [
         {

@@ -1,4 +1,4 @@
-import { formatEventDate, getCurrencySymbol } from "@/utils/format";
+import { formatDateTime, formatTime, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -58,9 +58,14 @@ interface TransferItemProps {
   onSelect?: (data: TTransferItemData) => void;
 }
 
-const TransferItem: React.FC<TransferItemProps> = ({ data, hiddenHeader, isHotelToEvent, onSelect }) => {
+const TransferItem: React.FC<TransferItemProps> = ({
+  data,
+  hiddenHeader,
+  isHotelToEvent,
+  onSelect,
+}) => {
   if (!data) return null;
-  
+
   const {
     from,
     to,
@@ -93,7 +98,11 @@ const TransferItem: React.FC<TransferItemProps> = ({ data, hiddenHeader, isHotel
         </View>
       )}
 
-      <TouchableOpacity activeOpacity={0.8} className="w-full px-2 overflow-hidden flex flex-col gap-2" onPress={handleSelect}>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        className="w-full px-2 overflow-hidden flex flex-col gap-2"
+        onPress={handleSelect}
+      >
         {/* FROM */}
         <View className="w-full flex flex-row items-start gap-4 justify-between">
           <View className="flex flex-row items-center gap-2">
@@ -138,7 +147,8 @@ const TransferItem: React.FC<TransferItemProps> = ({ data, hiddenHeader, isHotel
               </Text>
             </View>
             <Text className="font-poppins-semibold text-gray-600">
-              {formatEventDate(new Date(travelDate))}
+              {formatDateTime(new Date(travelDate).toISOString())}{" "}
+              {formatTime(new Date(travelDate))}
             </Text>
           </View>
         )}

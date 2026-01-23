@@ -23,7 +23,7 @@ const EventDetailHeader: React.FC<EventDetailHeaderProps> = ({
   dates,
 }) => {
   return (
-    <View className="w-full gap-5 overflow-hidden">
+    <View className="w-full gap-5 overflow-hidden bg-white rounded-2xl p-4">
       <View className="relative w-full h-[212px] overflow-hidden bg-[#F3F4F6] rounded-[10px]">
         {!image ? (
           <View className="absolute inset-0 flex flex-col items-center justify-center gap-2">

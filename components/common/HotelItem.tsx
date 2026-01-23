@@ -1,5 +1,5 @@
 import { TAmadeusHotelOffer } from "@/types/amadeus";
-import { formatEventDate, getCurrencySymbol } from "@/utils/format";
+import { formatDateTime, getCurrencySymbol } from "@/utils/format";
 import { mapAmadeusHotelOfferToHotelItemData } from "@/utils/map";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -233,7 +233,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
               </Text>
             </View>
             <Text className="font-poppins-semibold text-gray-600">
-              {formatEventDate(new Date(data.checkInDate))}
+              {formatDateTime(new Date(data.checkInDate).toISOString())}
             </Text>
           </View>
         )}
@@ -252,7 +252,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
               </Text>
             </View>
             <Text className="font-poppins-semibold text-gray-600">
-              {formatEventDate(new Date(data.checkOutDate))}
+              {formatDateTime(new Date(data.checkOutDate).toISOString())}
             </Text>
           </View>
         )}
@@ -425,7 +425,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </Text>
           <Text className="font-poppins-bold text-gray-700 text-xl">
             {getCurrencySymbol(
-              (data.price.currency.toLowerCase() as any) || "usd",
+              (data.price.currency.toLowerCase() as any) || "usd"
             )}
             {data.price.total}
           </Text>

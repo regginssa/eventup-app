@@ -1,3 +1,4 @@
+import { createFlightOrder } from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
   createStripePaymentIntent,
@@ -11,11 +12,10 @@ import { CheckoutContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
 import { RootState } from "@/redux/store";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
-import { IEvent } from "@/types/data";
-import { formatEventDate, formatName, getCurrencySymbol } from "@/utils/format";
+import { IEvent } from "@/types/event";
+import { formatDateTime, formatName, getCurrencySymbol } from "@/utils/format";
 import {
   Fontisto,
-  Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
@@ -85,28 +85,45 @@ const EventDetail = ({
         <>
           <View className="w-full flex flex-row items-center gap-4 overflow-hidden">
             <Image
-              source={event.image}
+              source={event.images?.[0] as string}
               contentFit="cover"
               style={{ width: 100, height: 100, borderRadius: 6 }}
             />
             <View className="gap-4 flex-1">
               <Text className="font-poppins-semibold text-gray-700 line-clamp-2">
-                {event.title}
+                {event.name as string}
               </Text>
 
               <View className="gap-2">
                 <View className="flex flex-row items-center gap-2">
                   <Fontisto name="map-marker-alt" size={20} color="#374151" />
                   <Text className="font-dm-sans-medium text-sm text-gray-700">
-                    {event?.venue?.city
-                      ? `${event.venue.city}, ${event.country}`
-                      : event?.country}
+                    {event?.location?.city
+                      ? `${event.location.city.name}, ${event.location.country.name}`
+                      : event?.location?.country?.name}
                   </Text>
                 </View>
+
                 <View className="flex flex-row items-center gap-2">
-                  <Ionicons name="calendar-outline" size={16} color="#374151" />
+                  <MaterialCommunityIcons
+                    name="calendar-outline"
+                    size={16}
+                    color="#374151"
+                  />
                   <Text className="font-dm-sans-medium text-sm text-gray-700">
-                    {formatEventDate(event?.opening_date as Date)}
+                    {event.dates?.start.time} /{" "}
+                    {formatDateTime(event.dates?.start.date as string)}
+                  </Text>
+                </View>
+
+                <View className="flex flex-row items-center gap-2">
+                  <MaterialCommunityIcons
+                    name="clock-outline"
+                    size={16}
+                    color="#374151"
+                  />
+                  <Text className="font-dm-sans-medium text-sm text-gray-700">
+                    {event.dates?.timezone ?? "--"}
                   </Text>
                 </View>
               </View>
@@ -637,13 +654,14 @@ const CheckoutScreen = () => {
   const [paymentMethod, setPaymentMethod] = useState<TPaymentMethod>("card");
   const [stripePaymentMethodId, setStripePaymentMethodId] =
     useState<string>("");
-  const [isBookLoading, setIsBookLoading] = useState<boolean>(false);
+  const [bookLoading, setBookLoading] = useState<boolean>(false);
 
   const { eventId, packageType } = useLocalSearchParams();
   const router = useRouter();
+
   const { user } = useSelector((state: RootState) => state.auth);
   const { flight, hotel, bookings } = useSelector(
-    (state: RootState) => state.booking,
+    (state: RootState) => state.booking
   );
   const dispatch = useDispatch();
 
@@ -673,7 +691,7 @@ const CheckoutScreen = () => {
 
     if (user.stripe.payment_methods.length === 0) return;
     setStripePaymentMethodId(
-      user.stripe.payment_methods[0].payment_method_id || "",
+      user.stripe.payment_methods[0].payment_method_id || ""
     );
   }, [user]);
 
@@ -701,7 +719,7 @@ const CheckoutScreen = () => {
     setServices(services);
   }, [flight, hotel]);
 
-  const handleStripePayment = async () => {
+  const handleStripePayment = async (): Promise<boolean> => {
     const stripePayload = {
       customerId: user?.stripe.customer_id,
       paymentMethodId: stripePaymentMethodId,
@@ -712,14 +730,16 @@ const CheckoutScreen = () => {
     };
 
     const clientSecretResponse = await createStripePaymentIntent(
-      stripePayload as any,
+      stripePayload as any
     );
 
     if (!clientSecretResponse.ok) {
-      return Alert.alert(
+      Alert.alert(
         "Payment Error",
-        clientSecretResponse.message || "Failed to create payment intent.",
+        clientSecretResponse.message || "Failed to create payment intent."
       );
+
+      return false;
     }
 
     const { id: paymentIntentId, clientSecret } = clientSecretResponse.data;
@@ -733,39 +753,85 @@ const CheckoutScreen = () => {
     });
 
     if (confirmPaymentError) {
-      return Alert.alert(
-        "Payment Confirmation Error",
-        confirmPaymentError.message,
-      );
+      Alert.alert("Payment Confirmation Error", confirmPaymentError.message);
+      return false;
     }
 
-    return paymentIntentId;
+    return true;
+  };
+
+  const book = async () => {
+    try {
+      if (flight?.request) {
+        console.log("[create flight order request]: ", flight.request);
+
+        const response = await createFlightOrder(flight.request);
+
+        if (response.ok) {
+          console.log("[create flight order success]: ", response.data);
+        } else {
+          console.error("[create flight order error]: ", response.message);
+          Alert.alert(
+            "Error",
+            response.message || "Failed to create flight order."
+          );
+          return;
+        }
+      }
+
+      // if (hotel?.request) {
+      //   const response = await createHotelOrder(hotel.request);
+
+      //   if (response.ok) {
+      //     console.log("[create hotel order success]: ", response.data);
+      //   } else {
+      //     console.error("[create hotel order error]: ", response.message);
+      //     Alert.alert(
+      //       "Error",
+      //       response.message || "Failed to create hotel order."
+      //     );
+      //     return;
+      //   }
+      // }
+    } catch (error: any) {
+      console.error("book error: ", error);
+      Alert.alert("Error", error?.response?.data?.message || "Failed to book.");
+    }
   };
 
   const handleBook = async (paymentMethod: TPaymentMethod) => {
     if (!user?._id || !eventId) return Alert.alert("Error", "Unauthorized");
 
     try {
-      setIsBookLoading(true);
-      switch (paymentMethod) {
-        case "card":
-          break;
+      setBookLoading(true);
 
-        case "crypto":
-          break;
+      // let paymentResult = false;
 
-        case "token":
-          break;
+      // switch (paymentMethod) {
+      //   case "card":
+      //     // paymentResult = await handleStripePayment();
+      //     break;
 
-        default:
-          return;
-      }
+      //   case "crypto":
+      //     break;
+
+      //   case "token":
+      //     break;
+
+      //   default:
+      //     break;
+      // }
+
+      // if (!paymentResult)
+      //   return Alert.alert("Error", "Failed to make payment.");
+
+      await book();
     } catch (error: any) {
       console.error("handle book error: ", error);
       const message = error?.response?.data?.message;
       Alert.alert(message);
     } finally {
-      setIsBookLoading(false);
+      setBookLoading(false);
     }
   };
 
@@ -797,7 +863,7 @@ const CheckoutScreen = () => {
         buttonClassName="h-12"
         textClassName="text-lg"
         disabled={paymentMethod === "card" && stripePaymentMethodId === ""}
-        loading={isBookLoading}
+        loading={bookLoading}
         onPress={() => handleBook(paymentMethod)}
       />
     </CheckoutContainer>

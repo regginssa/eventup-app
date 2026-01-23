@@ -43,7 +43,7 @@ export type TFlightTraveler = {
         deviceType: string;
         countryCallingCode: string;
         number: string;
-      },
+      }
     ];
   };
   document: {
@@ -91,7 +91,7 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [documentType, setDocumentType] = useState<TDropdownItem>(
-    documentTypes[0],
+    documentTypes[0]
   );
   const [birthPlace, setBirthPlace] = useState("");
   const [issuanceLocation, setIssuanceLocation] = useState("");
@@ -99,7 +99,7 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
   const [number, setNumber] = useState("");
   const [expiryDate, setExpiryDate] = useState(new Date());
   const [issuranceCountry, setIssuranceCountry] = useState<Country | null>(
-    null,
+    null
   );
   const [validityCountry, setValidityCountry] = useState<Country | null>(null);
   const [nationality, setNationality] = useState<Country | null>(null);
@@ -178,7 +178,7 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
       id: id.toString(),
       dateOfBirth: formatBookingDate(dateOfBirth),
       name: { firstName: firstName, lastName: lastName },
-      gender: gender.label as string,
+      gender: gender.label.toUpperCase() as string,
       contact: {
         emailAddress: email,
         phones: [
@@ -197,7 +197,7 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
     const hotelTravelerDetails: THotelTraveler = {
       info: {
         tid: id.toString(),
-        title: gender.label as string,
+        title: gender.value === "male" ? "Mr" : ("Mrs" as string),
         firstName: firstName,
         lastName: lastName,
         phone: phone,

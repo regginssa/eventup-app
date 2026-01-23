@@ -109,7 +109,7 @@ const EventDetailScreen = () => {
 
   return (
     <EventDetailContainer>
-      <View className="flex-1 bg-white rounded-2xl p-4 gap-5">
+      <View className="flex-1 gap-6">
         {loading ? (
           <Spinner size="md" />
         ) : event ? (
@@ -125,35 +125,37 @@ const EventDetailScreen = () => {
               dates={event.dates as EventDates}
             />
 
-            <Tabs
-              tabs={tabs}
-              selectedTab={selectedTab}
-              onSelct={setSelectedTab}
-              tabClassName="flex-1"
-            />
+            <View className="flex-1 bg-white rounded-2xl p-4 gap-6">
+              <Tabs
+                tabs={tabs}
+                selectedTab={selectedTab}
+                onSelct={setSelectedTab}
+                tabClassName="flex-1"
+              />
 
-            {selectedTab.value === "packages" ? (
-              <EventDetailPackages
-                event={event}
-                currentLocationCoords={currentLocationCoords}
-                currentCity={currentCity}
-                currentCountryCode={currentCountryCode}
-              />
-            ) : selectedTab.value === "overview" ? (
-              <EventDetailOverview
-                hoster={{
-                  _id: event.hoster?._id ?? "",
-                  avatar: event.hoster?.avatar ?? "",
-                  title: event.hoster?.title ?? "",
-                  country: event.hoster?.location.country ?? "",
-                  country_code: event.hoster?.location.country_code ?? "",
-                  is_verified: event.hoster?.is_id_verified ?? false,
-                }}
-                description={event.description}
-              />
-            ) : (
-              <EventDetailItinerary />
-            )}
+              {selectedTab.value === "packages" ? (
+                <EventDetailPackages
+                  event={event}
+                  currentLocationCoords={currentLocationCoords}
+                  currentCity={currentCity}
+                  currentCountryCode={currentCountryCode}
+                />
+              ) : selectedTab.value === "overview" ? (
+                <EventDetailOverview
+                  hoster={{
+                    _id: event.hoster?._id ?? "",
+                    avatar: event.hoster?.avatar ?? "",
+                    title: event.hoster?.title ?? "",
+                    country: event.hoster?.location.country ?? "",
+                    country_code: event.hoster?.location.country_code ?? "",
+                    is_verified: event.hoster?.is_id_verified ?? false,
+                  }}
+                  description={event.description}
+                />
+              ) : (
+                <EventDetailItinerary />
+              )}
+            </View>
           </>
         ) : (
           <EventDetailEmpty />

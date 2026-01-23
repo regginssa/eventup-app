@@ -1,5 +1,5 @@
 import { TAmadeusFlightOffer } from "@/types/amadeus";
-import { formatEventDate, getCurrencySymbol } from "@/utils/format";
+import { formatDateTime, getCurrencySymbol } from "@/utils/format";
 import { mapAmadeusFlightOfferToFlightItemData } from "@/utils/map";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
@@ -36,7 +36,19 @@ interface FlightItemProps {
 const FlightItem: React.FC<FlightItemProps> = ({ data, hiddenHeader }) => {
   if (!data) return null;
 
-  const { from, to, departureDate, arrivalDate, stops, airlineCode, airlineName, flightNumber, seatsLeft, refundable, price } = mapAmadeusFlightOfferToFlightItemData(data);
+  const {
+    from,
+    to,
+    departureDate,
+    arrivalDate,
+    stops,
+    airlineCode,
+    airlineName,
+    flightNumber,
+    seatsLeft,
+    refundable,
+    price,
+  } = mapAmadeusFlightOfferToFlightItemData(data);
 
   return (
     <>
@@ -87,7 +99,9 @@ const FlightItem: React.FC<FlightItemProps> = ({ data, hiddenHeader }) => {
             </Text>
           </View>
           <Text className="font-poppins-semibold text-gray-600">
-            {departureDate ? formatEventDate(new Date(departureDate)) : "-"}
+            {departureDate
+              ? formatDateTime(new Date(departureDate).toISOString())
+              : "-"}
           </Text>
         </View>
 
@@ -105,7 +119,9 @@ const FlightItem: React.FC<FlightItemProps> = ({ data, hiddenHeader }) => {
           </View>
 
           <Text className="font-poppins-semibold text-gray-600">
-            {arrivalDate ? formatEventDate(new Date(arrivalDate)) : "-"}
+            {arrivalDate
+              ? formatDateTime(new Date(arrivalDate).toISOString())
+              : "-"}
           </Text>
         </View>
 

@@ -11,7 +11,7 @@ import {
  * Maps Amadeus Flight Offer API response to TFlightItemData format
  */
 export const mapAmadeusFlightOfferToFlightItemData = (
-  offer: TAmadeusFlightOffer,
+  offer: TAmadeusFlightOffer
 ): TFlightItemData => {
   const itinerary = offer.itineraries?.[0];
   const segments = itinerary?.segments || [];
@@ -44,8 +44,8 @@ export const mapAmadeusFlightOfferToFlightItemData = (
   const refundable =
     offer.travelerPricings?.[0]?.fareDetailsBySegment?.some((segment) =>
       segment.amenities?.some((amenity) =>
-        amenity.description?.toUpperCase().includes("REFUNDABLE"),
-      ),
+        amenity.description?.toUpperCase().includes("REFUNDABLE")
+      )
     ) || false;
 
   // Get price
@@ -89,21 +89,21 @@ export const mapAmadeusFlightOfferToFlightItemData = (
  */
 export const mapAmadeusHotelOfferToHotelItemData = (
   offer: TAmadeusHotelOffer,
-  offerIndex: number = 0,
+  offerIndex: number = 0
 ): THotelItemData => {
   // Validate that offers array exists and has items
   if (!offer.offers || offer.offers.length === 0) {
     throw new Error(
       `Hotel offer has no available offers. Hotel: ${
         offer.hotel?.name || "Unknown"
-      }`,
+      }`
     );
   }
 
   // Validate offerIndex is within bounds
   if (offerIndex < 0 || offerIndex >= offer.offers.length) {
     throw new Error(
-      `Invalid offerIndex ${offerIndex}. Hotel has ${offer.offers.length} offer(s).`,
+      `Invalid offerIndex ${offerIndex}. Hotel has ${offer.offers.length} offer(s).`
     );
   }
 
@@ -179,7 +179,7 @@ export const mapAmadeusHotelOfferToHotelItemData = (
  * Maps Amadeus Transfer Offer API response to TTransferItemData format
  */
 export const mapAmadeusTransferOfferToTransferItemData = (
-  offer: TAmadeusTransferOffer,
+  offer: TAmadeusTransferOffer
 ): TTransferItemData => {
   // Extract from location
   const from =
@@ -222,7 +222,7 @@ export const mapAmadeusTransferOfferToTransferItemData = (
   // Format luggage info
   const luggageParts: string[] = [];
   offer.vehicle?.baggages?.forEach((bag) => {
-    luggageParts.push(`${bag.count}x ${bag.size}`);
+    luggageParts.push(`${bag.count}x ${bag.size || "N/A"}`);
   });
   const luggage = luggageParts.join(", ") || "";
 
