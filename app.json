@@ -1,26 +1,26 @@
 {
   "expo": {
-    "name": "Charlie Party",
-    "slug": "charlie-party",
+    "name": "EventUp",
+    "slug": "eventup",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "charlieparty",
+    "scheme": "eventup",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.charlieunicornai.charlieparty",
+      "bundleIdentifier": "com.charlieunicornai.eventup",
       "usesAppleSignIn": true,
       "config": {
-        "googleMapsApiKey": "AIzaSyBZhXrql_BqZA9QbARhs9wpEM2whstsIMc"
+        "googleMapsApiKey": "AIzaSyD-ctseOmsg3Gg2fTwPyN6XmY_kgMOpVrI"
       },
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
         "ITSAppUsesNonExemptEncryption": false,
-        "NSLocationWhenInUseUsageDescription": "Charlie Party needs access to your location to show nearby events.",
-        "NSPhotoLibraryUsageDescription": "Charlie Party requires access to your photo library to let you upload pictures for events.",
-        "NSCameraUsageDescription": "Charlie Party uses the camera to let you take photos for your events."
+        "NSLocationWhenInUseUsageDescription": "EventUp needs access to your location to show nearby events.",
+        "NSPhotoLibraryUsageDescription": "EventUp requires access to your photo library to let you upload pictures for events.",
+        "NSCameraUsageDescription": "EventUp uses the camera to let you take photos for your events."
       }
     },
     "android": {
@@ -32,13 +32,14 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.charlieunicornai.charlieparty",
+      "package": "com.charlieunicornai.eventup",
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyBZhXrql_BqZA9QbARhs9wpEM2whstsIMc"
+          "apiKey": "AIzaSyD-ctseOmsg3Gg2fTwPyN6XmY_kgMOpVrI"
         }
       },
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan",
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "output": "static",
@@ -61,9 +62,10 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Charlie Party accesses your photos to let you share them with your friends."
+          "photosPermission": "EventUp accesses your photos to let you share them with your friends."
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -72,7 +74,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "b321bfc9-d1b6-4e5e-b248-e0a04375f251"
+        "projectId": "43130ed1-f67b-4ed3-8442-df4cfa60aab8"
       }
     },
     "owner": "charlie-unicorn-ai"

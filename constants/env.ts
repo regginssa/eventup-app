@@ -1,11 +1,11 @@
-export const GOOGLE_API_KEY = "AIzaSyBZhXrql_BqZA9QbARhs9wpEM2whstsIMc";
+export const GOOGLE_API_KEY = "AIzaSyD-ctseOmsg3Gg2fTwPyN6XmY_kgMOpVrI";
 export const GOOGLE_ANDROID_CLIENT_ID =
-  "862117122939-7at7h4s0a4r2aqa0f305gmku8opl35hq.apps.googleusercontent.com";
+  "732132936043-0jv4d1t4l7e6ope1elj72q355j20d4ui.apps.googleusercontent.com";
 export const GOOGLE_IOS_CLIENT_ID =
-  "862117122939-0fk4gc08pg47dpalrm31655r9s1ht0hk.apps.googleusercontent.com";
+  "732132936043-eli6c86ll0gndeohski518nbjmnm9qbq.apps.googleusercontent.com";
 export const GOOGLE_WEB_CLIENT_ID =
-  "862117122939-ilesttlvupmohki3ms71oh1mn28op5pn.apps.googleusercontent.com";
-export const GOOGLE_WEB_CLIENT_SECRET = "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";
+  "732132936043-85fpifatj1b2kusu319c6urvdnub7aq7.apps.googleusercontent.com";
+export const GOOGLE_WEB_CLIENT_SECRET = "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";
 export const SERVER_API_ENDPOINT = "http://192.168.125.100:5001/api";
 // https://party-app-v2-server-production.up.railway.app/api
 // http://38.180.212.3:5001/api

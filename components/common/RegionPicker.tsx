@@ -1,5 +1,5 @@
 import { RegionType } from "@/types/location.types";
-import { Entypo, Feather, Fontisto } from "@expo/vector-icons";
+import { Entypo, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import countryRegionData from "country-region-data";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -80,7 +80,11 @@ const RegionPicker: React.FC<RegionPickerProps> = ({
         className="py-1 px-4 gap-2 bg-white rounded-md flex flex-row items-center"
         onPress={() => setIsOpen(true)}
       >
-        <Fontisto name="map-marker-alt" size={16} color="#4b5563" />
+        <MaterialCommunityIcons
+          name="map-marker-outline"
+          size={16}
+          color="#4b5563"
+        />
 
         <TextInput
           placeholder={placeholder}

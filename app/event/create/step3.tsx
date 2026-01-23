@@ -1,4 +1,4 @@
-import { Button, DateTimePicker } from "@/components/common";
+import { Button, DateTimePicker, TimezonePicker } from "@/components/common";
 import { CreateEventContainer } from "@/components/organisms";
 import { setNewEvent } from "@/redux/slices/event.slice";
 import { RootState } from "@/redux/store";
@@ -22,6 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 const CreateEventStep3Screen = () => {
   const [images, setImages] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<Date>(new Date());
+  const [timezone, setTimezone] = useState<string | null>(null);
 
   const router = useRouter();
   const { newEvent } = useSelector((state: RootState) => state.event);
@@ -218,6 +219,15 @@ const CreateEventStep3Screen = () => {
         onPick={setStartDate}
         label="Start date"
         placeholder="Select start date"
+        bordered
+        className="rounded-md"
+      />
+
+      <TimezonePicker
+        label="Timezone"
+        placeholder="Select timezone"
+        value={timezone}
+        onSelect={setTimezone}
         bordered
         className="rounded-md"
       />
