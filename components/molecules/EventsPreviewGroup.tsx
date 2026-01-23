@@ -123,9 +123,10 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                 </View>
               ) : (
                 <Image
-                  source={event.images[0]}
-                  alt={event.name}
+                  source={{ uri: event.images?.[0] }}
+                  alt={event.name || ""}
                   style={styles.image}
+                  contentFit="cover"
                 />
               )}
 
@@ -151,7 +152,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
 
                     <Text className="font-dm-sans text-sm text-white">
                       {formatEventLabel(
-                        event.classifications.category as string
+                        event.classifications?.category as string
                       )}
                     </Text>
                   </View>
@@ -184,9 +185,9 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                           color="white"
                         />
                         <Text className="font-dm-sans-medium text-sm text-white">
-                          {event.location.city?.name
-                            ? `${event.location.city.name}, ${event.location.country.code}`
-                            : event.location.country.name}
+                          {event.location?.city?.name
+                            ? `${event.location?.city?.name}, ${event.location?.country?.code}`
+                            : event.location?.country?.name}
                         </Text>
                       </View>
 
@@ -198,10 +199,11 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                         />
                         <Text className="font-dm-sans-medium text-sm text-white">
                           {formatEventDateTime(
-                            event.dates.start.date as string,
-                            event.dates.start.time as string
+                            event.dates?.start?.date as string,
+                            event.dates?.start?.time as string
                           )}{" "}
-                          ({formatTimezoneShort(event.dates.timezone as string)}
+                          (
+                          {formatTimezoneShort(event.dates?.timezone as string)}
                           )
                         </Text>
                       </View>

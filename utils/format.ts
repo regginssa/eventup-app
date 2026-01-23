@@ -10,6 +10,7 @@ export const formatEventLabel = (key: string) => {
   if (!key || typeof key !== "string") return "";
 
   return key
+    .replace(/_and_/gi, " & ") // handle "_and_" to " & "
     .replace(/_/g, " ")
     .replace(/\//g, " / ")
     .replace(/\b\w/g, (char) => char.toUpperCase())

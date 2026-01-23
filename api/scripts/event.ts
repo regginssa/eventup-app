@@ -6,10 +6,12 @@ import AxiosInstance from "../AxiosInstance";
 export const fetchEventsFeed = async (
   userId: string,
   page: number,
-  limit: number
+  limit: number,
+  type: "ai" | "user"
 ): Promise<ApiResponse<EventsFeedResponse>> => {
   return await AxiosInstance.get(
-    FETCH_EVENTS_FEED + `?userId=${userId}&page=${page}&limit=${limit}`
+    FETCH_EVENTS_FEED +
+      `?userId=${userId}&page=${page}&limit=${limit}&type=${type}`
   );
 };
 

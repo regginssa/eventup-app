@@ -9,7 +9,7 @@ import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSelector } from "react-redux";
 
@@ -54,7 +54,8 @@ const HomeScreen = () => {
       const response = await fetchEventsFeed(
         user._id,
         nextPage,
-        pagination.limit
+        pagination.limit,
+        selectedTab.value as "ai" | "user"
       );
 
       if (response.ok) {
@@ -78,7 +79,8 @@ const HomeScreen = () => {
       const response = await fetchEventsFeed(
         user._id,
         prevPage,
-        pagination.limit
+        pagination.limit,
+        selectedTab.value as "ai" | "user"
       );
 
       if (response.ok) {
@@ -90,14 +92,18 @@ const HomeScreen = () => {
     }
   };
 
-  const fetchFeed = useCallback(async () => {
-    if (!user?._id) return;
+  const fetchFeed = async () => {
     try {
       setLoading(true);
 
       setPagination({ ...pagination, page: 1, total: 0 });
 
-      const response = await fetchEventsFeed(user._id, 1, 10);
+      const response = await fetchEventsFeed(
+        user._id,
+        1,
+        10,
+        selectedTab.value as "ai" | "user"
+      );
 
       if (response.ok) {
         const { events, pagination } = response.data;
@@ -110,11 +116,11 @@ const HomeScreen = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?._id]);
+  };
 
   useEffect(() => {
     fetchFeed();
-  }, []);
+  }, [selectedTab]);
 
   return (
     <HomeContainer>

@@ -1,18 +1,27 @@
-import { Button } from "@/components/common";
+import { Button, DateTimePicker } from "@/components/common";
 import { CreateEventContainer } from "@/components/organisms";
 import { setNewEvent } from "@/redux/slices/event.slice";
 import { RootState } from "@/redux/store";
 import { IEvent } from "@/types/event";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const CreateEventStep3Screen = () => {
   const [images, setImages] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState<Date>(new Date());
 
   const router = useRouter();
   const { newEvent } = useSelector((state: RootState) => state.event);
@@ -38,7 +47,21 @@ const CreateEventStep3Screen = () => {
     });
 
     if (!result.canceled) {
-      setImages([...images, ...result.assets.map((asset) => asset.uri)]);
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+      const validAssets = result.assets.filter((asset) => {
+        if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
+          Alert.alert(
+            "File too large",
+            `The file is larger than 5MB. Please select a smaller file.`
+          );
+          return false;
+        }
+        return true;
+      });
+
+      if (validAssets.length > 0) {
+        setImages([...images, ...validAssets.map((asset) => asset.uri)]);
+      }
     }
   };
 
@@ -64,6 +87,16 @@ const CreateEventStep3Screen = () => {
 
     if (!result.canceled) {
       const asset = result.assets[0];
+      const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+      if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
+        Alert.alert(
+          "File too large",
+          "The captured file is larger than 5MB. Please try again with lower quality settings."
+        );
+        return;
+      }
+
       setImages([...images, asset.uri]);
     }
   };
@@ -79,6 +112,7 @@ const CreateEventStep3Screen = () => {
     };
 
     dispatch(setNewEvent(updates));
+    router.push("/event/create/step4");
   };
 
   console.log("newEvent", newEvent?.location?.city);
@@ -86,8 +120,8 @@ const CreateEventStep3Screen = () => {
   return (
     <CreateEventContainer
       step={3}
-      title="Add Photo"
-      subtitle="Upload photos of your event"
+      title="Add Pictures & Start Date"
+      subtitle="Upload pictures of your event"
       onBack={() => router.back()}
     >
       <View className="flex flex-row items-center justify-center gap-[42px]">
@@ -155,8 +189,38 @@ const CreateEventStep3Screen = () => {
         </Text>
       </View>
 
-      {/* Date picker must be here to let user input opening date */}
-      {/* <DateTimePicker /> */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View className="flex flex-row gap-2">
+          {images.map((image, index) => (
+            <View
+              key={index}
+              className="w-[100px] h-[100px] relative overflow-hidden rounded-lg bg-white border border-gray-200 mb-3"
+            >
+              <Image
+                source={{ uri: image }}
+                style={{ width: 100, height: 100 }}
+                contentFit="cover"
+              />
+              <TouchableOpacity
+                onPress={() => handleRemoveImage(index)}
+                className="absolute top-0 right-0 bg-black/50 rounded-full p-1"
+              >
+                <MaterialIcons name="close" size={16} color="white" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+
+      <DateTimePicker
+        mode="datetime"
+        value={startDate}
+        onPick={setStartDate}
+        label="Start date"
+        placeholder="Select start date"
+        bordered
+        className="rounded-md"
+      />
 
       <Button
         type="primary"
@@ -170,7 +234,7 @@ const CreateEventStep3Screen = () => {
         }
         iconPosition="right"
         buttonClassName="h-12"
-        onPress={() => router.push("/event/create/step4")}
+        onPress={handleContinue}
       />
     </CreateEventContainer>
   );

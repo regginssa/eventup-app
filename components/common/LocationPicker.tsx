@@ -140,14 +140,11 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     };
   }, [input, country, region, city]);
 
-  // Helper function to extract city name from address components
   const extractCityName = (components: any[]): string | null => {
-    // Try to find city from address components
-    // 'locality' is the most common type for city
-    // 'administrative_area_level_2' can also be used for city in some countries
     const cityComponent = components.find(
       (component: any) =>
         component.types.includes("locality") ||
+        component.types.includes("postal_town") ||
         component.types.includes("administrative_area_level_2")
     );
     return cityComponent?.long_name || null;
@@ -156,7 +153,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   const handlePick = async (description: string, placeId: string) => {
     try {
       const response = await fetch(
-        // NOTE: correct param is `place_id`, not `placeid`
         `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}&language=en`
       );
       const json = await response.json();
@@ -164,11 +160,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
       const location = json.result?.geometry?.location;
       const components = json.result?.address_components || [];
 
-      // Extract city name from address components
       const cityName = extractCityName(components);
-      console.log("City name:", cityName); // You can use this cityName as needed
 
-      // Check if selected place is inside region/city if filters are provided
       let valid = true;
       if (region) {
         const allText = components.map((c: any) => c.long_name.toLowerCase());
@@ -187,10 +180,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
       }
 
       if (location) {
-        // Prevent the *next* effect run from fetching suggestions again
         skipNextFetchRef.current = true;
 
-        // Clear any pending debounce so nothing fires after selection
         if (debounceRef.current) clearTimeout(debounceRef.current);
 
         onPick({
@@ -206,7 +197,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         setSuggestions([]);
         setShowSuggestions(false);
 
-        // Blur to close keyboard & keep dropdown closed
         inputRef.current?.blur();
       } else {
         console.warn("No geometry found in Place Details.");
@@ -297,7 +287,7 @@ const styles = StyleSheet.create({
     borderColor: "#e2e8f0",
     borderRadius: 12,
     zIndex: 999,
-    maxHeight: 250, // limit height of dropdown
+    maxHeight: 250,
   },
 });
 
