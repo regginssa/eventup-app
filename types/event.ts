@@ -52,15 +52,22 @@ type Classifications = {
   venue?: string[];
 };
 
+type Fee = {
+  type?: "free" | "paid";
+  amount?: number;
+  currency?: string;
+};
+
 export interface IEvent {
   _id?: string;
-  type: "ai" | "user";
-  name: string;
+  type?: "ai" | "user";
+  name?: string;
   description?: string;
-  tm: TM;
-  dates: EventDates;
-  location: Location;
-  classifications: Classifications;
+  tm?: TM;
+  dates?: EventDates;
+  location?: Location;
+  classifications?: Classifications;
   seatmap?: string;
   images?: string[];
+  fee?: Fee;
 }

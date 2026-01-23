@@ -54,14 +54,15 @@ const CreateEventStep1Screen = () => {
 
     dispatch(
       setNewEvent({
-        id: "",
-        title,
-        detail,
-        kind: "user",
-        category: category?.value.toString() || undefined,
-        subcategories: subcategories.map((s) => s.value.toString()),
-        vibe: vibe.map((v) => v.value.toString()),
-        venue_type: venueType.map((v) => v.value.toString()),
+        name: title,
+        description: detail,
+        type: "user",
+        classifications: {
+          category: category?.value.toString() || undefined,
+          subcategories: subcategories.map((s) => s.value.toString()),
+          vibe: vibe.map((v) => v.value.toString()),
+          venue: venueType.map((v) => v.value.toString()),
+        },
       })
     );
     router.push("/event/create/step2");
@@ -70,17 +71,16 @@ const CreateEventStep1Screen = () => {
   useEffect(() => {
     if (!newEvent) return;
 
-    const { title, detail, category, subcategories, venue_type, vibe } =
-      newEvent;
+    const { name, description, classifications } = newEvent;
 
     // Restore simple fields
-    setTitle(title || "");
-    setDetail(detail || "");
+    setTitle(name || "");
+    setDetail(description || "");
 
     // ---- Restore Category ----
     if (category) {
       const selectedCategory = EVENT_CATEGORIES.find(
-        (c) => c.value === category
+        (c) => c.value === classifications?.category
       );
       setCategory(selectedCategory || null);
 
@@ -103,10 +103,12 @@ const CreateEventStep1Screen = () => {
       }
 
       // ---- Restore Venue Type ----
-      if (selectedCategory && venue_type?.length) {
+      if (selectedCategory && classifications?.venue?.length) {
         const key = selectedCategory.value as keyof typeof EVENT_SUB_CATEGORIES;
         const list = EVENT_VENUE_TYPE[key] || [];
-        const restored = list.filter((v: any) => venue_type.includes(v.value));
+        const restored = list.filter((v: any) =>
+          classifications?.venue?.includes(v.value)
+        );
         setVenueType(restored);
       }
     }

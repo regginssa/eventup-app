@@ -15,6 +15,7 @@ export type TFileType = "image" | "document";
 export type TLocation = {
   description: string;
   coordinate: TCoordinate;
+  cityName?: string;
 };
 export type TAccountType = "individual" | "company";
 export type TKycStatus =

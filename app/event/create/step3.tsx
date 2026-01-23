@@ -1,13 +1,22 @@
 import { Button } from "@/components/common";
 import { CreateEventContainer } from "@/components/organisms";
+import { setNewEvent } from "@/redux/slices/event.slice";
+import { RootState } from "@/redux/store";
+import { IEvent } from "@/types/event";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 
 const CreateEventStep3Screen = () => {
+  const [images, setImages] = useState<string[]>([]);
+
   const router = useRouter();
+  const { newEvent } = useSelector((state: RootState) => state.event);
+  const dispatch = useDispatch();
 
   const handleGalleryPick = async () => {
     const permissionResult =
@@ -29,6 +38,7 @@ const CreateEventStep3Screen = () => {
     });
 
     if (!result.canceled) {
+      setImages([...images, ...result.assets.map((asset) => asset.uri)]);
     }
   };
 
@@ -54,8 +64,24 @@ const CreateEventStep3Screen = () => {
 
     if (!result.canceled) {
       const asset = result.assets[0];
+      setImages([...images, asset.uri]);
     }
   };
+
+  const handleRemoveImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
+  const handleContinue = () => {
+    const updates: IEvent = {
+      ...newEvent,
+      images,
+    };
+
+    dispatch(setNewEvent(updates));
+  };
+
+  console.log("newEvent", newEvent?.location?.city);
 
   return (
     <CreateEventContainer

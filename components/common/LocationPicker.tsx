@@ -99,6 +99,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         const response = await fetch(url);
         const json = await response.json();
 
+        console.log("json", json);
+
         if (json.predictions) {
           let preds: LocationSuggestion[] = json.predictions;
 
@@ -138,6 +140,19 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     };
   }, [input, country, region, city]);
 
+  // Helper function to extract city name from address components
+  const extractCityName = (components: any[]): string | null => {
+    // Try to find city from address components
+    // 'locality' is the most common type for city
+    // 'administrative_area_level_2' can also be used for city in some countries
+    const cityComponent = components.find(
+      (component: any) =>
+        component.types.includes("locality") ||
+        component.types.includes("administrative_area_level_2")
+    );
+    return cityComponent?.long_name || null;
+  };
+
   const handlePick = async (description: string, placeId: string) => {
     try {
       const response = await fetch(
@@ -148,6 +163,10 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
       const location = json.result?.geometry?.location;
       const components = json.result?.address_components || [];
+
+      // Extract city name from address components
+      const cityName = extractCityName(components);
+      console.log("City name:", cityName); // You can use this cityName as needed
 
       // Check if selected place is inside region/city if filters are provided
       let valid = true;
@@ -180,6 +199,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
             latitude: location.lat,
             longitude: location.lng,
           },
+          cityName: cityName || "",
         });
 
         setInput(description);

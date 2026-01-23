@@ -15,7 +15,8 @@ import {
 } from "@/constants/values";
 import { setNewEvent } from "@/redux/slices/event.slice";
 import { RootState } from "@/redux/store";
-import { TCurrency, TDropdownItem, TEventFee, TLocation } from "@/types";
+import { TCoordinate, TDropdownItem, TLocation } from "@/types";
+import { IEvent } from "@/types/event";
 import { RegionType } from "@/types/location.types";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -57,22 +58,31 @@ const CreateEventStep2Screen = () => {
   const handleContinue = () => {
     if (!validate()) return;
 
-    dispatch(
-      setNewEvent({
-        ...newEvent,
-        country: country?.name.toString(),
-        region: region?.name,
-        address: address?.description,
-        coordinate: address?.coordinate,
-        region_code: region?.code,
-        country_code: country?.cca2,
-        fee_type: entryType.value as TEventFee,
-        fee: {
-          amount: Number(fee.value),
-          currency: currency.value as TCurrency,
+    const updates: IEvent = {
+      ...newEvent,
+      location: {
+        country: {
+          name: country?.name.toString(),
+          code: country?.cca2,
         },
-      })
-    );
+        state: {
+          name: region?.name,
+          code: region?.code,
+        },
+        city: {
+          name: address?.cityName,
+          code: undefined,
+        },
+        coordinate: address?.coordinate as TCoordinate,
+      },
+      fee: {
+        type: entryType.value as any,
+        amount: Number(fee.value),
+        currency: currency.value as string,
+      },
+    };
+
+    dispatch(setNewEvent(updates));
 
     router.push("/event/create/step3");
   };
