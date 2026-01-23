@@ -1,17 +1,19 @@
-import { Spinner, Tabs } from "@/components/common";
+import { fetchEventsByUser } from "@/api/scripts/event";
+import { Tabs } from "@/components/common";
 import { EventsPreviewGroup } from "@/components/molecules";
 import { MyEventsScreenContainer } from "@/components/organisms";
 import { RootState } from "@/redux/store";
 import { TDropdownItem } from "@/types";
-import { IEvent } from "@/types/event";
+import { IEvent, TEventStatus } from "@/types/event";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Alert } from "react-native";
 import { useSelector } from "react-redux";
 
 const tabs: TDropdownItem[] = [
   {
-    label: "Created",
-    value: "created",
+    label: "Open",
+    value: "open",
     icon: (
       <MaterialCommunityIcons
         name="calendar-plus-outline"
@@ -32,8 +34,8 @@ const tabs: TDropdownItem[] = [
     ),
   },
   {
-    label: "Booked",
-    value: "booked",
+    label: "Completed",
+    value: "completed",
     icon: (
       <MaterialCommunityIcons
         name="calendar-check-outline"
@@ -51,6 +53,31 @@ const MyEventsScreen = () => {
 
   const { user } = useSelector((state: RootState) => state.auth);
 
+  const fetchEvents = async () => {
+    if (!user?._id) return;
+    try {
+      setLoading(true);
+
+      const response = await fetchEventsByUser(
+        user._id,
+        selectedTab.value as TEventStatus
+      );
+
+      if (response.ok) {
+        setEvents(response.data);
+      }
+    } catch (error) {
+      console.error("fetch created events error: ", error);
+      Alert.alert("Error", "Failed to fetch created events");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, [selectedTab]);
+
   return (
     <MyEventsScreenContainer>
       <Tabs
@@ -59,7 +86,7 @@ const MyEventsScreen = () => {
         selectedTab={selectedTab}
         onSelct={setSelectedTab}
       />
-      {loading ? <Spinner size="md" /> : <EventsPreviewGroup events={events} />}
+      <EventsPreviewGroup events={events} loading={loading} />
     </MyEventsScreenContainer>
   );
 };

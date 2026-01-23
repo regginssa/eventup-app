@@ -60,6 +60,13 @@ type Fee = {
   currency?: string;
 };
 
+export type TEventStatus =
+  | "open"
+  | "closed"
+  | "pending"
+  | "completed"
+  | "cancelled";
+
 export interface IEvent {
   _id?: string;
   type?: "ai" | "user";
@@ -72,5 +79,6 @@ export interface IEvent {
   seatmap?: string;
   images?: string[];
   fee?: Fee;
-  hosterId?: IUser;
+  hoster?: IUser;
+  status?: TEventStatus;
 }

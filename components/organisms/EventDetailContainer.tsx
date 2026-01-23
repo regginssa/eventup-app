@@ -20,7 +20,7 @@ const EventDetailContainer: React.FC<EventDetailContainerProps> = ({
           <TouchableOpacity
             activeOpacity={0.8}
             className="w-10 h-10 rounded-full bg-white flex flex-col items-center justify-center"
-            onPress={() => router.back()}
+            onPress={() => router.replace("/home")}
           >
             <Feather name="arrow-left" size={16} color="#4b5563" />
           </TouchableOpacity>

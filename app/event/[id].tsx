@@ -142,12 +142,12 @@ const EventDetailScreen = () => {
             ) : selectedTab.value === "overview" ? (
               <EventDetailOverview
                 hoster={{
-                  _id: event.hosterId?._id ?? "",
-                  avatar: event.hosterId?.avatar ?? "",
-                  title: event.hosterId?.title ?? "",
-                  country: event.hosterId?.location.country ?? "",
-                  country_code: event.hosterId?.location.country_code ?? "",
-                  is_verified: event.hosterId?.is_id_verified ?? false,
+                  _id: event.hoster?._id ?? "",
+                  avatar: event.hoster?.avatar ?? "",
+                  title: event.hoster?.title ?? "",
+                  country: event.hoster?.location.country ?? "",
+                  country_code: event.hoster?.location.country_code ?? "",
+                  is_verified: event.hoster?.is_id_verified ?? false,
                 }}
                 description={event.description}
               />

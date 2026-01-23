@@ -18,6 +18,7 @@ export const FETCH_IDENTITY_VERIFICATION_SESSION = "/didit/create-session/";
 export const FETCH_EVENTS_FEED = "/events/feed";
 export const FETCH_ALL_EVENTS = "/events/all";
 export const FETCH_EVENT = "/events/";
+export const FETCH_EVENTS_BY_USER = "/events/user";
 export const CREATE_EVENT = "/events/create";
 
 // Airports apis

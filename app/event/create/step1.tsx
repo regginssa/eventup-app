@@ -77,6 +77,7 @@ const CreateEventStep1Screen = () => {
           vibe: vibe.map((v) => v.value.toString()),
           venue: venueType.map((v) => v.value.toString()),
         },
+        hoster: user._id as any,
       })
     );
     router.push("/event/create/step2");
