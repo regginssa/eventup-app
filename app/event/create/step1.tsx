@@ -16,8 +16,10 @@ import { setNewEvent } from "@/redux/slices/event.slice";
 import { RootState } from "@/redux/store";
 import { TDropdownItem } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import { Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const CreateEventStep1Screen = () => {
@@ -32,6 +34,7 @@ const CreateEventStep1Screen = () => {
   const [invalidCategory, setInvalidCategory] = useState<boolean>(false);
   const [invalidDetail, setInvalidDetail] = useState<boolean>(false);
 
+  const { user } = useSelector((state: RootState) => state.auth);
   const { newEvent } = useSelector((state: RootState) => state.event);
   const dispatch = useDispatch();
 
@@ -49,8 +52,19 @@ const CreateEventStep1Screen = () => {
     return titleValid && categoryValid && detailValid;
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!validate()) return;
+
+    if (!user?._id) {
+      Alert.alert("Error", "Please login to continue");
+
+      const token = await AsyncStorage.getItem("Authorization");
+      if (token) {
+        await AsyncStorage.removeItem("Authorization");
+      }
+
+      router.replace("/start");
+    }
 
     dispatch(
       setNewEvent({

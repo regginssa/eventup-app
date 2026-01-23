@@ -4,14 +4,44 @@ import { MyEventsScreenContainer } from "@/components/organisms";
 import { RootState } from "@/redux/store";
 import { TDropdownItem } from "@/types";
 import { IEvent } from "@/types/event";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 
 const tabs: TDropdownItem[] = [
-  { label: "Booked", value: "booked" },
-  { label: "Created", value: "created" },
-  { label: "Pending", value: "pending" },
-  { label: "Completed", value: "completed" },
+  {
+    label: "Created",
+    value: "created",
+    icon: (
+      <MaterialCommunityIcons
+        name="calendar-plus-outline"
+        size={16}
+        color="#1f2937"
+      />
+    ),
+  },
+  {
+    label: "Pending",
+    value: "pending",
+    icon: (
+      <MaterialCommunityIcons
+        name="calendar-clock-outline"
+        size={16}
+        color="#1f2937"
+      />
+    ),
+  },
+  {
+    label: "Booked",
+    value: "booked",
+    icon: (
+      <MaterialCommunityIcons
+        name="calendar-check-outline"
+        size={16}
+        color="#1f2937"
+      />
+    ),
+  },
 ];
 
 const MyEventsScreen = () => {
@@ -23,18 +53,13 @@ const MyEventsScreen = () => {
 
   return (
     <MyEventsScreenContainer>
-      {loading ? (
-        <Spinner size="md" />
-      ) : (
-        <>
-          <Tabs
-            tabs={tabs}
-            selectedTab={selectedTab}
-            onSelct={setSelectedTab}
-          />
-          <EventsPreviewGroup events={events} />
-        </>
-      )}
+      <Tabs
+        tabs={tabs}
+        tabClassName="flex-1"
+        selectedTab={selectedTab}
+        onSelct={setSelectedTab}
+      />
+      {loading ? <Spinner size="md" /> : <EventsPreviewGroup events={events} />}
     </MyEventsScreenContainer>
   );
 };

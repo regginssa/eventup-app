@@ -1,6 +1,6 @@
 import { EventDates } from "@/types/event";
-import { formatEventDateTime } from "@/utils/format";
-import { Fontisto, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { formatDateTime } from "@/utils/format";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text, View } from "react-native";
@@ -80,19 +80,34 @@ const EventDetailHeader: React.FC<EventDetailHeaderProps> = ({
 
       <View className="gap-2">
         <View className="flex flex-row items-center gap-2">
-          <Fontisto name="map-marker-alt" size={20} color="#374151" />
+          <MaterialCommunityIcons
+            name="map-marker-outline"
+            size={16}
+            color="#374151"
+          />
           <Text className="font-dm-sans-medium text-sm text-gray-700">
             {city ? `${city}, ${country}` : country}
           </Text>
         </View>
         <View className="flex flex-row items-center gap-2">
-          <Ionicons name="calendar-outline" size={16} color="#374151" />
+          <MaterialCommunityIcons
+            name="calendar-outline"
+            size={16}
+            color="#374151"
+          />
           <Text className="font-dm-sans-medium text-sm text-gray-700">
-            {formatEventDateTime(
-              dates.start.date as string,
-              dates.start.time as string
-            )}{" "}
-            ({dates.timezone ?? "--"})
+            {dates.start.time} / {formatDateTime(dates.start.date as string)}
+          </Text>
+        </View>
+
+        <View className="flex flex-row items-center gap-2">
+          <MaterialCommunityIcons
+            name="clock-outline"
+            size={16}
+            color="#374151"
+          />
+          <Text className="font-dm-sans-medium text-sm text-gray-700">
+            {dates.timezone ?? "--"}
           </Text>
         </View>
       </View>

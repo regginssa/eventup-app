@@ -67,6 +67,7 @@ const EventDetailScreen = () => {
 
       setEvent(response.data);
       setEventType(type as "ai" | "user");
+      console.log(response.data);
     } catch (error: any) {
       throw new Error(error.message);
     }
@@ -141,14 +142,14 @@ const EventDetailScreen = () => {
             ) : selectedTab.value === "overview" ? (
               <EventDetailOverview
                 hoster={{
-                  _id: "",
-                  avatar: "",
-                  country: "Portugal",
-                  country_code: "PT",
-                  is_verified: true,
-                  title: "Event Hunter",
+                  _id: event.hosterId?._id ?? "",
+                  avatar: event.hosterId?.avatar ?? "",
+                  title: event.hosterId?.title ?? "",
+                  country: event.hosterId?.location.country ?? "",
+                  country_code: event.hosterId?.location.country_code ?? "",
+                  is_verified: event.hosterId?.is_id_verified ?? false,
                 }}
-                detail={event.description}
+                description={event.description}
               />
             ) : (
               <EventDetailItinerary />

@@ -1,4 +1,4 @@
-import { formatBookingDate, formatDateTime } from "@/utils/format";
+import { formatDateTime, formatTime } from "@/utils/format";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import {
@@ -81,8 +81,8 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
           editable={false}
           value={
             mode === "datetime"
-              ? formatDateTime(value.toISOString())
-              : formatBookingDate(value)
+              ? `${formatTime(value)} / ${formatDateTime(value.toISOString())}`
+              : formatDateTime(value.toISOString())
           }
         />
       </TouchableOpacity>

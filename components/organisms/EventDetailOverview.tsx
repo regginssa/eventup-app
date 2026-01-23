@@ -15,13 +15,13 @@ interface EventDetailOverviewProps {
     country_code: string;
     is_verified: boolean;
   };
-  detail?: string;
+  description?: string;
   notes?: string;
 }
 
 const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
   hoster,
-  detail,
+  description,
   notes,
 }) => {
   return (
@@ -67,14 +67,16 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
           About this event
         </Text>
 
-        {detail && (
-          <Text className="font-dm-sans text-sm text-gray-600">{detail}</Text>
+        {description && (
+          <Text className="font-dm-sans text-sm text-gray-600">
+            {description}
+          </Text>
         )}
         {notes && (
           <Text className="font-dm-sans text-sm text-gray-600">{notes}</Text>
         )}
 
-        {!detail && !notes && (
+        {!description && !notes && (
           <View className="w-full flex flex-col items-center justify-center gap-1">
             <MaterialCommunityIcons
               name="pencil-remove-outline"

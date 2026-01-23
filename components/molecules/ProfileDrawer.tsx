@@ -1,5 +1,5 @@
 import { RootState } from "@/redux/store";
-import { IUser } from "@/types/data";
+import { IUser } from "@/types/user";
 import {
   AntDesign,
   Entypo,

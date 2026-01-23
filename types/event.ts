@@ -1,3 +1,5 @@
+import { IUser } from "./user";
+
 type TM = {
   eventId?: string;
   url?: string;
@@ -70,4 +72,5 @@ export interface IEvent {
   seatmap?: string;
   images?: string[];
   fee?: Fee;
+  hosterId?: IUser;
 }

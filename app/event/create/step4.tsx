@@ -17,10 +17,14 @@ const CreateEventStep4Screen = () => {
   const { newEvent } = useSelector((state: RootState) => state.event);
 
   const handleJoinNow = async () => {
-    if (newEvent?._id) {
+    if (!newEvent?._id) {
       Alert.alert("Error", "Event not found");
       router.push("/event/create/step1");
-      return;
+    } else {
+      router.push({
+        pathname: `/event/${newEvent?._id}` as any,
+        params: { id: newEvent?._id, type: "user" },
+      });
     }
   };
 
@@ -54,7 +58,12 @@ const CreateEventStep4Screen = () => {
         Onboarding completed
       </Text>
 
-      <Button type="primary" label="Join now" buttonClassName="h-12" />
+      <Button
+        type="primary"
+        label="Join now"
+        buttonClassName="h-12"
+        onPress={handleJoinNow}
+      />
     </CreateEventContainer>
   );
 };

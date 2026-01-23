@@ -4,7 +4,7 @@ import { CreateEventContainer } from "@/components/organisms";
 import { setNewEvent } from "@/redux/slices/event.slice";
 import { RootState } from "@/redux/store";
 import { IEvent } from "@/types/event";
-import { formatBookingDate } from "@/utils/format";
+import { formatBookingDate, formatTime } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -141,7 +141,7 @@ const CreateEventStep3Screen = () => {
         ...newEvent?.dates,
         start: {
           date: formatBookingDate(startDate),
-          time: startDate.toISOString().split("T")[1].substring(0, 5),
+          time: formatTime(startDate),
         },
         timezone: timezone || undefined,
       },
