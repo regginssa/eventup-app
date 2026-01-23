@@ -99,8 +99,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         const response = await fetch(url);
         const json = await response.json();
 
-        console.log("json", json);
-
         if (json.predictions) {
           let preds: LocationSuggestion[] = json.predictions;
 

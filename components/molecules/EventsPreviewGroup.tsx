@@ -199,8 +199,8 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                         />
                         <Text className="font-dm-sans-medium text-sm text-white">
                           {formatEventDateTime(
-                            event.dates?.start?.date as string,
-                            event.dates?.start?.time as string
+                            event.dates?.start?.date,
+                            event.dates?.start?.time
                           )}{" "}
                           (
                           {formatTimezoneShort(event.dates?.timezone as string)}
@@ -214,7 +214,12 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                       label="View package"
                       buttonClassName="w-[125px] h-10"
                       textClassName="text-sm"
-                      onPress={() => router.push(`/event/${event._id}` as any)}
+                      onPress={() =>
+                        router.push({
+                          pathname: `/event/${event._id}` as any,
+                          params: { id: event._id, type: event.type },
+                        })
+                      }
                     />
                   </View>
                 </View>

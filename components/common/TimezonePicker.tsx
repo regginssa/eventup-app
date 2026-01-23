@@ -1,6 +1,6 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
 import moment from "moment-timezone";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -13,48 +13,6 @@ import {
 import Input from "./Input";
 import Modal from "./Modal";
 
-// Format timezone name for display
-const formatTimezoneLabel = (timezone: string): string => {
-  try {
-    // Extract city name from timezone (e.g., "America/New_York" -> "New York")
-    const cityName = timezone.split("/").pop()?.replace(/_/g, " ") || timezone;
-
-    // Try to get timezone abbreviation
-    let timeZoneAbbr = "";
-    try {
-      const now = new Date();
-      const formatter = new Intl.DateTimeFormat("en-US", {
-        timeZone: timezone,
-        timeZoneName: "short",
-      });
-      const parts = formatter.formatToParts(now);
-      timeZoneAbbr =
-        parts.find((part) => part.type === "timeZoneName")?.value || "";
-    } catch {
-      // Fallback: try to get offset
-      const offset = getTimezoneOffset(timezone);
-      const sign = offset >= 0 ? "+" : "";
-      timeZoneAbbr = `UTC${sign}${offset}`;
-    }
-
-    return timeZoneAbbr ? `${cityName} (${timeZoneAbbr})` : cityName;
-  } catch {
-    return timezone;
-  }
-};
-
-// Get timezone offset for sorting
-const getTimezoneOffset = (timezone: string): number => {
-  try {
-    const now = new Date();
-    const utc = new Date(now.toLocaleString("en-US", { timeZone: "UTC" }));
-    const tz = new Date(now.toLocaleString("en-US", { timeZone: timezone }));
-    return (tz.getTime() - utc.getTime()) / (1000 * 60 * 60); // hours
-  } catch {
-    return 0;
-  }
-};
-
 interface TimezonePickerProps {
   label?: string;
   placeholder?: string;
@@ -62,7 +20,7 @@ interface TimezonePickerProps {
   className?: string;
   disabled?: boolean;
   value: string | null;
-  onSelect: (timezone: string) => void;
+  onPick: (timezone: string) => void;
   invalid?: boolean;
   invalidTxt?: string;
 }
@@ -74,7 +32,7 @@ const TimezonePicker: React.FC<TimezonePickerProps> = ({
   className,
   disabled,
   value,
-  onSelect,
+  onPick,
   invalid,
   invalidTxt,
 }) => {
@@ -86,10 +44,14 @@ const TimezonePicker: React.FC<TimezonePickerProps> = ({
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
-      console.log(Intl.supportedValuesOf("timeZone"));
+      const tz = moment.tz.names();
+      const filteredTimezones = tz.filter((timezone) =>
+        timezone.toLowerCase().includes(search.toLowerCase())
+      );
+      setTimezones(filteredTimezones);
       setLoading(false);
     }
-  }, [isOpen]);
+  }, [isOpen, search]);
 
   return (
     <View className="w-full gap-2 relative">
@@ -145,7 +107,15 @@ const TimezonePicker: React.FC<TimezonePickerProps> = ({
             <FlatList
               data={timezones}
               renderItem={({ item }) => (
-                <TouchableOpacity className="p-2 flex flex-row items-center gap-2">
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  className="p-2 flex flex-row items-center gap-2"
+                  onPress={() => {
+                    onPick(item);
+                    setIsOpen(false);
+                    setSearch("");
+                  }}
+                >
                   <MaterialCommunityIcons
                     name="clock-outline"
                     size={16}

@@ -16,7 +16,7 @@ export type EventDates = {
     date?: string;
     time?: string;
   };
-  end: {
+  end?: {
     date?: string;
     time?: string;
   };

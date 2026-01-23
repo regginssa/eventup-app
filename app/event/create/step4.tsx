@@ -1,10 +1,12 @@
 import { Button } from "@/components/common";
 import { CreateEventContainer } from "@/components/organisms";
+import { RootState } from "@/redux/store";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 import { useRef } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
+import { useSelector } from "react-redux";
 
 const CongImage = require("@/assets/images/cong_image.png");
 
@@ -12,8 +14,15 @@ const CreateEventStep4Screen = () => {
   const lottieRef = useRef<LottieView>(null);
 
   const router = useRouter();
+  const { newEvent } = useSelector((state: RootState) => state.event);
 
-  const handleJoinNow = async () => {};
+  const handleJoinNow = async () => {
+    if (newEvent?._id) {
+      Alert.alert("Error", "Event not found");
+      router.push("/event/create/step1");
+      return;
+    }
+  };
 
   return (
     <CreateEventContainer

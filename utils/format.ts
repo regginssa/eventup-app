@@ -24,8 +24,11 @@ export const formatEventLabel = (key: string) => {
     .trim();
 };
 
-export const formatEventDateTime = (date: string, time: string) => {
-  if (!date) return "";
+export const formatEventDateTime = (
+  date: string | undefined,
+  time: string | undefined
+) => {
+  if (!date || !time) return "--:--";
 
   const [, month, day] = date.split("-");
 

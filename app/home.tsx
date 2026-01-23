@@ -108,7 +108,7 @@ const HomeScreen = () => {
       if (response.ok) {
         const { events, pagination } = response.data;
 
-        setPagination({ ...pagination, page: 1 });
+        setPagination(pagination);
 
         setEvents(events);
       }

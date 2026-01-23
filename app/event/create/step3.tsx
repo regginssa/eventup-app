@@ -1,14 +1,16 @@
+import { createEvent } from "@/api/scripts/event";
 import { Button, DateTimePicker, TimezonePicker } from "@/components/common";
 import { CreateEventContainer } from "@/components/organisms";
 import { setNewEvent } from "@/redux/slices/event.slice";
 import { RootState } from "@/redux/store";
 import { IEvent } from "@/types/event";
+import { formatBookingDate } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -23,6 +25,7 @@ const CreateEventStep3Screen = () => {
   const [images, setImages] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [timezone, setTimezone] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const router = useRouter();
   const { newEvent } = useSelector((state: RootState) => state.event);
@@ -106,17 +109,71 @@ const CreateEventStep3Screen = () => {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  const handleContinue = () => {
-    const updates: IEvent = {
-      ...newEvent,
-      images,
-    };
+  const validate = () => {
+    if (!startDate) {
+      Alert.alert("Error", "Start date is required");
+      return false;
+    }
 
-    dispatch(setNewEvent(updates));
-    router.push("/event/create/step4");
+    const today = formatBookingDate(new Date());
+    const startDateFormatted = formatBookingDate(startDate);
+
+    if (startDateFormatted === today) {
+      Alert.alert("Error", "Start date must be in the future");
+      return false;
+    }
+
+    if (!timezone) {
+      Alert.alert("Error", "Timezone is required");
+      return false;
+    }
+
+    return true;
   };
 
-  console.log("newEvent", newEvent?.location?.city);
+  const handleContinue = async () => {
+    if (!validate()) return;
+
+    const newEventData: IEvent = {
+      ...newEvent,
+      images,
+      dates: {
+        ...newEvent?.dates,
+        start: {
+          date: formatBookingDate(startDate),
+          time: startDate.toISOString().split("T")[1].substring(0, 5),
+        },
+        timezone: timezone || undefined,
+      },
+    };
+
+    try {
+      setLoading(true);
+
+      const response = await createEvent(newEventData);
+
+      if (response.ok) {
+        dispatch(setNewEvent(response.data));
+        router.push("/event/create/step4");
+      }
+    } catch (error: any) {
+      console.log("[create event] error", error.response.data);
+      Alert.alert(
+        "Error",
+        error.response.data.message || "Something went wrong"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (newEvent?.dates?.start?.date) {
+      setStartDate(new Date(newEvent?.dates?.start?.date));
+      setTimezone(newEvent?.dates?.timezone || null);
+      setImages(newEvent?.images || []);
+    }
+  }, [newEvent]);
 
   return (
     <CreateEventContainer
@@ -227,7 +284,7 @@ const CreateEventStep3Screen = () => {
         label="Timezone"
         placeholder="Select timezone"
         value={timezone}
-        onSelect={setTimezone}
+        onPick={setTimezone}
         bordered
         className="rounded-md"
       />
@@ -244,6 +301,7 @@ const CreateEventStep3Screen = () => {
         }
         iconPosition="right"
         buttonClassName="h-12"
+        loading={loading}
         onPress={handleContinue}
       />
     </CreateEventContainer>

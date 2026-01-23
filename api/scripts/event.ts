@@ -1,6 +1,11 @@
 import { ApiResponse, EventsFeedResponse } from "@/types/api";
 import { IEvent } from "@/types/event";
-import { FETCH_ALL_EVENTS, FETCH_EVENT, FETCH_EVENTS_FEED } from "../apis";
+import {
+  CREATE_EVENT,
+  FETCH_ALL_EVENTS,
+  FETCH_EVENT,
+  FETCH_EVENTS_FEED,
+} from "../apis";
 import AxiosInstance from "../AxiosInstance";
 
 export const fetchEventsFeed = async (
@@ -21,4 +26,11 @@ export const fetchAllEvents = async (): Promise<ApiResponse<IEvent[]>> => {
 
 export const fetchEvent = async (id: string): Promise<ApiResponse<IEvent>> => {
   return await AxiosInstance.get(FETCH_EVENT + id);
+};
+
+// Create event
+export const createEvent = async (
+  event: IEvent
+): Promise<ApiResponse<IEvent>> => {
+  return await AxiosInstance.post(CREATE_EVENT, event);
 };
