@@ -1,9 +1,9 @@
 import { EventDates } from "@/types/event";
 import { formatEventDateTime } from "@/utils/format";
-import { Fontisto, Ionicons } from "@expo/vector-icons";
+import { Fontisto, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 interface EventDetailHeaderProps {
   image: string;
@@ -24,12 +24,28 @@ const EventDetailHeader: React.FC<EventDetailHeaderProps> = ({
 }) => {
   return (
     <View className="w-full gap-5 overflow-hidden">
-      <Image
-        source={image}
-        alt={title}
-        contentFit="cover"
-        style={{ width: "100%", height: 212, borderRadius: 10 }}
-      />
+      <View className="relative w-full h-[212px] overflow-hidden bg-[#F3F4F6] rounded-[10px]">
+        {!image ? (
+          <View className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+            <MaterialCommunityIcons
+              name="image-off-outline"
+              size={48}
+              color="#374151"
+            />
+            <Text className="text-gray-700 font-poppins-semibold">
+              No Image
+            </Text>
+          </View>
+        ) : (
+          <Image
+            source={{ uri: image }}
+            alt={title}
+            contentFit="cover"
+            style={styles.image}
+          />
+        )}
+      </View>
+
       <View className="gap-2">
         <Text className="font-poppins-semibold text-lg text-gray-800">
           {title}
@@ -83,5 +99,13 @@ const EventDetailHeader: React.FC<EventDetailHeaderProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  image: {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+  },
+});
 
 export default EventDetailHeader;

@@ -1,9 +1,5 @@
 import { IEvent } from "@/types/event";
-import {
-  formatEventDateTime,
-  formatEventLabel,
-  formatTimezoneShort,
-} from "@/utils/format";
+import { formatEventDateTime, formatEventLabel } from "@/utils/format";
 import {
   Ionicons,
   MaterialCommunityIcons,
@@ -107,7 +103,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
         >
           {events.map((event, index) => (
             <View
-              className="rounded-xl relative w-full h-[212px] overflow-hidden bg-white"
+              className="rounded-xl relative w-full h-[250px] overflow-hidden bg-white"
               key={index}
               style={styles.item}
             >
@@ -201,10 +197,18 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                           {formatEventDateTime(
                             event.dates?.start?.date,
                             event.dates?.start?.time
-                          )}{" "}
-                          (
-                          {formatTimezoneShort(event.dates?.timezone as string)}
-                          )
+                          )}
+                        </Text>
+                      </View>
+
+                      <View className="flex flex-row items-center gap-2">
+                        <MaterialCommunityIcons
+                          name="clock-outline"
+                          size={16}
+                          color="white"
+                        />
+                        <Text className="font-dm-sans-medium text-sm text-white">
+                          {event.dates?.timezone ?? "--"}
                         </Text>
                       </View>
                     </View>
