@@ -4,6 +4,7 @@ import {
   TAmadeusFlightOffer,
   TAmadeusHotelBookingRequest,
   TAmadeusHotelOffer,
+  TAmadeusTransferBookingRequest,
 } from "@/types/amadeus";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -77,6 +78,12 @@ const bookingSlice = createSlice({
     setBookingTransfer(state, action: PayloadAction<TTransfer | null>) {
       state.transfer = action.payload;
     },
+    setBookingTransferRequest(
+      state,
+      action: PayloadAction<TAmadeusTransferBookingRequest[]>
+    ) {
+      state.transfer!.requests = action.payload;
+    },
   },
 });
 
@@ -90,6 +97,7 @@ export const {
   setBookingHotelRequest,
 
   setBookingTransfer,
+  setBookingTransferRequest,
 
   setBookingTravelers,
   setBookingHotelRooms,

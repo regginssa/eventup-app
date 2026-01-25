@@ -12,11 +12,7 @@ import {
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TCoordinate, TPackageType } from "@/types";
-import {
-  TAmadeusFlightOffer,
-  TAmadeusHotelOffer,
-  TAmadeusTransferOffer,
-} from "@/types/amadeus";
+import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "@/types/amadeus";
 import { IEvent } from "@/types/event";
 import {
   formatBookingDate,
@@ -26,13 +22,12 @@ import {
 import {
   mapAmadeusFlightOfferToFlightItemData,
   mapAmadeusHotelOfferToHotelItemData,
-  mapAmadeusTransferOfferToTransferItemData,
 } from "@/utils/map";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, DateTimePicker, RadioButton, Spinner } from "../common";
+import { Button, DateTimePicker, RadioButton } from "../common";
 import { TFlightItemData } from "../common/FlightItem";
 import { THotelItemData } from "../common/HotelItem";
 import FlightAvailabilityGroup from "./FlightAvailabilityGroup";
@@ -61,10 +56,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [hotelDepartureDate, setHotelDepartureDate] = useState<Date>(
     new Date()
   );
+  const [hotelCheckoutDate, setHotelCheckoutDate] = useState<Date>(new Date());
   const [hotelRooms, setHotelRooms] = useState<number>(1);
   const [searchBtnLabel, setSearchBtnLabel] = useState<string>("");
   const [isSearched, setIsSearched] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
 
   const [travelers, setTravelers] = useState<number>(1);
@@ -117,7 +112,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     const flightArrival = new Date(flightArrivalDate);
     const flightArrivalDateTime = normalizeDateUTC(flightArrival);
     const eventOpeningDateTime = normalizeDateUTC(
-      new Date(event.dates.start.date as string)
+      new Date(event.dates?.start?.date as string)
     );
 
     if (flightArrivalDateTime > eventOpeningDateTime) {
@@ -128,14 +123,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return null;
     }
 
-    const checkout = new Date(event.dates.start.date as string);
-    checkout.setDate(checkout.getDate() + 1);
-
     const params = {
       type: packageType,
       eventId: event._id,
       checkInDate: formatBookingDate(flightArrival),
-      checkOutDate: formatBookingDate(checkout),
+      checkOutDate: formatBookingDate(hotelCheckoutDate),
       adults: travelers,
       roomQuantity: hotelRooms,
     };
@@ -206,17 +198,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return null;
     }
 
-    const ahData = response.data.airportToHotel.map(
-      (offer: TAmadeusTransferOffer) =>
-        mapAmadeusTransferOfferToTransferItemData(offer)
-    );
-    const heData = response.data.hotelToEvent.map(
-      (offer: TAmadeusTransferOffer) =>
-        mapAmadeusTransferOfferToTransferItemData(offer)
-    );
-
     dispatch(
-      setBookingTransfer({ ...rdTransfer, ah: ahData[0], he: heData[0] })
+      setBookingTransfer({
+        ...rdTransfer,
+        ah: response.data.airportToHotel,
+        he: response.data.hotelToEvent,
+      })
     );
   };
 
@@ -225,8 +212,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     dispatch(setBookingHotel(null));
     if (!event._id) return Alert.alert("Event ID is missing.");
 
+    if (!event.dates?.timezone)
+      return Alert.alert("Event timezone is missing.");
+
     const eventDateTime = normalizeDateUTC(
-      new Date(event.dates.start.date as string)
+      new Date(event.dates?.start?.date as string)
     );
     const departureDateTime = normalizeDateUTC(departureDate);
 
@@ -270,10 +260,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     }
   };
 
-  if (loading) {
-    return <Spinner size="md" />;
-  }
-
   return (
     <View className="w-full flex flex-col gap-3">
       <View className="">
@@ -300,19 +286,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 onPress={() => setDepartureLocation("current")}
               />
             </View>
-
-            {/* {departureLocation === "current" && (
-              <View className="px-2 mt-2">
-                {currentNearestAirports.map((airport, index) => (
-                  <Text
-                    key={`current-location-nearest-airport-${index}`}
-                    className="line-clamp-2 text-gray-600 font-dm-sans-medium text-xs"
-                  >
-                    {index + 1}. {airport.name}
-                  </Text>
-                ))}
-              </View>
-            )} */}
           </View>
 
           <View>
@@ -334,23 +307,19 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 onPress={() => setDepartureLocation("home")}
               />
             </View>
-
-            {/* {departureLocation === "home" && (
-              <View className="px-2 mt-2">
-                {homeNearestAirports.map((airport, index) => (
-                  <Text
-                    key={`current-location-nearest-airport-${index}`}
-                    className="line-clamp-2 text-gray-600 font-dm-sans-medium text-xs"
-                  >
-                    {index + 1}. {airport.name}
-                  </Text>
-                ))}
-              </View>
-            )} */}
           </View>
         </View>
       </View>
+
       <View className="w-full h-[1px] bg-gray-200"></View>
+
+      <Text className="font-dm-sans-semibold text-sm text-red-500">
+        Important: All of your bookings will be based on event timezone:{" "}
+        <Text className="font-dm-sans-bold">{event.dates?.timezone}</Text>
+      </Text>
+
+      <View className="w-full h-[1px] bg-gray-200"></View>
+
       <DateTimePicker
         label="Tell us when you will leave the airport in your location"
         className="rounded-md"
@@ -358,11 +327,18 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         onPick={setDepartureDate}
       />
       <DateTimePicker
-        label="Tell us when you will leave the hotel for the event"
+        label="Tell us when you will leave the hotel to return"
         className="rounded-md"
         mode="datetime"
         value={hotelDepartureDate}
         onPick={setHotelDepartureDate}
+      />
+      <DateTimePicker
+        label="Tell us when you will check out of the hotel"
+        className="rounded-md"
+        mode="date"
+        value={hotelCheckoutDate}
+        onPick={setHotelCheckoutDate}
       />
 
       <View className="w-full h-[1px] bg-gray-200"></View>
@@ -428,33 +404,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-dm-sans-medium text-sm text-gray-600">
-          Infant{" "}
-          <Text className="font-poppins-medium text-gray-500">(0-2 years)</Text>
-        </Text>
-
-        <View className="flex flex-row items-center gap-4">
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-            disabled={infants <= 0}
-            onPress={() => setInfants(infants - 1)}
-          >
-            <Entypo name="minus" size={14} color="#1f2937" />
-          </TouchableOpacity>
-          <Text className="font-poppins-semibold text-gray-800">{infants}</Text>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
-            disabled={infants >= 1}
-            onPress={() => setInfants(infants + 1)}
-          >
-            <Entypo name="plus" size={14} color="#1f2937" />
-          </TouchableOpacity>
-        </View>
-      </View> */}
 
       {isSearched && (
         <>

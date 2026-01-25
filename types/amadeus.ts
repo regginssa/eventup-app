@@ -375,3 +375,85 @@ export type TAmadeusTransferOffer = {
     age: number;
   }>;
 };
+
+export type TAmadeusTransferBookingRequest = {
+  passengers: {
+    firstName: string;
+    lastName: string;
+    title: string;
+    contacts: {
+      phoneNumber: string;
+      email: string;
+    };
+    billingAddress: {
+      line: string;
+      zip: string;
+      countryCode: string;
+      cityName: string;
+    };
+  }[];
+  payment: {
+    methodOfPayment: string;
+    creditCard: {
+      number: string;
+      holderName: string;
+      vendorCode: string;
+      expiryDate: string;
+      cvv: string;
+    };
+  };
+  extraServices?: {
+    code: string;
+    itemId: string;
+  }[];
+  equipment?: {
+    code: string;
+  }[];
+  corporation?: {
+    address: {
+      line: string;
+      zip: string;
+      countryCode: string;
+      cityName: string;
+    };
+    info: {
+      AU: string;
+      CE: string;
+    };
+  };
+  startConnectedSegment?: {
+    transportationType: string;
+    transportationNumber: string;
+    departure: {
+      uicCode: string;
+      iataCode: string;
+      localDateTime: string;
+    };
+    arrival: {
+      uicCode: string;
+      iataCode: string;
+      localDateTime: string;
+    };
+  };
+  endConnectedSegment?: {
+    transportationType: string;
+    transportationNumber: string;
+    departure: {
+      uicCode: string;
+      iataCode: string;
+      localDateTime: string;
+    };
+    arrival: {
+      uicCode: string;
+      iataCode: string;
+      localDateTime: string;
+    };
+  };
+  agency?: {
+    contacts: {
+      email: {
+        address: string;
+      };
+    }[];
+  };
+};

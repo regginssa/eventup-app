@@ -1,4 +1,6 @@
+import { TAmadeusTransferOffer } from "@/types/amadeus";
 import { formatDateTime, formatTime, getCurrencySymbol } from "@/utils/format";
+import { mapAmadeusTransferOfferToTransferItemData } from "@/utils/map";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -52,10 +54,10 @@ export type TTransferItemData = {
 };
 
 interface TransferItemProps {
-  data?: TTransferItemData;
+  data?: TAmadeusTransferOffer;
   hiddenHeader?: boolean;
   isHotelToEvent?: boolean;
-  onSelect?: (data: TTransferItemData) => void;
+  onSelect?: (data: TAmadeusTransferOffer) => void;
 }
 
 const TransferItem: React.FC<TransferItemProps> = ({
@@ -81,7 +83,7 @@ const TransferItem: React.FC<TransferItemProps> = ({
     transferTime,
     price,
     rating,
-  } = data;
+  } = mapAmadeusTransferOfferToTransferItemData(data);
 
   const handleSelect = () => {
     if (onSelect) {

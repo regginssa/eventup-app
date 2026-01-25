@@ -1,11 +1,13 @@
 import { fetchEvent } from "@/api/scripts/event";
 import {
   Button,
+  CountryPicker,
   DateTimePicker,
   Dropdown,
   FlightItem,
   HotelItem,
   Input,
+  LocationPicker,
   Spinner,
 } from "@/components/common";
 import TravelerDetailInputGroup, {
@@ -17,16 +19,19 @@ import BookingContainer from "@/components/organisms/BookingContainer";
 import {
   setBookingFlightRequest,
   setBookingHotelRequest,
+  setBookingTransferRequest,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { TDropdownItem } from "@/types";
+import { TDropdownItem, TLocation } from "@/types";
 import {
   TAmadeusFlightBookingRequest,
   TAmadeusFlightOffer,
   TAmadeusHotelBookingRequest,
   TAmadeusHotelOffer,
+  TAmadeusTransferBookingRequest,
 } from "@/types/amadeus";
 import { IEvent } from "@/types/event";
+import { Country } from "@/types/location.types";
 import { formatDateTime } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -124,6 +129,14 @@ type TPaymentDetails = {
   expiryDate: string;
   holderName: string;
   method: string;
+  cvv?: string;
+};
+
+type TBillingAddress = {
+  line: TLocation | null;
+  zip: string;
+  country: Country | null;
+  cityName: string;
 };
 
 interface TravelerDetailsFormProps {
@@ -131,8 +144,11 @@ interface TravelerDetailsFormProps {
   onTravelerDetailsConfirm: (travelerDetails: TTraveler, id: number) => void;
   isConfirmed: boolean[];
   isHotel: boolean;
+  isTransfer: boolean;
   paymentDetails: TPaymentDetails;
   setPaymentDetails: (paymentDetails: TPaymentDetails) => void;
+  billingAddress: TBillingAddress;
+  setBillingAddress: (billingAddress: TBillingAddress) => void;
 }
 
 const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
@@ -140,8 +156,11 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
   onTravelerDetailsConfirm,
   isConfirmed,
   isHotel,
+  isTransfer,
   paymentDetails,
   setPaymentDetails,
+  billingAddress,
+  setBillingAddress,
 }) => {
   const methods: TDropdownItem[] = [
     { label: "CREDIT CARD", value: "CREDIT_CARD" },
@@ -198,73 +217,123 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
         ))}
       </View>
 
-      {isHotel && (
+      {isHotel ||
+        (isTransfer && (
+          <View className="w-full bg-white rounded-xl p-4 gap-6">
+            <Text className="font-poppins-semibold text-lg text-gray-800">
+              Hotel / Transfer Billing Details
+            </Text>
+
+            <Dropdown
+              label="Payment Method"
+              items={methods}
+              selectedItem={
+                methods.find(
+                  (method) => method.value === paymentDetails.method
+                ) || null
+              }
+              onSelect={(item) =>
+                setPaymentDetails({
+                  ...paymentDetails,
+                  method: item.value as string,
+                })
+              }
+              bordered
+              className="rounded-md"
+            />
+
+            <Input
+              type="string"
+              label="Card Number"
+              placeholder="1234567890123456"
+              bordered
+              className="rounded-md"
+              value={paymentDetails.cardNumber}
+              onChange={(text) =>
+                setPaymentDetails({ ...paymentDetails, cardNumber: text })
+              }
+            />
+            <Input
+              type="string"
+              label="CVV"
+              placeholder="123"
+              bordered
+              className="rounded-md"
+              value={paymentDetails.cvv}
+              onChange={(text) =>
+                setPaymentDetails({ ...paymentDetails, cvv: text })
+              }
+            />
+            <DateTimePicker
+              mode="date"
+              label="Expiry Date"
+              bordered
+              className="rounded-md"
+              value={new Date(paymentDetails.expiryDate)}
+              onPick={(date) =>
+                setPaymentDetails({
+                  ...paymentDetails,
+                  expiryDate: date.toISOString(),
+                })
+              }
+            />
+            <Input
+              type="string"
+              label="Vener Code"
+              placeholder="VI"
+              bordered
+              className="rounded-md"
+              value={paymentDetails.vendorCode}
+              onChange={(text) =>
+                setPaymentDetails({ ...paymentDetails, vendorCode: text })
+              }
+            />
+            <Input
+              type="string"
+              label="Holder Name"
+              placeholder="John Doe"
+              bordered
+              className="rounded-md"
+              value={paymentDetails.holderName}
+              onChange={(text) =>
+                setPaymentDetails({ ...paymentDetails, holderName: text })
+              }
+            />
+          </View>
+        ))}
+
+      {isTransfer && (
         <View className="w-full bg-white rounded-xl p-4 gap-6">
           <Text className="font-poppins-semibold text-lg text-gray-800">
-            Hotel Billing Details
+            Transfer Billing Details
           </Text>
-
-          <Dropdown
-            label="Payment Method"
-            items={methods}
-            selectedItem={
-              methods.find(
-                (method) => method.value === paymentDetails.method
-              ) || null
-            }
-            onSelect={(item) =>
-              setPaymentDetails({
-                ...paymentDetails,
-                method: item.value as string,
-              })
-            }
-            bordered
-            className="rounded-md"
-          />
-          <Input
-            type="string"
-            label="Vener Code"
-            placeholder="VI"
-            bordered
-            className="rounded-md"
-            value={paymentDetails.vendorCode}
-            onChange={(text) =>
-              setPaymentDetails({ ...paymentDetails, vendorCode: text })
+          <LocationPicker
+            label="Billing Address"
+            placeholder="123 Main St"
+            value={billingAddress.line}
+            onPick={(location) =>
+              setBillingAddress({ ...billingAddress, line: location })
             }
           />
           <Input
             type="string"
-            label="Card Number"
-            placeholder="1234567890123456"
+            label="Zip"
+            placeholder="12345"
             bordered
             className="rounded-md"
-            value={paymentDetails.cardNumber}
+            value={billingAddress.zip}
             onChange={(text) =>
-              setPaymentDetails({ ...paymentDetails, cardNumber: text })
+              setBillingAddress({ ...billingAddress, zip: text })
             }
           />
-          <Input
-            type="string"
-            label="Holder Name"
-            placeholder="John Doe"
+          <CountryPicker
+            label="Country Code"
+            placeholder="US"
             bordered
             className="rounded-md"
-            value={paymentDetails.holderName}
-            onChange={(text) =>
-              setPaymentDetails({ ...paymentDetails, holderName: text })
-            }
-          />
-          <DateTimePicker
-            mode="date"
-            label="Expiry Date"
-            bordered
-            className="rounded-md"
-            value={new Date(paymentDetails.expiryDate)}
-            onPick={(date) =>
-              setPaymentDetails({
-                ...paymentDetails,
-                expiryDate: date.toISOString(),
-              })
+            value={billingAddress.country}
+            onPick={(country) =>
+              setBillingAddress({ ...billingAddress, country })
             }
           />
         </View>
@@ -299,25 +368,33 @@ const Summary: React.FC<SummaryProps> = ({ flight, hotel }) => {
 const BookingScreen = () => {
   const [event, setEvent] = useState<IEvent | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const { eventId, packageType } = useLocalSearchParams();
-  const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const { flight, hotel, travelers, hotelRooms } = useSelector(
-    (state: RootState) => state.booking
-  );
   const [flightTravelers, setFlightTravelers] = useState<TFlightTraveler[]>([]);
   const [hotelTravelers, setHotelTravelers] = useState<THotelTraveler[]>([]);
-  const [isConfirmed, setIsConfirmed] = useState<boolean[]>(
-    Array.from({ length: travelers }, () => false)
-  );
   const [paymentDetails, setPaymentDetails] = useState<TPaymentDetails>({
     vendorCode: "",
     cardNumber: "",
     expiryDate: new Date().toISOString(),
     holderName: "",
     method: "CREDIT_CARD",
+    cvv: "",
   });
+  const [billingAddress, setBillingAddress] = useState<TBillingAddress>({
+    line: null,
+    zip: "",
+    country: null,
+    cityName: "",
+  });
+
+  const { eventId, packageType } = useLocalSearchParams();
+  const router = useRouter();
+
+  const { flight, hotel, transfer, travelers } = useSelector(
+    (state: RootState) => state.booking
+  );
+
+  const [isConfirmed, setIsConfirmed] = useState<boolean[]>(
+    Array.from({ length: travelers }, () => false)
+  );
 
   const dispatch = useDispatch();
 
@@ -434,8 +511,87 @@ const BookingScreen = () => {
       },
     };
 
+    const ahTransferBookingRequest: TAmadeusTransferBookingRequest = {
+      passengers: hotelTravelers.map((traveler) => {
+        const { firstName, lastName, phone, email, title } = traveler.info;
+        return {
+          firstName,
+          lastName,
+          title,
+          contacts: {
+            phoneNumber: phone,
+            email,
+          },
+          billingAddress: {
+            line: billingAddress.line?.description ?? "",
+            zip: billingAddress.zip,
+            countryCode: billingAddress.country?.cca2 ?? "",
+            cityName: billingAddress.line?.cityName ?? "",
+          },
+        };
+      }),
+      payment: {
+        methodOfPayment: paymentDetails.method as any,
+        creditCard: {
+          number: paymentDetails.cardNumber,
+          holderName: paymentDetails.holderName,
+          vendorCode: paymentDetails.vendorCode,
+          expiryDate: paymentDetails.expiryDate,
+          cvv: paymentDetails.cvv as string,
+        },
+      },
+      startConnectedSegment: transfer?.ah[0].startConnectedSegment as any,
+      endConnectedSegment: transfer?.ah[0]?.end as any,
+      extraServices: transfer?.ah[0].extraServices as any,
+      equipment: transfer?.ah[0].equipment as any,
+    };
+
+    const heTransferBookingRequest: TAmadeusTransferBookingRequest = {
+      passengers: hotelTravelers.map((traveler) => {
+        const { firstName, lastName, phone, email, title } = traveler.info;
+        return {
+          firstName,
+          lastName,
+          title,
+          contacts: {
+            phoneNumber: phone,
+            email,
+          },
+          billingAddress: {
+            line: billingAddress.line?.description ?? "",
+            zip: billingAddress.zip,
+            countryCode: billingAddress.country?.cca2 ?? "",
+            cityName: billingAddress.line?.cityName ?? "",
+          },
+        };
+      }),
+      payment: {
+        methodOfPayment: paymentDetails.method as any,
+        creditCard: {
+          number: paymentDetails.cardNumber,
+          holderName: paymentDetails.holderName,
+          vendorCode: paymentDetails.vendorCode,
+          expiryDate: paymentDetails.expiryDate,
+          cvv: paymentDetails.cvv as string,
+        },
+      },
+      startConnectedSegment: transfer?.he[0].startConnectedSegment as any,
+      endConnectedSegment: transfer?.he[0]?.end as any,
+      extraServices: transfer?.he[0].extraServices as any,
+      equipment: transfer?.he[0].equipment as any,
+    };
+
+    console.log("[ahTransferBookingRequest]", ahTransferBookingRequest);
+    console.log("[heTransferBookingRequest]", heTransferBookingRequest);
+
     dispatch(setBookingFlightRequest(flightBookingRequest));
     dispatch(setBookingHotelRequest(hotelBookingRequest));
+    dispatch(
+      setBookingTransferRequest([
+        ahTransferBookingRequest,
+        heTransferBookingRequest,
+      ])
+    );
 
     router.push({
       pathname: "/checkout",
@@ -448,7 +604,9 @@ const BookingScreen = () => {
       paymentDetails.vendorCode.trim().length > 0 &&
       paymentDetails.cardNumber.trim().length > 0 &&
       paymentDetails.holderName.trim().length > 0 &&
-      paymentDetails.expiryDate.trim().length > 0
+      paymentDetails.expiryDate.trim().length > 0 &&
+      paymentDetails.cvv &&
+      paymentDetails.cvv.trim().length > 0
     );
   }, [paymentDetails]);
 
@@ -462,8 +620,11 @@ const BookingScreen = () => {
           onTravelerDetailsConfirm={handleTravelerDetailsConfirm}
           isConfirmed={isConfirmed}
           isHotel={!!hotel}
+          isTransfer={!!transfer}
           paymentDetails={paymentDetails}
           setPaymentDetails={setPaymentDetails}
+          billingAddress={billingAddress}
+          setBillingAddress={setBillingAddress}
         />
 
         <Summary

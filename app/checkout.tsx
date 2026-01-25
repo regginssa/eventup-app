@@ -1,4 +1,4 @@
-import { createHotelOrder } from "@/api/scripts/booking";
+import { createHotelOrder, createTransferOrder } from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
   createStripePaymentIntent,
@@ -659,7 +659,9 @@ const CheckoutScreen = () => {
   const router = useRouter();
 
   const { user } = useSelector((state: RootState) => state.auth);
-  const { flight, hotel } = useSelector((state: RootState) => state.booking);
+  const { flight, hotel, transfer } = useSelector(
+    (state: RootState) => state.booking
+  );
   const dispatch = useDispatch();
 
   const getEvent = useCallback(async () => {
@@ -781,6 +783,16 @@ const CheckoutScreen = () => {
 
         if (response.ok) {
           console.log("[create hotel order success]: ", response.data);
+        }
+      }
+
+      if (transfer?.requests && transfer.requests.length > 0) {
+        for (const request of transfer.requests) {
+          const response = await createTransferOrder(request);
+
+          if (response.ok) {
+            console.log("[create transfer order success]: ", response.data);
+          }
         }
       }
     } catch (error: any) {
