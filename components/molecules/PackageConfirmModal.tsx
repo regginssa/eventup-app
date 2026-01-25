@@ -1,5 +1,11 @@
-import { fetchFlightOffersPricing } from "@/api/scripts/booking";
-import { updateBookingFlightOfferById } from "@/redux/slices/booking.slice";
+import {
+  fetchFlightOffersPricing,
+  fetchHotelOfferPricing,
+} from "@/api/scripts/booking";
+import {
+  updateBookingFlightOfferById,
+  updateBookingHotelByIndex,
+} from "@/redux/slices/booking.slice";
 import { TTransfer } from "@/types";
 import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "@/types/amadeus";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -46,7 +52,20 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             updateBookingFlightOfferById({
               id: flight.id,
               offer: response.data[0],
-            }),
+            })
+          );
+        }
+      }
+
+      if (hotel) {
+        const response = await fetchHotelOfferPricing(hotel.offers[0].id);
+
+        if (response.ok) {
+          dispatch(
+            updateBookingHotelByIndex({
+              index: 0,
+              offer: response.data,
+            })
           );
         }
       }

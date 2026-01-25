@@ -31,7 +31,7 @@ import { formatDateTime } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Text, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -171,6 +171,33 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
         ))}
       </View>
 
+      <View className="w-full bg-white rounded-xl p-4 gap-6">
+        {Array.from({ length: travelers }).map((_, index) => (
+          <View
+            key={index}
+            className="w-full flex flex-row items-center justify-between"
+          >
+            <Text className="font-poppins-semibold text-sm text-gray-800">
+              Traveler {index + 1}
+            </Text>
+
+            {isConfirmed[index] ? (
+              <MaterialCommunityIcons
+                name="check-circle-outline"
+                size={24}
+                color="green"
+              />
+            ) : (
+              <MaterialCommunityIcons
+                name="alert-circle-outline"
+                size={24}
+                color="red"
+              />
+            )}
+          </View>
+        ))}
+      </View>
+
       {isHotel && (
         <View className="w-full bg-white rounded-xl p-4 gap-6">
           <Text className="font-poppins-semibold text-lg text-gray-800">
@@ -197,7 +224,7 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
           <Input
             type="string"
             label="Vener Code"
-            placeholder="1234567890"
+            placeholder="VI"
             bordered
             className="rounded-md"
             value={paymentDetails.vendorCode}
@@ -242,33 +269,6 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
           />
         </View>
       )}
-
-      <View className="w-full bg-white rounded-xl p-4 gap-6">
-        {Array.from({ length: travelers }).map((_, index) => (
-          <View
-            key={index}
-            className="w-full flex flex-row items-center justify-between"
-          >
-            <Text className="font-poppins-semibold text-sm text-gray-800">
-              Traveler {index + 1}
-            </Text>
-
-            {isConfirmed[index] ? (
-              <MaterialCommunityIcons
-                name="check-circle-outline"
-                size={24}
-                color="green"
-              />
-            ) : (
-              <MaterialCommunityIcons
-                name="alert-circle-outline"
-                size={24}
-                color="red"
-              />
-            )}
-          </View>
-        ))}
-      </View>
     </>
   );
 };
@@ -443,6 +443,15 @@ const BookingScreen = () => {
     });
   };
 
+  const isPaymentDetailsValid = useMemo(() => {
+    return (
+      paymentDetails.vendorCode.trim().length > 0 &&
+      paymentDetails.cardNumber.trim().length > 0 &&
+      paymentDetails.holderName.trim().length > 0 &&
+      paymentDetails.expiryDate.trim().length > 0
+    );
+  }, [paymentDetails]);
+
   return (
     <BookingContainer>
       <View className="flex-1 gap-4">
@@ -467,7 +476,9 @@ const BookingScreen = () => {
         type="primary"
         label="Checkout"
         buttonClassName="h-12"
-        disabled={isConfirmed.some((confirmed) => !confirmed)}
+        disabled={
+          isConfirmed.some((confirmed) => !confirmed) || !isPaymentDetailsValid
+        }
         onPress={handleCheckout}
       />
     </BookingContainer>

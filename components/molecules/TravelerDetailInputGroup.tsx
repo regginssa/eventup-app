@@ -57,7 +57,7 @@ export type TFlightTraveler = {
 
 export type THotelTraveler = {
   info: {
-    tid: string;
+    tid: number;
     title: string;
     firstName: string;
     lastName: string;
@@ -196,8 +196,8 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
 
     const hotelTravelerDetails: THotelTraveler = {
       info: {
-        tid: id.toString(),
-        title: gender.value === "male" ? "Mr" : ("Mrs" as string),
+        tid: Number(id),
+        title: gender.value === "male" ? "MR" : ("MRS" as string),
         firstName: firstName,
         lastName: lastName,
         phone: phone,

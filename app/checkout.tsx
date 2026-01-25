@@ -1,4 +1,4 @@
-import { createFlightOrder } from "@/api/scripts/booking";
+import { createHotelOrder } from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
   createStripePaymentIntent,
@@ -218,7 +218,6 @@ const CardPayment = ({
   methodId: string;
   onSelectMethod: (id: string) => void;
 }) => {
-  const [cardDetails, setCardDetails] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const { user } = useSelector((state: RootState) => state.auth);
@@ -660,9 +659,7 @@ const CheckoutScreen = () => {
   const router = useRouter();
 
   const { user } = useSelector((state: RootState) => state.auth);
-  const { flight, hotel, bookings } = useSelector(
-    (state: RootState) => state.booking
-  );
+  const { flight, hotel } = useSelector((state: RootState) => state.booking);
   const dispatch = useDispatch();
 
   const getEvent = useCallback(async () => {
@@ -762,39 +759,31 @@ const CheckoutScreen = () => {
 
   const book = async () => {
     try {
-      if (flight?.request) {
-        console.log("[create flight order request]: ", flight.request);
+      // if (flight?.request) {
+      //   console.log("[create flight order request]: ", flight.request);
 
-        const response = await createFlightOrder(flight.request);
-
-        if (response.ok) {
-          console.log("[create flight order success]: ", response.data);
-        } else {
-          console.error("[create flight order error]: ", response.message);
-          Alert.alert(
-            "Error",
-            response.message || "Failed to create flight order."
-          );
-          return;
-        }
-      }
-
-      // if (hotel?.request) {
-      //   const response = await createHotelOrder(hotel.request);
+      //   const response = await createFlightOrder(flight.request);
 
       //   if (response.ok) {
-      //     console.log("[create hotel order success]: ", response.data);
+      //     console.log("[create flight order success]: ", response.data);
       //   } else {
-      //     console.error("[create hotel order error]: ", response.message);
+      //     console.error("[create flight order error]: ", response.message);
       //     Alert.alert(
       //       "Error",
-      //       response.message || "Failed to create hotel order."
+      //       response.message || "Failed to create flight order."
       //     );
       //     return;
       //   }
       // }
+
+      if (hotel?.request) {
+        const response = await createHotelOrder(hotel.request);
+
+        if (response.ok) {
+          console.log("[create hotel order success]: ", response.data);
+        }
+      }
     } catch (error: any) {
-      console.error("book error: ", error);
       Alert.alert("Error", error?.response?.data?.message || "Failed to book.");
     }
   };
@@ -862,7 +851,7 @@ const CheckoutScreen = () => {
         label="Book Now"
         buttonClassName="h-12"
         textClassName="text-lg"
-        disabled={paymentMethod === "card" && stripePaymentMethodId === ""}
+        // disabled={paymentMethod === "card" && stripePaymentMethodId === ""}
         loading={bookLoading}
         onPress={() => handleBook(paymentMethod)}
       />

@@ -5,7 +5,6 @@ import {
   TAmadeusHotelBookingRequest,
   TAmadeusHotelOffer,
 } from "@/types/amadeus";
-import { IBooking } from "@/types/data";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface IBookingState {
@@ -14,7 +13,6 @@ interface IBookingState {
   transfer: TTransfer | null;
   travelers: number;
   hotelRooms: number;
-  bookings: IBooking[];
 }
 
 const initialState: IBookingState = {
@@ -23,7 +21,6 @@ const initialState: IBookingState = {
   transfer: null,
   travelers: 1,
   hotelRooms: 1,
-  bookings: [],
 };
 
 const bookingSlice = createSlice({
@@ -35,10 +32,10 @@ const bookingSlice = createSlice({
     },
     updateBookingFlightOfferById(
       state,
-      action: PayloadAction<{ id: string; offer: TAmadeusFlightOffer }>,
+      action: PayloadAction<{ id: string; offer: TAmadeusFlightOffer }>
     ) {
       const index = state.flight?.offers.findIndex(
-        (f) => f.id === action.payload.id,
+        (f) => f.id === action.payload.id
       );
 
       if (index !== -1) {
@@ -47,7 +44,7 @@ const bookingSlice = createSlice({
     },
     setBookingFlightRequest(
       state,
-      action: PayloadAction<TAmadeusFlightBookingRequest>,
+      action: PayloadAction<TAmadeusFlightBookingRequest>
     ) {
       state.flight!.request = action.payload;
     },
@@ -55,15 +52,17 @@ const bookingSlice = createSlice({
     setBookingHotel(state, action: PayloadAction<THotel | null>) {
       state.hotel = action.payload;
     },
-    updateBookingHotelOfferByIndex(
+
+    updateBookingHotelByIndex(
       state,
-      action: PayloadAction<{ index: number; offer: TAmadeusHotelOffer }>,
+      action: PayloadAction<{ index: number; offer: TAmadeusHotelOffer }>
     ) {
       state.hotel!.offers[action.payload.index] = action.payload.offer;
     },
+
     setBookingHotelRequest(
       state,
-      action: PayloadAction<TAmadeusHotelBookingRequest>,
+      action: PayloadAction<TAmadeusHotelBookingRequest>
     ) {
       state.hotel!.request = action.payload;
     },
@@ -78,20 +77,6 @@ const bookingSlice = createSlice({
     setBookingTransfer(state, action: PayloadAction<TTransfer | null>) {
       state.transfer = action.payload;
     },
-    addNewBooking(state, action: PayloadAction<IBooking>) {
-      state.bookings.push(action.payload);
-    },
-    updateBooking(
-      state,
-      action: PayloadAction<{ id: string; booking: IBooking }>,
-    ) {
-      const index = state.bookings.findIndex(
-        (b) => b._id === action.payload.id,
-      );
-      if (index !== -1) {
-        state.bookings[index] = action.payload.booking;
-      }
-    },
   },
 });
 
@@ -101,16 +86,13 @@ export const {
   setBookingFlightRequest,
 
   setBookingHotel,
-  updateBookingHotelOfferByIndex,
+  updateBookingHotelByIndex,
   setBookingHotelRequest,
 
   setBookingTransfer,
 
   setBookingTravelers,
   setBookingHotelRooms,
-
-  addNewBooking,
-  updateBooking,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;
