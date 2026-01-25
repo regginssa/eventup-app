@@ -1,4 +1,4 @@
-import { IPaymentMethod } from "@/types/data";
+import { IPaymentMethod } from "@/types/stripe";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";

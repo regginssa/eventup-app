@@ -1,5 +1,13 @@
 import { fetchEvent } from "@/api/scripts/event";
-import { Button, FlightItem, HotelItem, Spinner } from "@/components/common";
+import {
+  Button,
+  DateTimePicker,
+  Dropdown,
+  FlightItem,
+  HotelItem,
+  Input,
+  Spinner,
+} from "@/components/common";
 import TravelerDetailInputGroup, {
   TFlightTraveler,
   THotelTraveler,
@@ -11,6 +19,7 @@ import {
   setBookingHotelRequest,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
+import { TDropdownItem } from "@/types";
 import {
   TAmadeusFlightBookingRequest,
   TAmadeusFlightOffer,
@@ -109,17 +118,40 @@ const EventDetail = ({
   );
 };
 
+type TPaymentDetails = {
+  vendorCode: string;
+  cardNumber: string;
+  expiryDate: string;
+  holderName: string;
+  method: string;
+};
+
 interface TravelerDetailsFormProps {
   travelers: number;
   onTravelerDetailsConfirm: (travelerDetails: TTraveler, id: number) => void;
   isConfirmed: boolean[];
+  isHotel: boolean;
+  paymentDetails: TPaymentDetails;
+  setPaymentDetails: (paymentDetails: TPaymentDetails) => void;
 }
 
 const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
   travelers,
   onTravelerDetailsConfirm,
   isConfirmed,
+  isHotel,
+  paymentDetails,
+  setPaymentDetails,
 }) => {
+  const methods: TDropdownItem[] = [
+    { label: "CREDIT CARD", value: "CREDIT_CARD" },
+    { label: "CREDIT CARD AGENCY", value: "CREDIT_CARD_AGENCY" },
+    { label: "CREDIT CARD TRAVELER", value: "CREDIT_CARD_TRAVELER" },
+    { label: "AGENCY ACCOUNT", value: "AGENCY_ACCOUNT" },
+    { label: "VCC BILLBACK", value: "VCC_BILLBACK" },
+    { label: "VCC B2B WALLET", value: "VCC_B2B_WALLET" },
+  ];
+
   return (
     <>
       <View className="w-full bg-white rounded-xl p-4 gap-6">
@@ -138,6 +170,78 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
           />
         ))}
       </View>
+
+      {isHotel && (
+        <View className="w-full bg-white rounded-xl p-4 gap-6">
+          <Text className="font-poppins-semibold text-lg text-gray-800">
+            Hotel Billing Details
+          </Text>
+
+          <Dropdown
+            label="Payment Method"
+            items={methods}
+            selectedItem={
+              methods.find(
+                (method) => method.value === paymentDetails.method
+              ) || null
+            }
+            onSelect={(item) =>
+              setPaymentDetails({
+                ...paymentDetails,
+                method: item.value as string,
+              })
+            }
+            bordered
+            className="rounded-md"
+          />
+          <Input
+            type="string"
+            label="Vener Code"
+            placeholder="1234567890"
+            bordered
+            className="rounded-md"
+            value={paymentDetails.vendorCode}
+            onChange={(text) =>
+              setPaymentDetails({ ...paymentDetails, vendorCode: text })
+            }
+          />
+          <Input
+            type="string"
+            label="Card Number"
+            placeholder="1234567890123456"
+            bordered
+            className="rounded-md"
+            value={paymentDetails.cardNumber}
+            onChange={(text) =>
+              setPaymentDetails({ ...paymentDetails, cardNumber: text })
+            }
+          />
+          <Input
+            type="string"
+            label="Holder Name"
+            placeholder="John Doe"
+            bordered
+            className="rounded-md"
+            value={paymentDetails.holderName}
+            onChange={(text) =>
+              setPaymentDetails({ ...paymentDetails, holderName: text })
+            }
+          />
+          <DateTimePicker
+            mode="date"
+            label="Expiry Date"
+            bordered
+            className="rounded-md"
+            value={new Date(paymentDetails.expiryDate)}
+            onPick={(date) =>
+              setPaymentDetails({
+                ...paymentDetails,
+                expiryDate: date.toISOString(),
+              })
+            }
+          />
+        </View>
+      )}
 
       <View className="w-full bg-white rounded-xl p-4 gap-6">
         {Array.from({ length: travelers }).map((_, index) => (
@@ -207,6 +311,13 @@ const BookingScreen = () => {
   const [isConfirmed, setIsConfirmed] = useState<boolean[]>(
     Array.from({ length: travelers }, () => false)
   );
+  const [paymentDetails, setPaymentDetails] = useState<TPaymentDetails>({
+    vendorCode: "",
+    cardNumber: "",
+    expiryDate: new Date().toISOString(),
+    holderName: "",
+    method: "CREDIT_CARD",
+  });
 
   const dispatch = useDispatch();
 
@@ -294,11 +405,15 @@ const BookingScreen = () => {
       },
     };
 
+    const paymentExpiryDateSplit = paymentDetails.expiryDate
+      .split("T")[0]
+      .split("-");
+
     const hotelBookingRequest: TAmadeusHotelBookingRequest = {
       guests: hotelTravelers.map((traveler) => traveler.info) as any,
       travelAgent: {
         contact: {
-          email: user?.email as string,
+          email: "team@charlieunicornai.eu",
         },
       },
       roomAssociations: hotelTravelers.map((traveler) => ({
@@ -306,13 +421,14 @@ const BookingScreen = () => {
         hotelOfferId: traveler.offerId,
       })),
       payment: {
-        method: "",
+        method: paymentDetails.method as any,
         paymentCard: {
           paymentCardInfo: {
-            vendorCode: "",
-            cardNumber: "",
-            expiryDate: "",
-            holderName: "",
+            vendorCode: paymentDetails.vendorCode,
+            cardNumber: paymentDetails.cardNumber,
+            expiryDate:
+              paymentExpiryDateSplit[0] + "-" + paymentExpiryDateSplit[1],
+            holderName: paymentDetails.holderName,
           },
         },
       },
@@ -336,6 +452,9 @@ const BookingScreen = () => {
           travelers={travelers}
           onTravelerDetailsConfirm={handleTravelerDetailsConfirm}
           isConfirmed={isConfirmed}
+          isHotel={!!hotel}
+          paymentDetails={paymentDetails}
+          setPaymentDetails={setPaymentDetails}
         />
 
         <Summary
