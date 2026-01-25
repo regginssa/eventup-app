@@ -1,4 +1,4 @@
-import { createHotelOrder, createTransferOrder } from "@/api/scripts/booking";
+import { createTransferOrder } from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
   createStripePaymentIntent,
@@ -778,13 +778,13 @@ const CheckoutScreen = () => {
       //   }
       // }
 
-      if (hotel?.request) {
-        const response = await createHotelOrder(hotel.request);
+      // if (hotel?.request) {
+      //   const response = await createHotelOrder(hotel.request);
 
-        if (response.ok) {
-          console.log("[create hotel order success]: ", response.data);
-        }
-      }
+      //   if (response.ok) {
+      //     console.log("[create hotel order success]: ", response.data);
+      //   }
+      // }
 
       if (transfer?.requests && transfer.requests.length > 0) {
         for (const request of transfer.requests) {

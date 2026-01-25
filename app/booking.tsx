@@ -512,6 +512,7 @@ const BookingScreen = () => {
     };
 
     const ahTransferBookingRequest: TAmadeusTransferBookingRequest = {
+      id: transfer?.ah[0].id as string,
       passengers: hotelTravelers.map((traveler) => {
         const { firstName, lastName, phone, email, title } = traveler.info;
         return {
@@ -547,6 +548,7 @@ const BookingScreen = () => {
     };
 
     const heTransferBookingRequest: TAmadeusTransferBookingRequest = {
+      id: transfer?.he[0].id as string,
       passengers: hotelTravelers.map((traveler) => {
         const { firstName, lastName, phone, email, title } = traveler.info;
         return {

@@ -377,6 +377,7 @@ export type TAmadeusTransferOffer = {
 };
 
 export type TAmadeusTransferBookingRequest = {
+  id: string;
   passengers: {
     firstName: string;
     lastName: string;
