@@ -2,9 +2,12 @@ import { TFlight, THotel, TTransfer } from "@/types";
 import {
   TAmadeusFlightBookingRequest,
   TAmadeusFlightOffer,
+  TAmadeusFlightOrder,
   TAmadeusHotelBookingRequest,
   TAmadeusHotelOffer,
+  TAmadeusHotelOrder,
   TAmadeusTransferBookingRequest,
+  TAmadeusTransferOrder,
 } from "@/types/amadeus";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -49,30 +52,27 @@ const bookingSlice = createSlice({
     ) {
       state.flight!.request = action.payload;
     },
+    setBookingFlightOrder(state, action: PayloadAction<TAmadeusFlightOrder>) {
+      state.flight!.order = action.payload;
+    },
 
     setBookingHotel(state, action: PayloadAction<THotel | null>) {
       state.hotel = action.payload;
     },
-
     updateBookingHotelByIndex(
       state,
       action: PayloadAction<{ index: number; offer: TAmadeusHotelOffer }>
     ) {
       state.hotel!.offers[action.payload.index] = action.payload.offer;
     },
-
     setBookingHotelRequest(
       state,
       action: PayloadAction<TAmadeusHotelBookingRequest>
     ) {
       state.hotel!.request = action.payload;
     },
-
-    setBookingTravelers(state, action: PayloadAction<number>) {
-      state.travelers = action.payload;
-    },
-    setBookingHotelRooms(state, action: PayloadAction<number>) {
-      state.hotelRooms = action.payload;
+    setBookingHotelOrder(state, action: PayloadAction<TAmadeusHotelOrder>) {
+      state.hotel!.order = action.payload;
     },
 
     setBookingTransfer(state, action: PayloadAction<TTransfer | null>) {
@@ -84,6 +84,19 @@ const bookingSlice = createSlice({
     ) {
       state.transfer!.requests = action.payload;
     },
+    setBookingTransferOrder(
+      state,
+      action: PayloadAction<TAmadeusTransferOrder[]>
+    ) {
+      state.transfer!.orders = action.payload;
+    },
+
+    setBookingTravelers(state, action: PayloadAction<number>) {
+      state.travelers = action.payload;
+    },
+    setBookingHotelRooms(state, action: PayloadAction<number>) {
+      state.hotelRooms = action.payload;
+    },
   },
 });
 
@@ -91,13 +104,16 @@ export const {
   setBookingFlight,
   updateBookingFlightOfferById,
   setBookingFlightRequest,
+  setBookingFlightOrder,
 
   setBookingHotel,
   updateBookingHotelByIndex,
   setBookingHotelRequest,
+  setBookingHotelOrder,
 
   setBookingTransfer,
   setBookingTransferRequest,
+  setBookingTransferOrder,
 
   setBookingTravelers,
   setBookingHotelRooms,

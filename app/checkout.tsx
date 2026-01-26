@@ -1,4 +1,8 @@
-import { createTransferOrder } from "@/api/scripts/booking";
+import {
+  createFlightOrder,
+  createHotelOrder,
+  createTransferOrder,
+} from "@/api/scripts/booking";
 import { fetchEvent } from "@/api/scripts/event";
 import {
   createStripePaymentIntent,
@@ -10,8 +14,13 @@ import { Button, CryptoPaymentQR, Spinner } from "@/components/common";
 import { StripePaymentMethodGroup } from "@/components/molecules";
 import { CheckoutContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
+import {
+  setBookingFlightOrder,
+  setBookingHotelOrder,
+} from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
+import { TAmadeusTransferOrder } from "@/types/amadeus";
 import { IEvent } from "@/types/event";
 import { formatDateTime, formatName, getCurrencySymbol } from "@/utils/format";
 import {
@@ -761,29 +770,27 @@ const CheckoutScreen = () => {
 
   const book = async () => {
     try {
-      // if (flight?.request) {
-      //   console.log("[create flight order request]: ", flight.request);
+      if (flight?.request) {
+        console.log("[create flight order request]: ", flight.request);
 
-      //   const response = await createFlightOrder(flight.request);
+        const response = await createFlightOrder(flight.request);
 
-      //   if (response.ok) {
-      //     console.log("[create flight order success]: ", response.data);
-      //   } else {
-      //     console.error("[create flight order error]: ", response.message);
-      //     Alert.alert(
-      //       "Error",
-      //       response.message || "Failed to create flight order."
-      //     );
-      //   }
-      // }
+        if (response.ok) {
+          console.log("[create flight order success]: ", response.data);
+          dispatch(setBookingFlightOrder(response.data));
+        }
+      }
 
-      // if (hotel?.request) {
-      //   const response = await createHotelOrder(hotel.request);
+      if (hotel?.request) {
+        const response = await createHotelOrder(hotel.request);
 
-      //   if (response.ok) {
-      //     console.log("[create hotel order success]: ", response.data);
-      //   }
-      // }
+        if (response.ok) {
+          console.log("[create hotel order success]: ", response.data);
+          dispatch(setBookingHotelOrder(response.data));
+        }
+      }
+
+      let transferOrders: TAmadeusTransferOrder[] = [];
 
       if (transfer?.requests && transfer.requests.length > 0) {
         for (const request of transfer.requests) {
@@ -791,6 +798,7 @@ const CheckoutScreen = () => {
 
           if (response.ok) {
             console.log("[create transfer order success]: ", response.data);
+            transferOrders.push(response.data);
           }
         }
       }

@@ -1,10 +1,13 @@
 import {
   TAmadeusFlightBookingRequest,
   TAmadeusFlightOffer,
+  TAmadeusFlightOrder,
   TAmadeusHotelBookingRequest,
   TAmadeusHotelOffer,
+  TAmadeusHotelOrder,
   TAmadeusTransferBookingRequest,
   TAmadeusTransferOffer,
+  TAmadeusTransferOrder,
 } from "./amadeus";
 
 export type TCoordinate = {
@@ -59,15 +62,18 @@ export type TPagination = {
 export interface TFlight {
   offers: TAmadeusFlightOffer[];
   request?: TAmadeusFlightBookingRequest;
+  order?: TAmadeusFlightOrder;
 }
 
 export interface THotel {
   offers: TAmadeusHotelOffer[];
   request?: TAmadeusHotelBookingRequest;
+  order?: TAmadeusHotelOrder;
 }
 
 export type TTransfer = {
   ah: TAmadeusTransferOffer[];
   he: TAmadeusTransferOffer[];
   requests?: TAmadeusTransferBookingRequest[];
+  orders?: TAmadeusTransferOrder[];
 };
