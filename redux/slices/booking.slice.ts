@@ -9,6 +9,7 @@ import {
   TAmadeusTransferBookingRequest,
   TAmadeusTransferOrder,
 } from "@/types/amadeus";
+import { IBooking } from "@/types/booking";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface IBookingState {
@@ -17,6 +18,7 @@ interface IBookingState {
   transfer: TTransfer | null;
   travelers: number;
   hotelRooms: number;
+  bookings: IBooking[];
 }
 
 const initialState: IBookingState = {
@@ -25,6 +27,7 @@ const initialState: IBookingState = {
   transfer: null,
   travelers: 1,
   hotelRooms: 1,
+  bookings: [],
 };
 
 const bookingSlice = createSlice({
@@ -97,6 +100,9 @@ const bookingSlice = createSlice({
     setBookingHotelRooms(state, action: PayloadAction<number>) {
       state.hotelRooms = action.payload;
     },
+    setBookings(state, action: PayloadAction<IBooking[]>) {
+      state.bookings = action.payload;
+    },
   },
 });
 
@@ -117,6 +123,7 @@ export const {
 
   setBookingTravelers,
   setBookingHotelRooms,
+  setBookings,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

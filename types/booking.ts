@@ -36,6 +36,24 @@ export type TBookingHotel = {
 export type TBookingTransfer = {
   orderId: string;
   type: string;
+  start: {
+    locationCode: string;
+    datetime: string;
+  };
+  end: {
+    googlePlaceId?: string;
+    name?: string;
+    locationCode?: string;
+    address?: {
+      line: string;
+      zip?: string;
+      countryCode: string;
+      cityName: string;
+      latitude: number;
+      longitude: number;
+      uicCode?: string;
+    };
+  };
   provider: {
     name: string;
     logo: string;
@@ -64,7 +82,10 @@ export interface IBooking {
   _id: string;
   flight: TBookingFlight;
   hotel: TBookingHotel;
-  transfer: TBookingTransfer;
+  transfer: {
+    ah: TBookingTransfer;
+    he: TBookingTransfer;
+  };
   timezone: string;
   event: IEvent;
   user: IUser;
@@ -89,33 +110,3 @@ export interface IBooking {
     cvv: string;
   };
 }
-
-//   const reservationItems =
-//     flight?.TravelItinerary?.ItineraryInfo?.ReservationItems;
-
-//   // Pick first segment for display
-//   const firstSegment = reservationItems?.[0]?.ReservationItem;
-//   const lastSegment =
-//     reservationItems?.[reservationItems.length - 1]?.ReservationItem;
-
-//   const airlineLabel = firstSegment
-//     ? `Airline: ${firstSegment.MarketingAirlineCode} ${firstSegment.FlightNumber}`
-//     : "Airline: N/A";
-
-//   const departureLabel = firstSegment
-//     ? `Departure: ${
-//         firstSegment.DepartureAirportLocationCode
-//       } - ${formatDateTime(firstSegment.DepartureDateTime as any)}`
-//     : "Departure: N/A";
-
-//   const arrivalLabel = lastSegment
-//     ? `Arrival: ${lastSegment.ArrivalAirportLocationCode} - ${formatDateTime(
-//         lastSegment.ArrivalDateTime as any
-//       )}`
-//     : "Arrival: N/A";
-
-//   const classLabel = firstSegment
-//     ? `Class: ${packageType === "standard" ? "Economy/Standard" : "VIP/Gold"}`
-//     : "Class: N/A";
-
-//   const confirmationCode = firstSegment?.AirlinePNR || "N/A";

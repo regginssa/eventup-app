@@ -1,11 +1,14 @@
 import { TAmadeusFlightOffer } from "@/types/amadeus";
 import { ApiResponse } from "@/types/api";
+import { IBooking } from "@/types/booking";
 import AxiosInstance from "../AxiosInstance";
 import {
+  BOOKING_BASE,
   CANCEL_FLIGHT_ORDER,
   CREATE_FLIGHT_ORDER,
   CREATE_HOTEL_ORDER,
   CREATE_TRANSFER_ORDER,
+  FETCH_ALL_BOOKINGS,
   FETCH_FLIGHT_OFFERS,
   FETCH_FLIGHT_OFFERS_PRICING,
   FETCH_HOTEL_OFFER_PRICING,
@@ -96,16 +99,16 @@ export const createTransferOrder = async (
 
 // ------------ Booking engine ------------
 
-// // Fetch all bookings
-// export const fetchAllBookings = async (
-//   userId: string,
-// ): Promise<ApiResponse<IBooking[]>> => {
-//   return await AxiosInstance.get(FETCH_ALL_BOOKINGS + userId);
-// };
+// Fetch all bookings
+export const fetchAllBookings = async (
+  userId: string
+): Promise<ApiResponse<IBooking[]>> => {
+  return await AxiosInstance.get(FETCH_ALL_BOOKINGS + userId);
+};
 
-// // Fetch booking
-// export const fetchBooking = async (
-//   id: string,
-// ): Promise<ApiResponse<IBooking>> => {
-//   return await AxiosInstance.get(BOOKING_BASE + id);
-// };
+// Fetch booking
+export const fetchBooking = async (
+  id: string
+): Promise<ApiResponse<IBooking>> => {
+  return await AxiosInstance.get(BOOKING_BASE + id);
+};

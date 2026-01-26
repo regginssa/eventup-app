@@ -3,26 +3,21 @@ import { fetchEvent } from "@/api/scripts/event";
 import { Button, Spinner, TicketQR } from "@/components/common";
 import { BookedContainer } from "@/components/organisms";
 import { useTheme } from "@/components/providers/ThemeProvider";
-import {
-  setBookingFlight,
-  setBookingHotel,
-  setBookingHotelSelectedRoomRate,
-} from "@/redux/slices/booking.slice";
-import { RootState } from "@/redux/store";
 import { TCurrency, TPackageType } from "@/types";
-import { IBooking, IEvent, IHotel, TripDetails } from "@/types/data";
 import {
-  formatDateTime,
-  formatEventDate,
-  getCurrencySymbol,
-} from "@/utils/format";
+  IBooking,
+  TBookingFlight,
+  TBookingHotel,
+  TBookingTransfer,
+} from "@/types/booking";
+import { IEvent } from "@/types/event";
+import { formatDateTime, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import LottieView from "lottie-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 
 const BookedLightImage = require("@/assets/images/booked_image.png");
 const BookedDarkImage = require("@/assets/images/booked_image_dark.png");
@@ -42,17 +37,19 @@ const EventTicket = ({
 
     let items = [
       {
-        label: event.title,
+        label: event.name,
         icon: "calendar-badge-outline",
       },
       {
-        label: formatEventDate(new Date(event.opening_date as any)),
+        label: `${event.dates?.start.time} / ${formatDateTime(
+          event.dates?.start.date as string
+        )} (${event.dates?.timezone ?? "--"})`,
         icon: "calendar-clock-outline",
       },
       {
-        label: event.venue?.city
-          ? `${event.venue.city}, ${event.country_code}`
-          : event.country,
+        label: event.location?.city
+          ? `${event.location.city.name}, ${event.location.country.name}`
+          : event.location?.country.name,
         icon: "map-marker-outline",
       },
       {
@@ -118,7 +115,7 @@ const FlightDetails = ({
   flight,
   packageType,
 }: {
-  flight: TripDetails | undefined;
+  flight: TBookingFlight | undefined;
   packageType: TPackageType;
 }) => {
   const { theme } = useTheme();
@@ -127,39 +124,9 @@ const FlightDetails = ({
   useEffect(() => {
     if (!flight) return;
 
-    const reservationItems =
-      flight?.TravelItinerary?.ItineraryInfo?.ReservationItems;
-
-    // Pick first segment for display
-    const firstSegment = reservationItems?.[0]?.ReservationItem;
-    const lastSegment =
-      reservationItems?.[reservationItems.length - 1]?.ReservationItem;
-
-    const airlineLabel = firstSegment
-      ? `Airline: ${firstSegment.MarketingAirlineCode} ${firstSegment.FlightNumber}`
-      : "Airline: N/A";
-
-    const departureLabel = firstSegment
-      ? `Departure: ${
-          firstSegment.DepartureAirportLocationCode
-        } - ${formatDateTime(firstSegment.DepartureDateTime as any)}`
-      : "Departure: N/A";
-
-    const arrivalLabel = lastSegment
-      ? `Arrival: ${lastSegment.ArrivalAirportLocationCode} - ${formatDateTime(
-          lastSegment.ArrivalDateTime as any
-        )}`
-      : "Arrival: N/A";
-
-    const classLabel = firstSegment
-      ? `Class: ${packageType === "standard" ? "Economy/Standard" : "VIP/Gold"}`
-      : "Class: N/A";
-
-    const confirmationCode = firstSegment?.AirlinePNR || "N/A";
-
     const items = [
       {
-        label: airlineLabel,
+        label: flight.airline,
         icon: (
           <MaterialIcons
             name="airlines"
@@ -169,7 +136,9 @@ const FlightDetails = ({
         ),
       },
       {
-        label: departureLabel,
+        label: `${flight.departure.airport} - ${formatDateTime(
+          flight.departure.datetime as string
+        )}`,
         icon: (
           <MaterialCommunityIcons
             name="calendar-clock-outline"
@@ -179,7 +148,9 @@ const FlightDetails = ({
         ),
       },
       {
-        label: arrivalLabel,
+        label: `${flight.arrival.airport} - ${formatDateTime(
+          flight.arrival.datetime as string
+        )}`,
         icon: (
           <MaterialCommunityIcons
             name="airplane-landing"
@@ -189,7 +160,7 @@ const FlightDetails = ({
         ),
       },
       {
-        label: classLabel,
+        label: packageType === "standard" ? "Economy/Standard" : "VIP/Gold",
         icon: (
           <MaterialIcons
             name="flight-class"
@@ -199,7 +170,7 @@ const FlightDetails = ({
         ),
       },
       {
-        label: `Confirmation Code: ${confirmationCode}`,
+        label: `Confirmation Code: ${flight.confirmationCode}`,
         icon: (
           <MaterialIcons
             name="event-seat"
@@ -258,23 +229,16 @@ const FlightDetails = ({
   );
 };
 
-const HotelBooking = ({ hotel }: { hotel: IHotel | undefined }) => {
+const HotelBooking = ({ hotel }: { hotel: TBookingHotel | undefined }) => {
   const { theme } = useTheme();
   const [items, setItems] = useState<any[]>([]);
-
-  const details = hotel?.roomBookDetails;
 
   useEffect(() => {
     if (!hotel) return;
 
-    const roomsLabel = details?.rooms
-      ?.map((r) => r.name)
-      .filter(Boolean)
-      .join(" / ");
-
     const items = [
       {
-        label: `Hotel: ${details?.hotelName ?? "-"}`,
+        label: `Hotel: ${hotel.hotel.name}`,
         icon: (
           <MaterialIcons
             name="hotel"
@@ -284,9 +248,7 @@ const HotelBooking = ({ hotel }: { hotel: IHotel | undefined }) => {
         ),
       },
       {
-        label: `Check-in: ${
-          details?.checkIn ? formatDateTime(details?.checkIn as any) : "-"
-        }`,
+        label: `Check-in: ${formatDateTime(hotel.checkIn as string)}`,
         icon: (
           <MaterialCommunityIcons
             name="clock"
@@ -296,9 +258,7 @@ const HotelBooking = ({ hotel }: { hotel: IHotel | undefined }) => {
         ),
       },
       {
-        label: `Check-out: ${
-          details?.checkOut ? formatDateTime(details?.checkOut as any) : "-"
-        }`,
+        label: `Check-out: ${formatDateTime(hotel.checkOut as string)}`,
         icon: (
           <MaterialCommunityIcons
             name="clock"
@@ -308,7 +268,9 @@ const HotelBooking = ({ hotel }: { hotel: IHotel | undefined }) => {
         ),
       },
       {
-        label: `Room: ${roomsLabel || "-"}`,
+        label: `Room: ${
+          hotel.rooms.map((room) => room.description).join(" / ") || "-"
+        }`,
         icon: (
           <MaterialIcons
             name="bed"
@@ -318,7 +280,7 @@ const HotelBooking = ({ hotel }: { hotel: IHotel | undefined }) => {
         ),
       },
       {
-        label: `Reservation Number: ${hotel?.supplierConfirmationNum ?? "-"}`,
+        label: `Reservation Number: ${hotel?.confirmationCode ?? "-"}`,
         icon: (
           <MaterialCommunityIcons
             name="ticket-confirmation-outline"
@@ -377,12 +339,26 @@ const HotelBooking = ({ hotel }: { hotel: IHotel | undefined }) => {
   );
 };
 
-const ChauffeurPickupInfo = () => {
+const TrasferDetails = ({
+  transfer,
+  title,
+}: {
+  transfer: TBookingTransfer | undefined;
+  title: string;
+}) => {
   const { theme } = useTheme();
+
+  if (!transfer) return null;
+
+  const driver = transfer.provider.name;
+  const car = transfer.vehicle.description;
+  const pickup = transfer.start.locationCode;
+  const destination = transfer.end.address?.line;
+  const contact = transfer.provider.contacts?.phoneNumber;
 
   const items = [
     {
-      label: "Driver: Alexandre B.",
+      label: `Driver: ${driver}`,
       icon: (
         <MaterialCommunityIcons
           name="account"
@@ -392,7 +368,7 @@ const ChauffeurPickupInfo = () => {
       ),
     },
     {
-      label: "Car: Black Mercedes S-Class",
+      label: `Car: ${car}`,
       icon: (
         <MaterialIcons
           name="directions-car"
@@ -402,7 +378,7 @@ const ChauffeurPickupInfo = () => {
       ),
     },
     {
-      label: "Pickup: Brussels Airport - Arrivals Terminal",
+      label: `Pickup from: ${pickup} to: ${destination}`,
       icon: (
         <MaterialIcons
           name="luggage"
@@ -412,7 +388,7 @@ const ChauffeurPickupInfo = () => {
       ),
     },
     {
-      label: "Contact: +32 478 123 456",
+      label: `Contact: ${contact}`,
       icon: (
         <MaterialIcons
           name="phone-in-talk"
@@ -434,7 +410,7 @@ const ChauffeurPickupInfo = () => {
           theme === "light" ? "text-gray-700" : "text-gray-200"
         }`}
       >
-        Chauffeur Pickup Info (Gold Package Only)
+        {title}
       </Text>
 
       <View className="w-full flex flex-col items-start gap-2">
@@ -580,9 +556,7 @@ const BookedScreen = () => {
   const lottieRef = useRef<LottieView>(null);
 
   const { bookingId, eventId, packageType } = useLocalSearchParams();
-  const dispatch = useDispatch();
   const { theme } = useTheme();
-  const { bookings } = useSelector((state: RootState) => state.booking);
 
   const init = useCallback(async () => {
     if (
@@ -605,29 +579,15 @@ const BookedScreen = () => {
       const booking = bookingRes.data;
 
       setBooking(booking);
-
-      const flightPrice =
-        Number(
-          booking.flight.TravelItinerary.ItineraryInfo.ItineraryPricing
-            .TotalFare.Amount
-        ) || 0;
-      const hotelPrice = booking.hotel.roomBookDetails.NetPrice || 0;
-
-      const base = flightPrice + hotelPrice;
-      const comm = base * 0.1;
-      const total = base + comm;
-
-      setBasePrice(Number(base.toFixed(2)));
-      setCommissionPrice(Number(comm.toFixed(2)));
-      setTotalPrice(Number(total.toFixed(2)));
-
-      setCurrency(
-        (booking.hotel.roomBookDetails.currency?.toLowerCase() || "usd") as any
-      );
+      setBasePrice(booking.price.base);
+      setCommissionPrice(booking.price.comission);
+      setTotalPrice(booking.price.total);
+      setCurrency(booking.price.currency as TCurrency);
 
       const selectedServices = [];
       if (booking.flight) selectedServices.push("Flight");
       if (booking.hotel) selectedServices.push("Hotel");
+      if (booking.transfer) selectedServices.push("Transfer");
       setServices(selectedServices);
       setHasLoadedSuccessfully(true);
     } catch (error: any) {
@@ -640,10 +600,6 @@ const BookedScreen = () => {
 
   useEffect(() => {
     init();
-
-    dispatch(setBookingHotelSelectedRoomRate(undefined));
-    dispatch(setBookingFlight(null));
-    dispatch(setBookingHotel(null));
   }, []);
 
   return (
@@ -678,7 +634,14 @@ const BookedScreen = () => {
           />
           <FlightDetails flight={booking?.flight} packageType="standard" />
           <HotelBooking hotel={booking?.hotel} />
-          <ChauffeurPickupInfo />
+          <TrasferDetails
+            transfer={booking?.transfer?.ah}
+            title="Aiport To Hotel Transfer Details"
+          />
+          <TrasferDetails
+            transfer={booking?.transfer?.he}
+            title="Hotel To Event Transfer Details"
+          />
           <TripSummary
             basePrice={basePrice}
             comissionPrice={commissionPrice}
