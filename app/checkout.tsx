@@ -14,13 +14,10 @@ import { Button, CryptoPaymentQR, Spinner } from "@/components/common";
 import { StripePaymentMethodGroup } from "@/components/molecules";
 import { CheckoutContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
-import {
-  setBookingFlightOrder,
-  setBookingHotelOrder,
-} from "@/redux/slices/booking.slice";
+import { setBookingHotelOrder } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
-import { TAmadeusTransferOrder } from "@/types/amadeus";
+import { TAmadeusFlightOrder, TAmadeusTransferOrder } from "@/types/amadeus";
 import { IEvent } from "@/types/event";
 import { formatDateTime, formatName, getCurrencySymbol } from "@/utils/format";
 import {
@@ -777,7 +774,7 @@ const CheckoutScreen = () => {
 
         if (response.ok) {
           console.log("[create flight order success]: ", response.data);
-          dispatch(setBookingFlightOrder(response.data));
+          const data: TAmadeusFlightOrder = response.data;
         }
       }
 
