@@ -14,7 +14,6 @@ const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
   isSearched,
   available,
 }) => {
-  
   if (isSearched && !transfer) {
     return (
       <View className="w-full flex flex-col items-center justify-center gap-2">
@@ -35,18 +34,11 @@ const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
         </Text>
       </View>
 
-      <TransferItem
-        data={transfer?.ah}
-        hiddenHeader
-      />
+      <TransferItem data={transfer?.ah[0]} hiddenHeader />
 
       <View className="w-full h-[1px] bg-gray-200"></View>
 
-      <TransferItem
-        data={transfer?.he}
-        hiddenHeader
-        isHotelToEvent
-      />
+      <TransferItem data={transfer?.he[0]} hiddenHeader isHotelToEvent />
     </View>
   );
 };

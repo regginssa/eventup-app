@@ -29,6 +29,7 @@ interface LocationPickerProps {
   country?: string;
   region?: string;
   city?: string; // e.g. "Ipswich"
+  bordered?: boolean;
 }
 
 const LocationPicker: React.FC<LocationPickerProps> = ({
@@ -41,6 +42,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   country,
   region,
   city,
+  bordered,
 }) => {
   const [input, setInput] = useState<string>(value?.description ?? "");
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
@@ -209,7 +211,11 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
       {label && (
         <Text className="font-dm-sans text-sm text-gray-700">{label}</Text>
       )}
-      <View className="py-1 px-4 gap-2 bg-white rounded-md flex flex-row items-center">
+      <View
+        className={`py-1 px-4 gap-2 bg-white rounded-md flex flex-row items-center ${
+          bordered ? "border border-gray-200" : ""
+        }`}
+      >
         <Feather name="map" size={16} color="#4b5563" />
         <TextInput
           ref={inputRef}

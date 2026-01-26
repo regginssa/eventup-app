@@ -10,6 +10,7 @@ import {
   LocationPicker,
   Spinner,
 } from "@/components/common";
+import { TransferAvailabilityGroup } from "@/components/molecules";
 import TravelerDetailInputGroup, {
   TFlightTraveler,
   THotelTraveler,
@@ -22,7 +23,7 @@ import {
   setBookingTransferRequest,
 } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
-import { TDropdownItem, TLocation } from "@/types";
+import { TDropdownItem, TLocation, TTransfer } from "@/types";
 import {
   TAmadeusFlightBookingRequest,
   TAmadeusFlightOffer,
@@ -217,90 +218,89 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
         ))}
       </View>
 
-      {isHotel ||
-        (isTransfer && (
-          <View className="w-full bg-white rounded-xl p-4 gap-6">
-            <Text className="font-poppins-semibold text-lg text-gray-800">
-              Hotel / Transfer Billing Details
-            </Text>
+      {(isHotel || isTransfer) && (
+        <View className="w-full bg-white rounded-xl p-4 gap-6">
+          <Text className="font-poppins-semibold text-lg text-gray-800">
+            Hotel / Transfer Billing Details
+          </Text>
 
-            <Dropdown
-              label="Payment Method"
-              items={methods}
-              selectedItem={
-                methods.find(
-                  (method) => method.value === paymentDetails.method
-                ) || null
-              }
-              onSelect={(item) =>
-                setPaymentDetails({
-                  ...paymentDetails,
-                  method: item.value as string,
-                })
-              }
-              bordered
-              className="rounded-md"
-            />
+          <Dropdown
+            label="Payment Method"
+            items={methods}
+            selectedItem={
+              methods.find(
+                (method) => method.value === paymentDetails.method
+              ) || null
+            }
+            onSelect={(item) =>
+              setPaymentDetails({
+                ...paymentDetails,
+                method: item.value as string,
+              })
+            }
+            bordered
+            className="rounded-md"
+          />
 
-            <Input
-              type="string"
-              label="Card Number"
-              placeholder="1234567890123456"
-              bordered
-              className="rounded-md"
-              value={paymentDetails.cardNumber}
-              onChange={(text) =>
-                setPaymentDetails({ ...paymentDetails, cardNumber: text })
-              }
-            />
-            <Input
-              type="string"
-              label="CVV"
-              placeholder="123"
-              bordered
-              className="rounded-md"
-              value={paymentDetails.cvv}
-              onChange={(text) =>
-                setPaymentDetails({ ...paymentDetails, cvv: text })
-              }
-            />
-            <DateTimePicker
-              mode="date"
-              label="Expiry Date"
-              bordered
-              className="rounded-md"
-              value={new Date(paymentDetails.expiryDate)}
-              onPick={(date) =>
-                setPaymentDetails({
-                  ...paymentDetails,
-                  expiryDate: date.toISOString(),
-                })
-              }
-            />
-            <Input
-              type="string"
-              label="Vener Code"
-              placeholder="VI"
-              bordered
-              className="rounded-md"
-              value={paymentDetails.vendorCode}
-              onChange={(text) =>
-                setPaymentDetails({ ...paymentDetails, vendorCode: text })
-              }
-            />
-            <Input
-              type="string"
-              label="Holder Name"
-              placeholder="John Doe"
-              bordered
-              className="rounded-md"
-              value={paymentDetails.holderName}
-              onChange={(text) =>
-                setPaymentDetails({ ...paymentDetails, holderName: text })
-              }
-            />
-          </View>
-        ))}
+          <Input
+            type="string"
+            label="Card Number"
+            placeholder="1234567890123456"
+            bordered
+            className="rounded-md"
+            value={paymentDetails.cardNumber}
+            onChange={(text) =>
+              setPaymentDetails({ ...paymentDetails, cardNumber: text })
+            }
+          />
+          <Input
+            type="string"
+            label="CVV"
+            placeholder="123"
+            bordered
+            className="rounded-md"
+            value={paymentDetails.cvv}
+            onChange={(text) =>
+              setPaymentDetails({ ...paymentDetails, cvv: text })
+            }
+          />
+          <DateTimePicker
+            mode="date"
+            label="Expiry Date"
+            bordered
+            className="rounded-md"
+            value={new Date(paymentDetails.expiryDate)}
+            onPick={(date) =>
+              setPaymentDetails({
+                ...paymentDetails,
+                expiryDate: date.toISOString(),
+              })
+            }
+          />
+          <Input
+            type="string"
+            label="Vener Code"
+            placeholder="VI"
+            bordered
+            className="rounded-md"
+            value={paymentDetails.vendorCode}
+            onChange={(text) =>
+              setPaymentDetails({ ...paymentDetails, vendorCode: text })
+            }
+          />
+          <Input
+            type="string"
+            label="Holder Name"
+            placeholder="John Doe"
+            bordered
+            className="rounded-md"
+            value={paymentDetails.holderName}
+            onChange={(text) =>
+              setPaymentDetails({ ...paymentDetails, holderName: text })
+            }
+          />
+        </View>
+      )}
 
       {isTransfer && (
         <View className="w-full bg-white rounded-xl p-4 gap-6">
@@ -310,6 +310,7 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
           <LocationPicker
             label="Billing Address"
             placeholder="123 Main St"
+            bordered
             value={billingAddress.line}
             onPick={(location) =>
               setBillingAddress({ ...billingAddress, line: location })
@@ -345,22 +346,25 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
 interface SummaryProps {
   flight?: TAmadeusFlightOffer;
   hotel?: TAmadeusHotelOffer;
+  transfer?: TTransfer;
 }
 
-const Summary: React.FC<SummaryProps> = ({ flight, hotel }) => {
-  if (!flight || !hotel) return null;
-
+const Summary: React.FC<SummaryProps> = ({ flight, hotel, transfer }) => {
   return (
     <View className="w-full bg-white rounded-xl p-4 gap-6">
       <Text className="font-poppins-semibold text-lg text-gray-800">
         Summary
       </Text>
 
-      <FlightItem data={flight} />
+      {flight && <FlightItem data={flight} />}
 
       <View className="w-full h-[1px] bg-gray-200"></View>
 
-      <HotelItem data={hotel} hiddenImages={true} />
+      {hotel && <HotelItem data={hotel} hiddenImages={true} />}
+
+      <View className="w-full h-[1px] bg-gray-200"></View>
+
+      {transfer && <TransferAvailabilityGroup transfer={transfer} />}
     </View>
   );
 };
@@ -511,6 +515,10 @@ const BookingScreen = () => {
       },
     };
 
+    const expiryDate = paymentDetails.expiryDate.split("T")[0];
+    const expiryDateMMYY =
+      expiryDate.split("-")[1] + expiryDate.split("-")[0].slice(2, 4);
+
     const ahTransferBookingRequest: TAmadeusTransferBookingRequest = {
       id: transfer?.ah[0].id as string,
       passengers: hotelTravelers.map((traveler) => {
@@ -537,7 +545,7 @@ const BookingScreen = () => {
           number: paymentDetails.cardNumber,
           holderName: paymentDetails.holderName,
           vendorCode: paymentDetails.vendorCode,
-          expiryDate: paymentDetails.expiryDate,
+          expiryDate: expiryDateMMYY,
           cvv: paymentDetails.cvv as string,
         },
       },
@@ -573,7 +581,7 @@ const BookingScreen = () => {
           number: paymentDetails.cardNumber,
           holderName: paymentDetails.holderName,
           vendorCode: paymentDetails.vendorCode,
-          expiryDate: paymentDetails.expiryDate,
+          expiryDate: expiryDateMMYY,
           cvv: paymentDetails.cvv as string,
         },
       },
@@ -622,7 +630,7 @@ const BookingScreen = () => {
           onTravelerDetailsConfirm={handleTravelerDetailsConfirm}
           isConfirmed={isConfirmed}
           isHotel={!!hotel}
-          isTransfer={!!transfer}
+          isTransfer={!!transfer?.ah[0] || !!transfer?.he[0]}
           paymentDetails={paymentDetails}
           setPaymentDetails={setPaymentDetails}
           billingAddress={billingAddress}
@@ -632,6 +640,7 @@ const BookingScreen = () => {
         <Summary
           flight={flight?.offers[0] as TAmadeusFlightOffer}
           hotel={hotel?.offers[0] as TAmadeusHotelOffer}
+          transfer={transfer ?? undefined}
         />
       </View>
 

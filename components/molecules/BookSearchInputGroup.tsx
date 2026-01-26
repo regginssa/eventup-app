@@ -315,7 +315,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       <Text className="font-dm-sans-semibold text-sm text-red-500">
         Important: All of your bookings will be based on event timezone:{" "}
-        <Text className="font-dm-sans-bold">{event.dates?.timezone}</Text>
+        <Text className="font-dm-sans-bold">
+          {event.dates?.timezone || "UTC"}
+        </Text>
       </Text>
 
       <View className="w-full h-[1px] bg-gray-200"></View>
@@ -327,18 +329,18 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         onPick={setDepartureDate}
       />
       <DateTimePicker
-        label="Tell us when you will leave the hotel to return"
-        className="rounded-md"
-        mode="datetime"
-        value={hotelDepartureDate}
-        onPick={setHotelDepartureDate}
-      />
-      <DateTimePicker
         label="Tell us when you will check out of the hotel"
         className="rounded-md"
         mode="date"
         value={hotelCheckoutDate}
         onPick={setHotelCheckoutDate}
+      />
+      <DateTimePicker
+        label="Tell us when you will leave the hotel for the event"
+        className="rounded-md"
+        mode="datetime"
+        value={hotelDepartureDate}
+        onPick={setHotelDepartureDate}
       />
 
       <View className="w-full h-[1px] bg-gray-200"></View>
