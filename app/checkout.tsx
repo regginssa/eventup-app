@@ -774,7 +774,6 @@ const CheckoutScreen = () => {
       //       "Error",
       //       response.message || "Failed to create flight order."
       //     );
-      //     return;
       //   }
       // }
 

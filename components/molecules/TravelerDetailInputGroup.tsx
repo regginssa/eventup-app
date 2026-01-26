@@ -376,7 +376,7 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
           />
 
           <HotelOfferGroup
-            offers={hotel?.offers[0].offers || []}
+            offers={hotel?.offers ? hotel?.offers[0].offers : []}
             selectedIndex={selectedHotelOfferIndex}
             onSelect={setSelectedHotelOfferIndex}
           />
