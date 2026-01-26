@@ -426,12 +426,12 @@ export type TAmadeusTransferBookingRequest = {
     transportationType: string;
     transportationNumber: string;
     departure: {
-      uicCode: string;
+      uicCode?: string;
       iataCode: string;
       localDateTime: string;
     };
     arrival: {
-      uicCode: string;
+      uicCode?: string;
       iataCode: string;
       localDateTime: string;
     };

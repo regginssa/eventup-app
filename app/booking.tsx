@@ -553,6 +553,9 @@ const BookingScreen = () => {
     const expiryDateMMYY =
       expiryDate.split("-")[1] + expiryDate.split("-")[0].slice(2, 4);
 
+    const ahTransfer = transfer?.ah[0];
+    const heTransfer = transfer?.he[0];
+
     const ahTransferBookingRequest: TAmadeusTransferBookingRequest = {
       id: transfer?.ah[0].id as string,
       passengers: hotelTravelers.map((traveler) => {
@@ -583,10 +586,41 @@ const BookingScreen = () => {
           cvv: paymentDetails.cvv as string,
         },
       },
-      startConnectedSegment: transfer?.ah[0].startConnectedSegment as any,
-      endConnectedSegment: transfer?.ah[0]?.end as any,
-      extraServices: transfer?.ah[0].extraServices as any,
-      equipment: transfer?.ah[0].equipment as any,
+      startConnectedSegment: {
+        transportationType:
+          ahTransfer?.startConnectedSegment?.transportationType ?? "",
+        transportationNumber:
+          ahTransfer?.startConnectedSegment?.transportationNumber ?? "",
+        departure: {
+          iataCode:
+            ahTransfer?.startConnectedSegment?.departure?.iataCode ?? "",
+          localDateTime:
+            ahTransfer?.startConnectedSegment?.departure?.localDateTime ?? "",
+        },
+        arrival: {
+          iataCode: ahTransfer?.startConnectedSegment?.arrival?.iataCode ?? "",
+          localDateTime:
+            ahTransfer?.startConnectedSegment?.arrival?.localDateTime ?? "",
+        },
+      },
+      extraServices:
+        ahTransfer?.extraServices?.map((extraService) => ({
+          code: extraService.code,
+          itemId: extraService.itemId,
+        })) ?? [],
+      equipment:
+        ahTransfer?.equipment?.map((equipment) => ({
+          code: equipment.code,
+        })) ?? [],
+      agency: {
+        contacts: [
+          {
+            email: {
+              address: "team@charlieunicornai.eu",
+            },
+          },
+        ],
+      },
     };
 
     const heTransferBookingRequest: TAmadeusTransferBookingRequest = {
@@ -619,10 +653,41 @@ const BookingScreen = () => {
           cvv: paymentDetails.cvv as string,
         },
       },
-      startConnectedSegment: transfer?.he[0].startConnectedSegment as any,
-      endConnectedSegment: transfer?.he[0]?.end as any,
-      extraServices: transfer?.he[0].extraServices as any,
-      equipment: transfer?.he[0].equipment as any,
+      startConnectedSegment: {
+        transportationType:
+          heTransfer?.startConnectedSegment?.transportationType ?? "",
+        transportationNumber:
+          heTransfer?.startConnectedSegment?.transportationNumber ?? "",
+        departure: {
+          iataCode:
+            heTransfer?.startConnectedSegment?.departure?.iataCode ?? "",
+          localDateTime:
+            heTransfer?.startConnectedSegment?.departure?.localDateTime ?? "",
+        },
+        arrival: {
+          iataCode: heTransfer?.startConnectedSegment?.arrival?.iataCode ?? "",
+          localDateTime:
+            heTransfer?.startConnectedSegment?.arrival?.localDateTime ?? "",
+        },
+      },
+      extraServices:
+        heTransfer?.extraServices?.map((extraService) => ({
+          code: extraService.code,
+          itemId: extraService.itemId,
+        })) ?? [],
+      equipment:
+        heTransfer?.equipment?.map((equipment) => ({
+          code: equipment.code,
+        })) ?? [],
+      agency: {
+        contacts: [
+          {
+            email: {
+              address: "team@charlieunicornai.eu",
+            },
+          },
+        ],
+      },
     };
 
     console.log("[ahTransferBookingRequest]", ahTransferBookingRequest);
