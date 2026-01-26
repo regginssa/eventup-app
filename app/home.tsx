@@ -5,12 +5,23 @@ import { HomeContainer } from "@/components/organisms";
 import { RootState } from "@/redux/store";
 import { TDropdownItem, TPagination } from "@/types";
 import { IEvent } from "@/types/event";
-import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Feather,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSelector } from "react-redux";
 
 const tabs: TDropdownItem[] = [
@@ -38,6 +49,7 @@ const HomeScreen = () => {
     total: 0,
     hasMore: true,
   });
+  const [goToPage, setGoToPage] = useState<number>(1);
 
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -96,10 +108,14 @@ const HomeScreen = () => {
     try {
       setLoading(true);
 
-      setPagination({ ...pagination, page: 1, total: 0 });
-
+      setPagination({
+        page: 1,
+        limit: 10,
+        total: 0,
+        hasMore: true,
+      });
       const response = await fetchEventsFeed(
-        user._id,
+        user?._id ?? "",
         1,
         10,
         selectedTab.value as "ai" | "user"
@@ -109,7 +125,7 @@ const HomeScreen = () => {
         const { events, pagination } = response.data;
 
         setPagination(pagination);
-
+        setGoToPage(pagination.page);
         setEvents(events);
       }
     } catch (error: any) {
@@ -121,6 +137,32 @@ const HomeScreen = () => {
   useEffect(() => {
     fetchFeed();
   }, [selectedTab]);
+
+  const handleGoToPage = async (page: number) => {
+    if (isNaN(page)) return;
+    if (page < 1 || page > Math.ceil(pagination.total / pagination.limit))
+      return;
+
+    try {
+      setLoading(true);
+
+      const response = await fetchEventsFeed(
+        user?._id ?? "",
+        page,
+        pagination.limit,
+        selectedTab.value as "ai" | "user"
+      );
+
+      if (response.ok) {
+        setPagination(response.data.pagination);
+        setEvents(response.data.events);
+        setGoToPage(page);
+      }
+    } catch (error: any) {
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <HomeContainer>
@@ -219,6 +261,44 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Page button */}
+      <View
+        className="bg-white absolute bottom-[80px] left-[10px] w-40 h-10 rounded-full flex flex-row items-center justify-center gap-2 px-2 overflow-hidden"
+        style={styles.tune}
+      >
+        <MaskedView
+          style={{ width: 40, height: 18 }}
+          maskElement={<Text className="font-poppins">Go to</Text>}
+        >
+          <LinearGradient
+            colors={["#C427E0", "#844AFF", "#12A9FF"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ flex: 1 }}
+          />
+        </MaskedView>
+
+        <TextInput
+          keyboardType="numeric"
+          className="flex-1 border border-[#BF28E0] text-center rounded-full text-sm"
+          value={goToPage.toString()}
+          onChangeText={(text) =>
+            setGoToPage(isNaN(parseInt(text)) ? 0 : parseInt(text))
+          }
+        />
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => handleGoToPage(goToPage)}
+        >
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={18}
+            color="#374151"
+          />
+        </TouchableOpacity>
+      </View>
 
       {/* Map button */}
       <TouchableOpacity

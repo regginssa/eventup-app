@@ -38,7 +38,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const EventDetail = ({
@@ -163,6 +163,9 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
   billingAddress,
   setBillingAddress,
 }) => {
+  const [isBillingOpen, setIsBillingOpen] = useState(false);
+  const [isTransferBillingOpen, setIsTransferBillingOpen] = useState(false);
+
   const methods: TDropdownItem[] = [
     { label: "CREDIT CARD", value: "CREDIT_CARD" },
     { label: "CREDIT CARD AGENCY", value: "CREDIT_CARD_AGENCY" },
@@ -220,123 +223,154 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
 
       {(isHotel || isTransfer) && (
         <View className="w-full bg-white rounded-xl p-4 gap-6">
-          <Text className="font-poppins-semibold text-lg text-gray-800">
-            Hotel / Transfer Billing Details
-          </Text>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="flex flex-row items-center justify-between"
+            onPress={() => setIsBillingOpen(!isBillingOpen)}
+          >
+            <Text className="font-poppins-semibold text-lg text-gray-800">
+              Hotel / Transfer Billing Details
+            </Text>
+            <MaterialCommunityIcons
+              name={isBillingOpen ? "chevron-up" : "chevron-down"}
+              size={24}
+              color="#4b5563"
+            />
+          </TouchableOpacity>
 
-          <Dropdown
-            label="Payment Method"
-            items={methods}
-            selectedItem={
-              methods.find(
-                (method) => method.value === paymentDetails.method
-              ) || null
-            }
-            onSelect={(item) =>
-              setPaymentDetails({
-                ...paymentDetails,
-                method: item.value as string,
-              })
-            }
-            bordered
-            className="rounded-md"
-          />
+          {isBillingOpen && (
+            <>
+              <Dropdown
+                label="Payment Method"
+                items={methods}
+                selectedItem={
+                  methods.find(
+                    (method) => method.value === paymentDetails.method
+                  ) || null
+                }
+                onSelect={(item) =>
+                  setPaymentDetails({
+                    ...paymentDetails,
+                    method: item.value as string,
+                  })
+                }
+                bordered
+                className="rounded-md"
+              />
 
-          <Input
-            type="string"
-            label="Card Number"
-            placeholder="1234567890123456"
-            bordered
-            className="rounded-md"
-            value={paymentDetails.cardNumber}
-            onChange={(text) =>
-              setPaymentDetails({ ...paymentDetails, cardNumber: text })
-            }
-          />
-          <Input
-            type="string"
-            label="CVV"
-            placeholder="123"
-            bordered
-            className="rounded-md"
-            value={paymentDetails.cvv}
-            onChange={(text) =>
-              setPaymentDetails({ ...paymentDetails, cvv: text })
-            }
-          />
-          <DateTimePicker
-            mode="date"
-            label="Expiry Date"
-            bordered
-            className="rounded-md"
-            value={new Date(paymentDetails.expiryDate)}
-            onPick={(date) =>
-              setPaymentDetails({
-                ...paymentDetails,
-                expiryDate: date.toISOString(),
-              })
-            }
-          />
-          <Input
-            type="string"
-            label="Vener Code"
-            placeholder="VI"
-            bordered
-            className="rounded-md"
-            value={paymentDetails.vendorCode}
-            onChange={(text) =>
-              setPaymentDetails({ ...paymentDetails, vendorCode: text })
-            }
-          />
-          <Input
-            type="string"
-            label="Holder Name"
-            placeholder="John Doe"
-            bordered
-            className="rounded-md"
-            value={paymentDetails.holderName}
-            onChange={(text) =>
-              setPaymentDetails({ ...paymentDetails, holderName: text })
-            }
-          />
+              <Input
+                type="string"
+                label="Card Number"
+                placeholder="1234567890123456"
+                bordered
+                className="rounded-md"
+                value={paymentDetails.cardNumber}
+                onChange={(text) =>
+                  setPaymentDetails({ ...paymentDetails, cardNumber: text })
+                }
+              />
+              <Input
+                type="string"
+                label="CVV"
+                placeholder="123"
+                bordered
+                className="rounded-md"
+                value={paymentDetails.cvv}
+                onChange={(text) =>
+                  setPaymentDetails({ ...paymentDetails, cvv: text })
+                }
+              />
+              <DateTimePicker
+                mode="date"
+                label="Expiry Date"
+                bordered
+                className="rounded-md"
+                value={new Date(paymentDetails.expiryDate)}
+                onPick={(date) =>
+                  setPaymentDetails({
+                    ...paymentDetails,
+                    expiryDate: date.toISOString(),
+                  })
+                }
+              />
+              <Input
+                type="string"
+                label="Vener Code"
+                placeholder="VI"
+                bordered
+                className="rounded-md"
+                value={paymentDetails.vendorCode}
+                onChange={(text) =>
+                  setPaymentDetails({ ...paymentDetails, vendorCode: text })
+                }
+              />
+              <Input
+                type="string"
+                label="Holder Name"
+                placeholder="John Doe"
+                bordered
+                className="rounded-md"
+                value={paymentDetails.holderName}
+                onChange={(text) =>
+                  setPaymentDetails({ ...paymentDetails, holderName: text })
+                }
+              />
+            </>
+          )}
         </View>
       )}
 
       {isTransfer && (
         <View className="w-full bg-white rounded-xl p-4 gap-6">
-          <Text className="font-poppins-semibold text-lg text-gray-800">
-            Transfer Billing Details
-          </Text>
-          <LocationPicker
-            label="Billing Address"
-            placeholder="123 Main St"
-            bordered
-            value={billingAddress.line}
-            onPick={(location) =>
-              setBillingAddress({ ...billingAddress, line: location })
-            }
-          />
-          <Input
-            type="string"
-            label="Zip"
-            placeholder="12345"
-            bordered
-            className="rounded-md"
-            value={billingAddress.zip}
-            onChange={(text) =>
-              setBillingAddress({ ...billingAddress, zip: text })
-            }
-          />
-          <CountryPicker
-            label="Country Code"
-            placeholder="US"
-            bordered
-            className="rounded-md"
-            value={billingAddress.country}
-            onPick={(country) =>
-              setBillingAddress({ ...billingAddress, country })
-            }
-          />
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="flex flex-row items-center justify-between"
+            onPress={() => setIsTransferBillingOpen(!isTransferBillingOpen)}
+          >
+            <Text className="font-poppins-semibold text-lg text-gray-800">
+              Transfer Billing Details
+            </Text>
+            <MaterialCommunityIcons
+              name={isBillingOpen ? "chevron-up" : "chevron-down"}
+              size={24}
+              color="#4b5563"
+            />
+          </TouchableOpacity>
+
+          {isTransferBillingOpen && (
+            <>
+              <LocationPicker
+                label="Billing Address"
+                placeholder="123 Main St"
+                bordered
+                value={billingAddress.line}
+                onPick={(location) =>
+                  setBillingAddress({ ...billingAddress, line: location })
+                }
+              />
+              <Input
+                type="string"
+                label="Zip"
+                placeholder="12345"
+                bordered
+                className="rounded-md"
+                value={billingAddress.zip}
+                onChange={(text) =>
+                  setBillingAddress({ ...billingAddress, zip: text })
+                }
+              />
+              <CountryPicker
+                label="Country Code"
+                placeholder="US"
+                bordered
+                className="rounded-md"
+                value={billingAddress.country}
+                onPick={(country) =>
+                  setBillingAddress({ ...billingAddress, country })
+                }
+              />
+            </>
+          )}
         </View>
       )}
     </>
@@ -375,16 +409,16 @@ const BookingScreen = () => {
   const [flightTravelers, setFlightTravelers] = useState<TFlightTraveler[]>([]);
   const [hotelTravelers, setHotelTravelers] = useState<THotelTraveler[]>([]);
   const [paymentDetails, setPaymentDetails] = useState<TPaymentDetails>({
-    vendorCode: "",
-    cardNumber: "",
+    vendorCode: "VI",
+    cardNumber: "4065129432541853",
     expiryDate: new Date().toISOString(),
-    holderName: "",
+    holderName: "Vladislav Gostiuc",
     method: "CREDIT_CARD",
-    cvv: "",
+    cvv: "991",
   });
   const [billingAddress, setBillingAddress] = useState<TBillingAddress>({
     line: null,
-    zip: "",
+    zip: "123456",
     country: null,
     cityName: "",
   });

@@ -222,6 +222,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
 
+    const hotelCheckoutDateTime = normalizeDateUTC(hotelCheckoutDate);
+
     if (eventDateTime < departureDateTime) {
       return Alert.alert(
         "Invalid Departure Date",
@@ -229,12 +231,18 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       );
     }
 
+    if (eventDateTime > hotelCheckoutDateTime) {
+      return Alert.alert(
+        "Invalid Hotel Checkout Date",
+        "The hotel checkout date cannot be after the event date."
+      );
+    }
+
     if (hotelDepartureDateTime > eventDateTime) {
-      Alert.alert(
+      return Alert.alert(
         "Invalid Hotel Departure Date",
         "The hotel departure date cannot be after the event date."
       );
-      return;
     }
 
     try {

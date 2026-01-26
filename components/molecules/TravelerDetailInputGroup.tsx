@@ -84,20 +84,20 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
   onConfirm,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState(new Date());
+  const [firstName, setFirstName] = useState("Vladislav");
+  const [lastName, setLastName] = useState("Gostiuc");
+  const [dateOfBirth, setDateOfBirth] = useState(new Date("1990-01-01"));
   const [gender, setGender] = useState<TDropdownItem>(genders[0]);
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("vladislav.gostiuc@gmail.com");
+  const [phone, setPhone] = useState("+37369123456");
   const [documentType, setDocumentType] = useState<TDropdownItem>(
     documentTypes[0]
   );
-  const [birthPlace, setBirthPlace] = useState("");
-  const [issuanceLocation, setIssuanceLocation] = useState("");
-  const [issuanceDate, setIssuanceDate] = useState(new Date());
-  const [number, setNumber] = useState("");
-  const [expiryDate, setExpiryDate] = useState(new Date());
+  const [birthPlace, setBirthPlace] = useState("Madrid");
+  const [issuanceLocation, setIssuanceLocation] = useState("Madrid");
+  const [issuanceDate, setIssuanceDate] = useState(new Date("2020-01-01"));
+  const [number, setNumber] = useState("123456790");
+  const [expiryDate, setExpiryDate] = useState(new Date("2028-01-01"));
   const [issuranceCountry, setIssuranceCountry] = useState<Country | null>(
     null
   );
@@ -229,13 +229,13 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
             <MaterialCommunityIcons
               name="chevron-up"
               size={24}
-              color="#9ca3af"
+              color="#4b5563"
             />
           ) : (
             <MaterialCommunityIcons
               name="chevron-down"
               size={24}
-              color="#9ca3af"
+              color="#4b5563"
             />
           )}
         </TouchableOpacity>
