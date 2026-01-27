@@ -1,4 +1,5 @@
 import {
+  createBooking,
   createFlightOrder,
   createHotelOrder,
   createTransferOrder,
@@ -14,12 +15,26 @@ import { Button, CryptoPaymentQR, Spinner } from "@/components/common";
 import { StripePaymentMethodGroup } from "@/components/molecules";
 import { CheckoutContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
-import { setBookingHotelOrder } from "@/redux/slices/booking.slice";
 import { RootState } from "@/redux/store";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
-import { TAmadeusFlightOrder, TAmadeusTransferOrder } from "@/types/amadeus";
+import {
+  TAmadeusFlightOrder,
+  TAmadeusHotelOrder,
+  TAmadeusTransferOrder,
+} from "@/types/amadeus";
+import {
+  IBooking,
+  TBookingFlight,
+  TBookingHotel,
+  TBookingTransfer,
+} from "@/types/booking";
 import { IEvent } from "@/types/event";
 import { formatDateTime, formatName, getCurrencySymbol } from "@/utils/format";
+import {
+  mapAmadeusFlightOrderToBookingFlightData,
+  mapAmadeusHotelOrderToBookingHotelData,
+  mapAmadeusTransferOrderToBookingTransferData,
+} from "@/utils/map";
 import {
   Fontisto,
   MaterialCommunityIcons,
@@ -778,15 +793,26 @@ const CheckoutScreen = () => {
   };
 
   const book = async () => {
+    let flightOrder: TBookingFlight | undefined;
+    let hotelOrder: TBookingHotel | undefined;
+    let transferOrders: {
+      ah: TBookingTransfer | undefined;
+      he: TBookingTransfer | undefined;
+    } = {
+      ah: undefined,
+      he: undefined,
+    };
+
+    let billingAddress = null;
+    let billingPayment = null;
+
     try {
       if (flight?.request) {
-        console.log("[create flight order request]: ", flight.request);
-
         const response = await createFlightOrder(flight.request);
 
         if (response.ok) {
-          console.log("[create flight order success]: ", response.data);
           const data: TAmadeusFlightOrder = response.data;
+          flightOrder = mapAmadeusFlightOrderToBookingFlightData(data);
         }
       }
 
@@ -794,23 +820,47 @@ const CheckoutScreen = () => {
         const response = await createHotelOrder(hotel.request);
 
         if (response.ok) {
-          console.log("[create hotel order success]: ", response.data);
-          dispatch(setBookingHotelOrder(response.data));
+          const data: TAmadeusHotelOrder = response.data;
+          hotelOrder = mapAmadeusHotelOrderToBookingHotelData(data);
         }
       }
 
-      let transferOrders: TAmadeusTransferOrder[] = [];
-
       if (transfer?.requests && transfer.requests.length > 0) {
-        for (const request of transfer.requests) {
+        for (let i = 0; i < transfer.requests.length; i++) {
+          const request = transfer.requests[i];
           const response = await createTransferOrder(request);
 
           if (response.ok) {
-            console.log("[create transfer order success]: ", response.data);
-            transferOrders.push(response.data);
+            const data: TAmadeusTransferOrder = response.data;
+
+            if (i === 0) {
+              transferOrders.ah =
+                mapAmadeusTransferOrderToBookingTransferData(data);
+            } else {
+              transferOrders.he =
+                mapAmadeusTransferOrderToBookingTransferData(data);
+            }
+
+            billingAddress = data.passengers[0].billingAddress;
+            billingPayment = {
+              method: transfer.requests[0].payment.methodOfPayment,
+              cardNumber: transfer.requests[0].payment.creditCard.number,
+              expiryDate: transfer.requests[0].payment.creditCard.expiryDate,
+              holderName: transfer.requests[0].payment.creditCard.holderName,
+              vendorCode: transfer.requests[0].payment.creditCard.vendorCode,
+              cvv: transfer.requests[0].payment.creditCard.cvv,
+            };
           }
         }
       }
+
+      return {
+        flightOrder,
+        hotelOrder,
+        transferOrders,
+        billingAddress,
+        billingPayment,
+      };
     } catch (error: any) {
       Alert.alert("Error", error?.response?.data?.message || "Failed to book.");
     }
@@ -842,7 +892,40 @@ const CheckoutScreen = () => {
       if (!paymentResult)
         return Alert.alert("Error", "Failed to make payment.");
 
-      await book();
+      const basicBookingData = await book();
+
+      if (!basicBookingData) return Alert.alert("Error", "Failed to book.");
+
+      const bookingData: IBooking = {
+        flight: basicBookingData.flightOrder as any,
+        hotel: basicBookingData.hotelOrder as any,
+        transfer: basicBookingData.transferOrders as any,
+        timezone: event?.dates?.timezone || "",
+        event: event?._id as any,
+        user: user._id as any,
+        price: {
+          total: totalPrice,
+          base: basePrice,
+          comission: commissionPrice,
+          currency: currency.toUpperCase(),
+        },
+        billingAddress: basicBookingData.billingAddress as any,
+        billingPayment: basicBookingData.billingPayment as any,
+      };
+
+      const response = await createBooking(bookingData);
+
+      if (response.ok) {
+        Alert.alert("Success", "Booking created successfully");
+        router.push({
+          pathname: "/booked",
+          params: {
+            bookingId: response.data._id as string,
+            eventId,
+            packageType,
+          },
+        });
+      }
     } catch (error: any) {
       console.error("handle book error: ", error);
       const message = error?.response?.data?.message;

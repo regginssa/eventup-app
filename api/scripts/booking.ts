@@ -5,6 +5,7 @@ import AxiosInstance from "../AxiosInstance";
 import {
   BOOKING_BASE,
   CANCEL_FLIGHT_ORDER,
+  CREATE_BOOKING,
   CREATE_FLIGHT_ORDER,
   CREATE_HOTEL_ORDER,
   CREATE_TRANSFER_ORDER,
@@ -111,4 +112,11 @@ export const fetchBooking = async (
   id: string
 ): Promise<ApiResponse<IBooking>> => {
   return await AxiosInstance.get(BOOKING_BASE + id);
+};
+
+// Create booking
+export const createBooking = async (
+  body: IBooking
+): Promise<ApiResponse<IBooking>> => {
+  return await AxiosInstance.post(CREATE_BOOKING, body);
 };

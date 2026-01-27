@@ -80,7 +80,7 @@ export type TBookingTransfer = {
 };
 
 export interface IBooking {
-  _id: string;
+  _id?: string;
   flight: TBookingFlight;
   hotel: TBookingHotel;
   transfer: {
