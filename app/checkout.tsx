@@ -17,11 +17,7 @@ import { CheckoutContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
 import { RootState } from "@/redux/store";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
-import {
-  TAmadeusFlightOrder,
-  TAmadeusHotelOrder,
-  TAmadeusTransferOrder,
-} from "@/types/amadeus";
+import { TAmadeusFlightOrder, TAmadeusHotelOrder } from "@/types/amadeus";
 import {
   IBooking,
   TBookingFlight,
@@ -683,6 +679,8 @@ const CheckoutScreen = () => {
   const { flight, hotel, transfer } = useSelector(
     (state: RootState) => state.booking
   );
+  const [bookLabel, setBookLabel] = useState<string>("Book Now");
+
   const dispatch = useDispatch();
 
   const getEvent = useCallback(async () => {
@@ -751,12 +749,15 @@ const CheckoutScreen = () => {
     setServices(services);
   }, [flight, hotel, transfer]);
 
-  const handleStripePayment = async (): Promise<boolean> => {
+  const handleStripePayment = async (
+    amount: number,
+    currency: string
+  ): Promise<boolean> => {
     const stripePayload = {
       customerId: user?.stripe.customer_id,
       paymentMethodId: stripePaymentMethodId,
-      amount: totalPrice,
-      currency: currency,
+      amount,
+      currency,
       bookingOption: "flight",
       packageType: packageType as TPackageType,
     };
@@ -770,7 +771,7 @@ const CheckoutScreen = () => {
         "Payment Error",
         clientSecretResponse.message || "Failed to create payment intent."
       );
-
+      setBookLabel("Book Now");
       return false;
     }
 
@@ -786,6 +787,7 @@ const CheckoutScreen = () => {
 
     if (confirmPaymentError) {
       Alert.alert("Payment Confirmation Error", confirmPaymentError.message);
+      setBookLabel("Book Now");
       return false;
     }
 
@@ -806,33 +808,52 @@ const CheckoutScreen = () => {
     let billingAddress = null;
     let billingPayment = null;
 
+    const flightPrice = Number(flight?.offers[0]?.price.total) || 0;
+    const hotelPrice = Number(hotel?.offers[0]?.offers[0]?.price?.total) || 0;
+    const transferPriceAH =
+      Number(transfer?.ah[0]?.quotation?.monetaryAmount) || 0;
+    const transferPriceHE =
+      Number(transfer?.he[0]?.quotation?.monetaryAmount) || 0;
+
+    // Pay total amount first
+    setBookLabel("Processing Payment...");
+    const paymentResult = await handleStripePayment(totalPrice, currency);
+
     try {
       if (flight?.request) {
+        setBookLabel("Booking Flight...");
         const response = await createFlightOrder(flight.request);
 
-        if (response.ok) {
+        if (response.data) {
           const data: TAmadeusFlightOrder = response.data;
           flightOrder = mapAmadeusFlightOrderToBookingFlightData(data);
         }
       }
 
       if (hotel?.request) {
+        setBookLabel("Booking Hotel...");
         const response = await createHotelOrder(hotel.request);
 
-        if (response.ok) {
+        if (response.data) {
           const data: TAmadeusHotelOrder = response.data;
           hotelOrder = mapAmadeusHotelOrderToBookingHotelData(data);
         }
       }
 
       if (transfer?.requests && transfer.requests.length > 0) {
+        setBookLabel("Booking Transfers...");
         for (let i = 0; i < transfer.requests.length; i++) {
           const request = transfer.requests[i];
           const response = await createTransferOrder(request);
 
-          if (response.ok) {
-            const data: TAmadeusTransferOrder = response.data;
+          if (response.data) {
+            const data: any = response.data;
 
+            console.log("[transfer data]: ", data);
+
+            if (data?.reservationStatus === "CANCELLED") {
+              continue;
+            }
             if (i === 0) {
               transferOrders.ah =
                 mapAmadeusTransferOrderToBookingTransferData(data);
@@ -862,6 +883,8 @@ const CheckoutScreen = () => {
         billingPayment,
       };
     } catch (error: any) {
+      setBookLabel("Book Now");
+      console.error("handle book error: ", error);
       Alert.alert("Error", error?.response?.data?.message || "Failed to book.");
     }
   };
@@ -874,27 +897,20 @@ const CheckoutScreen = () => {
 
       let paymentResult = false;
 
-      switch (paymentMethod) {
-        case "card":
-          paymentResult = await handleStripePayment();
-          break;
-
-        case "crypto":
-          break;
-
-        case "token":
-          break;
-
-        default:
-          break;
-      }
-
       if (!paymentResult)
         return Alert.alert("Error", "Failed to make payment.");
 
       const basicBookingData = await book();
 
-      if (!basicBookingData) return Alert.alert("Error", "Failed to book.");
+      console.log("[basicBookingData]: ", basicBookingData);
+
+      // Refund payment if failed to book (flight, hotel, transfers)
+      if (!basicBookingData) {
+        setBookLabel("Book Now");
+        return Alert.alert("Error", "Failed to book.");
+      }
+
+      setBookLabel("Creating Booking...");
 
       const bookingData: IBooking = {
         flight: basicBookingData.flightOrder as any,
@@ -929,8 +945,9 @@ const CheckoutScreen = () => {
     } catch (error: any) {
       console.error("handle book error: ", error);
       const message = error?.response?.data?.message;
-      Alert.alert(message);
+      Alert.alert("Error", message);
     } finally {
+      setBookLabel("Book Now");
       setBookLoading(false);
     }
   };
@@ -959,7 +976,7 @@ const CheckoutScreen = () => {
       />
       <Button
         type="primary"
-        label="Book Now"
+        label={bookLabel}
         buttonClassName="h-12"
         textClassName="text-lg"
         // disabled={paymentMethod === "card" && stripePaymentMethodId === ""}

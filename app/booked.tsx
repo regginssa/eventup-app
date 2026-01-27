@@ -348,7 +348,21 @@ const TrasferDetails = ({
 }) => {
   const { theme } = useTheme();
 
-  if (!transfer) return null;
+  if (!transfer)
+    return (
+      <View
+        className={`w-full ${
+          theme === "light" ? "bg-white" : "bg-[#171C1C]"
+        } rounded-xl p-4 gap-3 overflow-hidden`}
+      >
+        <View className="w-full flex flex-col items-center justify-center gap-2">
+          <MaterialCommunityIcons name="car-off" size={24} color="#4b5563" />
+          <Text className="font-poppins-semibold text-gray-600">
+            No {title}
+          </Text>
+        </View>
+      </View>
+    );
 
   const driver = transfer.provider.name;
   const car = transfer.vehicle.description;

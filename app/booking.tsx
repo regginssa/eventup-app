@@ -331,7 +331,7 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
               Transfer Billing Details
             </Text>
             <MaterialCommunityIcons
-              name={isBillingOpen ? "chevron-up" : "chevron-down"}
+              name={isTransferBillingOpen ? "chevron-up" : "chevron-down"}
               size={24}
               color="#4b5563"
             />
