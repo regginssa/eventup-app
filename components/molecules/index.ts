@@ -1,4 +1,5 @@
 export { default as BadgeGroup } from "./BadgeGroup";
+export { default as BookingCardGroup } from "./BookingCardGroup";
 export { default as BookSearchInputGroup } from "./BookSearchInputGroup";
 export { default as CreateEventStepper } from "./CreateEventStepper";
 export { default as EventsPreviewGroup } from "./EventsPreviewGroup";

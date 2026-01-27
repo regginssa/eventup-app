@@ -47,14 +47,15 @@ const Footer = () => {
       ),
     },
     {
-      label: "Ticket",
+      label: "Books",
       icon: (
         <MaterialIcons
-          name="add-shopping-cart"
+          name="bookmarks"
           size={24}
           color={theme === "light" ? "#1f2937" : "#e5e7eb"}
         />
       ),
+      href: "/my-bookings",
     },
     {
       label: "Shop",
