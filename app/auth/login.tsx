@@ -99,7 +99,7 @@ const LoginScreen = () => {
     } catch (error: any) {
       const message = error?.response?.data?.message;
 
-      Alert.alert(message);
+      Alert.alert(error?.message || "An error occurred");
 
       if (error?.status === 401) {
         setInvalidPassword(true);

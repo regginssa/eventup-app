@@ -295,7 +295,7 @@ const HomeScreen = () => {
           <MaterialCommunityIcons
             name="chevron-right"
             size={18}
-            color="#374151"
+            color="#BF28E0"
           />
         </TouchableOpacity>
       </View>

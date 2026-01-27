@@ -171,8 +171,8 @@ const PriceDetail = ({
     <View className="w-full bg-white rounded-xl p-4 gap-6">
       <Text className="font-poppins-semibold text-gray-700">Price details</Text>
 
-      <View className="w-full flex flex-row items-start gap-6">
-        <View className="flex-1 flex-row items-center gap-4">
+      <View className="w-full flex flex-row items-start justify-between">
+        <View className="grid grid-cols-1 gap-4">
           {services.map((service, index) => (
             <View key={index} className="flex flex-row items-center gap-1">
               <View className="w-2 h-2 rounded-full bg-gray-400"></View>
@@ -716,13 +716,25 @@ const CheckoutScreen = () => {
       base += Number(hotelPrice);
     }
 
+    if (transfer?.ah) {
+      services.push("Transfer (A/H)");
+      const transferPrice = transfer?.ah[0]?.quotation?.monetaryAmount || 0;
+      base += Number(transferPrice);
+    }
+
+    if (transfer?.he) {
+      services.push("Transfer (H/E)");
+      const transferPrice = transfer?.he[0]?.quotation?.monetaryAmount || 0;
+      base += Number(transferPrice);
+    }
+
     const total = base + base * 0.1;
 
     setBasePrice(Number(base.toFixed(2)));
     setTotalPrice(Number(total.toFixed(2)));
     setCommissionPrice(Number((base * 0.1).toFixed(2)));
     setServices(services);
-  }, [flight, hotel]);
+  }, [flight, hotel, transfer]);
 
   const handleStripePayment = async (): Promise<boolean> => {
     const stripePayload = {
@@ -810,25 +822,25 @@ const CheckoutScreen = () => {
     try {
       setBookLoading(true);
 
-      // let paymentResult = false;
+      let paymentResult = false;
 
-      // switch (paymentMethod) {
-      //   case "card":
-      //     // paymentResult = await handleStripePayment();
-      //     break;
+      switch (paymentMethod) {
+        case "card":
+          paymentResult = await handleStripePayment();
+          break;
 
-      //   case "crypto":
-      //     break;
+        case "crypto":
+          break;
 
-      //   case "token":
-      //     break;
+        case "token":
+          break;
 
-      //   default:
-      //     break;
-      // }
+        default:
+          break;
+      }
 
-      // if (!paymentResult)
-      //   return Alert.alert("Error", "Failed to make payment.");
+      if (!paymentResult)
+        return Alert.alert("Error", "Failed to make payment.");
 
       await book();
     } catch (error: any) {

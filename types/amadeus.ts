@@ -924,7 +924,7 @@ export type TAmadeusTransferOrder = {
     }>;
     distance?: {
       value: number;
-      unit: "KM" | "MI" | string;
+      unit: string;
     };
   }>;
   passengerCharacteristics?: Array<{

@@ -12,7 +12,7 @@ export type TBookingFlight = {
     airport: string;
     datetime: string;
   };
-  class: "standard" | "gold";
+  class: "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST" | string;
   confirmationCode: string;
 };
 
@@ -35,7 +35,7 @@ export type TBookingHotel = {
 
 export type TBookingTransfer = {
   orderId: string;
-  type: string;
+  type: "PRIVATE" | "SHARED" | string;
   start: {
     locationCode: string;
     datetime: string;
@@ -56,7 +56,7 @@ export type TBookingTransfer = {
   };
   provider: {
     name: string;
-    logo: string;
+    logo?: string;
     contacts: {
       phoneNumber?: string;
       email?: string;
@@ -76,6 +76,7 @@ export type TBookingTransfer = {
     value: number;
     unit: string;
   };
+  confirmationCode?: string;
 };
 
 export interface IBooking {

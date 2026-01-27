@@ -3,9 +3,17 @@ import { THotelItemData } from "@/components/common/HotelItem";
 import { TTransferItemData } from "@/components/common/TransferItem";
 import {
   TAmadeusFlightOffer,
+  TAmadeusFlightOrder,
   TAmadeusHotelOffer,
+  TAmadeusHotelOrder,
   TAmadeusTransferOffer,
+  TAmadeusTransferOrder,
 } from "@/types/amadeus";
+import {
+  TBookingFlight,
+  TBookingHotel,
+  TBookingTransfer,
+} from "@/types/booking";
 
 /**
  * Maps Amadeus Flight Offer API response to TFlightItemData format
@@ -289,5 +297,124 @@ export const mapAmadeusTransferOfferToTransferItemData = (
     price,
     distance,
     cancellationPolicy,
+  };
+};
+
+export const mapAmadeusFlightOrderToBookingFlightData = (
+  order: TAmadeusFlightOrder
+): TBookingFlight => {
+  const airline =
+    order.flightOffers[0].itineraries[0].segments[0].carrierCode || "";
+  const departure = {
+    airport:
+      order.flightOffers[0].itineraries[0].segments[0].departure.iataCode || "",
+    datetime:
+      order.flightOffers[0].itineraries[0].segments[0].departure.at || "",
+  };
+  const arrival = {
+    airport:
+      order.flightOffers[0].itineraries[0].segments[0].arrival.iataCode || "",
+    datetime: order.flightOffers[0].itineraries[0].segments[0].arrival.at || "",
+  };
+  const className =
+    order.flightOffers[0].itineraries[0].segments[0].co2Emissions?.[0]?.cabin ||
+    "";
+  const confirmationCode = order.associatedRecords?.[0]?.reference || "";
+  const orderId = order.id;
+
+  return {
+    orderId,
+    airline,
+    departure,
+    arrival,
+    class: className,
+    confirmationCode,
+  };
+};
+
+export const mapAmadeusHotelOrderToBookingHotelData = (
+  order: TAmadeusHotelOrder
+): TBookingHotel => {
+  const orderId = order.id;
+  const hotel = {
+    id: order.hotelBookings[0].hotel.hotelId,
+    name: order.hotelBookings[0].hotel.name,
+  };
+  const checkIn = order.hotelBookings[0].hotelOffer.checkInDate;
+  const checkOut = order.hotelBookings[0].hotelOffer.checkOutDate;
+  const rooms = Array.from(
+    { length: order.hotelBookings[0].hotelOffer.roomQuantity },
+    (_, index) => ({
+      description: order.hotelBookings[0].hotelOffer.room.description.text,
+      type: order.hotelBookings[0].hotelOffer.room.type,
+    })
+  );
+  const confirmationCode = order.associatedRecords?.[0]?.reference || "";
+  const providerCode =
+    order.hotelBookings[0].hotelProviderInformation?.[0]?.hotelProviderCode ||
+    "";
+
+  return {
+    orderId,
+    hotel,
+    checkIn,
+    checkOut,
+    rooms,
+    confirmationCode,
+    providerCode,
+  };
+};
+
+export const mapAmadeusTransferOrderToBookingTransferData = (
+  order: TAmadeusTransferOrder
+): TBookingTransfer => {
+  const orderId = order.id;
+  const type = order.transfers[0].transferType;
+  const start = {
+    locationCode: order.transfers[0].start.locationCode,
+    datetime: order.transfers[0].start.dateTime,
+  };
+  const end = {
+    googlePlaceId: order.transfers[0].end.googlePlaceId,
+    name: order.transfers[0].end.name,
+    locationCode: order.transfers[0].end.locationCode,
+    address: order.transfers[0].end.address,
+  };
+  const distance = {
+    value: order.transfers[0].distance?.value || 0,
+    unit: order.transfers[0].distance?.unit || "",
+  };
+  const vehicle = {
+    description: order.transfers[0].vehicle.description,
+    seats: order.transfers[0].vehicle.seats[0].count,
+    baggages: order.transfers[0].vehicle.baggages.map((baggage) => ({
+      count: baggage.count,
+      size: baggage.size,
+    })),
+    image: order.transfers[0].vehicle.imageURL,
+  };
+  const provider = {
+    name: order.transfers[0].serviceProvider.name,
+    logo: order.transfers[0].serviceProvider.logoUrl,
+    contacts: {
+      phoneNumber:
+        order.transfers[0].serviceProvider.contacts?.phoneNumber || "",
+      email: order.transfers[0].serviceProvider.contacts?.email || "",
+    },
+    vatRegistrationNumber:
+      order.transfers[0].serviceProvider.businessIdentification
+        ?.vatRegistrationNumber || "",
+  };
+  const confirmationCode = order.reference;
+
+  return {
+    orderId,
+    type,
+    start,
+    end,
+    distance,
+    vehicle,
+    provider,
+    confirmationCode,
   };
 };
