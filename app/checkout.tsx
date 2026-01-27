@@ -819,12 +819,18 @@ const CheckoutScreen = () => {
     setBookLabel("Processing Payment...");
     const paymentResult = await handleStripePayment(totalPrice, currency);
 
+    if (!paymentResult) {
+      setBookLabel("Book Now");
+      return Alert.alert("Error", "Failed to make payment.");
+    }
+
     try {
       if (flight?.request) {
         setBookLabel("Booking Flight...");
         const response = await createFlightOrder(flight.request);
 
         if (response.data) {
+          console.log("[flight order data]: ", response.data);
           const data: TAmadeusFlightOrder = response.data;
           flightOrder = mapAmadeusFlightOrderToBookingFlightData(data);
         }
@@ -835,6 +841,7 @@ const CheckoutScreen = () => {
         const response = await createHotelOrder(hotel.request);
 
         if (response.data) {
+          console.log("[hotel order data]: ", response.data);
           const data: TAmadeusHotelOrder = response.data;
           hotelOrder = mapAmadeusHotelOrderToBookingHotelData(data);
         }
@@ -847,9 +854,8 @@ const CheckoutScreen = () => {
           const response = await createTransferOrder(request);
 
           if (response.data) {
+            console.log("[transfer order data]: ", response.data);
             const data: any = response.data;
-
-            console.log("[transfer data]: ", data);
 
             if (data?.reservationStatus === "CANCELLED") {
               continue;
@@ -885,7 +891,10 @@ const CheckoutScreen = () => {
     } catch (error: any) {
       setBookLabel("Book Now");
       console.error("handle book error: ", error);
-      Alert.alert("Error", error?.response?.data?.message || "Failed to book.");
+      Alert.alert(
+        "Error",
+        error?.response?.data?.message || error?.message || "Failed to book."
+      );
     }
   };
 
@@ -894,11 +903,6 @@ const CheckoutScreen = () => {
 
     try {
       setBookLoading(true);
-
-      let paymentResult = false;
-
-      if (!paymentResult)
-        return Alert.alert("Error", "Failed to make payment.");
 
       const basicBookingData = await book();
 

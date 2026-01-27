@@ -198,6 +198,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return null;
     }
 
+    console.log("[transfer offer data]: ", response.data);
+
     dispatch(
       setBookingTransfer({
         ...rdTransfer,

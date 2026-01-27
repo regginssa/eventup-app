@@ -592,15 +592,12 @@ const BookingScreen = () => {
         transportationNumber:
           ahTransfer?.startConnectedSegment?.transportationNumber ?? "",
         departure: {
-          iataCode:
-            ahTransfer?.startConnectedSegment?.departure?.iataCode ?? "",
-          localDateTime:
-            ahTransfer?.startConnectedSegment?.departure?.localDateTime ?? "",
+          iataCode: ahTransfer?.start?.locationCode ?? "",
+          localDateTime: ahTransfer?.start?.dateTime ?? "",
         },
         arrival: {
-          iataCode: ahTransfer?.startConnectedSegment?.arrival?.iataCode ?? "",
-          localDateTime:
-            ahTransfer?.startConnectedSegment?.arrival?.localDateTime ?? "",
+          iataCode: ahTransfer?.end?.locationCode ?? "",
+          localDateTime: ahTransfer?.end?.dateTime ?? "",
         },
       },
       extraServices:
@@ -659,15 +656,12 @@ const BookingScreen = () => {
         transportationNumber:
           heTransfer?.startConnectedSegment?.transportationNumber ?? "",
         departure: {
-          iataCode:
-            heTransfer?.startConnectedSegment?.departure?.iataCode ?? "",
-          localDateTime:
-            heTransfer?.startConnectedSegment?.departure?.localDateTime ?? "",
+          iataCode: heTransfer?.start?.locationCode ?? "",
+          localDateTime: heTransfer?.start?.dateTime ?? "",
         },
         arrival: {
-          iataCode: heTransfer?.startConnectedSegment?.arrival?.iataCode ?? "",
-          localDateTime:
-            heTransfer?.startConnectedSegment?.arrival?.localDateTime ?? "",
+          iataCode: heTransfer?.end?.locationCode ?? "",
+          localDateTime: heTransfer?.end?.dateTime ?? "",
         },
       },
       extraServices:

@@ -479,6 +479,7 @@ export type TAmadeusTransferOffer = {
     googlePlaceId?: string;
     name?: string;
     locationCode?: string;
+    dateTime?: string;
   };
   stopOvers?: Array<{
     duration: string;

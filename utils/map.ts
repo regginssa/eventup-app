@@ -313,8 +313,13 @@ export const mapAmadeusFlightOrderToBookingFlightData = (
   };
   const arrival = {
     airport:
-      order.flightOffers[0].itineraries[0].segments[0].arrival.iataCode || "",
-    datetime: order.flightOffers[0].itineraries[0].segments[0].arrival.at || "",
+      order.flightOffers[0].itineraries[0].segments[
+        order.flightOffers[0].itineraries[0].segments.length - 1
+      ].arrival.iataCode || "",
+    datetime:
+      order.flightOffers[0].itineraries[0].segments[
+        order.flightOffers[0].itineraries[0].segments.length - 1
+      ].arrival.at || "",
   };
   const className =
     order.flightOffers[0].itineraries[0].segments[0].co2Emissions?.[0]?.cabin ||

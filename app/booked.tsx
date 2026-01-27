@@ -136,8 +136,10 @@ const FlightDetails = ({
         ),
       },
       {
-        label: `${flight.departure.airport} - ${formatDateTime(
-          flight.departure.datetime as string
+        label: `${flight.departure.airport} - ${
+          flight.departure.datetime.split("T")[1]
+        } / ${formatDateTime(
+          flight.departure.datetime.split("T")[0] as string
         )}`,
         icon: (
           <MaterialCommunityIcons
@@ -148,9 +150,9 @@ const FlightDetails = ({
         ),
       },
       {
-        label: `${flight.arrival.airport} - ${formatDateTime(
-          flight.arrival.datetime as string
-        )}`,
+        label: `${flight.arrival.airport} - ${
+          flight.arrival.datetime.split("T")[1]
+        } / ${formatDateTime(flight.arrival.datetime as string)}`,
         icon: (
           <MaterialCommunityIcons
             name="airplane-landing"
@@ -392,7 +394,7 @@ const TrasferDetails = ({
       ),
     },
     {
-      label: `Pickup from: ${pickup} to: ${destination}`,
+      label: `Pickup from: ${pickup} to: ${destination ?? "-"}`,
       icon: (
         <MaterialIcons
           name="luggage"
@@ -406,6 +408,16 @@ const TrasferDetails = ({
       icon: (
         <MaterialIcons
           name="phone-in-talk"
+          size={16}
+          color={theme === "light" ? "#4b5563" : "#9ca3af"}
+        />
+      ),
+    },
+    {
+      label: `Confirmation Code: ${transfer.confirmationCode}`,
+      icon: (
+        <MaterialIcons
+          name="event-seat"
           size={16}
           color={theme === "light" ? "#4b5563" : "#9ca3af"}
         />
