@@ -384,21 +384,39 @@ interface SummaryProps {
 }
 
 const Summary: React.FC<SummaryProps> = ({ flight, hotel, transfer }) => {
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+
   return (
     <View className="w-full bg-white rounded-xl p-4 gap-6">
-      <Text className="font-poppins-semibold text-lg text-gray-800">
-        Summary
-      </Text>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        className="flex flex-row items-center justify-between"
+        onPress={() => setIsSummaryOpen(!isSummaryOpen)}
+      >
+        <Text className="font-poppins-semibold text-lg text-gray-800">
+          Summary
+        </Text>
 
-      {flight && <FlightItem data={flight} />}
+        <MaterialCommunityIcons
+          name={isSummaryOpen ? "chevron-up" : "chevron-down"}
+          size={24}
+          color="#4b5563"
+        />
+      </TouchableOpacity>
 
-      <View className="w-full h-[1px] bg-gray-200"></View>
+      {isSummaryOpen && (
+        <>
+          {flight && <FlightItem data={flight} />}
 
-      {hotel && <HotelItem data={hotel} hiddenImages={true} />}
+          <View className="w-full h-[1px] bg-gray-200"></View>
 
-      <View className="w-full h-[1px] bg-gray-200"></View>
+          {hotel && <HotelItem data={hotel} hiddenImages={true} />}
 
-      {transfer && <TransferAvailabilityGroup transfer={transfer} />}
+          <View className="w-full h-[1px] bg-gray-200"></View>
+
+          {transfer && <TransferAvailabilityGroup transfer={transfer} />}
+        </>
+      )}
     </View>
   );
 };
@@ -684,6 +702,8 @@ const BookingScreen = () => {
       },
     };
 
+    console.log("[flight booking request]: ", flightBookingRequest);
+    console.log("[hotel booking request]: ", hotelBookingRequest);
     console.log("[ahTransferBookingRequest]", ahTransferBookingRequest);
     console.log("[heTransferBookingRequest]", heTransferBookingRequest);
 

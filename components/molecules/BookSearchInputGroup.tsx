@@ -249,6 +249,13 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       );
     }
 
+    if (travelers < hotelRooms) {
+      return Alert.alert(
+        "Invalid Travelers",
+        "The number of travelers cannot be less than the number of hotel rooms."
+      );
+    }
+
     try {
       setSearchLoading(true);
       setIsSearched(false);

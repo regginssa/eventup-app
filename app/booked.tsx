@@ -124,9 +124,14 @@ const FlightDetails = ({
   useEffect(() => {
     if (!flight) return;
 
+    const departure = flight.itineraries[0].segments[0].departure;
+    const arrival =
+      flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1]
+        .arrival;
+
     const items = [
       {
-        label: flight.airline,
+        label: flight.validatingAirline,
         icon: (
           <MaterialIcons
             name="airlines"
@@ -136,11 +141,9 @@ const FlightDetails = ({
         ),
       },
       {
-        label: `${flight.departure.airport} - ${
-          flight.departure.datetime.split("T")[1]
-        } / ${formatDateTime(
-          flight.departure.datetime.split("T")[0] as string
-        )}`,
+        label: `${departure.airport} - ${
+          departure.datetime.split("T")[1]
+        } / ${formatDateTime(departure.datetime.split("T")[0] as string)}`,
         icon: (
           <MaterialCommunityIcons
             name="calendar-clock-outline"
@@ -150,9 +153,9 @@ const FlightDetails = ({
         ),
       },
       {
-        label: `${flight.arrival.airport} - ${
-          flight.arrival.datetime.split("T")[1]
-        } / ${formatDateTime(flight.arrival.datetime as string)}`,
+        label: `${arrival.airport} - ${
+          arrival.datetime.split("T")[1]
+        } / ${formatDateTime(arrival.datetime as string)}`,
         icon: (
           <MaterialCommunityIcons
             name="airplane-landing"
@@ -172,7 +175,7 @@ const FlightDetails = ({
         ),
       },
       {
-        label: `Confirmation Code: ${flight.confirmationCode}`,
+        label: `PNR / Record Locator: ${flight.associatedRecord.reference}`,
         icon: (
           <MaterialIcons
             name="event-seat"
@@ -231,7 +234,7 @@ const FlightDetails = ({
   );
 };
 
-const HotelBooking = ({ hotel }: { hotel: TBookingHotel | undefined }) => {
+const HotelDetails = ({ hotel }: { hotel: TBookingHotel | undefined }) => {
   const { theme } = useTheme();
   const [items, setItems] = useState<any[]>([]);
 
@@ -271,7 +274,7 @@ const HotelBooking = ({ hotel }: { hotel: TBookingHotel | undefined }) => {
       },
       {
         label: `Room: ${
-          hotel.rooms.map((room) => room.description).join(" / ") || "-"
+          hotel.rooms.map((room) => room.roomType).join(" / ") || "-"
         }`,
         icon: (
           <MaterialIcons
@@ -282,7 +285,9 @@ const HotelBooking = ({ hotel }: { hotel: TBookingHotel | undefined }) => {
         ),
       },
       {
-        label: `Reservation Number: ${hotel?.confirmationCode ?? "-"}`,
+        label: `Confirmation Number: ${hotel.rooms
+          .map((room) => room.confirmationNumber)
+          .join(", ")}`,
         icon: (
           <MaterialCommunityIcons
             name="ticket-confirmation-outline"
@@ -309,7 +314,7 @@ const HotelBooking = ({ hotel }: { hotel: TBookingHotel | undefined }) => {
               theme === "light" ? "text-gray-700" : "text-gray-200"
             }`}
           >
-            Hotel Booking
+            Hotel Details
           </Text>
 
           <View className="w-full flex flex-col items-start gap-2 overflow-hidden">
@@ -414,7 +419,7 @@ const TrasferDetails = ({
       ),
     },
     {
-      label: `Confirmation Code: ${transfer.confirmationCode}`,
+      label: `Confirmation Number: ${transfer.confirmationNumber}`,
       icon: (
         <MaterialIcons
           name="event-seat"
@@ -659,7 +664,7 @@ const BookedScreen = () => {
             packageType={(packageType as any) || "standard"}
           />
           <FlightDetails flight={booking?.flight} packageType="standard" />
-          <HotelBooking hotel={booking?.hotel} />
+          <HotelDetails hotel={booking?.hotel} />
           <TrasferDetails
             transfer={booking?.transfer?.ah}
             title="Aiport To Hotel Transfer Details"

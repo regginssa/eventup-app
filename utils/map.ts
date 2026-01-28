@@ -305,37 +305,67 @@ export const mapAmadeusTransferOfferToTransferItemData = (
 export const mapAmadeusFlightOrderToBookingFlightData = (
   order: TAmadeusFlightOrder
 ): TBookingFlight => {
-  const airline =
-    order.flightOffers[0].itineraries[0].segments[0].carrierCode || "";
-  const departure = {
-    airport:
-      order.flightOffers[0].itineraries[0].segments[0].departure.iataCode || "",
-    datetime:
-      order.flightOffers[0].itineraries[0].segments[0].departure.at || "",
-  };
-  const arrival = {
-    airport:
-      order.flightOffers[0].itineraries[0].segments[
-        order.flightOffers[0].itineraries[0].segments.length - 1
-      ].arrival.iataCode || "",
-    datetime:
-      order.flightOffers[0].itineraries[0].segments[
-        order.flightOffers[0].itineraries[0].segments.length - 1
-      ].arrival.at || "",
-  };
-  const className =
-    order.flightOffers[0].itineraries[0].segments[0].co2Emissions?.[0]?.cabin ||
-    "";
-  const confirmationCode = order.associatedRecords?.[0]?.reference || "";
+  const flightOffer = order.flightOffers[0];
+
   const orderId = order.id;
+  const associatedRecord = {
+    reference: order.associatedRecords[0].reference,
+    originSystemCode: order.associatedRecords[0].originSystemCode,
+  };
+  const validatingAirline = flightOffer.validatingAirlineCodes?.[0];
+
+  const travelerPricings = flightOffer.travelerPricings;
+
+  const itineraries = flightOffer.itineraries.map((itinerary) => ({
+    segments: itinerary.segments.map((segment) => {
+      // Find pricing info for THIS segment (use first traveler as reference)
+      const fareDetails = travelerPricings[0]?.fareDetailsBySegment.find(
+        (fare) => fare.segmentId === segment.id
+      );
+
+      return {
+        departure: {
+          airport: segment.departure.iataCode,
+          datetime: segment.departure.at,
+        },
+        arrival: {
+          airport: segment.arrival.iataCode,
+          datetime: segment.arrival.at,
+        },
+        marketingCarrier: segment.carrierCode,
+        operatingCarrier: segment.operating?.carrierCode,
+        flightNumber: `${segment.carrierCode}${segment.number}`,
+        cabin: fareDetails?.cabin ?? "UNKNOWN",
+        baggage: {
+          quantity: fareDetails?.includedCheckedBags?.quantity,
+          weight: fareDetails?.includedCheckedBags?.weight,
+          unit: fareDetails?.includedCheckedBags?.weightUnit,
+        },
+      };
+    }),
+  }));
+
+  const travelers = order.travelers.map((t) => ({
+    id: t.id,
+    firstName: t.name.firstName,
+    lastName: t.name.lastName,
+  }));
+
+  const price = {
+    total: Number(flightOffer.price.grandTotal ?? flightOffer.price.total),
+    currency: flightOffer.price.currency,
+  };
+
+  const status = order.ticketingAggreement?.option;
 
   return {
     orderId,
-    airline,
-    departure,
-    arrival,
-    class: className,
-    confirmationCode,
+    associatedRecord,
+    validatingAirline,
+    itineraries,
+    travelers,
+    price,
+    status,
   };
 };
 
@@ -343,85 +373,150 @@ export const mapAmadeusHotelOrderToBookingHotelData = (
   order: TAmadeusHotelOrder
 ): TBookingHotel => {
   const orderId = order.id;
+  const firstBooking = order.hotelBookings[0];
   const hotel = {
-    id: order.hotelBookings[0].hotel.hotelId,
-    name: order.hotelBookings[0].hotel.name,
+    id: firstBooking.hotel.hotelId,
+    name: firstBooking.hotel.name,
+    chainCode: firstBooking.hotel.chainCode,
   };
-  const checkIn = order.hotelBookings[0].hotelOffer.checkInDate;
-  const checkOut = order.hotelBookings[0].hotelOffer.checkOutDate;
-  const rooms = Array.from(
-    { length: order.hotelBookings[0].hotelOffer.roomQuantity },
-    (_, index) => ({
-      description: order.hotelBookings[0].hotelOffer.room.description.text,
-      type: order.hotelBookings[0].hotelOffer.room.type,
-    })
-  );
-  const confirmationCode = order.associatedRecords?.[0]?.reference || "";
-  const providerCode =
-    order.hotelBookings[0].hotelProviderInformation?.[0]?.hotelProviderCode ||
-    "";
+
+  const checkIn = firstBooking.hotelOffer.checkInDate;
+  const checkOut = firstBooking.hotelOffer.checkOutDate;
+
+  const guests = order.guests.map((g) => ({
+    id: g.id,
+    firstName: g.firstName,
+    lastName: g.lastName,
+    email: g.email,
+    phone: g.phone,
+  }));
+
+  const associatedRecord = {
+    reference: order.associatedRecords[0]?.reference,
+    originSystemCode: order.associatedRecords[0]?.originSystemCode,
+  };
+
+  const rooms = order.hotelBookings.map((booking) => ({
+    bookingId: booking.id,
+    status: booking.bookingStatus,
+
+    providerCode: booking.hotelProviderInformation[0].hotelProviderCode,
+    confirmationNumber: booking.hotelProviderInformation[0].confirmationNumber,
+
+    roomType: booking.hotelOffer.room.type,
+    roomDescription: booking.hotelOffer.room.description?.text,
+    rateCode: booking.hotelOffer.rateCode,
+
+    price: {
+      total: Number(booking.hotelOffer.price.total),
+      currency: booking.hotelOffer.price.currency,
+    },
+
+    cancellationPolicy: booking.hotelOffer.policies?.cancellations ?? [],
+  }));
+
+  const totalPrice = rooms.reduce((sum, r) => sum + r.price.total, 0);
+  const price = {
+    total: totalPrice,
+    currency: rooms[0].price.currency,
+  };
 
   return {
     orderId,
     hotel,
     checkIn,
     checkOut,
+    guests,
+    associatedRecord,
     rooms,
-    confirmationCode,
-    providerCode,
+    price,
+    status: rooms.every((r) => r.status === "CONFIRMED")
+      ? "CONFIRMED"
+      : "PARTIAL",
   };
 };
 
 export const mapAmadeusTransferOrderToBookingTransferData = (
   order: TAmadeusTransferOrder
 ): TBookingTransfer => {
-  const orderId = order.id;
-  const type = order.transfers[0].transferType;
-  const start = {
-    locationCode: order.transfers[0].start.locationCode,
-    datetime: order.transfers[0].start.dateTime,
-  };
-  const end = {
-    googlePlaceId: order.transfers[0].end.googlePlaceId,
-    name: order.transfers[0].end.name,
-    locationCode: order.transfers[0].end.locationCode,
-    address: order.transfers[0].end.address,
-  };
-  const distance = {
-    value: order.transfers[0].distance?.value || 0,
-    unit: order.transfers[0].distance?.unit || "",
-  };
-  const vehicle = {
-    description: order.transfers[0].vehicle.description,
-    seats: order.transfers[0].vehicle.seats[0].count,
-    baggages: order.transfers[0].vehicle.baggages.map((baggage) => ({
-      count: baggage.count,
-      size: baggage.size,
-    })),
-    image: order.transfers[0].vehicle.imageURL,
-  };
-  const provider = {
-    name: order.transfers[0].serviceProvider.name,
-    logo: order.transfers[0].serviceProvider.logoUrl,
-    contacts: {
-      phoneNumber:
-        order.transfers[0].serviceProvider.contacts?.phoneNumber || "",
-      email: order.transfers[0].serviceProvider.contacts?.email || "",
-    },
-    vatRegistrationNumber:
-      order.transfers[0].serviceProvider.businessIdentification
-        ?.vatRegistrationNumber || "",
-  };
-  const confirmationCode = order.reference;
+  const transfer = order.transfers[0];
 
   return {
-    orderId,
-    type,
-    start,
-    end,
-    distance,
-    vehicle,
-    provider,
-    confirmationCode,
+    orderId: order.id,
+    reference: order.reference,
+    status: transfer.status,
+    confirmationNumber: transfer.confirmNbr,
+    transferType: transfer.transferType,
+    start: {
+      dateTime: transfer.start.dateTime,
+      locationCode: transfer.start.locationCode,
+    },
+    end: {
+      name: transfer.end.name,
+      googlePlaceId: transfer.end.googlePlaceId,
+      locationCode: transfer.end.locationCode,
+      address: transfer.end.address
+        ? {
+            line: transfer.end.address.line,
+            zip: transfer.end.address.zip,
+            countryCode: transfer.end.address.countryCode,
+            cityName: transfer.end.address.cityName,
+            latitude: transfer.end.address.latitude,
+            longitude: transfer.end.address.longitude,
+            uicCode: transfer.end.address.uicCode,
+          }
+        : undefined,
+    },
+
+    provider: {
+      code: transfer.serviceProvider.code,
+      name: transfer.serviceProvider.name,
+      logo: transfer.serviceProvider.logoUrl,
+      contacts: {
+        phoneNumber: transfer.serviceProvider.contacts?.phoneNumber,
+        email: transfer.serviceProvider.contacts?.email,
+      },
+      vatRegistrationNumber:
+        transfer.serviceProvider.businessIdentification?.vatRegistrationNumber,
+    },
+    vehicle: {
+      code: transfer.vehicle.code,
+      description: transfer.vehicle.description,
+      category: transfer.vehicle.category,
+      seats: transfer.vehicle.seats?.[0]?.count ?? 0,
+      baggages:
+        transfer.vehicle.baggages?.map((b) => ({
+          count: b.count,
+          size: b.size,
+        })) ?? [],
+      imageUrl: transfer.vehicle.imageURL,
+    },
+
+    distance: transfer.distance
+      ? {
+          value: transfer.distance.value,
+          unit: transfer.distance.unit,
+        }
+      : undefined,
+
+    price: {
+      total: Number(
+        transfer.converted?.monetaryAmount ?? transfer.quotation.monetaryAmount
+      ),
+      currency:
+        transfer.converted?.currencyCode ?? transfer.quotation.currencyCode,
+    },
+
+    /** Cancellation rules (LEGAL protection) */
+    cancellationRules: transfer.cancellationRules ?? [],
+
+    /** Passengers (lead passenger is usually enough) */
+    passengers:
+      order.passengers?.map((p) => ({
+        firstName: p.firstName,
+        lastName: p.lastName,
+        phone: p.contacts?.phoneNumber,
+        email: p.contacts?.email,
+      })) ?? [],
   };
 };

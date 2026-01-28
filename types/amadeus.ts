@@ -78,7 +78,7 @@ export type TAmadeusFlightOrder = {
   type: "flight-order";
   id: string;
   queuingOfficeId?: string;
-  associatedRecords?: Array<{
+  associatedRecords: Array<{
     reference: string;
     creationDateTime: string;
     originSystemCode: string;
@@ -109,7 +109,7 @@ export type TAmadeusFlightOrder = {
   flightOffers: Array<{
     id: string;
     type: "flight-offer";
-    source?: "GDS" | "NON_GDS" | string;
+    source: "GDS" | "NON_GDS" | string;
     itineraries: Array<{
       duration?: string;
       segments: Array<{
@@ -121,7 +121,7 @@ export type TAmadeusFlightOrder = {
         numberOfStops?: number;
         blacklistedInEU?: boolean;
         carrierCode: string;
-        operating?: {
+        operating: {
           carrierCode: string;
         };
         number: string;
@@ -135,7 +135,7 @@ export type TAmadeusFlightOrder = {
           terminal?: string;
           iataCode: string;
         };
-        co2Emissions?: Array<{
+        co2Emissions: Array<{
           weight: string;
           weightUnit: "KG" | "LB" | string;
           cabin: "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST" | string;
@@ -161,8 +161,8 @@ export type TAmadeusFlightOrder = {
       fareType: Array<"PUBLISHED" | "NEGOTIATED" | "CORPORATE" | string>;
       includedCheckedBags?: boolean;
     };
-    validatingAirlineCodes?: string[];
-    travelerPricings?: Array<{
+    validatingAirlineCodes: string[];
+    travelerPricings: Array<{
       travelerId: string;
       fareOption?: "STANDARD" | "INCLUSIVE_TOUR" | "SPANISH_MARKET" | string;
       travelerType:
@@ -181,7 +181,7 @@ export type TAmadeusFlightOrder = {
           amount: string;
         }>;
       };
-      fareDetailsBySegment?: Array<{
+      fareDetailsBySegment: Array<{
         segmentId: string;
         cabin: "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST" | string;
         fareBasis?: string;
@@ -195,6 +195,8 @@ export type TAmadeusFlightOrder = {
         sliceDiceIndicator?: string;
         includedCheckedBags?: {
           quantity: number;
+          weight?: number;
+          weightUnit?: string;
         };
         additionalServices?: {
           chargeableCheckedBags?: {
@@ -344,7 +346,7 @@ export type TAmadeusHotelOrder = {
     type: "hotel-booking";
     id: string;
     bookingStatus: "CONFIRMED" | "CANCELLED" | "PENDING" | string;
-    hotelProviderInformation?: Array<{
+    hotelProviderInformation: Array<{
       hotelProviderCode: string;
       confirmationNumber: string;
     }>;
@@ -450,7 +452,7 @@ export type TAmadeusHotelOrder = {
     phone: string;
     email: string;
   }>;
-  associatedRecords?: Array<{
+  associatedRecords: Array<{
     reference: string;
     originSystemCode: "GDS" | "NON_GDS" | string;
     creationDateTime?: string;

@@ -816,13 +816,13 @@ const CheckoutScreen = () => {
       Number(transfer?.he[0]?.quotation?.monetaryAmount) || 0;
 
     // Pay total amount first
-    setBookLabel("Processing Payment...");
-    const paymentResult = await handleStripePayment(totalPrice, currency);
+    // setBookLabel("Processing Payment...");
+    // const paymentResult = await handleStripePayment(totalPrice, currency);
 
-    if (!paymentResult) {
-      setBookLabel("Book Now");
-      return Alert.alert("Error", "Failed to make payment.");
-    }
+    // if (!paymentResult) {
+    //   setBookLabel("Book Now");
+    //   return Alert.alert("Error", "Failed to make payment.");
+    // }
 
     try {
       if (flight?.request) {
@@ -935,8 +935,7 @@ const CheckoutScreen = () => {
 
       const response = await createBooking(bookingData);
 
-      if (response.ok) {
-        Alert.alert("Success", "Booking created successfully");
+      if (response.data) {
         router.push({
           pathname: "/booked",
           params: {

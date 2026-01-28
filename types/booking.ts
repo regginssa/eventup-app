@@ -3,21 +3,47 @@ import { IUser } from "./user";
 
 export type TBookingFlight = {
   orderId: string;
-  airline: string;
-  departure: {
-    airport: string;
-    datetime: string;
+  associatedRecord: {
+    reference: string;
+    originSystemCode: "GDS" | "NON_GDS" | string;
   };
-  arrival: {
-    airport: string;
-    datetime: string;
+  validatingAirline: string;
+  status?: string;
+  price: {
+    total: number;
+    currency: string;
   };
-  class: "ECONOMY" | "PREMIUM_ECONOMY" | "BUSINESS" | "FIRST" | string;
-  confirmationCode: string;
+  travelers: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  }[];
+  itineraries: {
+    segments: {
+      departure: {
+        airport: string;
+        datetime: string;
+      };
+      arrival: {
+        airport: string;
+        datetime: string;
+      };
+      marketingCarrier: string;
+      operatingCarrier?: string;
+      flightNumber: string;
+      cabin: string;
+      baggage: {
+        quantity?: number;
+        weight?: number;
+        unit?: string;
+      };
+    }[];
+  }[];
 };
 
 export type TBookingHotel = {
   orderId: string;
+  status: string;
   hotel: {
     id: string;
     name: string;
@@ -25,58 +51,105 @@ export type TBookingHotel = {
   };
   checkIn: string;
   checkOut: string;
-  rooms: {
-    description: string;
-    type: string;
-  }[];
-  providerCode?: string;
-  confirmationCode: string;
+  rooms: Array<{
+    bookingId: string;
+    providerCode: string;
+    confirmationNumber: string;
+    roomType: string;
+    rateCode: string;
+  }>;
+  price: {
+    total: number;
+    currency: string;
+  };
+  guests: Array<{
+    id: string | number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  }>;
+  associatedRecord: {
+    reference: string;
+    originSystemCode: "GDS" | "NON_GDS" | string;
+  };
 };
 
 export type TBookingTransfer = {
   orderId: string;
-  type: "PRIVATE" | "SHARED" | string;
+  reference: string;
+  status: "CONFIRMED" | "CANCELLED" | "PENDING" | string;
+  confirmationNumber: string;
+  transferType: "PRIVATE" | "SHARED" | string;
   start: {
-    locationCode: string;
-    datetime: string;
-  };
-  end: {
-    googlePlaceId?: string;
-    name?: string;
+    dateTime: string;
     locationCode?: string;
     address?: {
       line: string;
       zip?: string;
       countryCode: string;
       cityName: string;
-      latitude: number;
-      longitude: number;
+      latitude?: number;
+      longitude?: number;
+    };
+  };
+  end: {
+    name?: string;
+    googlePlaceId?: string;
+    locationCode?: string;
+    address?: {
+      line: string;
+      zip?: string;
+      countryCode: string;
+      cityName: string;
+      latitude?: number;
+      longitude?: number;
       uicCode?: string;
     };
   };
   provider: {
+    code: string;
     name: string;
     logo?: string;
     contacts: {
       phoneNumber?: string;
       email?: string;
     };
-    vatRegistrationNumber: string;
+    vatRegistrationNumber?: string;
   };
   vehicle: {
+    code: string;
     description: string;
+    category?: string;
     seats: number;
-    baggages: Array<{
+    baggages: {
       count: number;
-      size: string;
-    }>;
-    image?: string;
+      size?: string;
+    }[];
+    imageUrl?: string;
   };
-  distance: {
+  distance?: {
     value: number;
-    unit: string;
+    unit: "KM" | "MI" | string;
   };
-  confirmationCode?: string;
+  price: {
+    total: number;
+    currency: string;
+  };
+  cancellationRules: {
+    feeType: string;
+    feeValue: string;
+    metricType: string;
+    metricMin: string;
+    metricMax: string;
+  }[];
+
+  passengers: {
+    firstName: string;
+    lastName: string;
+    phone?: string;
+    email?: string;
+  }[];
 };
 
 export interface IBooking {
