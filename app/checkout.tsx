@@ -830,9 +830,9 @@ const CheckoutScreen = () => {
         const response = await createFlightOrder(flight.request);
 
         if (response.data) {
-          console.log("[flight order data]: ", response.data);
           const data: TAmadeusFlightOrder = response.data;
           flightOrder = mapAmadeusFlightOrderToBookingFlightData(data);
+          console.log("[flight order data]: ", flightOrder);
         }
       }
 
@@ -841,9 +841,9 @@ const CheckoutScreen = () => {
         const response = await createHotelOrder(hotel.request);
 
         if (response.data) {
-          console.log("[hotel order data]: ", response.data);
           const data: TAmadeusHotelOrder = response.data;
           hotelOrder = mapAmadeusHotelOrderToBookingHotelData(data);
+          console.log("[hotel order data]: ", hotelOrder);
         }
       }
 
@@ -854,12 +854,12 @@ const CheckoutScreen = () => {
           const response = await createTransferOrder(request);
 
           if (response.data) {
-            console.log("[transfer order data]: ", response.data);
             const data: any = response.data;
 
             if (data?.reservationStatus === "CANCELLED") {
               continue;
             }
+
             if (i === 0) {
               transferOrders.ah =
                 mapAmadeusTransferOrderToBookingTransferData(data);
@@ -877,6 +877,8 @@ const CheckoutScreen = () => {
               vendorCode: transfer.requests[0].payment.creditCard.vendorCode,
               cvv: transfer.requests[0].payment.creditCard.cvv,
             };
+
+            console.log("[transfer order data]: ", transferOrders);
           }
         }
       }
