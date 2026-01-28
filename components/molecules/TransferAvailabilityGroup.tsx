@@ -36,7 +36,7 @@ const TransferAvailabilityGroup: React.FC<TransferAvailabilityGroupProps> = ({
 
       <TransferItem data={transfer?.ah[0]} hiddenHeader />
 
-      <View className="w-full h-[1px] bg-gray-200"></View>
+      <View className="w-full h-[1px] bg-gray-300"></View>
 
       <TransferItem data={transfer?.he[0]} hiddenHeader isHotelToEvent />
     </View>

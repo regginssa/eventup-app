@@ -2,7 +2,6 @@ import { TAmadeusHotelOffer } from "@/types/amadeus";
 import { formatDateTime, getCurrencySymbol } from "@/utils/format";
 import { mapAmadeusHotelOfferToHotelItemData } from "@/utils/map";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { BadgeGroup } from "../molecules";
 
@@ -100,124 +99,37 @@ const HotelItem: React.FC<HotelItemProps> = ({
         </View>
       )}
       <View className="w-full px-2 flex flex-col items-start gap-2">
-        {/* IMAGE + NAME */}
-        <View className="flex-row gap-3">
-          <View className="w-20 h-20 relative rounded-lg overflow-hidden">
-            {data.thumbNailUrl ? (
-              <Image
-                source={{ uri: data.thumbNailUrl }}
-                alt={data.hotelName}
-                style={styles.image}
-                contentFit="cover"
-              />
-            ) : (
-              <View className="w-20 h-20 flex flex-col items-center justify-center gap-1">
-                <MaterialIcons
-                  name="image-not-supported"
-                  size={18}
-                  color="#374151"
-                />
-                <Text className="font-poppins-semibold text-gray-700 text-sm text-center">
-                  No Hotel Image
-                </Text>
-              </View>
-            )}
-          </View>
-          <View className="flex-1">
-            <Text className="font-poppins-bold text-gray-800 text-base">
-              {data.hotelName}
+        <View className="w-full flex flex-row items-start justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialCommunityIcons
+              name="home-outline"
+              size={16}
+              color="#4b5563"
+            />
+            <Text className="font-dm-sans-medium text-gray-600 text-sm">
+              Hotel Name:
             </Text>
-
-            <Text className="font-dm-sans-medium text-gray-500">
-              {data.city || data.cityCode}
-            </Text>
-
-            {/* STARS */}
-            {data.hotelRating && data.hotelRating > 0 && (
-              <View className="flex-row items-center gap-1 mt-1">
-                {Array.from({ length: data.hotelRating }).map((_, idx) => (
-                  <MaterialIcons
-                    key={idx}
-                    name="star"
-                    size={14}
-                    color="#facc15"
-                  />
-                ))}
-              </View>
-            )}
           </View>
+          <Text className="font-dm-sans-medium text-gray-600">
+            {data.hotelName}
+          </Text>
         </View>
 
-        {/* OFFER SELECTOR - Show if multiple offers available */}
-        {/* {hasMultipleOffers && offer?.offers && (
-          <View className="w-full flex flex-col gap-2 mt-2">
+        <View className="w-full flex flex-row items-start justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialCommunityIcons
+              name="city-variant-outline"
+              size={16}
+              color="#4b5563"
+            />
             <Text className="font-dm-sans-medium text-gray-600 text-sm">
-              Select Room/Rate Option:
+              City:
             </Text>
-            <View className="flex flex-row flex-wrap gap-2">
-              {offer?.offers?.map((hotelOffer, index) => {
-                const isSelected = index === selectedOfferIndex;
-                const offerPrice = hotelOffer?.price?.total || "0";
-                const offerCurrency = hotelOffer?.price?.currency || "USD";
-                const offerRoomCategory =
-                  hotelOffer?.room?.typeEstimated?.category ||
-                  hotelOffer?.room?.type ||
-                  "Room";
-                const isRefundable =
-                  hotelOffer?.policies?.cancellation?.type !== "FULL_STAY";
-
-                return (
-                  <TouchableOpacity
-                    key={hotelOffer?.id || index}
-                    activeOpacity={0.7}
-                    onPress={() => onOfferChange?.(index)}
-                    className={`px-3 py-2 rounded-lg border-2 ${
-                      isSelected
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 bg-white"
-                    }`}
-                  >
-                    <View className="flex flex-col gap-1">
-                      <Text
-                        className={`font-poppins-semibold text-sm ${
-                          isSelected ? "text-blue-700" : "text-gray-700"
-                        }`}
-                      >
-                        {offerRoomCategory}
-                      </Text>
-                      <Text
-                        className={`font-dm-sans-medium text-xs ${
-                          isSelected ? "text-blue-600" : "text-gray-600"
-                        }`}
-                      >
-                        {getCurrencySymbol(
-                          (offerCurrency.toLowerCase() as any) || "usd",
-                        )}
-                        {offerPrice}
-                      </Text>
-                      {isRefundable && (
-                        <View className="flex flex-row items-center gap-1">
-                          <MaterialCommunityIcons
-                            name="check-circle"
-                            size={12}
-                            color={isSelected ? "#3b82f6" : "#10b981"}
-                          />
-                          <Text
-                            className={`font-dm-sans-medium text-xs ${
-                              isSelected ? "text-blue-600" : "text-green-600"
-                            }`}
-                          >
-                            Refundable
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
           </View>
-        )} */}
+          <Text className="font-dm-sans-medium text-gray-600">
+            {data.city || data.cityCode}
+          </Text>
+        </View>
 
         {/* CHECK-IN DATE */}
         {data.checkInDate && (

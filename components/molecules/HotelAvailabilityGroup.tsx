@@ -1,7 +1,5 @@
-import { RootState } from "@/redux/store";
 import { TAmadeusHotelOffer } from "@/types/amadeus";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
   FlatList,
@@ -10,8 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { Button, HotelItem, Modal, Spinner } from "../common";
+import { Button, HotelItem, Modal } from "../common";
 
 interface HotelAvailabilityGroupProps {
   items: TAmadeusHotelOffer[];
@@ -27,12 +24,6 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
   onSelect,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isImageOpen, setIsImageOpen] = useState<boolean>(false);
-  const [images, setImages] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const { hotel } = useSelector((state: RootState) => state.booking);
-  const dispatch = useDispatch();
 
   const renderItem = ({ item }: { item: TAmadeusHotelOffer }) => {
     return (
@@ -72,7 +63,11 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
       {selected && (
         <View className="w-full gap-4 overflow-hidden">
           <View className="flex flex-row items-center gap-2">
-            <MaterialIcons name="hotel" size={20} color="#374151" />
+            <MaterialCommunityIcons
+              name="home-outline"
+              size={20}
+              color="#374151"
+            />
             <Text className="font-dm-sans-bold text-gray-700">
               Available Hotels
             </Text>
@@ -84,13 +79,15 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
             onViewImages={handleViewImages}
           />
 
-          <Button
-            type="text"
-            label="See more"
-            textClassName="text-gray-700"
-            buttonClassName="h-8"
-            onPress={() => setIsOpen(true)}
-          />
+          {items.length > 1 && (
+            <Button
+              type="text"
+              label="See more"
+              textClassName="text-gray-700"
+              buttonClassName="h-8"
+              onPress={() => setIsOpen(true)}
+            />
+          )}
         </View>
       )}
 
@@ -105,44 +102,6 @@ const HotelAvailabilityGroup: React.FC<HotelAvailabilityGroupProps> = ({
           renderItem={renderItem}
           contentContainerStyle={{ gap: 16 }}
         />
-      </Modal>
-
-      <Modal
-        title={selected?.hotel?.name || ""}
-        isOpen={isImageOpen}
-        onClose={() => setIsImageOpen(false)}
-      >
-        {loading ? (
-          <Spinner size="md" />
-        ) : images.length === 0 ? (
-          <View className="w-full flex flex-col items-center justify-center gap-2">
-            <MaterialIcons
-              name="image-not-supported"
-              size={24}
-              color="#374151"
-            />
-            <Text className="font-poppins-semibold text-gray-700 text-base text-center">
-              No Images
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={images}
-            renderItem={({ item }) => (
-              <View
-                className="w-full h-[150px] relative overflow-hidden rounded-lg bg-white border border-gray-200 mb-3"
-                style={styles.listContainer}
-              >
-                <Image
-                  source={{ uri: item }}
-                  alt={selected?.hotel?.name}
-                  contentFit="cover"
-                  style={styles.image}
-                />
-              </View>
-            )}
-          />
-        )}
       </Modal>
     </>
   );

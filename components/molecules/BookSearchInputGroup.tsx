@@ -134,6 +134,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     const response = await fetchHotelOffers(params);
 
+    console.log("[hotel offers data]: ", response.data);
+
     if (!response.data) {
       return null;
     }
@@ -369,7 +371,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             activeOpacity={0.8}
             className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
             disabled={travelers <= 1}
-            onPress={() => travelers > 2 && setTravelers(travelers - 1)}
+            onPress={() => travelers > 1 && setTravelers(travelers - 1)}
           >
             <Entypo name="minus" size={14} color="#1f2937" />
           </TouchableOpacity>
@@ -398,7 +400,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             className="w-6 h-6 bg-[#e5e5e6] rounded-full flex items-center justify-center"
             disabled={hotelRooms <= 1}
             onPress={() => {
-              hotelRooms > 2 && setHotelRooms(hotelRooms - 1);
+              hotelRooms > 1 && setHotelRooms(hotelRooms - 1);
             }}
           >
             <Entypo name="minus" size={14} color="#1f2937" />
@@ -419,7 +421,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       {isSearched && (
         <>
-          <View className="w-full h-[1px] bg-gray-200"></View>
+          <View className="w-full h-[1px] bg-gray-300"></View>
 
           <FlightAvailabilityGroup
             selected={flight?.offers[0]}
@@ -442,7 +444,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       {isSearched && (
         <>
-          <View className="w-full h-[1px] bg-gray-200"></View>
+          <View className="w-full h-[1px] bg-gray-300"></View>
 
           <HotelAvailabilityGroup
             items={rdHotel?.offers || []}
@@ -467,7 +469,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       {isSearched && (
         <>
-          <View className="w-full h-[1px] bg-gray-200"></View>
+          <View className="w-full h-[1px] bg-gray-300"></View>
 
           <TransferAvailabilityGroup
             transfer={rdTransfer}
@@ -477,7 +479,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         </>
       )}
 
-      <View className="w-full h-[1px] bg-gray-200"></View>
+      <View className="w-full h-[1px] bg-gray-300"></View>
 
       {searchBtnLabel !== "" && (
         <Text className="font-poppins-medium text-sm text-gray-800">

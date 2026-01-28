@@ -65,13 +65,15 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
 
           <FlightItem data={selected} hiddenHeader={true} />
 
-          <Button
-            type="text"
-            label="See more"
-            textClassName="text-gray-700"
-            buttonClassName="h-8"
-            onPress={() => setIsOpen(true)}
-          />
+          {items.length > 1 && (
+            <Button
+              type="text"
+              label="See more"
+              textClassName="text-gray-700"
+              buttonClassName="h-8"
+              onPress={() => setIsOpen(true)}
+            />
+          )}
         </View>
       )}
 

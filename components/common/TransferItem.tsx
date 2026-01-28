@@ -1,9 +1,11 @@
+import { RootState } from "@/redux/store";
 import { TAmadeusTransferOffer } from "@/types/amadeus";
 import { formatDateTime, formatTime, getCurrencySymbol } from "@/utils/format";
 import { mapAmadeusTransferOfferToTransferItemData } from "@/utils/map";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useSelector } from "react-redux";
 
 // TTransferItemData - essential fields from Amadeus Transfer Offer
 export type TTransferItemData = {
@@ -72,9 +74,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
     from,
     to,
     travelDate,
-    adults,
-    children,
-    infants,
     vehicleType,
     vehicleDescription,
     vehicleImage,
@@ -84,6 +83,8 @@ const TransferItem: React.FC<TransferItemProps> = ({
     price,
     rating,
   } = mapAmadeusTransferOfferToTransferItemData(data);
+
+  const { travelers } = useSelector((state: RootState) => state.booking);
 
   const handleSelect = () => {
     if (onSelect) {
@@ -168,16 +169,7 @@ const TransferItem: React.FC<TransferItemProps> = ({
             </Text>
           </View>
           <Text className="font-poppins-semibold text-gray-600">
-            {adults > 0 && `${adults} Adult${adults !== 1 ? "s" : ""}`}
-            {children > 0 &&
-              `${adults > 0 ? ", " : ""}${children} Child${
-                children !== 1 ? "ren" : ""
-              }`}
-            {infants > 0 &&
-              `${adults > 0 || children > 0 ? ", " : ""}${infants} Infant${
-                infants !== 1 ? "s" : ""
-              }`}
-            {adults === 0 && children === 0 && infants === 0 && "-"}
+            {travelers}
           </Text>
         </View>
 
@@ -200,7 +192,11 @@ const TransferItem: React.FC<TransferItemProps> = ({
         {vehicleDescription && (
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex flex-row items-center gap-2">
-              <MaterialIcons name="description" size={16} color="#4b5563" />
+              <MaterialCommunityIcons
+                name="information-outline"
+                size={16}
+                color="#4b5563"
+              />
               <Text className="font-dm-sans-medium text-sm text-gray-600">
                 Description:
               </Text>

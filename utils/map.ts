@@ -132,7 +132,9 @@ export const mapAmadeusHotelOfferToHotelItemData = (
   const checkOutDate = hotelOffer?.checkOutDate || "";
 
   // Room info (specific to this offer)
-  const roomType = hotelOffer?.room?.type || "";
+  const roomType = hotelOffer?.room?.type
+    ? hotelOffer.room.type.replace(/_/g, " ")
+    : "";
   const roomCategory = hotelOffer?.room?.typeEstimated?.category || "";
   const roomDescription = hotelOffer?.room?.description?.text || "";
   const beds = hotelOffer?.room?.typeEstimated?.beds || 0;
