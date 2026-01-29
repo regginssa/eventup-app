@@ -904,8 +904,6 @@ const CheckoutScreen = () => {
 
       const basicBookingData = await book();
 
-      console.log("[basicBookingData]: ", basicBookingData);
-
       // Refund payment if failed to book (flight, hotel, transfers)
       if (!basicBookingData) {
         setBookLabel("Book Now");
