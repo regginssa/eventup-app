@@ -99,14 +99,14 @@ const HotelItem: React.FC<HotelItemProps> = ({
         </View>
       )}
       <View className="w-full px-2 flex flex-col items-start gap-2">
-        <View className="w-full flex flex-row items-start justify-between">
+        <View className="w-full flex flex-row items-start justify-between gap-6">
           <View className="flex-row items-center gap-2">
             <MaterialCommunityIcons
               name="home-outline"
               size={16}
               color="#4b5563"
             />
-            <Text className="font-dm-sans-medium text-gray-600 text-sm">
+            <Text className="font-dm-sans-medium text-gray-600 text-sm line-clamp-2">
               Hotel Name:
             </Text>
           </View>

@@ -67,7 +67,6 @@ const EventDetailScreen = () => {
 
       setEvent(response.data);
       setEventType(type as "ai" | "user");
-      console.log(response.data);
     } catch (error: any) {
       throw new Error(error.message);
     }
