@@ -1,6 +1,6 @@
 import { fetchUser } from "@/src/api/services/user";
 import { Spinner } from "@/src/components/common";
-import { ProfileContainer } from "@/src/components/organisms";
+import { ProfileContainer, ProfileHeader } from "@/src/components/organisms";
 import { IUser } from "@/src/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
@@ -49,6 +49,21 @@ const ProfileScreen = () => {
             <Text className="text-gray-800 font-poppins-semibold">No Data</Text>
           </View>
         </View>
+      );
+    } else {
+      return (
+        <>
+          <ProfileHeader
+            name={user?.name as string}
+            idVerified={user?.idVerified as boolean}
+            title={user?.title as string}
+            country={user?.location.country as any}
+            cityName={user?.location.city.name as string}
+            description={user?.description as string}
+            rate={user?.rate as number}
+            avatar={user?.avatar}
+          />
+        </>
       );
     }
   };

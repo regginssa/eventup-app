@@ -33,8 +33,9 @@ export interface IUser {
   email: string;
   avatar?: string;
   title?: string;
-  about?: string;
+  description?: string;
   location: TUserLocation;
+  rate: number;
   accountType: TAccountType;
   signOption: "email" | "google" | "apple";
   googleId?: string;

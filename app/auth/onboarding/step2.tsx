@@ -69,7 +69,7 @@ const OnboardingStep2Screen = () => {
         ...user,
         avatar: avatarUri,
         title,
-        about,
+        description: about,
       };
 
       const response = await updateUser(user._id, updates);
@@ -91,7 +91,7 @@ const OnboardingStep2Screen = () => {
     if (!user) return;
     setAvatar(user.avatar ?? "");
     setTitle(user.title ?? "");
-    setAbout(user.about ?? "");
+    setAbout(user.description ?? "");
   }, [user]);
 
   return (

@@ -18,3 +18,4 @@ export { default as MyBookingsContainer } from "./my-bookings/MyBookingsContaine
 export { default as MyEventsScreenContainer } from "./my-events/MyEventsScreenContainer";
 export { default as OnboardingContainer } from "./onboarding/OnboardingContainer";
 export { default as ProfileContainer } from "./profile/ProfileContainer";
+export { default as ProfileHeader } from "./profile/ProfileHeader";
