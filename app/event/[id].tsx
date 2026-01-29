@@ -1,5 +1,5 @@
-import { fetchEvent } from "@/api/scripts/event";
-import { Spinner, Tabs } from "@/components/common";
+import { fetchEvent } from "@/src/api/services/event";
+import { Spinner, Tabs } from "@/src/components/common";
 import {
   EventDetailContainer,
   EventDetailEmpty,
@@ -7,15 +7,15 @@ import {
   EventDetailItinerary,
   EventDetailOverview,
   EventDetailPackages,
-} from "@/components/organisms";
+} from "@/src/components/organisms";
+import { RootState } from "@/src/store";
 import {
   setBookingFlight,
   setBookingHotel,
-} from "@/redux/slices/booking.slice";
-import { RootState } from "@/redux/store";
-import { TCoordinate, TDropdownItem } from "@/types";
-import { EventDates, IEvent } from "@/types/event";
-import { formatEventLabel } from "@/utils/format";
+} from "@/src/store/slices/booking.slice";
+import { TCoordinate, TDropdownItem } from "@/src/types";
+import { EventDates, IEvent } from "@/src/types/event";
+import { formatEventLabel } from "@/src/utils/format";
 import * as Location from "expo-location";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -145,9 +145,9 @@ const EventDetailScreen = () => {
                     _id: event.hoster?._id ?? "",
                     avatar: event.hoster?.avatar ?? "",
                     title: event.hoster?.title ?? "",
-                    country: event.hoster?.location.country ?? "",
-                    country_code: event.hoster?.location.country_code ?? "",
-                    is_verified: event.hoster?.is_id_verified ?? false,
+                    country: event.hoster?.location.country.name ?? "",
+                    country_code: event.hoster?.location.country.code ?? "",
+                    is_verified: event.hoster?.idVerified ?? false,
                   }}
                   description={event.description}
                 />

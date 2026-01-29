@@ -1,17 +1,17 @@
-import { fetchBooking } from "@/api/scripts/booking";
-import { fetchEvent } from "@/api/scripts/event";
-import { Button, Spinner, TicketQR } from "@/components/common";
-import { BookedContainer } from "@/components/organisms";
-import { useTheme } from "@/components/providers/ThemeProvider";
-import { TCurrency, TPackageType } from "@/types";
+import { fetchBooking } from "@/src/api/services/booking";
+import { fetchEvent } from "@/src/api/services/event";
+import { Button, Spinner, TicketQR } from "@/src/components/common";
+import { BookedContainer } from "@/src/components/organisms";
+import { useTheme } from "@/src/components/providers/ThemeProvider";
+import { TCurrency, TPackageType } from "@/src/types";
 import {
   IBooking,
   TBookingFlight,
   TBookingHotel,
   TBookingTransfer,
-} from "@/types/booking";
-import { IEvent } from "@/types/event";
-import { formatDateTime, getCurrencySymbol } from "@/utils/format";
+} from "@/src/types/booking";
+import { IEvent } from "@/src/types/event";
+import { formatDateTime, getCurrencySymbol } from "@/src/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";

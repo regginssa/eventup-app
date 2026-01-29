@@ -1,8 +1,8 @@
-import { fetchUser } from "@/api/scripts/user";
-import { Button } from "@/components/common";
-import { setAuthUser } from "@/redux/slices/auth.slice";
-import { RootState } from "@/redux/store";
-import { TKycStatus } from "@/types";
+import { fetchUser } from "@/src/api/services/user";
+import { Button } from "@/src/components/common";
+import { RootState } from "@/src/store";
+import { setAuthUser } from "@/src/store/slices/auth.slice";
+import { TKycStatus } from "@/src/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";

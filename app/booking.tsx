@@ -1,4 +1,4 @@
-import { fetchEvent } from "@/api/scripts/event";
+import { fetchEvent } from "@/src/api/services/event";
 import {
   Button,
   CountryPicker,
@@ -9,31 +9,31 @@ import {
   Input,
   LocationPicker,
   Spinner,
-} from "@/components/common";
-import { TransferAvailabilityGroup } from "@/components/molecules";
+} from "@/src/components/common";
+import { TransferAvailabilityGroup } from "@/src/components/molecules";
 import TravelerDetailInputGroup, {
   TFlightTraveler,
   THotelTraveler,
   TTraveler,
-} from "@/components/molecules/TravelerDetailInputGroup";
-import { BookingContainer } from "@/components/organisms";
+} from "@/src/components/molecules/TravelerDetailInputGroup";
+import { BookingContainer } from "@/src/components/organisms";
+import { RootState } from "@/src/store";
 import {
   setBookingFlightRequest,
   setBookingHotelRequest,
   setBookingTransferRequest,
-} from "@/redux/slices/booking.slice";
-import { RootState } from "@/redux/store";
-import { TDropdownItem, TLocation, TTransfer } from "@/types";
+} from "@/src/store/slices/booking.slice";
+import { TDropdownItem, TLocation, TTransfer } from "@/src/types";
 import {
   TAmadeusFlightBookingRequest,
   TAmadeusFlightOffer,
   TAmadeusHotelBookingRequest,
   TAmadeusHotelOffer,
   TAmadeusTransferBookingRequest,
-} from "@/types/amadeus";
-import { IEvent } from "@/types/event";
-import { Country } from "@/types/location.types";
-import { formatDateTime } from "@/utils/format";
+} from "@/src/types/amadeus";
+import { IEvent } from "@/src/types/event";
+import { Country } from "@/src/types/location.types";
+import { formatDateTime } from "@/src/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";

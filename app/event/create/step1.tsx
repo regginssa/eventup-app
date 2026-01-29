@@ -4,17 +4,17 @@ import {
   Input,
   MultiSelectDropdown,
   Textarea,
-} from "@/components/common";
-import { CreateEventContainer } from "@/components/organisms";
+} from "@/src/components/common";
+import { CreateEventContainer } from "@/src/components/organisms";
 import {
   EVENT_CATEGORIES,
   EVENT_SUB_CATEGORIES,
   EVENT_VENUE_TYPE,
   EVENT_VIBE,
-} from "@/constants/events";
-import { setNewEvent } from "@/redux/slices/event.slice";
-import { RootState } from "@/redux/store";
-import { TDropdownItem } from "@/types";
+} from "@/src/constants/events";
+import { RootState } from "@/src/store";
+import { setNewEvent } from "@/src/store/slices/event.slice";
+import { TDropdownItem } from "@/src/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";

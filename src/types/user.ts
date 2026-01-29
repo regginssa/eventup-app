@@ -1,0 +1,53 @@
+import { TAccountType, TCoordinate, TEventLocation, TKycStatus } from ".";
+import { IStripe } from "./stripe";
+
+export interface IKyc {
+  sessionId: string;
+  sessionNumber: number;
+  sessionToken: string;
+  vendorData: string;
+  status: TKycStatus;
+  url: string;
+}
+
+export type TUserLocation = {
+  country: {
+    name?: string;
+    code?: string;
+  };
+  region: {
+    name?: string;
+    code?: string;
+  };
+  city: {
+    name?: string;
+    code?: string;
+  };
+  address?: string;
+  coordinate: TCoordinate;
+};
+
+export interface IUser {
+  _id?: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  title?: string;
+  about?: string;
+  location: TUserLocation;
+  accountType: TAccountType;
+  signOption: "email" | "google" | "apple";
+  googleId?: string;
+  appleId?: string;
+  blocked: boolean;
+  idVerified: boolean;
+  kyc: IKyc;
+  preferred: {
+    category: string;
+    subcategories: string[];
+    vibe: string[];
+    venueType: string[];
+    location: TEventLocation;
+  };
+  stripe: IStripe;
+}

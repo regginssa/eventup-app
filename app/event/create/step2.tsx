@@ -4,20 +4,20 @@ import {
   Dropdown,
   LocationPicker,
   RegionPicker,
-} from "@/components/common";
-import { CreateEventContainer } from "@/components/organisms";
-import { EVENT_ENTRY_TYPES } from "@/constants/events";
+} from "@/src/components/common";
+import { CreateEventContainer } from "@/src/components/organisms";
+import { EVENT_ENTRY_TYPES } from "@/src/constants/events";
 import {
   CURRENCIES,
   EUR_VALUES,
   PLN_VALUES,
   USD_VALUES,
-} from "@/constants/values";
-import { setNewEvent } from "@/redux/slices/event.slice";
-import { RootState } from "@/redux/store";
-import { TCoordinate, TDropdownItem, TLocation } from "@/types";
-import { IEvent } from "@/types/event";
-import { RegionType } from "@/types/location.types";
+} from "@/src/constants/values";
+import { RootState } from "@/src/store";
+import { setNewEvent } from "@/src/store/slices/event.slice";
+import { TCoordinate, TDropdownItem, TLocation } from "@/src/types";
+import { IEvent } from "@/src/types/event";
+import { RegionType } from "@/src/types/location.types";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";

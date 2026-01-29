@@ -1,10 +1,15 @@
-import { setAuthToken } from "@/api/AxiosInstance";
-import { emailLogin, googleLogin } from "@/api/scripts/auth";
-import { Button, Checkbox, Input, PasswordInput } from "@/components/common";
-import { AuthScreenContainer } from "@/components/organisms";
-import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/constants/env";
-import useRedirect from "@/hooks/useRedirect";
-import { setAuth } from "@/redux/slices/auth.slice";
+import { setAuthToken } from "@/src/api/client";
+import { emailLogin, googleLogin } from "@/src/api/services/auth";
+import {
+  Button,
+  Checkbox,
+  Input,
+  PasswordInput,
+} from "@/src/components/common";
+import { AuthScreenContainer } from "@/src/components/organisms";
+import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/src/config/env";
+import useRedirect from "@/src/hooks/useRedirect";
+import { setAuth } from "@/src/store/slices/auth.slice";
 import { Feather } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";

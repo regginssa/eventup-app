@@ -1,10 +1,14 @@
-import { createEvent } from "@/api/scripts/event";
-import { Button, DateTimePicker, TimezonePicker } from "@/components/common";
-import { CreateEventContainer } from "@/components/organisms";
-import { setNewEvent } from "@/redux/slices/event.slice";
-import { RootState } from "@/redux/store";
-import { IEvent } from "@/types/event";
-import { formatBookingDate, formatTime } from "@/utils/format";
+import { createEvent } from "@/src/api/services/event";
+import {
+  Button,
+  DateTimePicker,
+  TimezonePicker,
+} from "@/src/components/common";
+import { CreateEventContainer } from "@/src/components/organisms";
+import { RootState } from "@/src/store";
+import { setNewEvent } from "@/src/store/slices/event.slice";
+import { IEvent } from "@/src/types/event";
+import { formatBookingDate, formatTime } from "@/src/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
