@@ -702,11 +702,6 @@ const BookingScreen = () => {
       },
     };
 
-    console.log("[flight booking request]: ", flightBookingRequest);
-    console.log("[hotel booking request]: ", hotelBookingRequest);
-    console.log("[ahTransferBookingRequest]", ahTransferBookingRequest);
-    console.log("[heTransferBookingRequest]", heTransferBookingRequest);
-
     dispatch(setBookingFlightRequest(flightBookingRequest));
     dispatch(setBookingHotelRequest(hotelBookingRequest));
     dispatch(

@@ -832,7 +832,6 @@ const CheckoutScreen = () => {
         if (response.data) {
           const data: TAmadeusFlightOrder = response.data;
           flightOrder = mapAmadeusFlightOrderToBookingFlightData(data);
-          console.log("[flight order data]: ", flightOrder);
         }
       }
 
@@ -843,7 +842,6 @@ const CheckoutScreen = () => {
         if (response.data) {
           const data: TAmadeusHotelOrder = response.data;
           hotelOrder = mapAmadeusHotelOrderToBookingHotelData(data);
-          console.log("[hotel order data]: ", hotelOrder);
         }
       }
 
@@ -877,8 +875,6 @@ const CheckoutScreen = () => {
               vendorCode: transfer.requests[0].payment.creditCard.vendorCode,
               cvv: transfer.requests[0].payment.creditCard.cvv,
             };
-
-            console.log("[transfer order data]: ", transferOrders);
           }
         }
       }
