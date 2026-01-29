@@ -8,8 +8,8 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSelector } from "react-redux";
-import { Button } from "../common";
-import { BookSearchInputGroup, PackageConfirmModal } from "../molecules";
+import { Button } from "@/components/common";
+import { BookSearchInputGroup, PackageConfirmModal } from "@/components/molecules";
 
 interface EventDetailPackagesProps {
   event: IEvent;

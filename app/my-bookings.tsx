@@ -1,7 +1,7 @@
 import { fetchAllBookings } from "@/api/scripts/booking";
 import { Input } from "@/components/common";
 import { BookingCardGroup } from "@/components/molecules";
-import MyBookingsContainer from "@/components/organisms/MyBookingsContainer";
+import { MyBookingsContainer } from "@/components/organisms";
 import { RootState } from "@/redux/store";
 import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";

@@ -13,7 +13,7 @@ import { setAuthUser } from "@/redux/slices/auth.slice";
 
 import { RootState } from "@/redux/store";
 import { TDropdownItem } from "@/types";
-import { IUser } from "@/types/data";
+import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";

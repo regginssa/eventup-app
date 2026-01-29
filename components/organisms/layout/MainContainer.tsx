@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
-import { useTheme } from "../providers/ThemeProvider";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 const bgLightImage = require("@/assets/images/bg.png");
 const bgDarkImage = require("@/assets/images/bg_dark.png");

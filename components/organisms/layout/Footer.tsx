@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useTheme } from "../providers/ThemeProvider";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 const bgLightImage = require("@/assets/images/footer.png");
 const bgDarkImage = require("@/assets/images/footer_dark.png");

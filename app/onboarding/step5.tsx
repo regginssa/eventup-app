@@ -1,6 +1,6 @@
 import { fetchUser } from "@/api/scripts/user";
 import { Button } from "@/components/common";
-import OnboardingContainer from "@/components/organisms/OnboardingContainer";
+import { OnboardingContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
 
 import { RootState } from "@/redux/store";

@@ -1,10 +1,10 @@
+import { MainContainer } from "@/components/organisms/layout";
+import { OnboardingStepper } from "@/components/molecules";
 import { Feather } from "@expo/vector-icons";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { CreateEventStepper } from "../molecules";
-import MainContainer from "./MainContainer";
 
-interface CreateEventContainerProps {
+interface OnboardingContainerProps {
   step: number;
   title: string;
   subtitle: string;
@@ -14,7 +14,7 @@ interface CreateEventContainerProps {
   onBack: () => void;
 }
 
-const CreateEventContainer: React.FC<CreateEventContainerProps> = ({
+const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
   step,
   title,
   subtitle,
@@ -57,7 +57,7 @@ const CreateEventContainer: React.FC<CreateEventContainerProps> = ({
               )}
             </View>
 
-            <CreateEventStepper completedStep={step} />
+            <OnboardingStepper completedStep={step} />
             <View
               className="w-full p-4 gap-5 bg-[#eef1f7] rounded-lg border"
               style={{ borderColor: "white" }}
@@ -71,4 +71,4 @@ const CreateEventContainer: React.FC<CreateEventContainerProps> = ({
   );
 };
 
-export default CreateEventContainer;
+export default OnboardingContainer;

@@ -16,7 +16,7 @@ import TravelerDetailInputGroup, {
   THotelTraveler,
   TTraveler,
 } from "@/components/molecules/TravelerDetailInputGroup";
-import BookingContainer from "@/components/organisms/BookingContainer";
+import { BookingContainer } from "@/components/organisms";
 import {
   setBookingFlightRequest,
   setBookingHotelRequest,

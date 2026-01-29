@@ -2,11 +2,11 @@ import { uploadFile } from "@/api/scripts/upload";
 import { updateUser } from "@/api/scripts/user";
 import { Avatar, Button, Input, Textarea } from "@/components/common";
 import { TAvatar } from "@/components/common/Avatar";
-import OnboardingContainer from "@/components/organisms/OnboardingContainer";
+import { OnboardingContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
 
 import { RootState } from "@/redux/store";
-import { IUser } from "@/types/data";
+import { IUser } from "@/types/user";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";

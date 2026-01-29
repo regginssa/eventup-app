@@ -1,43 +1,32 @@
+import { Footer, MainContainer } from "@/components/organisms/layout";
 import { AntDesign } from "@expo/vector-icons";
-import { useState } from "react";
+import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ProfileDrawer } from "../molecules";
-import Footer from "./Footer";
-import MainContainer from "./MainContainer";
 
-interface MyBookingsContainerProps {
+interface MapContainerProps {
   children: React.ReactNode;
 }
 
-const MyBookingsContainer: React.FC<MyBookingsContainerProps> = ({
-  children,
-}) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
+const MapContainer: React.FC<MapContainerProps> = ({ children }) => {
   return (
     <MainContainer>
       <SafeAreaView className="flex-1 px-5 gap-5">
         <View className="w-full flex flex-row items-center justify-between sticky top-0">
           <Text className="font-poppins-semibold text-lg text-gray-800">
-            My Bookings
+            Map
           </Text>
 
           <TouchableOpacity
             activeOpacity={0.8}
             className="w-10 h-10 rounded-full bg-white flex items-center justify-center"
             style={styles.bar}
-            onPress={() => setIsOpen(true)}
           >
             <AntDesign name="bars" size={20} color="#1f2937" />
           </TouchableOpacity>
         </View>
-
-        <View className="flex-1 gap-3">{children}</View>
+        <View className="flex-1 gap-5">{children}</View>
       </SafeAreaView>
-
-      <ProfileDrawer isOpen={isOpen} onClose={() => setIsOpen(false)} />
-
       <Footer />
     </MainContainer>
   );
@@ -53,4 +42,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyBookingsContainer;
+export default MapContainer;

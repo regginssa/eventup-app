@@ -5,12 +5,12 @@ import {
   LocationPicker,
   RegionPicker,
 } from "@/components/common";
-import OnboardingContainer from "@/components/organisms/OnboardingContainer";
+import { OnboardingContainer } from "@/components/organisms";
 import { setAuthUser } from "@/redux/slices/auth.slice";
 import { RootState } from "@/redux/store";
 import { TCoordinate, TLocation } from "@/types";
-import { IUser } from "@/types/data";
 import { Country, RegionType } from "@/types/location.types";
+import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import countryRegionData from "country-region-data";
 import { useRouter } from "expo-router";

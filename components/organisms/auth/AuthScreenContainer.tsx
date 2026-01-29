@@ -1,7 +1,7 @@
+import { useTheme } from "@/components/providers/ThemeProvider";
 import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { useTheme } from "../providers/ThemeProvider";
 
 const LogoImage = require("@/assets/images/logo.png");
 

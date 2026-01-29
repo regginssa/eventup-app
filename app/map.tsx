@@ -4,8 +4,8 @@ import { MapMarker } from "@/components/molecules";
 import { MapContainer } from "@/components/organisms";
 import { COLORFUL_MAP_STYLE } from "@/constants/themes";
 import { RootState } from "@/redux/store";
-import { IEvent } from "@/types/data";
-import { formatEventDate, formatEventLabel } from "@/utils/format";
+import { IEvent } from "@/types/event";
+import { formatDateTime, formatEventLabel } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -102,7 +102,7 @@ const MapScreen = () => {
             {events.map((event, index) => (
               <MapMarker
                 key={event._id ?? index}
-                coordinate={event.coordinate as any}
+                coordinate={event.location?.coordinate as any}
                 onPress={() => handleSelectEvent(event._id)}
               />
             ))}
@@ -141,10 +141,10 @@ const MapScreen = () => {
       >
         <View className="w-full flex flex-row gap-4">
           <View className="relative w-[125px] h-[125px] rounded-lg overflow-hidden">
-            {selectedEvent?.image ? (
+            {selectedEvent?.images && selectedEvent.images.length > 0 ? (
               <Image
-                source={{ uri: selectedEvent?.image }}
-                alt={selectedEvent?.title}
+                source={{ uri: selectedEvent?.images[0] }}
+                alt={selectedEvent?.name}
                 contentFit="cover"
                 style={styles.image}
               />
@@ -160,7 +160,7 @@ const MapScreen = () => {
 
           <View className="flex-1 items-start justify-between">
             <Text className="font-poppins-semibold text-sm text-gray-800">
-              {selectedEvent?.title}
+              {selectedEvent?.name}
             </Text>
 
             <View className="flex flex-row items-center gap-2.5">
@@ -179,8 +179,8 @@ const MapScreen = () => {
                 </LinearGradient>
               </View>
               <Text className="font-dm-sans text-gray-800">
-                {selectedEvent?.category
-                  ? formatEventLabel(selectedEvent?.category)
+                {selectedEvent?.classifications?.category
+                  ? formatEventLabel(selectedEvent?.classifications?.category)
                   : "Unknown"}
               </Text>
             </View>
@@ -192,7 +192,8 @@ const MapScreen = () => {
                 color="#1f2937"
               />
               <Text className="font-dm-sans text-gray-800">
-                {selectedEvent?.venue?.city as string}, {selectedEvent?.country}
+                {selectedEvent?.location?.city.name as string},{" "}
+                {selectedEvent?.location?.country.code}
               </Text>
             </View>
 
@@ -203,9 +204,11 @@ const MapScreen = () => {
                 color="#1f2937"
               />
               <Text className="font-dm-sans text-gray-800">
-                {selectedEvent?.opening_date
-                  ? formatEventDate(selectedEvent?.opening_date)
-                  : "Unknown"}
+                {selectedEvent?.dates?.start.date
+                  ? `${selectedEvent.dates.start.time} / ${formatDateTime(
+                      selectedEvent.dates.start.date
+                    )}`
+                  : "N/A"}
               </Text>
             </View>
           </View>

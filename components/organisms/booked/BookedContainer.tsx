@@ -1,3 +1,6 @@
+import { Footer, MainContainer } from "@/components/organisms/layout";
+import { ProfileDrawer } from "@/components/molecules";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import { AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
 import {
@@ -8,10 +11,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ProfileDrawer } from "../molecules";
-import { useTheme } from "../providers/ThemeProvider";
-import Footer from "./Footer";
-import MainContainer from "./MainContainer";
 
 interface BookedContainerProps {
   children: React.ReactNode;

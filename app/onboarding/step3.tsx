@@ -1,6 +1,6 @@
 import { fetchIdentityVerificationSession } from "@/api/scripts/didit";
 import { Button, Modal } from "@/components/common";
-import OnboardingContainer from "@/components/organisms/OnboardingContainer";
+import { OnboardingContainer } from "@/components/organisms";
 import { RootState } from "@/redux/store";
 import { MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";

@@ -1,3 +1,5 @@
+import { MainContainer, Footer } from "@/components/organisms/layout";
+import { ProfileDrawer } from "@/components/molecules";
 import { setAuth } from "@/redux/slices/auth.slice";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -6,9 +8,6 @@ import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch } from "react-redux";
-import { ProfileDrawer } from "../molecules";
-import Footer from "./Footer";
-import MainContainer from "./MainContainer";
 
 interface HomeContainerProps {
   children: React.ReactNode;

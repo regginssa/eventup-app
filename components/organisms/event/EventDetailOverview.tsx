@@ -2,7 +2,7 @@ import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Text, TouchableOpacity, View } from "react-native";
 import { FlagButton } from "react-native-country-picker-modal";
-import { Avatar } from "../common";
+import { Avatar } from "@/components/common";
 
 const VerifiedBadge = require("@/assets/images/icons/verified_badge.png");
 
