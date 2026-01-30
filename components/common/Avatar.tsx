@@ -31,6 +31,8 @@ const Avatar: React.FC<AvatarProps> = ({ name, source, size, onChange }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+
   const handlePick = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
@@ -57,6 +59,12 @@ const Avatar: React.FC<AvatarProps> = ({ name, source, size, onChange }) => {
 
     if (onChange && result?.assets) {
       const asset = result.assets[0];
+
+      if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE)
+        return Alert.alert(
+          "File too large",
+          `The file is larger than 5MB. Please select a smaller file.`
+        );
 
       const avatar = {
         type: "image",
@@ -88,6 +96,12 @@ const Avatar: React.FC<AvatarProps> = ({ name, source, size, onChange }) => {
     if (onChange && result?.assets) {
       const asset = result.assets[0];
 
+      if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE)
+        return Alert.alert(
+          "File too large",
+          `The file is larger than 5MB. Please select a smaller file.`
+        );
+
       const avatar = {
         type: "image",
         name: asset.fileName,
@@ -108,7 +122,9 @@ const Avatar: React.FC<AvatarProps> = ({ name, source, size, onChange }) => {
     >
       <View className="absolute inset-0 rounded-full overflow-hidden border border-gray-200">
         {loading ? (
-          <ActivityIndicator size={24} color="#C427E0" />
+          <View className="w-full h-full flex items-center justify-center">
+            <ActivityIndicator size={24} color="#C427E0" />
+          </View>
         ) : source ? (
           <Image source={source} alt={name} style={styles.image} />
         ) : (

@@ -12,11 +12,9 @@ import { TCoordinate, TLocation } from "@/types";
 import { Country, RegionType } from "@/types/location.types";
 import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import countryRegionData from "country-region-data";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
-import { FlagType, getAllCountries } from "react-native-country-picker-modal";
 import { useDispatch, useSelector } from "react-redux";
 
 const OnboardingStep1Screen = () => {
@@ -78,42 +76,6 @@ const OnboardingStep1Screen = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!user) return;
-
-    const init = async () => {
-      if (!user.location.country?.code || !user.location.country?.name) {
-        return;
-      }
-
-      const country = (await getAllCountries(FlagType.EMOJI)).find(
-        (c) => c.cca2 === user.location.country.code
-      );
-      setCountry(country ?? null);
-
-      if (country) {
-        const countryData: any = countryRegionData.find(
-          (c: any) => c.countryShortCode === country.cca2
-        );
-
-        if (countryData.regions) {
-          const formattedRegions = countryData.regions.map((region: any) => ({
-            code: region.shortCode || region.name.replace(/\s+/g, ""),
-            name: region.name,
-          }));
-
-          const region = formattedRegions.find(
-            (r: any) => r.name === user.location.region
-          );
-
-          setRegion(region);
-        }
-      }
-    };
-
-    init();
-  }, [user]);
 
   useEffect(() => {
     setRegion(null);

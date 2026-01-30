@@ -154,7 +154,7 @@ const RegisterScreen = () => {
         <Input
           type="string"
           placeholder="Enter your full name"
-          icon={<Feather name="mail" size={16} color="#4b5563" />}
+          icon={<Feather name="user" size={16} color="#4b5563" />}
           className="rounded-md"
           invalid={invalidFullName}
           invalidTxt="Full name is invalid"

@@ -44,13 +44,7 @@ const OnboardingStep4Screen = () => {
     setInvalidVenue(venueTypes.length === 0);
     setInvalidLocation(!location);
 
-    return !(
-      !category ||
-      subcategories.length === 0 ||
-      vibes.length === 0 ||
-      venueTypes.length === 0 ||
-      !location
-    );
+    return !(!category || !location);
   };
 
   const handleSubmit = async () => {
