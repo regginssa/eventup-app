@@ -7,12 +7,12 @@ import { FlagButton } from "react-native-country-picker-modal";
 const VerifiedBadge = require("@/assets/images/icons/verified_badge.png");
 
 interface EventDetailOverviewProps {
-  hoster: {
+  hoster?: {
     _id: string;
     avatar: string;
     title: string;
-    country: string;
-    country_code: string;
+    countryName: string;
+    countryCode: string;
     is_verified: boolean;
   };
   description?: string;
@@ -27,39 +27,49 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
   return (
     <View className="flex-1 gap-4">
       <View className="w-full flex flex-row items-center justify-between">
-        <View className="flex flex-row items-center gap-2">
-          <Avatar source={hoster.avatar} name={hoster.title} size={40} />
-          <View className="">
-            <View className="flex flex-row items-center gap-2">
-              <Text className="font-poppins-medium text-gray-700">
-                {hoster.title}
-              </Text>
+        {hoster ? (
+          <View className="flex flex-row items-center gap-2">
+            <Avatar source={hoster.avatar} name={hoster.title} size={40} />
+            <View className="">
+              <View className="flex flex-row items-center gap-2">
+                <Text className="font-poppins-medium text-gray-700">
+                  {hoster.title}
+                </Text>
 
-              {hoster.is_verified && (
-                <Image
-                  source={VerifiedBadge}
-                  alt="verified"
-                  style={{ width: 16, height: 16 }}
+                {hoster.is_verified && (
+                  <Image
+                    source={VerifiedBadge}
+                    alt="verified"
+                    style={{ width: 16, height: 16 }}
+                  />
+                )}
+              </View>
+
+              <View className="flex flex-row items-center gap-2">
+                <FlagButton
+                  placeholder=""
+                  countryCode={hoster.countryCode as any}
+                  containerButtonStyle={{ marginTop: -4 }}
                 />
-              )}
-            </View>
-
-            <View className="flex flex-row items-center gap-2">
-              <FlagButton
-                placeholder=""
-                countryCode={hoster.country_code as any}
-                containerButtonStyle={{ marginTop: -4 }}
-              />
-              <Text className="font-dm-sans text-gray-600 -ml-4 -mt-1">
-                {hoster.country}
-              </Text>
+                <Text className="font-dm-sans text-gray-600 -ml-4 -mt-1">
+                  {hoster.countryName}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
+        ) : (
+          <View className="">
+            <Text className="font-dm-sans-medium text-gray-800 text-sm">
+              Event hoster is not found
+            </Text>
+          </View>
+        )}
 
-        <TouchableOpacity activeOpacity={0.8}>
-          <Feather name="arrow-right" size={20} color="#374151" />
-        </TouchableOpacity>
+        {hoster && (
+          <TouchableOpacity activeOpacity={0.8}>
+            <Feather name="arrow-right" size={20} color="#374151" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View className="w-full gap-4">

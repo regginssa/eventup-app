@@ -316,8 +316,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                   color="#4b5563"
                 />
                 <Text className="font-dm-sans-medium text-gray-600 text-sm line-clamp-2">
-                  Home region / Saved location ({user?.location.region},{" "}
-                  {user?.location.country_code || ""})
+                  Home region / Saved location ({user?.location.city.name},{" "}
+                  {user?.location.country.name || ""})
                 </Text>
               </View>
 

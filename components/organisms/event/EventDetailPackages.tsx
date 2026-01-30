@@ -9,7 +9,6 @@ import { IEvent } from "@/types/event";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSelector } from "react-redux";
@@ -33,7 +32,6 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const router = useRouter();
   const { flight, hotel, transfer } = useSelector(
     (state: RootState) => state.booking
   );
