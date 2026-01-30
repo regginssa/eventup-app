@@ -1,4 +1,4 @@
-import { MainContainer } from "@/src/components/organisms/layout";
+import { MainContainer } from "@/components/organisms/layout";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";

@@ -1,4 +1,4 @@
-import { useTheme } from "@/src/components/providers/ThemeProvider";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
