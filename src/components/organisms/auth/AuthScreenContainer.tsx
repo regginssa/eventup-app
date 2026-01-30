@@ -22,7 +22,7 @@ const AuthScreenContainer: React.FC<AuthScreenContainerProps> = ({
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <StatusBar style="dark" />
       <View
-        className={`flex-1 items-center justify-center gap-8 ${
+        className={`flex-1 items-center justify-center gap-6 ${
           theme === "light" ? "bg-[#EEF0FC]" : "bg-black"
         } p-5`}
       >

@@ -33,7 +33,7 @@ const Input: React.FC<InputProps> = ({
         <Text className="font-dm-sans text-sm text-gray-700">{label}</Text>
       )}
       <View
-        className={`py-1 px-4 gap-2 bg-white flex flex-row items-center ${className}`}
+        className={`py-1 px-3 gap-2 bg-white flex flex-row items-center ${className}`}
         style={[{ borderWidth: bordered ? 1 : 0, borderColor: "#d1d5db" }]}
       >
         {icon && icon}

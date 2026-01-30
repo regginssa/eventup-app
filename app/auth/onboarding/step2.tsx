@@ -77,7 +77,7 @@ const OnboardingStep2Screen = () => {
       if (response.ok) {
         dispatch(setAuthUser(response.data));
 
-        router.replace("/onboarding/step3");
+        router.replace("/auth/onboarding/step3");
       }
     } catch (error: any) {
       const message = error?.response?.data?.message;
@@ -99,7 +99,7 @@ const OnboardingStep2Screen = () => {
       title="Professional profile"
       subtitle="Tell us about your expertise"
       step={2}
-      onBack={() => router.replace("/onboarding/step1")}
+      onBack={() => router.back()}
     >
       <View className="flex items-center justify-center">
         <Avatar

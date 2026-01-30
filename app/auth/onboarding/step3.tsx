@@ -49,7 +49,7 @@ const OnboardingStep3Screen = () => {
       title="Identity verification"
       subtitle="We need to verify your identity to complete with regulations"
       step={3}
-      onBack={() => router.replace("/onboarding/step2")}
+      onBack={() => router.back()}
       logo={
         <View className="w-[216px] h-[93.13px]">
           <Image
@@ -117,7 +117,7 @@ const OnboardingStep3Screen = () => {
             iconPosition="right"
             buttonClassName="h-12"
             textClassName="text-sm"
-            onPress={() => router.replace("/onboarding/step4")}
+            onPress={() => router.replace("/auth/onboarding/step4")}
           />
         </View>
       ) : (
@@ -133,7 +133,7 @@ const OnboardingStep3Screen = () => {
             type="white"
             label="Skip now"
             buttonClassName="h-12"
-            onPress={() => router.replace("/onboarding/step4")}
+            onPress={() => router.replace("/auth/onboarding/step4")}
           />
         </View>
       )}
@@ -167,7 +167,7 @@ const OnboardingStep3Screen = () => {
               />
             }
             iconPosition="right"
-            onPress={() => router.replace("/onboarding/step4")}
+            onPress={() => router.replace("/auth/onboarding/step4")}
           />
           <Button
             type="text"

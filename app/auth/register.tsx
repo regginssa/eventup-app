@@ -107,7 +107,7 @@ const RegisterScreen = () => {
       dispatch(setAuth({ isAuthenticated: true, user }));
 
       Alert.alert("Welcome !!!");
-      router.replace("/onboarding/step1");
+      router.replace("/auth/onboarding/step1");
     } catch (error: any) {
       const message = error?.response?.data?.message;
       console.error(error);
@@ -135,7 +135,7 @@ const RegisterScreen = () => {
       dispatch(setAuth({ isAuthenticated: true, user }));
 
       Alert.alert("Welcome !!!");
-      router.replace("/onboarding/step1");
+      router.replace("/auth/onboarding/step1");
     } catch (error: any) {
       const message = error?.response?.data?.message;
 

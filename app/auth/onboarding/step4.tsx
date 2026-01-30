@@ -79,7 +79,7 @@ const OnboardingStep4Screen = () => {
       if (response.ok) {
         dispatch(setAuthUser(response.data));
 
-        router.replace("/onboarding/step5");
+        router.replace("/auth/onboarding/step5");
       }
     } catch (error: any) {
       const message = error?.response?.data?.message;

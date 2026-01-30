@@ -69,7 +69,7 @@ const OnboardingStep1Screen = () => {
 
       if (response.ok) {
         dispatch(setAuthUser(response.data));
-        router.replace("/onboarding/step2");
+        router.replace("/auth/onboarding/step2");
       }
     } catch (error: any) {
       const message = error?.response?.data?.message;
@@ -83,6 +83,10 @@ const OnboardingStep1Screen = () => {
     if (!user) return;
 
     const init = async () => {
+      if (!user.location.country.code) {
+        return;
+      }
+
       const country = (await getAllCountries(FlagType.EMOJI)).find(
         (c) => c.cca2 === user.location.country.code
       );
