@@ -1,7 +1,12 @@
 import { fetchUser } from "@/api/services/user";
 import { Spinner } from "@/components/common";
-import { ProfileContainer, ProfileHeader } from "@/components/organisms";
+import {
+  ProfileContainer,
+  ProfileHeader,
+  ProfileReviews,
+} from "@/components/organisms";
 import { RootState } from "@/store";
+import { IReview } from "@/types/review";
 import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
@@ -11,6 +16,7 @@ import { useSelector } from "react-redux";
 
 const ProfileScreen = () => {
   const [user, setUser] = useState<IUser | null>(null);
+  const [reviews, setReviews] = useState<IReview[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isNotFound, setIsNotFound] = useState<boolean>(false);
 
@@ -69,6 +75,8 @@ const ProfileScreen = () => {
             avatar={user?.avatar}
             isMe={user._id === authUser?._id}
           />
+
+          <ProfileReviews reviews={reviews} />
         </>
       );
     }

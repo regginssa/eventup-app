@@ -14,6 +14,7 @@ export { default as OnboardingStepper } from "./OnboardingStepper";
 export { default as PackageConfirmModal } from "./PackageConfirmModal";
 export { default as PassengerInputGroup } from "./PassengerInputGroup";
 export { default as ProfileDrawer } from "./ProfileDrawer";
+export { default as ReviewCardGroup } from "./ReviewCardGroup";
 export { default as StripePaymentMethodGroup } from "./StripePaymentMethodGroup";
 export { default as TransferAvailabilityGroup } from "./TransferAvailabilityGroup";
 export { default as TravelerDetailInputGroup } from "./TravelerDetailInputGroup";
