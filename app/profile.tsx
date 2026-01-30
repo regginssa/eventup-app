@@ -1,11 +1,13 @@
 import { fetchUser } from "@/api/services/user";
 import { Spinner } from "@/components/common";
 import { ProfileContainer, ProfileHeader } from "@/components/organisms";
+import { RootState } from "@/store";
 import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
+import { useSelector } from "react-redux";
 
 const ProfileScreen = () => {
   const [user, setUser] = useState<IUser | null>(null);
@@ -13,6 +15,7 @@ const ProfileScreen = () => {
   const [isNotFound, setIsNotFound] = useState<boolean>(false);
 
   const { id: userId } = useLocalSearchParams();
+  const { user: authUser } = useSelector((state: RootState) => state.auth);
 
   const fetchUserInfo = async () => {
     if (!userId) return;
@@ -64,6 +67,7 @@ const ProfileScreen = () => {
             description={user?.description as string}
             rate={user?.rate as number}
             avatar={user?.avatar}
+            isMe={user._id === authUser?._id}
           />
         </>
       );
@@ -71,7 +75,7 @@ const ProfileScreen = () => {
   };
 
   return (
-    <ProfileContainer userName={user?.name ?? ""}>
+    <ProfileContainer title={user?.name || "Profile"}>
       {renderContent()}
     </ProfileContainer>
   );

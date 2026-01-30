@@ -6,12 +6,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ProfileContainerProps {
   children: React.ReactNode;
-  userName: string;
+  title: string;
 }
 
 const ProfileContainer: React.FC<ProfileContainerProps> = ({
   children,
-  userName,
+  title,
 }) => {
   const router = useRouter();
 
@@ -27,7 +27,7 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
             <Feather name="arrow-left" size={16} color="#4b5563" />
           </TouchableOpacity>
           <Text className="font-poppins-semibold text-lg text-gray-800">
-            {userName}'s Profile
+            {title}
           </Text>
           <View className="w-10"></View>
         </View>

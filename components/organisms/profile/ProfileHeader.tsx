@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { FlagButton } from "react-native-country-picker-modal";
 import { Avatar } from "../../common";
 
@@ -18,6 +18,7 @@ interface ProfileHeaderProps {
   rate?: number;
   title: string;
   description: string;
+  isMe?: boolean;
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -29,6 +30,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   title,
   cityName,
   country,
+  isMe,
 }) => {
   const formattedRate = rate
     ? rate.toLocaleString(undefined, {
@@ -39,9 +41,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   return (
     <View className="w-full flex flex-col items-center justify-center gap-4">
-      <Avatar name={name} source={avatar} />
+      <Avatar name={name} source={avatar} size={120} />
 
-      <View className="flex flex-col items-center justify-center">
+      <View className="flex flex-col items-center justify-center gap-2">
         <View className="flex flex-row items-center gap-2">
           <Text className="font-poppins-semibold text-sm text-gray-800">
             {name}
@@ -64,14 +66,56 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <Text className="font-dm-sans-medium text-xs text-gray-600">
             {cityName}, {country.name}
           </Text>
-          <FlagButton placeholder="" countryCode={country.code as any} />
+          <FlagButton
+            placeholder=""
+            countryCode={country.code as any}
+            containerButtonStyle={{ marginTop: -5 }}
+          />
         </View>
       </View>
 
-      <View className="w-full flex flex-col items-start">
-        <Text className="font-poppins-semibold text-sm text-gray-700">
-          {title}
-        </Text>
+      <View className="w-full flex flex-col items-start gap-2">
+        <View className="w-full flex flex-row items-center justify-between">
+          <Text className="font-poppins-semibold text-sm text-gray-700">
+            {title}
+          </Text>
+
+          <View className="flex flex-row items-center gap-2">
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="w-8 h-8 rounded-lg bg-white flex items-center justify-center"
+            >
+              <MaterialCommunityIcons
+                name="share-variant-outline"
+                size={18}
+                color="#374151"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="w-8 h-8 rounded-lg bg-white flex items-center justify-center"
+            >
+              <MaterialCommunityIcons
+                name="message-outline"
+                size={18}
+                color="#374151"
+              />
+            </TouchableOpacity>
+
+            {isMe && (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                className="w-8 h-8 rounded-lg bg-white flex items-center justify-center"
+              >
+                <MaterialCommunityIcons
+                  name="pencil-outline"
+                  size={18}
+                  color="#374151"
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
 
         <View className="flex flex-row items-center gap-1">
           <MaterialCommunityIcons
@@ -79,12 +123,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             size={14}
             color={rate && rate > 0 ? "#eab308" : "#94a3b8"}
           />
-          <Text className="font-dm-sans-medium text-gray-700">
+          <Text className="font-dm-sans-medium text-gray-700 text-sm">
             {formattedRate}
           </Text>
         </View>
 
-        <Text className="font-dm-sans text-xs text-gray-600">
+        <Text className="font-dm-sans text-xs text-gray-700 w-full p-2 rounded-lg bg-white">
           {description}
         </Text>
       </View>
