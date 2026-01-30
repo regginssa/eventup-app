@@ -1,19 +1,19 @@
-import { updateUser } from "@/src/api/services/user";
-import { Button, MultiSelectDropdown } from "@/src/components/common";
-import Dropdown from "@/src/components/common/Dropdown";
-import { OnboardingContainer } from "@/src/components/organisms";
+import { updateUser } from "@/api/services/user";
+import { Button, MultiSelectDropdown } from "@/components/common";
+import Dropdown from "@/components/common/Dropdown";
+import { OnboardingContainer } from "@/components/organisms";
 import {
   EVENT_CATEGORIES,
   EVENT_LOCATION_TYPES,
   EVENT_SUB_CATEGORIES,
   EVENT_VENUE_TYPE,
   EVENT_VIBE,
-} from "@/src/constants/events";
-import { setAuthUser } from "@/src/store/slices/auth.slice";
+} from "@/constants/events";
+import { setAuthUser } from "@/store/slices/auth.slice";
 
-import { RootState } from "@/src/store";
-import { TDropdownItem } from "@/src/types";
-import { IUser } from "@/src/types/user";
+import { RootState } from "@/store";
+import { TDropdownItem } from "@/types";
+import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";

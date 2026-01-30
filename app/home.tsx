@@ -1,10 +1,10 @@
-import { fetchEventsFeed } from "@/src/api/services/event";
-import { Input, Tabs } from "@/src/components/common";
-import { EventsPreviewGroup } from "@/src/components/molecules";
-import { HomeContainer } from "@/src/components/organisms";
-import { RootState } from "@/src/store";
-import { TDropdownItem, TPagination } from "@/src/types";
-import { IEvent } from "@/src/types/event";
+import { fetchEventsFeed } from "@/api/services/event";
+import { Input, Tabs } from "@/components/common";
+import { EventsPreviewGroup } from "@/components/molecules";
+import { HomeContainer } from "@/components/organisms";
+import { RootState } from "@/store";
+import { TDropdownItem, TPagination } from "@/types";
+import { IEvent } from "@/types/event";
 import {
   AntDesign,
   Feather,

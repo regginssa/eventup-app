@@ -1,7 +1,7 @@
-import { InitContainer } from "@/src/components/organisms";
-import { ThemeProvider } from "@/src/components/providers";
-import { STRIPE_PUBLISHABLE_KEY } from "@/src/config/env";
-import { store } from "@/src/store";
+import { InitContainer } from "@/components/organisms";
+import { ThemeProvider } from "@/components/providers";
+import { STRIPE_PUBLISHABLE_KEY } from "@/config/env";
+import { store } from "@/store";
 import {
   DMSans_400Regular,
   DMSans_500Medium,

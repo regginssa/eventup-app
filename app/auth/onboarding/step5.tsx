@@ -1,9 +1,9 @@
-import { fetchUser } from "@/src/api/services/user";
-import { Button } from "@/src/components/common";
-import { OnboardingContainer } from "@/src/components/organisms";
-import { setAuthUser } from "@/src/store/slices/auth.slice";
+import { fetchUser } from "@/api/services/user";
+import { Button } from "@/components/common";
+import { OnboardingContainer } from "@/components/organisms";
+import { setAuthUser } from "@/store/slices/auth.slice";
 
-import { RootState } from "@/src/store";
+import { RootState } from "@/store";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";

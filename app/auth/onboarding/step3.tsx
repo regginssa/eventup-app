@@ -1,7 +1,7 @@
-import { fetchIdentityVerificationSession } from "@/src/api/services/didit";
-import { Button, Modal } from "@/src/components/common";
-import { OnboardingContainer } from "@/src/components/organisms";
-import { RootState } from "@/src/store";
+import { fetchIdentityVerificationSession } from "@/api/services/didit";
+import { Button, Modal } from "@/components/common";
+import { OnboardingContainer } from "@/components/organisms";
+import { RootState } from "@/store";
 import { MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";

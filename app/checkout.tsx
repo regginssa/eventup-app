@@ -3,38 +3,34 @@ import {
   createFlightOrder,
   createHotelOrder,
   createTransferOrder,
-} from "@/src/api/services/booking";
-import { fetchEvent } from "@/src/api/services/event";
+} from "@/api/services/booking";
+import { fetchEvent } from "@/api/services/event";
 import {
   createStripePaymentIntent,
   fetchStripeClientSecret,
   fetchStripeCustomerId,
   saveStripePaymentMethod,
-} from "@/src/api/services/stripe";
-import { Button, CryptoPaymentQR, Spinner } from "@/src/components/common";
-import { StripePaymentMethodGroup } from "@/src/components/molecules";
-import { CheckoutContainer } from "@/src/components/organisms";
-import { RootState } from "@/src/store";
-import { setAuthUser } from "@/src/store/slices/auth.slice";
-import { TCurrency, TPackageType, TPaymentMethod } from "@/src/types";
-import { TAmadeusFlightOrder, TAmadeusHotelOrder } from "@/src/types/amadeus";
+} from "@/api/services/stripe";
+import { Button, CryptoPaymentQR, Spinner } from "@/components/common";
+import { StripePaymentMethodGroup } from "@/components/molecules";
+import { CheckoutContainer } from "@/components/organisms";
+import { RootState } from "@/store";
+import { setAuthUser } from "@/store/slices/auth.slice";
+import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
+import { TAmadeusFlightOrder, TAmadeusHotelOrder } from "@/types/amadeus";
 import {
   IBooking,
   TBookingFlight,
   TBookingHotel,
   TBookingTransfer,
-} from "@/src/types/booking";
-import { IEvent } from "@/src/types/event";
-import {
-  formatDateTime,
-  formatName,
-  getCurrencySymbol,
-} from "@/src/utils/format";
+} from "@/types/booking";
+import { IEvent } from "@/types/event";
+import { formatDateTime, formatName, getCurrencySymbol } from "@/utils/format";
 import {
   mapAmadeusFlightOrderToBookingFlightData,
   mapAmadeusHotelOrderToBookingHotelData,
   mapAmadeusTransferOrderToBookingTransferData,
-} from "@/src/utils/map";
+} from "@/utils/map";
 import {
   Fontisto,
   MaterialCommunityIcons,

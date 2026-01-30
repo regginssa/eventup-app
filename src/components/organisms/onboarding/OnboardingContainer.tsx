@@ -1,5 +1,5 @@
-import { OnboardingStepper } from "@/src/components/molecules";
-import { MainContainer } from "@/src/components/organisms/layout";
+import { OnboardingStepper } from "@/components/molecules";
+import { MainContainer } from "@/components/organisms/layout";
 import { Feather } from "@expo/vector-icons";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -40,7 +40,7 @@ const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
           <View className="w-10"></View>
         </View>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View className="flex-1 items-center justify-center gap-9 py-5">
+          <View className="flex-1 items-center justify-center gap-8 py-5">
             {logo && logo}
             <View className="items-center justify-center">
               <Text className="font-poppins-semibold text-2xl mb-2 text-gray-800">

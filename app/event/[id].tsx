@@ -1,5 +1,5 @@
-import { fetchEvent } from "@/src/api/services/event";
-import { Spinner, Tabs } from "@/src/components/common";
+import { fetchEvent } from "@/api/services/event";
+import { Spinner, Tabs } from "@/components/common";
 import {
   EventDetailContainer,
   EventDetailEmpty,
@@ -7,15 +7,15 @@ import {
   EventDetailItinerary,
   EventDetailOverview,
   EventDetailPackages,
-} from "@/src/components/organisms";
-import { RootState } from "@/src/store";
+} from "@/components/organisms";
+import { RootState } from "@/store";
 import {
   setBookingFlight,
   setBookingHotel,
-} from "@/src/store/slices/booking.slice";
-import { TCoordinate, TDropdownItem } from "@/src/types";
-import { EventDates, IEvent } from "@/src/types/event";
-import { formatEventLabel } from "@/src/utils/format";
+} from "@/store/slices/booking.slice";
+import { TCoordinate, TDropdownItem } from "@/types";
+import { EventDates, IEvent } from "@/types/event";
+import { formatEventLabel } from "@/utils/format";
 import * as Location from "expo-location";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";

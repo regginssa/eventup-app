@@ -1,10 +1,10 @@
-import { fetchAllBookings } from "@/src/api/services/booking";
-import { Input } from "@/src/components/common";
-import { BookingCardGroup } from "@/src/components/molecules";
-import { MyBookingsContainer } from "@/src/components/organisms";
-import { RootState } from "@/src/store";
-import { IBooking } from "@/src/types/booking";
-import { IEvent } from "@/src/types/event";
+import { fetchAllBookings } from "@/api/services/booking";
+import { Input } from "@/components/common";
+import { BookingCardGroup } from "@/components/molecules";
+import { MyBookingsContainer } from "@/components/organisms";
+import { RootState } from "@/store";
+import { IBooking } from "@/types/booking";
+import { IEvent } from "@/types/event";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";

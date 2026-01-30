@@ -1,16 +1,16 @@
-import { updateUser } from "@/src/api/services/user";
+import { updateUser } from "@/api/services/user";
 import {
   Button,
   CountryPicker,
   LocationPicker,
   RegionPicker,
-} from "@/src/components/common";
-import { OnboardingContainer } from "@/src/components/organisms";
-import { RootState } from "@/src/store";
-import { setAuthUser } from "@/src/store/slices/auth.slice";
-import { TCoordinate, TLocation } from "@/src/types";
-import { Country, RegionType } from "@/src/types/location.types";
-import { IUser } from "@/src/types/user";
+} from "@/components/common";
+import { OnboardingContainer } from "@/components/organisms";
+import { RootState } from "@/store";
+import { setAuthUser } from "@/store/slices/auth.slice";
+import { TCoordinate, TLocation } from "@/types";
+import { Country, RegionType } from "@/types/location.types";
+import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import countryRegionData from "country-region-data";
 import { useRouter } from "expo-router";
@@ -83,7 +83,7 @@ const OnboardingStep1Screen = () => {
     if (!user) return;
 
     const init = async () => {
-      if (!user.location.country.code) {
+      if (!user.location.country?.code || !user.location.country?.name) {
         return;
       }
 

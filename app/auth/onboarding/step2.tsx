@@ -1,12 +1,12 @@
-import { uploadFile } from "@/src/api/services/upload";
-import { updateUser } from "@/src/api/services/user";
-import { Avatar, Button, Input, Textarea } from "@/src/components/common";
-import { TAvatar } from "@/src/components/common/Avatar";
-import { OnboardingContainer } from "@/src/components/organisms";
-import { setAuthUser } from "@/src/store/slices/auth.slice";
+import { uploadFile } from "@/api/services/upload";
+import { updateUser } from "@/api/services/user";
+import { Avatar, Button, Input, Textarea } from "@/components/common";
+import { TAvatar } from "@/components/common/Avatar";
+import { OnboardingContainer } from "@/components/organisms";
+import { setAuthUser } from "@/store/slices/auth.slice";
 
-import { RootState } from "@/src/store";
-import { IUser } from "@/src/types/user";
+import { RootState } from "@/store";
+import { IUser } from "@/types/user";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";

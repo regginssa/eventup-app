@@ -1,6 +1,6 @@
-import { Button } from "@/src/components/common";
-import { CreateEventContainer } from "@/src/components/organisms";
-import { RootState } from "@/src/store";
+import { Button } from "@/components/common";
+import { CreateEventContainer } from "@/components/organisms";
+import { RootState } from "@/store";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";

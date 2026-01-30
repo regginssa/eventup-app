@@ -1,10 +1,10 @@
-import { fetchEventsByUser } from "@/src/api/services/event";
-import { Tabs } from "@/src/components/common";
-import { EventsPreviewGroup } from "@/src/components/molecules";
-import { MyEventsScreenContainer } from "@/src/components/organisms";
-import { RootState } from "@/src/store";
-import { TDropdownItem } from "@/src/types";
-import { IEvent, TEventStatus } from "@/src/types/event";
+import { fetchEventsByUser } from "@/api/services/event";
+import { Tabs } from "@/components/common";
+import { EventsPreviewGroup } from "@/components/molecules";
+import { MyEventsScreenContainer } from "@/components/organisms";
+import { RootState } from "@/store";
+import { TDropdownItem } from "@/types";
+import { IEvent, TEventStatus } from "@/types/event";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";

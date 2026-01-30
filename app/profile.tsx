@@ -1,7 +1,7 @@
-import { fetchUser } from "@/src/api/services/user";
-import { Spinner } from "@/src/components/common";
-import { ProfileContainer, ProfileHeader } from "@/src/components/organisms";
-import { IUser } from "@/src/types/user";
+import { fetchUser } from "@/api/services/user";
+import { Spinner } from "@/components/common";
+import { ProfileContainer, ProfileHeader } from "@/components/organisms";
+import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";

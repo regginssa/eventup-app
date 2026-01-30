@@ -1,5 +1,5 @@
-import { Button } from "@/src/components/common";
-import { useTheme } from "@/src/components/providers/ThemeProvider";
+import { Button } from "@/components/common";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
