@@ -80,7 +80,7 @@ const EmptyUserData = () => {
   );
 };
 
-const Profile = ({ user }: { user: IUser }) => {
+const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
   const [signOutLoading, setSignOutLoading] = useState<boolean>(false);
 
   const router = useRouter();
@@ -96,7 +96,8 @@ const Profile = ({ user }: { user: IUser }) => {
           color={theme === "light" ? "#374151" : "#d1d5db"}
         />
       ),
-      href: "/",
+      href: `/profile/`,
+      params: { id: user._id },
     },
     {
       label: "Verify Identity",
@@ -198,14 +199,6 @@ const Profile = ({ user }: { user: IUser }) => {
               </Text>
             </View>
           </View>
-
-          <TouchableOpacity activeOpacity={0.8}>
-            <Feather
-              name="arrow-right"
-              size={20}
-              color={theme === "light" ? "#374151" : "#d1d5db"}
-            />
-          </TouchableOpacity>
         </View>
 
         <View className="flex-1 gap-5">
@@ -214,7 +207,13 @@ const Profile = ({ user }: { user: IUser }) => {
               key={index}
               activeOpacity={0.8}
               className="w-full flex flex-row items-center justify-between py-2"
-              onPress={() => router.push(item.href as any)}
+              onPress={() => {
+                router.push({
+                  pathname: item.href as any,
+                  params: item.params,
+                });
+                onClose();
+              }}
             >
               <View className="flex flex-row items-center gap-2">
                 {item.icon}
@@ -306,7 +305,7 @@ const ProfileDrawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
       isOpen={isOpen}
       onClose={onClose}
     >
-      {!user ? <EmptyUserData /> : <Profile user={user} />}
+      {!user ? <EmptyUserData /> : <Profile user={user} onClose={onClose} />}
     </Drawer>
   );
 };

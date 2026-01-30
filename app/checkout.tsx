@@ -244,7 +244,7 @@ const CardPayment = ({
     try {
       setLoading(true);
 
-      if (!user?.stripe.customer_id) {
+      if (!user?.stripe?.customerId) {
         await fetchStripeCustomerId();
       }
 
@@ -303,8 +303,8 @@ const CardPayment = ({
             <ActivityIndicator color="white" size={16} />
           ) : (
             <Text className="text-white font-dm-sans text-sm">
-              {user?.stripe.payment_methods.length &&
-              user?.stripe.payment_methods.length > 0
+              {user?.stripe?.paymentMethods.length &&
+              user?.stripe.paymentMethods.length > 0
                 ? "Add another card"
                 : "Add card"}
             </Text>
@@ -312,11 +312,11 @@ const CardPayment = ({
         </TouchableOpacity>
       </View>
 
-      {user?.stripe.payment_methods &&
-        user.stripe.payment_methods.length > 0 && (
+      {user?.stripe?.paymentMethods &&
+        user.stripe.paymentMethods.length > 0 && (
           <>
             <StripePaymentMethodGroup
-              methods={user.stripe.payment_methods}
+              methods={user.stripe.paymentMethods}
               selectedMethodId={methodId}
               onSelectMethod={onSelectMethod}
             />
@@ -707,10 +707,8 @@ const CheckoutScreen = () => {
   useEffect(() => {
     if (!user?.stripe) return;
 
-    if (user.stripe.payment_methods.length === 0) return;
-    setStripePaymentMethodId(
-      user.stripe.payment_methods[0].payment_method_id || ""
-    );
+    if (user.stripe.paymentMethods.length === 0) return;
+    setStripePaymentMethodId(user.stripe.paymentMethods[0].id || "");
   }, [user]);
 
   useEffect(() => {
@@ -754,7 +752,7 @@ const CheckoutScreen = () => {
     currency: string
   ): Promise<boolean> => {
     const stripePayload = {
-      customerId: user?.stripe.customer_id,
+      customerId: user?.stripe?.customerId,
       paymentMethodId: stripePaymentMethodId,
       amount,
       currency,
@@ -816,13 +814,13 @@ const CheckoutScreen = () => {
       Number(transfer?.he[0]?.quotation?.monetaryAmount) || 0;
 
     // Pay total amount first
-    // setBookLabel("Processing Payment...");
-    // const paymentResult = await handleStripePayment(totalPrice, currency);
+    setBookLabel("Processing Payment...");
+    const paymentResult = await handleStripePayment(totalPrice, currency);
 
-    // if (!paymentResult) {
-    //   setBookLabel("Book Now");
-    //   return Alert.alert("Error", "Failed to make payment.");
-    // }
+    if (!paymentResult) {
+      setBookLabel("Book Now");
+      return Alert.alert("Error", "Failed to make payment.");
+    }
 
     try {
       if (flight?.request) {

@@ -50,5 +50,5 @@ export interface IUser {
     venueType: string[];
     location: TEventLocation;
   };
-  stripe: IStripe;
+  stripe?: IStripe;
 }

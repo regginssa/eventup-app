@@ -31,6 +31,8 @@ const ProfileScreen = () => {
   };
 
   useEffect(() => {
+    console.log(userId);
+    if (!userId) return;
     fetchUserInfo();
   }, [userId]);
 
@@ -50,7 +52,7 @@ const ProfileScreen = () => {
           </View>
         </View>
       );
-    } else {
+    } else if (user) {
       return (
         <>
           <ProfileHeader
@@ -69,7 +71,7 @@ const ProfileScreen = () => {
   };
 
   return (
-    <ProfileContainer userName={user?.name || ""}>
+    <ProfileContainer userName={user?.name ?? ""}>
       {renderContent()}
     </ProfileContainer>
   );

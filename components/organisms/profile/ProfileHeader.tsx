@@ -15,7 +15,7 @@ interface ProfileHeaderProps {
     name: string;
     code: string;
   };
-  rate: number;
+  rate?: number;
   title: string;
   description: string;
 }
@@ -30,10 +30,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   cityName,
   country,
 }) => {
-  const formattedRate = rate.toLocaleString(undefined, {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 20,
-  });
+  const formattedRate = rate
+    ? rate.toLocaleString(undefined, {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 20,
+      })
+    : 0;
 
   return (
     <View className="w-full flex flex-col items-center justify-center gap-4">
@@ -75,7 +77,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <MaterialCommunityIcons
             name="star"
             size={14}
-            color={rate > 0 ? "#eab308" : "#94a3b8"}
+            color={rate && rate > 0 ? "#eab308" : "#94a3b8"}
           />
           <Text className="font-dm-sans-medium text-gray-700">
             {formattedRate}
