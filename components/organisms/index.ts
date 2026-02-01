@@ -14,7 +14,6 @@ export { default as InitContainer } from "./init/InitContainer";
 export { default as Footer } from "./layout/Footer";
 export { default as MainContainer } from "./layout/MainContainer";
 export { default as MapContainer } from "./map/MapContainer";
-export { default as MyBookingsContainer } from "./my-bookings/MyBookingsContainer";
 export { default as MyEventsScreenContainer } from "./my-events/MyEventsScreenContainer";
 export { default as OnboardingContainer } from "./onboarding/OnboardingContainer";
 export { default as ProfileContainer } from "./profile/ProfileContainer";

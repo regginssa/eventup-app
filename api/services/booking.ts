@@ -10,6 +10,7 @@ import {
   CREATE_HOTEL_ORDER,
   CREATE_TRANSFER_ORDER,
   FETCH_ALL_BOOKINGS,
+  FETCH_BOOKINGS_BY_USERID_AND_EVENTID,
   FETCH_FLIGHT_OFFERS,
   FETCH_FLIGHT_OFFERS_PRICING,
   FETCH_HOTEL_OFFER_PRICING,
@@ -119,7 +120,9 @@ export const fetchBookingByUserIdAndEventId = async (
   userId: string,
   eventId: string,
 ): Promise<ApiResponse<IBooking>> => {
-  return await AxiosInstance.get(BOOKING_BASE + userId + "/" + eventId);
+  return await AxiosInstance.get(
+    FETCH_BOOKINGS_BY_USERID_AND_EVENTID + userId + "/" + eventId,
+  );
 };
 
 // Create booking

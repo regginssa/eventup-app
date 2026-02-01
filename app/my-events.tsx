@@ -1,3 +1,4 @@
+import { fetchAllBookings } from "@/api/services/booking";
 import { fetchEventsByUser } from "@/api/services/event";
 import { Tabs } from "@/components/common";
 import { EventsPreviewGroup } from "@/components/molecules";
@@ -7,7 +8,6 @@ import { TDropdownItem } from "@/types";
 import { IEvent, TEventStatus } from "@/types/event";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { Alert } from "react-native";
 import { useSelector } from "react-redux";
 
 const tabs: TDropdownItem[] = [
@@ -44,6 +44,13 @@ const tabs: TDropdownItem[] = [
       />
     ),
   },
+  {
+    label: "Booked",
+    value: "booked",
+    icon: (
+      <MaterialCommunityIcons name="cart-check" size={16} color="#1f2937" />
+    ),
+  },
 ];
 
 const MyEventsScreen = () => {
@@ -53,37 +60,43 @@ const MyEventsScreen = () => {
 
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const fetchEvents = async () => {
-    if (!user?._id) return;
-    try {
+  useEffect(() => {
+    const loadData = async () => {
+      if (!user?._id) return;
       setLoading(true);
 
-      const response = await fetchEventsByUser(
-        user._id,
-        selectedTab.value as TEventStatus
-      );
-
-      if (response.ok) {
-        setEvents(response.data);
+      try {
+        if (selectedTab.value === "booked") {
+          const response = await fetchAllBookings(user._id);
+          if (response.data) {
+            const events = response.data.map((booking) => booking.event);
+            setEvents(events);
+          }
+        } else {
+          const response = await fetchEventsByUser(
+            user._id,
+            selectedTab.value as TEventStatus,
+          );
+          if (response.ok) {
+            setEvents(response.data);
+          }
+        }
+      } catch (error) {
+        console.error("fetch events error: ", error);
       }
-    } catch (error) {
-      console.error("fetch created events error: ", error);
-      Alert.alert("Error", "Failed to fetch created events");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    fetchEvents();
+      setLoading(false);
+    };
+
+    loadData();
   }, [selectedTab]);
 
   return (
     <MyEventsScreenContainer>
       <Tabs
         tabs={tabs}
-        tabClassName="flex-1"
         selectedTab={selectedTab}
+        scrolled
         onSelct={setSelectedTab}
       />
       <EventsPreviewGroup events={events} loading={loading} />

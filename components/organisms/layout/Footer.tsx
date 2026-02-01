@@ -1,5 +1,9 @@
 import { useTheme } from "@/components/providers/ThemeProvider";
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -47,10 +51,10 @@ const Footer = () => {
       ),
     },
     {
-      label: "Booked",
+      label: "Tickets",
       icon: (
-        <MaterialIcons
-          name="bookmarks"
+        <MaterialCommunityIcons
+          name="cart-plus"
           size={24}
           color={theme === "light" ? "#1f2937" : "#e5e7eb"}
         />

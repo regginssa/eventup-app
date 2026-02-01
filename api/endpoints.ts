@@ -41,6 +41,7 @@ export const CREATE_TRANSFER_ORDER = "/booking/transfer-order";
 export const BOOKING_BASE = "/booking/";
 export const FETCH_ALL_BOOKINGS = "/booking/all/";
 export const CREATE_BOOKING = "/booking/create";
+export const FETCH_BOOKINGS_BY_USERID_AND_EVENTID = "/booking/user-event/";
 
 // Stripe
 export const FETCH_STRIPE_CUSTOMER_ID = "/stripe/customer-id";
