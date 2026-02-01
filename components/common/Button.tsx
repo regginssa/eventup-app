@@ -152,11 +152,15 @@ const Button: React.FC<ButtonProps> = ({
         {loading ? (
           <ActivityIndicator size={16} color="#6b7280" />
         ) : (
-          <Text
-            className={`text-gray-500 font-poppins-medium text-sm text-center ${textClassName}`}
-          >
-            {label}
-          </Text>
+          <>
+            {iconPosition === "left" && icon && icon}
+            <Text
+              className={`text-gray-500 font-poppins-medium text-sm text-center ${textClassName}`}
+            >
+              {label}
+            </Text>
+            {iconPosition === "right" && icon && icon}
+          </>
         )}
       </TouchableOpacity>
     );

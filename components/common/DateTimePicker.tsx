@@ -1,4 +1,5 @@
 import { formatDateTime, formatTime } from "@/utils/format";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import {
@@ -75,6 +76,11 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         style={[{ borderWidth: bordered ? 1 : 0, borderColor: "#d1d5db" }]}
         onPress={openPicker}
       >
+        <MaterialCommunityIcons
+          name="calendar-outline"
+          color="#4b5563"
+          size={16}
+        />
         <TextInput
           placeholder={placeholder}
           className="flex-1 bg-none text-black font-dm-sans text-sm"

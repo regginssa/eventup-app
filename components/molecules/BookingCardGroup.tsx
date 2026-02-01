@@ -103,11 +103,7 @@ const BookingCardGroup: React.FC<BookingCardGroupProps> = ({
                 </View>
 
                 <View className="flex flex-row items-start gap-2">
-                  <MaterialCommunityIcons
-                    name="ticket-outline"
-                    size={16}
-                    color="white"
-                  />
+                  <MaterialCommunityIcons name="apps" size={16} color="white" />
 
                   <View>
                     <View className="flex flex-row items-center gap-2">

@@ -18,6 +18,8 @@ interface RegionPickerProps {
   invalid?: boolean;
   invalidText?: string;
   countryCode?: string;
+  className?: string;
+  bordered?: boolean;
   value: RegionType | null;
   onPick: (region: RegionType) => void;
 }
@@ -28,6 +30,8 @@ const RegionPicker: React.FC<RegionPickerProps> = ({
   invalid,
   invalidText,
   countryCode,
+  className,
+  bordered,
   value,
   onPick,
 }) => {
@@ -45,7 +49,7 @@ const RegionPicker: React.FC<RegionPickerProps> = ({
   useEffect(() => {
     if (countryCode) {
       const countryData: any = countryRegionData.find(
-        (country: any) => country.countryShortCode === countryCode
+        (country: any) => country.countryShortCode === countryCode,
       );
 
       if (countryData && countryData.regions) {
@@ -67,17 +71,20 @@ const RegionPicker: React.FC<RegionPickerProps> = ({
   const filteredRegions = useMemo(() => {
     if (!search) return regions;
     return regions.filter((r) =>
-      r.name.toLowerCase().includes(search.toLowerCase())
+      r.name.toLowerCase().includes(search.toLowerCase()),
     );
   }, [search, regions]);
 
   return (
     <View className="w-full gap-2">
-      <Text className="font-dm-sans text-sm text-gray-700">{label}</Text>
+      {label && (
+        <Text className="font-dm-sans text-sm text-gray-700">{label}</Text>
+      )}
 
       <TouchableOpacity
         activeOpacity={0.8}
-        className="py-1 px-4 gap-2 bg-white rounded-md flex flex-row items-center"
+        className={`py-1 px-4 gap-2 bg-white rounded-md flex flex-row items-center ${className}`}
+        style={[{ borderWidth: bordered ? 1 : 0, borderColor: "#d1d5db" }]}
         onPress={() => setIsOpen(true)}
       >
         <MaterialCommunityIcons

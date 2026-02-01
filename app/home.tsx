@@ -1,10 +1,11 @@
 import { fetchEventsFeed } from "@/api/services/event";
 import { Input, Tabs } from "@/components/common";
-import { EventsPreviewGroup } from "@/components/molecules";
+import { EventFilterModal, EventsPreviewGroup } from "@/components/molecules";
 import { HomeContainer } from "@/components/organisms";
 import { RootState } from "@/store";
 import { TDropdownItem, TPagination } from "@/types";
 import { IEvent } from "@/types/event";
+import { Country, RegionType } from "@/types/location.types";
 import {
   AntDesign,
   Feather,
@@ -50,6 +51,7 @@ const HomeScreen = () => {
     hasMore: true,
   });
   const [goToPage, setGoToPage] = useState<number>(1);
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
 
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -67,7 +69,7 @@ const HomeScreen = () => {
         user._id,
         nextPage,
         pagination.limit,
-        selectedTab.value as "ai" | "user"
+        selectedTab.value as "ai" | "user",
       );
 
       if (response.ok) {
@@ -92,7 +94,7 @@ const HomeScreen = () => {
         user._id,
         prevPage,
         pagination.limit,
-        selectedTab.value as "ai" | "user"
+        selectedTab.value as "ai" | "user",
       );
 
       if (response.ok) {
@@ -118,7 +120,7 @@ const HomeScreen = () => {
         user?._id ?? "",
         1,
         10,
-        selectedTab.value as "ai" | "user"
+        selectedTab.value as "ai" | "user",
       );
 
       if (response.ok) {
@@ -150,7 +152,7 @@ const HomeScreen = () => {
         user?._id ?? "",
         page,
         pagination.limit,
-        selectedTab.value as "ai" | "user"
+        selectedTab.value as "ai" | "user",
       );
 
       if (response.ok) {
@@ -163,6 +165,15 @@ const HomeScreen = () => {
       setLoading(false);
     }
   };
+
+  const handleFilterApply = async (
+    date: Date,
+    country: Country | null,
+    region: RegionType | null,
+    category: string | null,
+  ) => {};
+
+  const handleFilterReset = async () => {};
 
   return (
     <HomeContainer>
@@ -182,6 +193,7 @@ const HomeScreen = () => {
             activeOpacity={0.8}
             className="w-[60px] h-[46px] bg-white rounded-full flex items-center justify-center"
             style={styles.tune}
+            onPress={() => setIsFilterOpen(true)}
           >
             <MaterialIcons name="tune" size={20} color="#4b5563" />
           </TouchableOpacity>
@@ -331,6 +343,13 @@ const HomeScreen = () => {
           />
         </MaskedView>
       </TouchableOpacity>
+
+      <EventFilterModal
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={handleFilterApply}
+        onReset={handleFilterReset}
+      />
     </HomeContainer>
   );
 };

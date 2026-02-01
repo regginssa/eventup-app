@@ -1,5 +1,5 @@
 import { Country, CountryCode } from "@/types/location.types";
-import { AntDesign, Entypo, Feather } from "@expo/vector-icons";
+import { Entypo, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -18,8 +18,8 @@ import Input from "./Input";
 import Modal from "./Modal";
 
 interface CountryPickerProps {
-  label: string;
-  placeholder: string;
+  label?: string;
+  placeholder?: string;
   invalid?: boolean;
   invalidText?: string;
   className?: string;
@@ -83,7 +83,9 @@ const CountryPicker: React.FC<CountryPickerProps> = ({
 
   return (
     <View className="w-full gap-2">
-      <Text className="font-dm-sans text-sm text-gray-700">{label}</Text>
+      {label && (
+        <Text className="font-dm-sans text-sm text-gray-700">{label}</Text>
+      )}
 
       <TouchableOpacity
         activeOpacity={0.8}
@@ -91,7 +93,7 @@ const CountryPicker: React.FC<CountryPickerProps> = ({
         style={[{ borderWidth: bordered ? 1 : 0, borderColor: "#d1d5db" }]}
         onPress={() => setIsOpen(true)}
       >
-        <AntDesign name="global" size={16} color="#4b5563" />
+        <MaterialCommunityIcons name="earth" size={16} color="#4b5563" />
         <TextInput
           placeholder={placeholder}
           className="flex-1 bg-none text-black font-dm-sans text-sm"
