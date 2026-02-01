@@ -1,3 +1,4 @@
+import { fetchBookingByUserIdAndEventId } from "@/api/services/booking";
 import { fetchEvent } from "@/api/services/event";
 import { Spinner, Tabs } from "@/components/common";
 import {
@@ -14,6 +15,7 @@ import {
   setBookingHotel,
 } from "@/store/slices/booking.slice";
 import { TCoordinate, TDropdownItem } from "@/types";
+import { IBooking } from "@/types/booking";
 import { EventDates, IEvent } from "@/types/event";
 import { formatEventLabel } from "@/utils/format";
 import * as Location from "expo-location";
@@ -35,10 +37,12 @@ const EventDetailScreen = () => {
   const [selectedTab, setSelectedTab] = useState<TDropdownItem>(tabs[0]);
   const [currentLocationCoords, setCurrentLocationCoords] =
     useState<TCoordinate | null>(null);
+  ``;
   const [currentCity, setCurrentCity] = useState<string | null>(null);
   const [currentCountryCode, setCurrentCountryCode] = useState<string | null>(
-    null
+    null,
   );
+  const [booking, setBooking] = useState<IBooking | null>(null);
 
   const { id, type } = useLocalSearchParams();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -93,10 +97,26 @@ const EventDetailScreen = () => {
     }
   };
 
+  const fetchBookingData = async () => {
+    if (!user?._id || !id) return;
+
+    try {
+      const response = await fetchBookingByUserIdAndEventId(
+        user._id,
+        id as string,
+      );
+
+      if (response.data) {
+        setBooking(response.data);
+      }
+    } catch (error) {}
+  };
+
   const init = useCallback(async () => {
     setLoading(true);
     await fetchEventData();
     await fetchUserCurrentLocation();
+    await fetchBookingData();
     dispatch(setBookingFlight(null));
     dispatch(setBookingHotel(null));
     setLoading(false);
@@ -117,7 +137,7 @@ const EventDetailScreen = () => {
               image={event.images?.[0] as string}
               title={event.name as string}
               category={formatEventLabel(
-                event.classifications?.category as string
+                event.classifications?.category as string,
               )}
               city={event.location?.city?.name}
               country={event.location?.country?.name as string}
@@ -158,7 +178,7 @@ const EventDetailScreen = () => {
                   description={event.description}
                 />
               ) : (
-                <EventDetailItinerary />
+                <EventDetailItinerary booking={booking} />
               )}
             </View>
           </>
