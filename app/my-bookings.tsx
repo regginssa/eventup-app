@@ -4,7 +4,6 @@ import { BookingCardGroup } from "@/components/molecules";
 import { MyBookingsContainer } from "@/components/organisms";
 import { RootState } from "@/store";
 import { IBooking } from "@/types/booking";
-import { IEvent } from "@/types/event";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -12,7 +11,6 @@ import { useSelector } from "react-redux";
 
 const MyBookingsScreen = () => {
   const [bookings, setBookings] = useState<IBooking[]>([]);
-  const [events, setEvents] = useState<IEvent[]>([]);
   const [search, setSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 

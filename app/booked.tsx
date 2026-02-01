@@ -42,13 +42,13 @@ const EventTicket = ({
       },
       {
         label: `${event.dates?.start.time} / ${formatDateTime(
-          event.dates?.start.date as string
+          event.dates?.start.date as string,
         )} (${event.dates?.timezone ?? "--"})`,
         icon: "calendar-clock-outline",
       },
       {
         label: event.location?.city
-          ? `${event.location.city.name}, ${event.location.country.name}`
+          ? `${event.location.city.name}, ${event.location.country.code}`
           : event.location?.country.name,
         icon: "map-marker-outline",
       },
@@ -131,7 +131,7 @@ const FlightDetails = ({
 
     const items = [
       {
-        label: flight.validatingAirline,
+        label: `Airline: ${flight.validatingAirline}`,
         icon: (
           <MaterialIcons
             name="airlines"
@@ -141,7 +141,7 @@ const FlightDetails = ({
         ),
       },
       {
-        label: `${departure.airport} - ${
+        label: `Departure: ${departure.airport} - ${
           departure.datetime.split("T")[1]
         } / ${formatDateTime(departure.datetime.split("T")[0] as string)}`,
         icon: (
@@ -153,7 +153,7 @@ const FlightDetails = ({
         ),
       },
       {
-        label: `${arrival.airport} - ${
+        label: `Arrival: ${arrival.airport} - ${
           arrival.datetime.split("T")[1]
         } / ${formatDateTime(arrival.datetime as string)}`,
         icon: (
@@ -165,7 +165,7 @@ const FlightDetails = ({
         ),
       },
       {
-        label: packageType === "standard" ? "Economy/Standard" : "VIP/Gold",
+        label: `Class: ${packageType === "standard" ? "Economy/Standard" : "VIP/Gold"}`,
         icon: (
           <MaterialIcons
             name="flight-class"
@@ -496,8 +496,8 @@ const TripSummary = ({
       </View>
 
       <View className="w-full gap-2">
-        <View className="w-full flex flex-row items-start gap-6">
-          <View className="flex-1 flex-row items-center gap-4">
+        <View className="w-full flex flex-row items-start justify-between">
+          <View className="grid grid-cols-1 gap-2">
             {services.map((service, index) => (
               <View key={index} className="flex flex-row items-center gap-1">
                 <View className="w-2 h-2 rounded-full bg-gray-400"></View>
@@ -618,7 +618,8 @@ const BookedScreen = () => {
       const selectedServices = [];
       if (booking.flight) selectedServices.push("Flight");
       if (booking.hotel) selectedServices.push("Hotel");
-      if (booking.transfer) selectedServices.push("Transfer");
+      if (booking.transfer.ah) selectedServices.push("Transfer(A/H)");
+      if (booking.transfer.he) selectedServices.push("Transfer(H/E)");
       setServices(selectedServices);
       setHasLoadedSuccessfully(true);
     } catch (error: any) {
@@ -685,11 +686,6 @@ const BookedScreen = () => {
             <Button
               type="primary"
               label="Download Itinerary"
-              buttonClassName="h-12"
-            />
-            <Button
-              type="primary"
-              label="Add to Calendar"
               buttonClassName="h-12"
             />
             <Button
