@@ -183,4 +183,5 @@ export interface IBooking {
     vendorCode: string;
     cvv: string;
   };
+  package: "standard" | "gold";
 }

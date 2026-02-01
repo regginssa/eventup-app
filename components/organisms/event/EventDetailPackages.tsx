@@ -18,6 +18,10 @@ interface EventDetailPackagesProps {
   currentLocationCoords: TCoordinate | null;
   currentCity: string | null;
   currentCountryCode: string | null;
+  isBooked?: boolean;
+  services: string[];
+  bookedPackageType: "standard" | "gold";
+  totalPrice: number;
 }
 
 const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
@@ -25,15 +29,18 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   currentLocationCoords,
   currentCity,
   currentCountryCode,
+  isBooked,
+  services,
+  totalPrice,
 }) => {
   const [eventPackage, setEventPackage] = useState<"standard" | "gold">(
-    "standard"
+    "standard",
   );
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { flight, hotel, transfer } = useSelector(
-    (state: RootState) => state.booking
+    (state: RootState) => state.booking,
   );
 
   const standardItems = [
@@ -53,6 +60,43 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   const handleOnConfirm = () => {
     setIsOpen(true);
   };
+
+  if (isBooked) {
+    return (
+      <View className="w-full flex flex-col gap-2">
+        <View className="flex flex-row items-center gap-2">
+          <MaterialCommunityIcons
+            name="checkbox-marked-circle-outline"
+            size={18}
+            color="#16a34a"
+          />
+          <Text className="font-poppins-medium text-green-600 text-xl ">
+            Booking confirmed:
+          </Text>
+        </View>
+
+        <Text className="font-poppins-semibold">Standard Package</Text>
+
+        <View className="gap-2">
+          {services.map((s) => (
+            <Text className="font-dm-sans-bold text-sm text-gray-700">
+              • {s}
+            </Text>
+          ))}
+        </View>
+        <View className="w-full h-[1px] bg-gray-200 mt-2 mb-2"></View>
+        <View className="w-full flex flex-row items-center justify-between">
+          <Text className="font-dm-sans-bold text-xl text-gray-800">
+            Total:
+          </Text>
+          <Text className="font-poppins-bold text-green-500">
+            <Text className="text-sm">$</Text>
+            <Text className="text-xl">{totalPrice}</Text>
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <>

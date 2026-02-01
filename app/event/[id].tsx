@@ -43,6 +43,7 @@ const EventDetailScreen = () => {
     null,
   );
   const [booking, setBooking] = useState<IBooking | null>(null);
+  const [services, setServices] = useState<string[]>([]);
 
   const { id, type } = useLocalSearchParams();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -108,6 +109,15 @@ const EventDetailScreen = () => {
 
       if (response.data) {
         setBooking(response.data);
+
+        const newServices: string[] = [];
+
+        if (response.data.flight) newServices.push("Flight");
+        if (response.data.hotel) newServices.push("Hotel");
+        if (response.data.transfer?.ah) newServices.push("Transfer (A/H)");
+        if (response.data.transfer?.he) newServices.push("Transfer (H/E)");
+
+        setServices(newServices);
       }
     } catch (error) {}
   };
@@ -115,8 +125,8 @@ const EventDetailScreen = () => {
   const init = useCallback(async () => {
     setLoading(true);
     await fetchEventData();
-    await fetchUserCurrentLocation();
     await fetchBookingData();
+    await fetchUserCurrentLocation();
     dispatch(setBookingFlight(null));
     dispatch(setBookingHotel(null));
     setLoading(false);
@@ -158,6 +168,10 @@ const EventDetailScreen = () => {
                   currentLocationCoords={currentLocationCoords}
                   currentCity={currentCity}
                   currentCountryCode={currentCountryCode}
+                  isBooked={!!booking}
+                  services={services}
+                  bookedPackageType={booking?.package || "standard"}
+                  totalPrice={booking?.price.total || 0}
                 />
               ) : selectedTab.value === "overview" ? (
                 <EventDetailOverview

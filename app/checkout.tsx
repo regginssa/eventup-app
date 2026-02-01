@@ -677,7 +677,7 @@ const CheckoutScreen = () => {
 
   const { user } = useSelector((state: RootState) => state.auth);
   const { flight, hotel, transfer } = useSelector(
-    (state: RootState) => state.booking
+    (state: RootState) => state.booking,
   );
   const [bookLabel, setBookLabel] = useState<string>("Book Now");
 
@@ -749,7 +749,7 @@ const CheckoutScreen = () => {
 
   const handleStripePayment = async (
     amount: number,
-    currency: string
+    currency: string,
   ): Promise<boolean> => {
     const stripePayload = {
       customerId: user?.stripe?.customerId,
@@ -761,13 +761,13 @@ const CheckoutScreen = () => {
     };
 
     const clientSecretResponse = await createStripePaymentIntent(
-      stripePayload as any
+      stripePayload as any,
     );
 
     if (!clientSecretResponse.ok) {
       Alert.alert(
         "Payment Error",
-        clientSecretResponse.message || "Failed to create payment intent."
+        clientSecretResponse.message || "Failed to create payment intent.",
       );
       setBookLabel("Book Now");
       return false;
@@ -889,7 +889,7 @@ const CheckoutScreen = () => {
       console.error("handle book error: ", error);
       Alert.alert(
         "Error",
-        error?.response?.data?.message || error?.message || "Failed to book."
+        error?.response?.data?.message || error?.message || "Failed to book.",
       );
     }
   };
@@ -925,6 +925,7 @@ const CheckoutScreen = () => {
         },
         billingAddress: basicBookingData.billingAddress as any,
         billingPayment: basicBookingData.billingPayment as any,
+        package: packageType as any,
       };
 
       const response = await createBooking(bookingData);
