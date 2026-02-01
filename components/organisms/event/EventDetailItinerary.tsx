@@ -124,7 +124,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
           <View className="flex flex-row items-start gap-2">
             <MaterialIcons name="hotel" size={16} color="#4b5563" />
             <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Hotel: {booking.hotel.hotel.name}
+              {booking.hotel.hotel.name}
             </Text>
           </View>
 
@@ -182,7 +182,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
           <View className="flex flex-row items-start gap-2">
             <MaterialCommunityIcons name="account" size={16} color="#4b5563" />
             <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Driver: {booking.transfer.ah.provider.name}
+              Driver: {booking.transfer.ah?.provider.name}
             </Text>
           </View>
 
@@ -203,7 +203,8 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
           <View className="flex flex-row items-start gap-2">
             <MaterialIcons name="phone-in-talk" size={16} color="#4b5563" />
             <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Contact: {booking.transfer.ah.provider.contacts?.phoneNumber}
+              Contact:{" "}
+              {booking.transfer.ah.provider.contacts?.phoneNumber || "N/A"}
             </Text>
           </View>
         </View>
@@ -220,7 +221,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
         </View>
       )}
 
-      {booking?.transfer?.ah ? (
+      {booking?.transfer?.he ? (
         <View className="w-full rounded-lg gap-2">
           <Text className="text-gray-700 font-poppins-semibold mb-2">
             Hotel To Event Transfer Details
@@ -250,7 +251,8 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
           <View className="flex flex-row items-start gap-2">
             <MaterialIcons name="phone-in-talk" size={16} color="#4b5563" />
             <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Contact: {booking.transfer.he.provider.contacts?.phoneNumber}
+              Contact:{" "}
+              {booking.transfer.he.provider.contacts?.phoneNumber || "N/A"}
             </Text>
           </View>
         </View>

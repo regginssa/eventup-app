@@ -60,7 +60,7 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
         ) : (
           <View className="">
             <Text className="font-dm-sans-medium text-gray-800 text-sm">
-              Event hoster is not found
+              Event is fetched from AI
             </Text>
           </View>
         )}
