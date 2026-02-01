@@ -52,6 +52,10 @@ const HomeScreen = () => {
   });
   const [goToPage, setGoToPage] = useState<number>(1);
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [country, setCountry] = useState<Country | null>(null);
+  const [region, setRegion] = useState<RegionType | null>(null);
+  const [category, setCategory] = useState<TDropdownItem | null>(null);
 
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -66,14 +70,19 @@ const HomeScreen = () => {
       setLoading(true);
 
       const response = await fetchEventsFeed(
-        user._id,
+        user?._id ?? "",
+        selectedTab.value as any,
+        startDate as any,
+        country?.cca2 as any,
+        region?.code as any,
+        category?.value as any,
         nextPage,
         pagination.limit,
-        selectedTab.value as "ai" | "user",
       );
 
       if (response.ok) {
         setPagination(response.data.pagination);
+        setGoToPage(response.data.pagination.page);
         setEvents(response.data.events);
       }
     } finally {
@@ -91,14 +100,19 @@ const HomeScreen = () => {
       setLoading(true);
 
       const response = await fetchEventsFeed(
-        user._id,
+        user?._id ?? "",
+        selectedTab.value as any,
+        startDate as any,
+        country?.cca2 as any,
+        region?.code as any,
+        category?.value as any,
         prevPage,
         pagination.limit,
-        selectedTab.value as "ai" | "user",
       );
 
       if (response.ok) {
         setPagination(response.data.pagination);
+        setGoToPage(response.data.pagination.page);
         setEvents(response.data.events);
       }
     } finally {
@@ -116,18 +130,23 @@ const HomeScreen = () => {
         total: 0,
         hasMore: true,
       });
+
       const response = await fetchEventsFeed(
         user?._id ?? "",
+        selectedTab.value as any,
+        startDate as any,
+        country?.cca2 as any,
+        region?.code as any,
+        category?.value as any,
         1,
         10,
-        selectedTab.value as "ai" | "user",
       );
 
       if (response.ok) {
         const { events, pagination } = response.data;
 
         setPagination(pagination);
-        setGoToPage(pagination.page);
+        setGoToPage(response.data.pagination.page);
         setEvents(events);
       }
     } catch (error: any) {
@@ -150,9 +169,13 @@ const HomeScreen = () => {
 
       const response = await fetchEventsFeed(
         user?._id ?? "",
+        selectedTab.value as any,
+        startDate as any,
+        country?.cca2 as any,
+        region?.code as any,
+        category?.value as any,
         page,
         pagination.limit,
-        selectedTab.value as "ai" | "user",
       );
 
       if (response.ok) {
@@ -166,14 +189,19 @@ const HomeScreen = () => {
     }
   };
 
-  const handleFilterApply = async (
-    date: Date,
-    country: Country | null,
-    region: RegionType | null,
-    category: string | null,
-  ) => {};
+  const handleFilterApply = async () => {
+    setIsFilterOpen(false);
+    await fetchFeed();
+  };
 
-  const handleFilterReset = async () => {};
+  const handleFilterReset = async () => {
+    setStartDate(null);
+    setCountry(null);
+    setRegion(null);
+    setCategory(null);
+    setIsFilterOpen(false);
+    await fetchFeed();
+  };
 
   return (
     <HomeContainer>
@@ -191,11 +219,24 @@ const HomeScreen = () => {
           </View>
           <TouchableOpacity
             activeOpacity={0.8}
-            className="w-[60px] h-[46px] bg-white rounded-full flex items-center justify-center"
+            className="w-[60px] h-[46px] bg-white rounded-full flex items-center justify-center relative"
             style={styles.tune}
             onPress={() => setIsFilterOpen(true)}
           >
             <MaterialIcons name="tune" size={20} color="#4b5563" />
+
+            {[startDate, country, region, category].filter((f) => f !== null)
+              .length > 0 && (
+              <View className="absolute top-0 right-2 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
+                <Text className="font-poppins-semibold text-white text-xs">
+                  {
+                    [startDate, country, region, category].filter(
+                      (f) => f !== null,
+                    ).length
+                  }
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -347,6 +388,14 @@ const HomeScreen = () => {
       <EventFilterModal
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
+        startDate={startDate}
+        country={country}
+        region={region}
+        category={category}
+        onStartDatePick={setStartDate}
+        onCountryPick={setCountry}
+        onRegionPick={setRegion}
+        onCategoryChange={setCategory}
         onApply={handleFilterApply}
         onReset={handleFilterReset}
       />

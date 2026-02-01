@@ -11,13 +11,25 @@ import {
 
 export const fetchEventsFeed = async (
   userId: string,
-  page: number,
-  limit: number,
-  type: "ai" | "user"
+  type: "ai" | "user",
+  startDate?: Date,
+  countryCode?: string,
+  regionCode?: string,
+  category?: string,
+  page?: number,
+  limit?: number,
 ): Promise<ApiResponse<EventsFeedResponse>> => {
+  const startDateString = startDate?.toISOString().split("T")[0];
   return await AxiosInstance.get(
     FETCH_EVENTS_FEED +
-      `?userId=${userId}&page=${page}&limit=${limit}&type=${type}`
+      `?userId=${userId}` +
+      `&page=${page}` +
+      `&limit=${limit}` +
+      `&type=${type}` +
+      `&startDate=${startDateString}` +
+      `&countryCode=${countryCode}` +
+      `&regionCode=${regionCode}` +
+      `&category=${category}`,
   );
 };
 
@@ -32,16 +44,16 @@ export const fetchEvent = async (id: string): Promise<ApiResponse<IEvent>> => {
 // Fetch events by user
 export const fetchEventsByUser = async (
   userId: string,
-  status: TEventStatus
+  status: TEventStatus,
 ): Promise<ApiResponse<IEvent[]>> => {
   return await AxiosInstance.get(
-    FETCH_EVENTS_BY_USER + `/${userId}?status=${status}`
+    FETCH_EVENTS_BY_USER + `/${userId}?status=${status}`,
   );
 };
 
 // Create event
 export const createEvent = async (
-  event: IEvent
+  event: IEvent,
 ): Promise<ApiResponse<IEvent>> => {
   return await AxiosInstance.post(CREATE_EVENT, event);
 };

@@ -1,10 +1,6 @@
 import { IEvent } from "@/types/event";
 import { formatEventDateTime, formatEventLabel } from "@/utils/format";
-import {
-  Ionicons,
-  MaterialCommunityIcons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -46,7 +42,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
         onReachedBottomChange?.(v);
       }
     },
-    [onReachedBottomChange]
+    [onReachedBottomChange],
   );
 
   const handleLayout = useCallback((e: any) => {
@@ -70,7 +66,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
       const isAtBottom = layoutH + y >= contentH - BOTTOM_PAD;
       setIsAtBottom(isAtBottom);
     },
-    [setIsAtBottom]
+    [setIsAtBottom],
   );
 
   return (
@@ -148,7 +144,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
 
                     <Text className="font-dm-sans text-sm text-white">
                       {formatEventLabel(
-                        event.classifications?.category as string
+                        event.classifications?.category as string,
                       )}
                     </Text>
                   </View>
@@ -158,7 +154,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                     activeOpacity={0.8}
                     className="w-8 h-8 bg-white rounded-full flex items-center justify-center"
                   >
-                    <Ionicons
+                    <MaterialCommunityIcons
                       name="heart-outline"
                       s
                       size={16}
@@ -196,7 +192,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                         <Text className="font-dm-sans-medium text-sm text-white">
                           {formatEventDateTime(
                             event.dates?.start?.date,
-                            event.dates?.start?.time
+                            event.dates?.start?.time,
                           )}
                         </Text>
                       </View>

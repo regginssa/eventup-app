@@ -16,7 +16,7 @@ interface CustomDatePickerProps {
   placeholder?: string;
   className?: string;
   bordered?: boolean;
-  value: Date;
+  value: Date | null;
   onPick: (date: Date) => void;
 }
 
@@ -86,9 +86,13 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
           className="flex-1 bg-none text-black font-dm-sans text-sm"
           editable={false}
           value={
-            mode === "datetime"
-              ? `${formatTime(value)} / ${formatDateTime(value.toISOString())}`
-              : formatDateTime(value.toISOString())
+            value
+              ? `${
+                  mode === "datetime"
+                    ? `${formatTime(value)} / ${formatDateTime(value.toISOString())}`
+                    : formatDateTime(value.toISOString())
+                }`
+              : ""
           }
         />
       </TouchableOpacity>
@@ -96,7 +100,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       {/* DATE PICKER */}
       {showDate && (
         <DateTimePicker
-          value={value}
+          value={value ?? new Date()}
           mode="date"
           display={Platform.OS === "ios" ? "spinner" : "default"}
           onChange={handleDateChange}
@@ -106,7 +110,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       {/* TIME PICKER */}
       {showTime && (
         <DateTimePicker
-          value={value}
+          value={value ?? new Date()}
           mode="time"
           display={Platform.OS === "ios" ? "spinner" : "default"}
           onChange={handleTimeChange}
