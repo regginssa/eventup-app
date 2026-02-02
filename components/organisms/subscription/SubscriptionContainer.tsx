@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MainContainer } from "../layout";
 
@@ -30,9 +30,7 @@ const SubscriptionContainer: React.FC<SubscriptionContainerProps> = ({
           <View className="w-10"></View>
         </View>
 
-        <ScrollView contentContainerStyle={{ flexGrow: 1, gap: 20 }}>
-          {children}
-        </ScrollView>
+        <View className="flex-1 gap-5">{children}</View>
       </SafeAreaView>
     </MainContainer>
   );
