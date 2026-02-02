@@ -67,9 +67,6 @@ export default function RootLayout() {
             <Stack.Screen name="map" />
             <Stack.Screen name="didit" />
             <Stack.Screen name="booking" />
-            <Stack.Screen name="checkout" />
-            <Stack.Screen name="booked" />
-            <Stack.Screen name="my-events" />
             <Stack.Screen name="profile" />
             <Stack.Screen name="tickets" />
           </Stack>

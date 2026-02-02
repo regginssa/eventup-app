@@ -245,7 +245,7 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
                 items={methods}
                 selectedItem={
                   methods.find(
-                    (method) => method.value === paymentDetails.method
+                    (method) => method.value === paymentDetails.method,
                   ) || null
                 }
                 onSelect={(item) =>
@@ -445,11 +445,11 @@ const BookingScreen = () => {
   const router = useRouter();
 
   const { flight, hotel, transfer, travelers } = useSelector(
-    (state: RootState) => state.booking
+    (state: RootState) => state.booking,
   );
 
   const [isConfirmed, setIsConfirmed] = useState<boolean[]>(
-    Array.from({ length: travelers }, () => false)
+    Array.from({ length: travelers }, () => false),
   );
 
   const dispatch = useDispatch();
@@ -476,7 +476,7 @@ const BookingScreen = () => {
 
   const handleTravelerDetailsConfirm = (
     travelerDetails: TTraveler,
-    id: number
+    id: number,
   ) => {
     setFlightTravelers((prev) => {
       const newFlightTravelers = [...prev];
@@ -708,11 +708,11 @@ const BookingScreen = () => {
       setBookingTransferRequest([
         ahTransferBookingRequest,
         heTransferBookingRequest,
-      ])
+      ]),
     );
 
     router.push({
-      pathname: "/checkout",
+      pathname: "/booking/checkout",
       params: { eventId, packageType },
     });
   };

@@ -34,9 +34,9 @@ const DiditScreen = () => {
         dispatch(setAuthUser(response.data));
 
         if (kycStatus === "Approved") {
-          router.replace("/onboarding/step4");
+          router.replace("/auth/onboarding/step4");
         } else {
-          router.replace("/onboarding/step3");
+          router.replace("/auth/onboarding/step3");
         }
       }
     } catch (error: any) {
@@ -90,15 +90,15 @@ const DiditScreen = () => {
           {kycStatus === "Declined" || kycStatus === "Expired"
             ? "failed"
             : kycStatus === "Approved"
-            ? "successful"
-            : "is in progress"}
+              ? "successful"
+              : "is in progress"}
         </Text>
         <Text className="font-dm-sans-medium text-gray-600 text-center">
           {kycStatus === "Declined" || kycStatus === "Expired"
             ? "We were unable to verify your identity at this time. Please retry later."
             : kycStatus === "Approved"
-            ? "Your identity has been successfully verified. You can now access all features and continue with confidence."
-            : "Your identity verification is currently being reviewed. This process may take a few minutes. We'll notify you once it's complete."}
+              ? "Your identity has been successfully verified. You can now access all features and continue with confidence."
+              : "Your identity verification is currently being reviewed. This process may take a few minutes. We'll notify you once it's complete."}
         </Text>
         <Button
           type="primary"

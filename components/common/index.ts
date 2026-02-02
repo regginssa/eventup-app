@@ -1,7 +1,9 @@
 export { default as Avatar } from "./Avatar";
 export { default as Button } from "./Button";
+export { default as CardPayment } from "./CardPayment";
 export { default as Checkbox } from "./Checkbox";
 export { default as CountryPicker } from "./CountryPicker";
+export { default as CryptoPayment } from "./CryptoPayment";
 export { default as CryptoPaymentQR } from "./CryptoPaymentQR";
 export { default as DateTimePicker } from "./DateTimePicker";
 export { default as Drawer } from "./Drawer";
