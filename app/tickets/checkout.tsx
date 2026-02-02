@@ -125,7 +125,7 @@ const Detail = ({
       <View className="w-full flex flex-row items-center justify-between">
         <Text className="font-dm-sans-bold text-xl text-gray-600">Total:</Text>
         <View className="flex flex-row items-start">
-          <Text className="font-poppins-semibold text-green-500 text-sm">
+          <Text className="font-poppins-semibold text-green-500 text-lg">
             {ticket?.currency ? getCurrencySymbol(ticket.currency as any) : "-"}
           </Text>
           <Text className="font-poppins-bold text-green-500 text-3xl">

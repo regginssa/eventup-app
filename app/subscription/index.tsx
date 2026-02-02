@@ -1,7 +1,9 @@
 import { Button, SubscriptionContainer } from "@/components";
+import { ISubscription } from "@/types/subscription";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 
@@ -11,18 +13,20 @@ const introTexts = [
   "Priority custom support",
 ];
 
-const subscriptions = [
+export const subscriptions: ISubscription[] = [
   {
     month: 0,
     price: 0,
     features: ["Limited features", "Standard support"],
     isActive: true,
+    isRecommended: false,
   },
   {
     month: 1,
     price: 12,
     features: ["All premium features", "Standard support"],
     isActive: false,
+    isRecommended: false,
   },
   {
     month: 3,
@@ -30,13 +34,14 @@ const subscriptions = [
     features: ["All premium features", "Priority support"],
     isActive: false,
     save: 17,
+    isRecommended: false,
   },
   {
     month: 6,
     price: 54,
     features: ["All premium features", "Exclusive Content", "Priority support"],
     isActive: false,
-    isRecommend: true,
+    isRecommended: true,
     save: 25,
   },
   {
@@ -56,7 +61,15 @@ const subscriptions = [
 const SubscriptionScreen = () => {
   const [selectedMonth, setSelectedMonth] = useState<number>(6);
 
-  const renderItem = ({ item, selected }: { item: any; selected: boolean }) => {
+  const router = useRouter();
+
+  const renderItem = ({
+    item,
+    selected,
+  }: {
+    item: ISubscription;
+    selected: boolean;
+  }) => {
     const Wrapper = ({ children }: any) =>
       selected ? (
         <LinearGradient
@@ -149,7 +162,7 @@ const SubscriptionScreen = () => {
                   </View>
                 )}
 
-                {item.isRecommend && (
+                {item.isRecommended && (
                   <LinearGradient
                     colors={["#C427E0", "#844AFF", "#12A9FF"]}
                     start={{ x: 0, y: 0 }}
@@ -284,6 +297,12 @@ const SubscriptionScreen = () => {
         type="primary"
         label={`Subscribe for $${subscriptions.find((s) => s.month === selectedMonth)?.price || 0}`}
         buttonClassName="h-12"
+        onPress={() =>
+          router.push({
+            pathname: "/subscription/checkout",
+            params: { month: selectedMonth },
+          })
+        }
       />
     </SubscriptionContainer>
   );
