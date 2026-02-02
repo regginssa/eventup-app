@@ -19,4 +19,5 @@ export { default as OnboardingContainer } from "./onboarding/OnboardingContainer
 export { default as ProfileContainer } from "./profile/ProfileContainer";
 export { default as ProfileHeader } from "./profile/ProfileHeader";
 export { default as ProfileReviews } from "./profile/ProfileReviews";
+export { default as SubscriptionContainer } from "./subscription/SubscriptionContainer";
 export { default as TicketsContainer } from "./tickets/TicketsContainer";

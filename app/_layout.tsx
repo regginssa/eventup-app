@@ -69,6 +69,7 @@ export default function RootLayout() {
             <Stack.Screen name="booking" />
             <Stack.Screen name="profile" />
             <Stack.Screen name="tickets" />
+            <Stack.Screen name="subscription" />
           </Stack>
           <InitContainer />
         </ThemeProvider>

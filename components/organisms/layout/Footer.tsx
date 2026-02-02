@@ -70,6 +70,7 @@ const Footer = () => {
           color={theme === "light" ? "#1f2937" : "#e5e7eb"}
         />
       ),
+      href: "/subscription",
     },
   ];
 
