@@ -1,5 +1,6 @@
 import { createStripePaymentIntent } from "@/api/services/stripe";
 import { fetchTicketById } from "@/api/services/ticket";
+import { fetchUser } from "@/api/services/user";
 import { Button, CheckoutContainer, PaymentMethodGroup } from "@/components";
 import { RootState } from "@/store";
 import { TPaymentMethod } from "@/types";
@@ -246,6 +247,33 @@ const TicketsCheckout = () => {
         Alert.alert("Error", "Payment Failed");
         return setPurchaseLoading(false);
       }
+
+      const waitForUpdate = async (timeout = 20000) => {
+        if (!user) return;
+
+        const intervalTime = 2000;
+        let elapsed = 0;
+
+        return new Promise<boolean>((resolve) => {
+          const interval = setInterval(async () => {
+            elapsed += intervalTime;
+
+            const response = await fetchUser(user?._id as string);
+
+            if (response.data.tickets.length > user?.tickets.length) {
+              clearInterval(interval);
+              resolve(true);
+            }
+
+            if (elapsed >= timeout) {
+              clearInterval(interval);
+              resolve(false);
+            }
+          }, intervalTime);
+        });
+      };
+
+      const updated = await waitForUpdate();
     } catch (error: any) {
       Alert.alert("Error", error?.response?.message || "Internal Server Error");
     } finally {
