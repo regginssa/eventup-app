@@ -1,5 +1,6 @@
 import { TAccountType, TCoordinate, TEventLocation, TKycStatus } from ".";
 import { IStripe } from "./stripe";
+import { ITicket } from "./ticket";
 
 export interface IKyc {
   sessionId: string;
@@ -51,4 +52,5 @@ export interface IUser {
     location: TEventLocation;
   };
   stripe?: IStripe;
+  tickets: ITicket[];
 }
