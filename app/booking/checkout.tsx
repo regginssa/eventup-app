@@ -292,8 +292,10 @@ const CheckoutScreen = () => {
       paymentMethodId: stripePaymentMethodId,
       amount,
       currency,
-      bookingOption: "flight",
-      packageType: packageType as TPackageType,
+      metadata: {
+        bookingOption: "flight",
+        packageType: packageType as TPackageType,
+      },
     };
 
     const clientSecretResponse = await createStripePaymentIntent(

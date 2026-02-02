@@ -11,3 +11,11 @@ export interface IStripe {
   customerId: string;
   paymentMethods: IPaymentMethod[];
 }
+
+export interface IStripePayload {
+  customerId: string;
+  paymentMethodId: string;
+  amount: number;
+  currency: string;
+  metadata: any;
+}

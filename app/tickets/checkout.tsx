@@ -1,14 +1,17 @@
+import { createStripePaymentIntent } from "@/api/services/stripe";
 import { fetchTicketById } from "@/api/services/ticket";
 import { Button, CheckoutContainer, PaymentMethodGroup } from "@/components";
 import { RootState } from "@/store";
 import { TPaymentMethod } from "@/types";
+import { IStripePayload } from "@/types/stripe";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { confirmPayment } from "@stripe/stripe-react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Text, View } from "react-native";
 import { useSelector } from "react-redux";
 
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
@@ -136,10 +139,12 @@ const Detail = ({
 
 const TicketsCheckout = () => {
   const [ticket, setTicket] = useState<ITicket | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+
   const [method, setMethod] = useState<TPaymentMethod>("card");
   const [stripePaymentMethodId, setStripePaymentMethodId] =
     useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [purchaseLoading, setPurchaseLoading] = useState<boolean>(false);
 
   const { id: ticketId } = useLocalSearchParams();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -169,6 +174,85 @@ const TicketsCheckout = () => {
     setStripePaymentMethodId(user.stripe.paymentMethods[0].id || "");
   }, [user]);
 
+  const handleStripePayment = async (
+    amount: number,
+    currency: string,
+  ): Promise<boolean> => {
+    if (stripePaymentMethodId === "") {
+      return false;
+    }
+
+    const stripePayload: IStripePayload = {
+      customerId: user?.stripe?.customerId as string,
+      paymentMethodId: stripePaymentMethodId,
+      amount,
+      currency,
+      metadata: {
+        ticket: {
+          id: ticket?._id,
+          name: ticket?.name,
+          image: ticket?.image,
+        },
+      },
+    };
+
+    const clientSecretResponse = await createStripePaymentIntent(
+      stripePayload as any,
+    );
+
+    if (!clientSecretResponse.ok) {
+      //   Alert.alert(
+      //     "Payment Error",
+      //     clientSecretResponse.message || "Failed to create payment.",
+      //   );
+      return false;
+    }
+
+    const { id: paymentIntentId, clientSecret } = clientSecretResponse.data;
+
+    // Pay with stripe
+    const { error: confirmPaymentError } = await confirmPayment(clientSecret, {
+      paymentMethodType: "Card",
+      paymentMethodData: {
+        paymentMethodId: stripePaymentMethodId,
+      },
+    });
+
+    if (confirmPaymentError) {
+      //   Alert.alert("Payment Confirmation Error", confirmPaymentError.message);
+      return false;
+    }
+
+    return true;
+  };
+
+  const handlePurchase = async () => {
+    if (!ticket) return;
+
+    try {
+      setPurchaseLoading(true);
+      let paymentResult = false;
+
+      switch (method) {
+        case "card":
+          paymentResult = await handleStripePayment(
+            ticket.price,
+            ticket.currency,
+          );
+          break;
+      }
+
+      if (!paymentResult) {
+        Alert.alert("Error", "Payment Failed");
+        return setPurchaseLoading(false);
+      }
+    } catch (error: any) {
+      Alert.alert("Error", error?.response?.message || "Internal Server Error");
+    } finally {
+      setPurchaseLoading(false);
+    }
+  };
+
   return (
     <CheckoutContainer>
       <Header ticket={ticket} loading={loading} />
@@ -182,7 +266,13 @@ const TicketsCheckout = () => {
         onSelectStripePaymentMethod={setStripePaymentMethodId}
       />
 
-      <Button type="primary" label="Purchase" buttonClassName="h-12" />
+      <Button
+        type="primary"
+        label="Purchase"
+        buttonClassName="h-12"
+        loading={purchaseLoading}
+        onPress={handlePurchase}
+      />
     </CheckoutContainer>
   );
 };
