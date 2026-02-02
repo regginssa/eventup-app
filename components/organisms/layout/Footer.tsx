@@ -59,7 +59,7 @@ const Footer = () => {
           color={theme === "light" ? "#1f2937" : "#e5e7eb"}
         />
       ),
-      href: "/tickets",
+      href: "/tickets/index",
     },
     {
       label: "Shop",
