@@ -24,15 +24,20 @@ import { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
-const tabs: TDropdownItem[] = [
+const userTabs: TDropdownItem[] = [
   { label: "Packages", value: "packages" },
   { label: "Overview", value: "overview" },
   { label: "Itinerary", value: "itinerary" },
 ];
 
+const ownerTabs: TDropdownItem[] = [
+  { label: "Attendees", value: "attendees" },
+  { label: "Overview", value: "overview" },
+];
+
 const EventDetailScreen = () => {
+  const [tabs, setTabs] = useState<TDropdownItem[]>(userTabs);
   const [event, setEvent] = useState<IEvent | undefined>(undefined);
-  const [eventType, setEventType] = useState<"ai" | "user">("ai");
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<TDropdownItem>(tabs[0]);
   const [currentLocationCoords, setCurrentLocationCoords] =
@@ -71,7 +76,10 @@ const EventDetailScreen = () => {
       const response = await fetchEvent(id);
 
       setEvent(response.data);
-      setEventType(type as "ai" | "user");
+
+      if (response.data.hoster?._id === user?._id) {
+        setTabs(ownerTabs);
+      }
     } catch (error: any) {
       throw new Error(error.message);
     }
