@@ -20,13 +20,15 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
 }) => {
   return (
     <View className="w-full bg-white rounded-xl p-4 gap-6">
-      <Text className="font-poppins-semibold text-gray-700">
-        Payment methods
-      </Text>
+      <View>
+        <Text className="font-poppins-semibold text-gray-700">
+          Payment methods
+        </Text>
 
-      <Text className="font-dm-sans text-sm text-gray-400">
-        Select your payment method
-      </Text>
+        <Text className="font-dm-sans text-sm text-gray-400">
+          Select your payment method
+        </Text>
+      </View>
 
       <View className="w-full flex flex-row items-center justify-between">
         <TouchableOpacity

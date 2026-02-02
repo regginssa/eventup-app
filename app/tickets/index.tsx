@@ -4,6 +4,7 @@ import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 
@@ -23,6 +24,8 @@ const TicketsScreen = () => {
     currencies[0].value,
   );
   const [loading, setLoading] = useState<boolean>(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchTicketsData = async () => {
@@ -96,7 +99,13 @@ const TicketsScreen = () => {
               <Button
                 type="primary"
                 label="Purchase"
-                buttonClassName="w-[108px] h-8"
+                buttonClassName="w-[108px] h-10"
+                onPress={() =>
+                  router.push({
+                    pathname: "/tickets/checkout",
+                    params: { id: item._id },
+                  })
+                }
               />
             </View>
           </View>
