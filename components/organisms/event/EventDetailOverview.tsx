@@ -7,6 +7,7 @@ import { FlagButton } from "react-native-country-picker-modal";
 const VerifiedBadge = require("@/assets/images/icons/verified_badge.png");
 
 interface EventDetailOverviewProps {
+  eventType: "ai" | "user";
   hoster?: {
     _id: string;
     avatar: string;
@@ -20,6 +21,7 @@ interface EventDetailOverviewProps {
 }
 
 const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
+  eventType,
   hoster,
   description,
   notes,
@@ -60,7 +62,9 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
         ) : (
           <View className="">
             <Text className="font-dm-sans-medium text-gray-800 text-sm">
-              Event is fetched from AI
+              {eventType === "ai"
+                ? "Event is fetched from AI"
+                : "Event hoster not found"}
             </Text>
           </View>
         )}

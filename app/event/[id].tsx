@@ -152,6 +152,7 @@ const EventDetailScreen = () => {
               city={event.location?.city?.name}
               country={event.location?.country?.name as string}
               dates={event.dates as EventDates}
+              fee={event.type === "user" ? event.fee : undefined}
             />
 
             <View className="flex-1 bg-white rounded-2xl p-4 gap-6">
@@ -161,7 +162,6 @@ const EventDetailScreen = () => {
                 onSelct={setSelectedTab}
                 tabClassName="flex-1"
               />
-
               {selectedTab.value === "packages" ? (
                 <EventDetailPackages
                   event={event}
@@ -172,6 +172,18 @@ const EventDetailScreen = () => {
                   services={services}
                   bookedPackageType={booking?.package || "standard"}
                   totalPrice={booking?.price.total || 0}
+                  fee={event.type === "user" ? event.fee : undefined}
+                  isTicketOwned={
+                    event.type === "user" &&
+                    event.fee &&
+                    user?.tickets &&
+                    user?.tickets.length > 0 &&
+                    user?.tickets.some(
+                      (t) =>
+                        t.currency === event.fee?.currency &&
+                        t.price === event.fee.amount,
+                    )
+                  }
                 />
               ) : selectedTab.value === "overview" ? (
                 <EventDetailOverview
@@ -190,6 +202,7 @@ const EventDetailScreen = () => {
                       : undefined
                   }
                   description={event.description}
+                  eventType={event.type as any}
                 />
               ) : (
                 <EventDetailItinerary booking={booking} />

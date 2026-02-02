@@ -54,7 +54,7 @@ type Classifications = {
   venue?: string[];
 };
 
-type Fee = {
+export type TEventFee = {
   type?: "free" | "paid";
   amount?: number;
   currency?: string;
@@ -78,7 +78,7 @@ export interface IEvent {
   classifications?: Classifications;
   seatmap?: string;
   images?: string[];
-  fee?: Fee;
+  fee?: TEventFee;
   hoster?: IUser;
   status?: TEventStatus;
 }

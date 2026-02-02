@@ -1,5 +1,5 @@
-import { EventDates } from "@/types/event";
-import { formatDateTime } from "@/utils/format";
+import { EventDates, TEventFee } from "@/types/event";
+import { formatDateTime, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -12,6 +12,7 @@ interface EventDetailHeaderProps {
   city?: string;
   country: string;
   dates: EventDates;
+  fee?: TEventFee;
 }
 
 const EventDetailHeader: React.FC<EventDetailHeaderProps> = ({
@@ -21,6 +22,7 @@ const EventDetailHeader: React.FC<EventDetailHeaderProps> = ({
   city,
   country,
   dates,
+  fee,
 }) => {
   return (
     <View className="w-full gap-5 overflow-hidden bg-white rounded-2xl p-4">
@@ -110,6 +112,21 @@ const EventDetailHeader: React.FC<EventDetailHeaderProps> = ({
             {dates.timezone ?? "--"}
           </Text>
         </View>
+
+        {fee && (
+          <View className="flex flex-row items-center gap-2">
+            <MaterialCommunityIcons
+              name="cart-outline"
+              size={16}
+              color="#374151"
+            />
+            <Text className="font-dm-sans-medium text-sm text-gray-700">
+              {fee.type === "paid"
+                ? `${getCurrencySymbol(fee.currency as any)} ${fee.amount}`
+                : "Free"}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );

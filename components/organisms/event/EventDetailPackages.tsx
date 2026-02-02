@@ -5,7 +5,8 @@ import {
 } from "@/components/molecules";
 import { RootState } from "@/store";
 import { TCoordinate } from "@/types";
-import { IEvent } from "@/types/event";
+import { IEvent, TEventFee } from "@/types/event";
+import { getCurrencySymbol } from "@/utils/format";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
@@ -22,6 +23,8 @@ interface EventDetailPackagesProps {
   services: string[];
   bookedPackageType: "standard" | "gold";
   totalPrice: number;
+  fee?: TEventFee;
+  isTicketOwned?: boolean;
 }
 
 const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
@@ -32,6 +35,8 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   isBooked,
   services,
   totalPrice,
+  fee,
+  isTicketOwned,
 }) => {
   const [eventPackage, setEventPackage] = useState<"standard" | "gold">(
     "standard",
@@ -44,14 +49,12 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   );
 
   const standardItems = [
-    "Event ticket",
     "Flights (economy)",
     "Mid-range hotel",
     "Basic airport-hotel-event transport",
   ];
 
   const goldItems = [
-    "VIP ticket",
     "Premium flight",
     "Luxury hotel",
     "Private chauffeur/car on call",
@@ -259,6 +262,50 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
           </View> */}
           </View>
         </View>
+
+        {fee && fee.type === "paid" && (
+          <View className="w-full flex flex-row items-start gap-2 rounded-xl border border-blue-500 bg-blue-200 p-4">
+            <MaterialCommunityIcons
+              name="information-outline"
+              size={24}
+              color="#3b82f6"
+            />
+            <View className="flex-1">
+              {!isTicketOwned ? (
+                <Text className="font-dm-sans-medium text-sm text-blue-500">
+                  You must have{" "}
+                  <Text className="font-poppins-bold">
+                    {getCurrencySymbol(fee.currency as any)}
+                    {fee.amount} ticket
+                  </Text>{" "}
+                  to enter the event.
+                </Text>
+              ) : (
+                <Text className="font-dm-sans-medium text-sm text-blue-500">
+                  Your{" "}
+                  <Text className="font-poppins-bold">
+                    {getCurrencySymbol(fee.currency as any)}
+                    {fee.amount} ticket
+                  </Text>{" "}
+                  will be spent to enter the event
+                </Text>
+              )}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                className="flex flex-row items-center gap-1"
+              >
+                <Text className="font-dm-sans-bold text-sm text-blue-600 underline">
+                  View
+                </Text>
+                <MaterialCommunityIcons
+                  name="arrow-right"
+                  size={12}
+                  color="#2563eb"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {eventPackage === "standard" ? (
           <View className="bg-[#F7F3FF] rounded-xl p-4 gap-3">
