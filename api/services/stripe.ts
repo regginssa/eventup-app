@@ -1,4 +1,3 @@
-import { TBookingOption, TPackageType } from "@/types";
 import { ApiResponse } from "@/types/api";
 import { IUser } from "@/types/user";
 import AxiosInstance from "../client";
@@ -21,38 +20,21 @@ export const fetchStripeClientSecret = async (): Promise<
 };
 
 export const saveStripePaymentMethod = async (
-  setupIntentClientSecret: string
+  setupIntentClientSecret: string,
 ): Promise<ApiResponse<IUser>> => {
   return await AxiosInstance.post(SAVE_STRIPE_PAYMENT_METHOD, {
     setupIntentClientSecret,
   });
 };
 
-export const createStripePaymentIntent = async ({
-  paymentMethodId,
-  bookingOption,
-  packageType,
-  amount,
-  currency,
-}: {
-  paymentMethodId: string;
-  bookingId: string;
-  bookingOption: TBookingOption;
-  packageType: TPackageType;
-  amount: number;
-  currency: string;
-}): Promise<ApiResponse<{ id: string; clientSecret: string }>> => {
-  return await AxiosInstance.post(CREATE_STRIPE_PAYMENT_INTENT, {
-    paymentMethodId,
-    bookingOption,
-    packageType,
-    amount,
-    currency,
-  });
+export const createStripePaymentIntent = async (
+  bodyData: any,
+): Promise<ApiResponse<{ id: string; clientSecret: string }>> => {
+  return await AxiosInstance.post(CREATE_STRIPE_PAYMENT_INTENT, bodyData);
 };
 
 export const refundStripePayment = async (
-  paymentIntentId: string
+  paymentIntentId: string,
 ): Promise<ApiResponse<null>> => {
   return await AxiosInstance.post(REFUND_STRIPE_PAYMENT, { paymentIntentId });
 };

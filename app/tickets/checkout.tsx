@@ -189,11 +189,8 @@ const TicketsCheckout = () => {
       amount,
       currency,
       metadata: {
-        ticket: {
-          id: ticket?._id,
-          name: ticket?.name,
-          image: ticket?.image,
-        },
+        ticketId: ticket?._id,
+        ticketPrice: ticket?.price,
       },
     };
 
