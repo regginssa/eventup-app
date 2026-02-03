@@ -60,7 +60,7 @@ const Button: React.FC<ButtonProps> = ({
         onPress={onPress}
       >
         {disabled ? (
-          <View className="flex-1 flex-row bg-gray-400 items-center justify-center gap-2 rounded-md">
+          <View className="flex-1 flex-row bg-gray-400 items-center justify-center gap-2 rounded-md whitespace-nowrap">
             <Text
               className={`text-gray-300 font-poppins-medium text-center ${textClassName}`}
             >

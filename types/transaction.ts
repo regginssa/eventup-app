@@ -1,6 +1,7 @@
 export interface ITransaction {
   _id?: string;
   type: "credit" | "crypto" | "token";
+  userId: string;
   txId: string;
   amount: number;
   amountReceived: number;

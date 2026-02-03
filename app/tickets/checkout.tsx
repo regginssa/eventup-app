@@ -1,5 +1,6 @@
 import { createStripePaymentIntent } from "@/api/services/stripe";
 import { fetchTicketById } from "@/api/services/ticket";
+import { createTransaction } from "@/api/services/transaction";
 import { fetchUser } from "@/api/services/user";
 import { Button, CheckoutContainer, PaymentMethodGroup } from "@/components";
 import { RootState } from "@/store";
@@ -141,12 +142,12 @@ const Detail = ({
 
 const TicketsCheckout = () => {
   const [ticket, setTicket] = useState<ITicket | null>(null);
-
   const [method, setMethod] = useState<TPaymentMethod>("card");
   const [stripePaymentMethodId, setStripePaymentMethodId] =
     useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [purchaseLoading, setPurchaseLoading] = useState<boolean>(false);
+  const [btnLabel, setBtnLabel] = useState<string>("Purchase");
 
   const { id: ticketId } = useLocalSearchParams();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -225,6 +226,7 @@ const TicketsCheckout = () => {
 
     const bodyData: ITransaction = {
       type: "credit",
+      userId: user?._id as string,
       txId: paymentIntentId,
       amount,
       currency,
@@ -234,8 +236,7 @@ const TicketsCheckout = () => {
       service: "ticket",
     };
 
-    try {
-    } catch (error) {}
+    await createTransaction(bodyData);
 
     return true;
   };
@@ -245,6 +246,7 @@ const TicketsCheckout = () => {
 
     try {
       setPurchaseLoading(true);
+      setBtnLabel("Processing Payment...");
       let paymentResult = false;
 
       switch (method) {
@@ -286,10 +288,12 @@ const TicketsCheckout = () => {
         });
       };
 
+      setBtnLabel("Checking Payment...");
       const updated = await waitForUpdate();
     } catch (error: any) {
       Alert.alert("Error", error?.response?.message || "Internal Server Error");
     } finally {
+      setBtnLabel("Purchase");
       setPurchaseLoading(false);
     }
   };
@@ -309,7 +313,7 @@ const TicketsCheckout = () => {
 
       <Button
         type="primary"
-        label="Purchase"
+        label={btnLabel}
         buttonClassName="h-12"
         loading={purchaseLoading}
         onPress={handlePurchase}
