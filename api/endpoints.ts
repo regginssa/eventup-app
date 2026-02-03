@@ -53,3 +53,6 @@ export const REFUND_STRIPE_PAYMENT = "/stripe/payment-refund";
 // Ticket
 export const FETCH_ALL_TICKETS = "/ticket/all";
 export const TICKET_BASE = "/ticket/";
+
+// Transaction
+export const TRANSACTION_BASE = "/tx";

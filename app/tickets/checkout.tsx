@@ -6,6 +6,7 @@ import { RootState } from "@/store";
 import { TPaymentMethod } from "@/types";
 import { IStripePayload } from "@/types/stripe";
 import { ITicket } from "@/types/ticket";
+import { ITransaction } from "@/types/transaction";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { confirmPayment } from "@stripe/stripe-react-native";
@@ -221,6 +222,20 @@ const TicketsCheckout = () => {
       //   Alert.alert("Payment Confirmation Error", confirmPaymentError.message);
       return false;
     }
+
+    const bodyData: ITransaction = {
+      type: "credit",
+      txId: paymentIntentId,
+      amount,
+      currency,
+      amountReceived: 0,
+      metadata: JSON.stringify(stripePayload.metadata),
+      status: "created",
+      service: "ticket",
+    };
+
+    try {
+    } catch (error) {}
 
     return true;
   };
