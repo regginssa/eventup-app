@@ -81,18 +81,21 @@ const Button: React.FC<ButtonProps> = ({
               style={styles.primaryInner}
             >
               <View className="flex-1 flex-row items-center justify-center gap-2">
-                {loading ? (
+                {iconPosition === "left" && icon && !loading && icon}
+                {iconPosition === "left" && icon && loading && (
                   <ActivityIndicator size={16} color="#ffffff" />
-                ) : (
-                  <>
-                    {iconPosition === "left" && icon && icon}
-                    <Text
-                      className={`text-white font-poppins-medium text-center ${textClassName}`}
-                    >
-                      {label}
-                    </Text>
-                    {iconPosition === "right" && icon && icon}
-                  </>
+                )}
+                <Text
+                  className={`text-white font-poppins-medium text-center ${textClassName}`}
+                >
+                  {label}
+                </Text>
+                {!icon && !iconPosition && loading && (
+                  <ActivityIndicator size={16} color="#ffffff" />
+                )}
+                {iconPosition === "right" && icon && !loading && icon}
+                {iconPosition === "right" && icon && loading && (
+                  <ActivityIndicator size={16} color="#ffffff" />
                 )}
               </View>
             </LinearGradient>
