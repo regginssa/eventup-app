@@ -1,5 +1,6 @@
 import { fetchAllTickets } from "@/api/services/ticket";
 import { Button, Spinner, TicketsContainer } from "@/components";
+import { RootState } from "@/store";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -7,6 +8,7 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { useSelector } from "react-redux";
 
 const bannerImage = require("@/assets/images/ticket_banner.png");
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
@@ -24,6 +26,8 @@ const TicketsScreen = () => {
     currencies[0].value,
   );
   const [loading, setLoading] = useState<boolean>(false);
+
+  const { user } = useSelector((state: RootState) => state.auth);
 
   const router = useRouter();
 

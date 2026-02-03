@@ -19,7 +19,7 @@ const useInit = () => {
     try {
       const response = await fetchUser(decoded.id);
 
-      if (response.ok) {
+      if (response.data) {
         dispatch(setAuth({ isAuthenticated: true, user: response.data }));
         redirect(response.data);
 

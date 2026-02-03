@@ -12,7 +12,7 @@ import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { confirmPayment } from "@stripe/stripe-react-native";
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Text, View } from "react-native";
 import { useSelector } from "react-redux";
@@ -152,6 +152,8 @@ const TicketsCheckout = () => {
   const { id: ticketId } = useLocalSearchParams();
   const { user } = useSelector((state: RootState) => state.auth);
 
+  const router = useRouter();
+
   useEffect(() => {
     const fetchTicket = async () => {
       if (!ticketId) return;
@@ -290,6 +292,11 @@ const TicketsCheckout = () => {
 
       setBtnLabel("Checking Payment...");
       const updated = await waitForUpdate();
+
+      if (updated) {
+        Alert.alert("Success", "Ticket is purchased");
+        router.replace("/tickets");
+      }
     } catch (error: any) {
       Alert.alert("Error", error?.response?.message || "Internal Server Error");
     } finally {
