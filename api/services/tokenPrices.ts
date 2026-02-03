@@ -11,8 +11,8 @@ export const fetchTokenPrices = async (): Promise<{
     const { data } = await axios.get(url);
 
     return {
-      chrle: Number(data[CHRLE_TOKEN_ADDRESS] ?? 0),
-      babyu: Number(data[BABYU_TOKEN_ADDRESS] ?? 0),
+      chrle: Number(data.data[CHRLE_TOKEN_ADDRESS] ?? 0),
+      babyu: Number(data.data[BABYU_TOKEN_ADDRESS] ?? 0),
     };
   } catch (err) {
     console.error("Failed to fetch token prices:", err);

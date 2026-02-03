@@ -220,7 +220,7 @@ const MineSellTicketsCheckout = () => {
   useEffect(() => {
     const getTokenPrices = async () => {
       const prices = await fetchTokenPrices();
-      console.log("[token prices]: ", prices);
+      setTokenPrices(prices);
     };
 
     getTokenPrices();
