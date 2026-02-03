@@ -171,7 +171,7 @@ const TicketsScreen = () => {
         </View>
       </View>
 
-      <View className="flex-1 px-5 mt-5">
+      <View className="flex-1 p-5">
         {loading ? (
           <Spinner size="md" />
         ) : (

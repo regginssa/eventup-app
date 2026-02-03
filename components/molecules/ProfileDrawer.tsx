@@ -131,8 +131,8 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
           color={theme === "light" ? "#374151" : "#d1d5db"}
         />
       ),
-      badge: 12,
-      href: "/",
+      badge: user.tickets.length.toString(),
+      href: "/mine/tickets",
     },
     {
       label: "Contact us",

@@ -15,7 +15,13 @@ import { confirmPayment } from "@stripe/stripe-react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
@@ -38,7 +44,7 @@ const Header = ({
 
   if (!ticket) {
     return (
-      <View className="w-full flex flex-col items-center justify-center gap-2">
+      <View className="w-full flex flex-col items-center justify-center gap-2 bg-white rounded-xl py-6">
         <MaterialCommunityIcons name="cart-off" size={24} color="#374151" />
         <Text className="font-poppins-semibold text-gray-700">
           Ticket not found
@@ -90,10 +96,18 @@ const Header = ({
 
 const Detail = ({
   ticket,
+  totalCount,
+  totalAmount,
   loading,
+  count,
+  setCount,
 }: {
   ticket: ITicket | null;
+  totalCount: number;
+  totalAmount: number;
+  count: number;
   loading: boolean;
+  setCount: (val: number) => void;
 }) => {
   if (loading) {
     <View className="flex-1 w-full flex flex-col items-center justify-center gap-2">
@@ -105,23 +119,58 @@ const Detail = ({
   }
 
   return (
-    <View className="flex-1 p-4 flex flex-col items-start justify-center gap-6 bg-white rounded-xl">
-      <Text className="font-poppins-bold text-3xl text-gray-800">
-        {ticket?.name || "N/A"}
-      </Text>
+    <View className="flex-1 p-4 flex flex-col items-start justify-center gap-4 bg-white rounded-xl">
+      <View className="w-full gap-2">
+        <View className="w-full flex flex-row items-center justify-between">
+          <Text className="font-dm-sans-medium text-gray-600">
+            Total Tickets:
+          </Text>
+          <Text className="font-poppins-semibold text-gray-800">
+            {totalCount}
+          </Text>
+        </View>
 
-      <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-dm-sans-medium text-gray-600">Currency:</Text>
-        <Text className="font-poppins-semibold text-gray-800">
-          {ticket?.currency.toUpperCase() || "-"}
-        </Text>
+        <View className="w-full flex flex-row items-center justify-between">
+          <Text className="font-dm-sans-medium text-gray-600">Currency:</Text>
+          <Text className="font-poppins-semibold text-gray-800">
+            {ticket?.currency.toUpperCase() || "-"}
+          </Text>
+        </View>
+
+        <View className="w-full flex flex-row items-center justify-between">
+          <Text className="font-dm-sans-medium text-gray-600">Price:</Text>
+          <Text className="font-poppins-semibold text-gray-800">
+            {ticket?.price || 0}
+          </Text>
+        </View>
       </View>
 
-      <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-dm-sans-medium text-gray-600">Price:</Text>
-        <Text className="font-poppins-semibold text-gray-800">
-          {ticket?.price || 0}
+      <View className="w-full h-[1px] bg-gray-200"></View>
+
+      <View className="w-full flex flex-row items-center justify-between gap-4">
+        <Text className="font-dm-sans-medium text-gray-600 text-sm flex-1">
+          How many tickets will you sell?
         </Text>
+
+        <View className="flex flex-row items-center gap-4">
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center"
+            onPress={() => count > 1 && setCount(--count)}
+          >
+            <MaterialCommunityIcons name="minus" size={18} color="#1f2937" />
+          </TouchableOpacity>
+          <Text className="font-poppins-bold text-xl text-gray-800">
+            {count}
+          </Text>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center"
+            onPress={() => count < totalCount && setCount(++count)}
+          >
+            <MaterialCommunityIcons name="plus" size={18} color="#1f2937" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View className="w-full h-[1px] bg-gray-200"></View>
@@ -133,7 +182,7 @@ const Detail = ({
             {ticket?.currency ? getCurrencySymbol(ticket.currency as any) : "-"}
           </Text>
           <Text className="font-poppins-bold text-green-500 text-3xl">
-            {ticket?.price || 0}
+            {totalAmount}
           </Text>
         </View>
       </View>
@@ -141,14 +190,16 @@ const Detail = ({
   );
 };
 
-const TicketsCheckout = () => {
+const MineSellTicketsCheckout = () => {
   const [ticket, setTicket] = useState<ITicket | null>(null);
+  const [count, setCount] = useState<number>(1);
+  const [totalAmount, setTotalAmount] = useState<number>(0);
   const [method, setMethod] = useState<TPaymentMethod>("card");
   const [stripePaymentMethodId, setStripePaymentMethodId] =
     useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [purchaseLoading, setPurchaseLoading] = useState<boolean>(false);
-  const [btnLabel, setBtnLabel] = useState<string>("Purchase");
+  const [btnLabel, setBtnLabel] = useState<string>("Sell");
 
   const { id: ticketId } = useLocalSearchParams();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -174,11 +225,14 @@ const TicketsCheckout = () => {
   }, [ticketId]);
 
   useEffect(() => {
-    if (!user?.stripe) return;
-
-    if (user.stripe.paymentMethods.length === 0) return;
+    if (!user?.stripe || user.stripe.paymentMethods.length === 0) return;
     setStripePaymentMethodId(user.stripe.paymentMethods[0].id || "");
   }, [user]);
+
+  useEffect(() => {
+    if (!ticket?.price) return;
+    setTotalAmount(count * ticket.price);
+  }, [count, ticket?.price]);
 
   const handleStripePayment = async (
     amount: number,
@@ -317,7 +371,14 @@ const TicketsCheckout = () => {
     <CheckoutContainer>
       <Header ticket={ticket} loading={loading} />
 
-      <Detail ticket={ticket} loading={loading} />
+      <Detail
+        ticket={ticket}
+        totalCount={user?.tickets.filter((t) => t._id === ticketId).length || 0}
+        totalAmount={totalAmount}
+        count={count}
+        loading={loading}
+        setCount={setCount}
+      />
 
       <PaymentMethodGroup
         method={method}
@@ -338,4 +399,4 @@ const TicketsCheckout = () => {
   );
 };
 
-export default TicketsCheckout;
+export default MineSellTicketsCheckout;
