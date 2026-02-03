@@ -1,27 +1,14 @@
-import { createStripePaymentIntent } from "@/api/services/stripe";
 import { fetchTicketById } from "@/api/services/ticket";
-import { createTransaction } from "@/api/services/transaction";
-import { fetchUser } from "@/api/services/user";
-import { Button, CheckoutContainer, PaymentMethodGroup } from "@/components";
+import { fetchTokenPrices } from "@/api/services/tokenPrices";
+import { Button, CheckoutContainer, CryptoPayout } from "@/components";
 import { RootState } from "@/store";
-import { setAuthUser } from "@/store/slices/auth.slice";
-import { TPaymentMethod } from "@/types";
-import { IStripePayload } from "@/types/stripe";
 import { ITicket } from "@/types/ticket";
-import { ITransaction } from "@/types/transaction";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { confirmPayment } from "@stripe/stripe-react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
@@ -97,14 +84,14 @@ const Header = ({
 const Detail = ({
   ticket,
   totalCount,
-  totalAmount,
+  totalPrice,
   loading,
   count,
   setCount,
 }: {
   ticket: ITicket | null;
   totalCount: number;
-  totalAmount: number;
+  totalPrice: number;
   count: number;
   loading: boolean;
   setCount: (val: number) => void;
@@ -182,7 +169,7 @@ const Detail = ({
             {ticket?.currency ? getCurrencySymbol(ticket.currency as any) : "-"}
           </Text>
           <Text className="font-poppins-bold text-green-500 text-3xl">
-            {totalAmount}
+            {totalPrice}
           </Text>
         </View>
       </View>
@@ -193,12 +180,13 @@ const Detail = ({
 const MineSellTicketsCheckout = () => {
   const [ticket, setTicket] = useState<ITicket | null>(null);
   const [count, setCount] = useState<number>(1);
-  const [totalAmount, setTotalAmount] = useState<number>(0);
-  const [method, setMethod] = useState<TPaymentMethod>("card");
-  const [stripePaymentMethodId, setStripePaymentMethodId] =
-    useState<string>("");
+  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [totalTokenAmount, setTotalTokenAmount] = useState<number>(0);
+  const [tokenPrices, setTokenPrices] = useState({ chrle: 0, babyu: 0 });
+  const [method, setMethod] = useState<"chrle" | "babyu">("chrle");
+  const [walletAddress, setWalletAddress] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [purchaseLoading, setPurchaseLoading] = useState<boolean>(false);
+  const [sellLoading, setSellLoading] = useState<boolean>(false);
   const [btnLabel, setBtnLabel] = useState<string>("Sell");
 
   const { id: ticketId } = useLocalSearchParams();
@@ -225,147 +213,18 @@ const MineSellTicketsCheckout = () => {
   }, [ticketId]);
 
   useEffect(() => {
-    if (!user?.stripe || user.stripe.paymentMethods.length === 0) return;
-    setStripePaymentMethodId(user.stripe.paymentMethods[0].id || "");
-  }, [user]);
-
-  useEffect(() => {
     if (!ticket?.price) return;
-    setTotalAmount(count * ticket.price);
+    setTotalPrice(count * ticket.price);
   }, [count, ticket?.price]);
 
-  const handleStripePayment = async (
-    amount: number,
-    currency: string,
-  ): Promise<boolean> => {
-    if (stripePaymentMethodId === "") {
-      return false;
-    }
-
-    const stripePayload: IStripePayload = {
-      customerId: user?.stripe?.customerId as string,
-      paymentMethodId: stripePaymentMethodId,
-      amount,
-      currency,
-      metadata: {
-        type: "ticket",
-        ticketId: ticket?._id,
-        ticketPrice: ticket?.price,
-      },
+  useEffect(() => {
+    const getTokenPrices = async () => {
+      const prices = await fetchTokenPrices();
+      console.log("[token prices]: ", prices);
     };
 
-    const clientSecretResponse = await createStripePaymentIntent(
-      stripePayload as any,
-    );
-
-    if (!clientSecretResponse.ok) {
-      //   Alert.alert(
-      //     "Payment Error",
-      //     clientSecretResponse.message || "Failed to create payment.",
-      //   );
-      return false;
-    }
-
-    const { id: paymentIntentId, clientSecret } = clientSecretResponse.data;
-
-    // Pay with stripe
-    const { error: confirmPaymentError } = await confirmPayment(clientSecret, {
-      paymentMethodType: "Card",
-      paymentMethodData: {
-        paymentMethodId: stripePaymentMethodId,
-      },
-    });
-
-    if (confirmPaymentError) {
-      //   Alert.alert("Payment Confirmation Error", confirmPaymentError.message);
-      return false;
-    }
-
-    const bodyData: ITransaction = {
-      type: "credit",
-      userId: user?._id as string,
-      txId: paymentIntentId,
-      amount,
-      currency,
-      amountReceived: 0,
-      metadata: JSON.stringify(stripePayload.metadata),
-      status: "created",
-      service: "ticket",
-    };
-
-    await createTransaction(bodyData);
-
-    return true;
-  };
-
-  const handlePurchase = async () => {
-    if (!ticket) return;
-
-    try {
-      setPurchaseLoading(true);
-      setBtnLabel("Processing Payment...");
-      let paymentResult = false;
-
-      switch (method) {
-        case "card":
-          paymentResult = await handleStripePayment(
-            ticket.price,
-            ticket.currency,
-          );
-          break;
-      }
-
-      if (!paymentResult) {
-        Alert.alert("Error", "Payment Failed");
-        return setPurchaseLoading(false);
-      }
-
-      const waitForUpdate = async (timeout = 20000) => {
-        if (!user) return;
-
-        const intervalTime = 2000;
-        let elapsed = 0;
-
-        return new Promise<boolean>((resolve) => {
-          const interval = setInterval(async () => {
-            elapsed += intervalTime;
-
-            const response = await fetchUser(user?._id as string);
-
-            if (response.data.tickets.length > user?.tickets.length) {
-              clearInterval(interval);
-              resolve(true);
-            }
-
-            if (elapsed >= timeout) {
-              clearInterval(interval);
-              resolve(false);
-            }
-          }, intervalTime);
-        });
-      };
-
-      setBtnLabel("Checking Payment...");
-      const updated = await waitForUpdate();
-
-      if (updated) {
-        Alert.alert("Success", "Ticket is purchased");
-
-        const response = await fetchUser(user?._id as string);
-
-        if (response.data) {
-          dispatch(setAuthUser(response.data));
-        }
-
-        router.back();
-      }
-    } catch (error: any) {
-      Alert.alert("Error", error?.response?.message || "Internal Server Error");
-    } finally {
-      setBtnLabel("Purchase");
-      setPurchaseLoading(false);
-    }
-  };
+    getTokenPrices();
+  }, []);
 
   return (
     <CheckoutContainer>
@@ -374,17 +233,17 @@ const MineSellTicketsCheckout = () => {
       <Detail
         ticket={ticket}
         totalCount={user?.tickets.filter((t) => t._id === ticketId).length || 0}
-        totalAmount={totalAmount}
+        totalPrice={totalPrice}
         count={count}
         loading={loading}
         setCount={setCount}
       />
 
-      <PaymentMethodGroup
+      <CryptoPayout
         method={method}
-        stripePaymentMethodId={stripePaymentMethodId}
+        walletAddress={walletAddress}
         onSelectMethod={setMethod}
-        onSelectStripePaymentMethod={setStripePaymentMethodId}
+        onWalletAddressChange={setWalletAddress}
       />
 
       <Button
@@ -392,8 +251,7 @@ const MineSellTicketsCheckout = () => {
         label={btnLabel}
         buttonClassName="h-12"
         disabled={loading}
-        loading={purchaseLoading}
-        onPress={handlePurchase}
+        loading={sellLoading}
       />
     </CheckoutContainer>
   );
