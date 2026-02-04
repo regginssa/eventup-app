@@ -2,6 +2,7 @@ export interface ITransaction {
   _id?: string;
   type: "buy" | "sell";
   paymentMethod: "credit" | "crypto" | "token";
+  payoutToken?: string;
   userId: string;
   txId: string;
   amount: number;

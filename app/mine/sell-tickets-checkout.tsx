@@ -1,5 +1,8 @@
 import { fetchTicketById } from "@/api/services/ticket";
-import { fetchTokenPricesAndFee } from "@/api/services/web3";
+import {
+  createSellTicketPayout,
+  fetchTokenPricesAndFee,
+} from "@/api/services/web3";
 import { Button, CheckoutContainer, CryptoPayout } from "@/components";
 import { RootState } from "@/store";
 import { ITicket } from "@/types/ticket";
@@ -8,7 +11,13 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
@@ -239,6 +248,35 @@ const MineSellTicketsCheckout = () => {
     setTokenAmounts({ chrle: chrleAmount, babyu: babyuAmount });
   }, [tokenPrices, totalPrice]);
 
+  const handleSell = async () => {
+    try {
+      setSellLoading(true);
+
+      const metadata = JSON.stringify({
+        type: "ticket",
+        ticket,
+        payoutFee: fee,
+      });
+
+      const bodyData = {
+        walletAddress,
+        ticketAmount: totalPrice,
+        ticketCurrency: ticket?.currency,
+        metadata,
+      };
+
+      const response = await createSellTicketPayout(bodyData);
+
+      if (response.data) {
+        Alert.alert("Success", "Payout successfully");
+      }
+    } catch (error: any) {
+      console.log("[handle sell error]: ", error);
+    } finally {
+      setSellLoading(false);
+    }
+  };
+
   return (
     <CheckoutContainer>
       <Header ticket={ticket} loading={loading} />
@@ -268,6 +306,7 @@ const MineSellTicketsCheckout = () => {
         buttonClassName="h-12"
         disabled={loading}
         loading={sellLoading}
+        onPress={handleSell}
       />
     </CheckoutContainer>
   );
