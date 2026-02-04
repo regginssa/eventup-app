@@ -1,6 +1,5 @@
 import { createStripePaymentIntent } from "@/api/services/stripe";
 import { fetchTicketById } from "@/api/services/ticket";
-import { createTransaction } from "@/api/services/transaction";
 import { fetchUser } from "@/api/services/user";
 import { Button, CheckoutContainer, PaymentMethodGroup } from "@/components";
 import { RootState } from "@/store";
@@ -8,7 +7,6 @@ import { setAuthUser } from "@/store/slices/auth.slice";
 import { TPaymentMethod } from "@/types";
 import { IStripePayload } from "@/types/stripe";
 import { ITicket } from "@/types/ticket";
-import { ITransaction } from "@/types/transaction";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { confirmPayment } from "@stripe/stripe-react-native";
@@ -99,7 +97,7 @@ const Detail = ({
     <View className="flex-1 w-full flex flex-col items-center justify-center gap-2">
       <ActivityIndicator size={24} />
       <Text className="text-[#C427E0] font-poppins-semibold">
-        Fetching Ticket...
+        Fetching Ticket Detail...
       </Text>
     </View>;
   }
@@ -227,21 +225,6 @@ const TicketsCheckout = () => {
       return false;
     }
 
-    const bodyData: ITransaction = {
-      type: "buy",
-      paymentMethod: "credit",
-      userId: user?._id as string,
-      txId: paymentIntentId,
-      amount,
-      currency,
-      amountReceived: 0,
-      metadata: JSON.stringify(stripePayload.metadata),
-      status: "created",
-      service: "ticket",
-    };
-
-    await createTransaction(bodyData);
-
     return true;
   };
 
@@ -280,6 +263,7 @@ const TicketsCheckout = () => {
             const response = await fetchUser(user?._id as string);
 
             if (response.data.tickets.length > user?.tickets.length) {
+              dispatch(setAuthUser(response.data));
               clearInterval(interval);
               resolve(true);
             }
@@ -297,13 +281,6 @@ const TicketsCheckout = () => {
 
       if (updated) {
         Alert.alert("Success", "Ticket is purchased");
-
-        const response = await fetchUser(user?._id as string);
-
-        if (response.data) {
-          dispatch(setAuthUser(response.data));
-        }
-
         router.back();
       }
     } catch (error: any) {

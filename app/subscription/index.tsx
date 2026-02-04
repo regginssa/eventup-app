@@ -1,11 +1,14 @@
-import { Button, SubscriptionContainer } from "@/components";
+import { fetchAllSubscriptions } from "@/api/services/subscription";
+import { Button, Spinner, SubscriptionContainer } from "@/components";
+import { RootState } from "@/store";
 import { ISubscription } from "@/types/subscription";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { useSelector } from "react-redux";
 
 const introTexts = [
   "Unlimited access to all features",
@@ -13,55 +16,48 @@ const introTexts = [
   "Priority custom support",
 ];
 
-export const subscriptions: ISubscription[] = [
-  {
-    month: 0,
-    price: 0,
-    features: ["Limited features", "Standard support"],
-    isActive: true,
-    isRecommended: false,
-  },
-  {
-    month: 1,
-    price: 12,
-    features: ["All premium features", "Standard support"],
-    isActive: false,
-    isRecommended: false,
-  },
-  {
-    month: 3,
-    price: 30,
-    features: ["All premium features", "Priority support"],
-    isActive: false,
-    save: 17,
-    isRecommended: false,
-  },
-  {
-    month: 6,
-    price: 54,
-    features: ["All premium features", "Exclusive Content", "Priority support"],
-    isActive: false,
-    isRecommended: true,
-    save: 25,
-  },
-  {
-    month: 12,
-    price: 95,
-    features: [
-      "Limited features",
-      "Exclusive Content",
-      "Priority support",
-      "Yearly bonus",
-    ],
-    isActive: false,
-    save: 34,
-  },
-];
+export type TSubscriptionItem = {
+  month: number;
+  price: number;
+  features: string[];
+  currency: string;
+  isActive: boolean;
+  isRecommended: boolean;
+  save?: number;
+};
+
+export const calculateSave = (
+  price: number,
+  month: number,
+  monthlyPrice = 12,
+) => {
+  if (month <= 1) return 0;
+
+  const originalPrice = month * monthlyPrice;
+  const savePercent = ((originalPrice - price) / originalPrice) * 100;
+
+  return Math.round(savePercent);
+};
 
 const SubscriptionScreen = () => {
-  const [selectedMonth, setSelectedMonth] = useState<number>(6);
+  const [subscriptions, setSubscriptions] = useState<ISubscription[]>([]);
+  const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
+    string | null
+  >(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
+  const { user } = useSelector((state: RootState) => state.auth);
   const router = useRouter();
+
+  useEffect(() => {
+    const getAllSubscriptions = async () => {
+      const response = await fetchAllSubscriptions();
+      if (!response.data) return;
+      setSubscriptions(response.data);
+    };
+
+    getAllSubscriptions();
+  }, []);
 
   const renderItem = ({
     item,
@@ -133,28 +129,41 @@ const SubscriptionScreen = () => {
         </View>
       );
 
+    const savePercent = calculateSave(
+      item.price,
+      item.month,
+      subscriptions[0].price,
+    );
+
+    const formattedItem: TSubscriptionItem = {
+      ...item,
+      isActive: user?.subscription.id === item._id,
+      isRecommended: item.month === 6,
+      save: savePercent === 0 ? undefined : savePercent,
+    };
+
     return (
       <Wrapper selected={selected}>
         <TouchableOpacity
           activeOpacity={0.8}
           className="p-5 bg-white rounded-xl flex flex-col gap-4 absolute inset-[1px]"
-          onPress={() => setSelectedMonth(item.month)}
+          onPress={() => setSelectedSubscriptionId(item._id)}
         >
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex flex-col items-start gap-1">
               <View className="flex flex-row items-center gap-2">
                 <View className="flex flex-row items-end gap-1">
                   <Text className="font-poppins-semibold text-2xl text-gray-800">
-                    {item.month === 0 ? "Free" : item.month}
+                    {formattedItem.month === 0 ? "Free" : formattedItem.month}
                   </Text>
-                  {item.month > 0 && (
+                  {formattedItem.month > 0 && (
                     <Text className="font-poppins-semibold text-lg text-gray-600">
                       Month
                     </Text>
                   )}
                 </View>
 
-                {item.isActive && (
+                {formattedItem.isActive && (
                   <View className="flex items-center justify-center px-2 py-1 rounded-md bg-green-600">
                     <Text className="font-dm-sans-medium text-white text-xs">
                       Active
@@ -162,7 +171,7 @@ const SubscriptionScreen = () => {
                   </View>
                 )}
 
-                {item.isRecommended && (
+                {formattedItem.isRecommended && (
                   <LinearGradient
                     colors={["#C427E0", "#844AFF", "#12A9FF"]}
                     start={{ x: 0, y: 0 }}
@@ -178,10 +187,10 @@ const SubscriptionScreen = () => {
                 )}
               </View>
 
-              {item.save && (
+              {formattedItem.save && (
                 <View className="px-3 py-1 rounded-lg bg-[#EFE8FF]">
                   <Text className="font-dm-sans-medium text-[#844AFF] text-xs">
-                    Save {item.save}%
+                    Save {formattedItem.save}%
                   </Text>
                 </View>
               )}
@@ -282,25 +291,36 @@ const SubscriptionScreen = () => {
         <Text className="font-poppins-medium text-gray-700">Select plan</Text>
       </View>
 
-      <View className="flex-1 -mt-[20px]">
-        <FlatList
-          data={subscriptions}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={({ item }) =>
-            renderItem({ item, selected: selectedMonth === item.month })
-          }
-          contentContainerStyle={{ paddingTop: 20, gap: 24 }}
-        />
+      <View className="flex-1 p-5">
+        {loading ? (
+          <Spinner size="md" />
+        ) : (
+          <FlatList
+            data={subscriptions}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item }) =>
+              renderItem({
+                item,
+                selected: selectedSubscriptionId === item._id,
+              })
+            }
+            contentContainerStyle={{ paddingTop: 20, gap: 24 }}
+          />
+        )}
       </View>
 
       <Button
         type="primary"
-        label={`Subscribe for $${subscriptions.find((s) => s.month === selectedMonth)?.price || 0}`}
+        label={`Subscribe for $${subscriptions.find((s) => s._id === selectedSubscriptionId)?.price || 0}`}
         buttonClassName="h-12"
+        disabled={loading || !selectedSubscriptionId}
         onPress={() =>
           router.push({
             pathname: "/subscription/checkout",
-            params: { month: selectedMonth },
+            params: {
+              id: selectedSubscriptionId,
+              oneMonthPrice: subscriptions[0].price,
+            },
           })
         }
       />

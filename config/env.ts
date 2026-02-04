@@ -6,7 +6,7 @@ export const GOOGLE_IOS_CLIENT_ID =
 export const GOOGLE_WEB_CLIENT_ID =
   "732132936043-85fpifatj1b2kusu319c6urvdnub7aq7.apps.googleusercontent.com";
 export const GOOGLE_WEB_CLIENT_SECRET = "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";
-export const SERVER_API_ENDPOINT = "http://192.168.125.100:5001/api";
+export const SERVER_API_ENDPOINT = "http://192.168.125.100:5001/api/v1";
 
 // https://server-production-66f9.up.railway.app/api
 export const STRIPE_PUBLISHABLE_KEY =

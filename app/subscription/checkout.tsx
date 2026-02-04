@@ -1,18 +1,35 @@
 import { createStripePaymentIntent } from "@/api/services/stripe";
+import { fetchSubscriptionById } from "@/api/services/subscription";
+import { fetchUser } from "@/api/services/user";
 import { Button, CheckoutContainer, PaymentMethodGroup } from "@/components";
 import { RootState } from "@/store";
+import { setAuthUser } from "@/store/slices/auth.slice";
 import { TPaymentMethod } from "@/types";
 import { IStripePayload } from "@/types/stripe";
-import { ISubscription } from "@/types/subscription";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { confirmPayment } from "@stripe/stripe-react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
-import { useSelector } from "react-redux";
-import { subscriptions } from ".";
+import { ActivityIndicator, Alert, Text, View } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { calculateSave, TSubscriptionItem } from ".";
 
-const Header = ({ subscription }: { subscription: ISubscription | null }) => {
+const Header = ({
+  subscription,
+  loading,
+}: {
+  subscription: TSubscriptionItem | null;
+  loading: boolean;
+}) => {
+  if (loading) {
+    <View className="w-full flex flex-col items-center justify-center gap-2">
+      <ActivityIndicator size={24} />
+      <Text className="text-[#C427E0] font-poppins-semibold">
+        Fetching Subscription...
+      </Text>
+    </View>;
+  }
+
   if (!subscription) {
     return (
       <View className="w-full flex flex-col items-center justify-center gap-2">
@@ -90,7 +107,22 @@ const Header = ({ subscription }: { subscription: ISubscription | null }) => {
   );
 };
 
-const Detail = ({ subscription }: { subscription: ISubscription | null }) => {
+const Detail = ({
+  subscription,
+  loading,
+}: {
+  subscription: TSubscriptionItem | null;
+  loading: boolean;
+}) => {
+  if (loading) {
+    <View className="flex-1 w-full flex flex-col items-center justify-center gap-2">
+      <ActivityIndicator size={24} />
+      <Text className="text-[#C427E0] font-poppins-semibold">
+        Fetching Subscription Detail...
+      </Text>
+    </View>;
+  }
+
   if (!subscription) return;
 
   return (
@@ -136,21 +168,49 @@ const Detail = ({ subscription }: { subscription: ISubscription | null }) => {
 };
 
 const SubscriptionCheckout = () => {
-  const [selectedSubscription, setSelectedSubscription] = useState<any>(null);
+  const [subscription, setSubscription] = useState<TSubscriptionItem | null>(
+    null,
+  );
   const [method, setMethod] = useState<TPaymentMethod>("card");
   const [stripePaymentMethodId, setStripePaymentMethodId] =
     useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [subLoading, setSubLoading] = useState<boolean>(false);
 
-  const { month } = useLocalSearchParams();
+  const { id: subscriptionId, oneMonthPrice } = useLocalSearchParams();
   const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
+  const router = useRouter();
 
   useEffect(() => {
-    if (!month) return;
+    const getSubscription = async () => {
+      if (!subscriptionId || !oneMonthPrice) return;
+      try {
+        setLoading(true);
+        const response = await fetchSubscriptionById(subscriptionId as any);
 
-    const selected = subscriptions.find((s) => s.month === Number(month));
-    setSelectedSubscription(selected || null);
-  }, [month]);
+        if (response.data) {
+          const savePercent = calculateSave(
+            response.data.price,
+            response.data.month,
+            Number(oneMonthPrice),
+          );
+          const formattedSubscription: TSubscriptionItem = {
+            ...response.data,
+            isActive: user?.subscription.id === response.data._id,
+            isRecommended: response.data.month === 6,
+            save: savePercent === 0 ? undefined : savePercent,
+          };
+          setSubscription(formattedSubscription);
+        }
+      } catch (error) {
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getSubscription();
+  }, [subscriptionId]);
 
   useEffect(() => {
     if (!user?.stripe) return;
@@ -173,17 +233,13 @@ const SubscriptionCheckout = () => {
       amount,
       currency,
       metadata: {
-        subscription: {
-          month: selectedSubscription.month,
-          price: selectedSubscription.price,
-          createdAt: new Date().toISOString(),
-        },
+        type: "subscription",
+        userId: user?._id,
+        subscriptionId,
       },
     };
 
-    const clientSecretResponse = await createStripePaymentIntent(
-      stripePayload as any,
-    );
+    const clientSecretResponse = await createStripePaymentIntent(stripePayload);
 
     if (!clientSecretResponse.ok) {
       //   Alert.alert(
@@ -211,11 +267,77 @@ const SubscriptionCheckout = () => {
     return true;
   };
 
+  const handleSubscribe = async () => {
+    if (!subscription) return;
+
+    try {
+      setSubLoading(true);
+
+      let paymentResult = false;
+
+      switch (method) {
+        case "card":
+          paymentResult = await handleStripePayment(
+            subscription.price,
+            subscription.currency,
+          );
+          break;
+        case "crypto":
+          break;
+        case "token":
+          break;
+      }
+
+      if (!paymentResult) {
+        Alert.alert("Error", "Payment Failed");
+        setSubLoading(false);
+        return;
+      }
+
+      const waitForUpdate = async (timeout = 20000) => {
+        if (!user) return;
+
+        const intervalTime = 2000;
+        let elapsed = 0;
+
+        return new Promise<boolean>((resolve) => {
+          const interval = setInterval(async () => {
+            elapsed += intervalTime;
+
+            const response = await fetchUser(user?._id as string);
+
+            if (response.data.subscription.id === subscriptionId) {
+              dispatch(setAuthUser(response.data));
+              clearInterval(interval);
+              resolve(true);
+            }
+
+            if (elapsed >= timeout) {
+              clearInterval(interval);
+              resolve(false);
+            }
+          }, intervalTime);
+        });
+      };
+
+      const updated = await waitForUpdate();
+
+      if (updated) {
+        Alert.alert("Success", "Subscribed successfully");
+        router.back();
+      }
+    } catch (error: any) {
+      console.log("[handle subscription error]: ", error);
+    } finally {
+      setSubLoading(false);
+    }
+  };
+
   return (
     <CheckoutContainer>
-      <Header subscription={selectedSubscription} />
+      <Header subscription={subscription} loading={loading} />
 
-      <Detail subscription={selectedSubscription} />
+      <Detail subscription={subscription} loading={loading} />
 
       <PaymentMethodGroup
         method={method}
@@ -228,7 +350,9 @@ const SubscriptionCheckout = () => {
         type="primary"
         label="Subscribe"
         buttonClassName="h-12"
-        loading={loading}
+        disabled={loading || !subscription}
+        loading={subLoading}
+        onPress={handleSubscribe}
       />
     </CheckoutContainer>
   );

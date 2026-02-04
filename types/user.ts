@@ -53,4 +53,8 @@ export interface IUser {
   };
   stripe?: IStripe;
   tickets: ITicket[];
+  subscription: {
+    id: string;
+    startedAt?: string;
+  };
 }

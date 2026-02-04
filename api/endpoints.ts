@@ -60,3 +60,7 @@ export const TRANSACTION_BASE = "/tx";
 // Web3
 export const FETCH_TOKEN_PRICES_AND_FEE = "/web3/token-prices-fee";
 export const CREATE_TICKET_SELL_PAYOUT = "/web3/create/sell-ticket-payout";
+
+// Subscription
+export const FETCH_ALL_SUBSCRIPTIONS = "/subscription/all";
+export const SUBSCRIPTION_BASE = "/subscription/";
