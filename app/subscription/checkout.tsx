@@ -22,24 +22,15 @@ const Header = ({
   loading: boolean;
 }) => {
   if (loading) {
-    <View className="w-full flex flex-col items-center justify-center gap-2">
-      <ActivityIndicator size={24} />
+    <View className="w-full flex flex-col items-center justify-center gap-2 py-6 bg-white rounded-xl">
+      <ActivityIndicator size={24} color="#C427E0" />
       <Text className="text-[#C427E0] font-poppins-semibold">
         Fetching Subscription...
       </Text>
     </View>;
   }
 
-  if (!subscription) {
-    return (
-      <View className="w-full flex flex-col items-center justify-center gap-2">
-        <MaterialCommunityIcons name="cart-off" size={24} color="#374151" />
-        <Text className="font-poppins-semibold text-gray-700">
-          Subscription not found
-        </Text>
-      </View>
-    );
-  }
+  if (!subscription) return null;
 
   return (
     <View className="p-4 bg-white rounded-xl flex flex-col gap-4 w-full">
@@ -115,8 +106,8 @@ const Detail = ({
   loading: boolean;
 }) => {
   if (loading) {
-    <View className="flex-1 w-full flex flex-col items-center justify-center gap-2">
-      <ActivityIndicator size={24} />
+    <View className="flex-1 w-full flex flex-col items-center justify-center gap-2 py-6 bg-white rounded-xl">
+      <ActivityIndicator size={24} color="#C427E0" />
       <Text className="text-[#C427E0] font-poppins-semibold">
         Fetching Subscription Detail...
       </Text>
@@ -176,6 +167,7 @@ const SubscriptionCheckout = () => {
     useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [subLoading, setSubLoading] = useState<boolean>(false);
+  const [btnLabel, setBtnLabel] = useState<string>("Subscribe");
 
   const { id: subscriptionId, oneMonthPrice } = useLocalSearchParams();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -272,7 +264,7 @@ const SubscriptionCheckout = () => {
 
     try {
       setSubLoading(true);
-
+      setBtnLabel("Processing Payment...");
       let paymentResult = false;
 
       switch (method) {
@@ -290,6 +282,7 @@ const SubscriptionCheckout = () => {
 
       if (!paymentResult) {
         Alert.alert("Error", "Payment Failed");
+        setBtnLabel("Subscribe");
         setSubLoading(false);
         return;
       }
@@ -329,6 +322,7 @@ const SubscriptionCheckout = () => {
     } catch (error: any) {
       console.log("[handle subscription error]: ", error);
     } finally {
+      setBtnLabel("Subscribe");
       setSubLoading(false);
     }
   };
@@ -348,7 +342,7 @@ const SubscriptionCheckout = () => {
 
       <Button
         type="primary"
-        label="Subscribe"
+        label={btnLabel}
         buttonClassName="h-12"
         disabled={loading || !subscription}
         loading={subLoading}

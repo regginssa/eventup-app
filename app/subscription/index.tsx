@@ -2,6 +2,7 @@ import { fetchAllSubscriptions } from "@/api/services/subscription";
 import { Button, Spinner, SubscriptionContainer } from "@/components";
 import { RootState } from "@/store";
 import { ISubscription } from "@/types/subscription";
+import { formatDateTime } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
@@ -41,6 +42,11 @@ export const calculateSave = (
 
 const SubscriptionScreen = () => {
   const [subscriptions, setSubscriptions] = useState<ISubscription[]>([]);
+  const [currentSubscription, setCurrentSubscription] =
+    useState<ISubscription | null>(null);
+  const [isExpired, setIsExpired] = useState<boolean>(false);
+  const [expiryDate, setExpiryDate] = useState<string>("");
+  const [oneMonthPrice, setOneMonthPrice] = useState<number>(0);
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
     string | null
   >(null);
@@ -59,6 +65,38 @@ const SubscriptionScreen = () => {
     getAllSubscriptions();
   }, []);
 
+  useEffect(() => {
+    if (subscriptions.length === 0) {
+      setOneMonthPrice(12);
+    } else {
+      setOneMonthPrice(subscriptions[1].price);
+      setSelectedSubscriptionId(subscriptions[3]._id);
+
+      if (!user?.subscription) return;
+
+      const current = subscriptions.find((s) => s._id === user.subscription.id);
+      setCurrentSubscription(current || null);
+
+      if (!user.subscription.startedAt || !current) {
+        return setIsExpired(false);
+      }
+
+      const start = new Date(user.subscription.startedAt);
+      const expiry = new Date(start);
+      expiry.setMonth(expiry.getMonth() + current.month);
+
+      setExpiryDate(formatDateTime(expiry.toISOString()));
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const expiryDay = new Date(expiry);
+      expiryDay.setHours(0, 0, 0, 0);
+
+      setIsExpired(today > expiryDay);
+    }
+  }, [subscriptions, user]);
+
   const renderItem = ({
     item,
     selected,
@@ -67,7 +105,7 @@ const SubscriptionScreen = () => {
     selected: boolean;
   }) => {
     const Wrapper = ({ children }: any) =>
-      selected ? (
+      selected && item._id !== currentSubscription?._id ? (
         <LinearGradient
           colors={["#C427E0", "#844AFF", "#12A9FF"]}
           start={{ x: 0, y: 0 }}
@@ -129,11 +167,7 @@ const SubscriptionScreen = () => {
         </View>
       );
 
-    const savePercent = calculateSave(
-      item.price,
-      item.month,
-      subscriptions[0].price,
-    );
+    const savePercent = calculateSave(item.price, item.month, oneMonthPrice);
 
     const formattedItem: TSubscriptionItem = {
       ...item,
@@ -146,7 +180,8 @@ const SubscriptionScreen = () => {
       <Wrapper selected={selected}>
         <TouchableOpacity
           activeOpacity={0.8}
-          className="p-5 bg-white rounded-xl flex flex-col gap-4 absolute inset-[1px]"
+          className={`p-5 ${item._id !== currentSubscription?._id ? "bg-white" : "bg-gray-200"} rounded-xl flex flex-col gap-4 absolute inset-[1px]`}
+          disabled={item._id === currentSubscription?._id}
           onPress={() => setSelectedSubscriptionId(item._id)}
         >
           <View className="w-full flex flex-row items-start justify-between">
@@ -158,7 +193,7 @@ const SubscriptionScreen = () => {
                   </Text>
                   {formattedItem.month > 0 && (
                     <Text className="font-poppins-semibold text-lg text-gray-600">
-                      Month
+                      {formattedItem.month === 1 ? "Month" : "Months"}
                     </Text>
                   )}
                 </View>
@@ -248,6 +283,14 @@ const SubscriptionScreen = () => {
     );
   };
 
+  const isCurrent = selectedSubscriptionId === currentSubscription?._id;
+
+  const isActiveSubscription =
+    currentSubscription?.month && currentSubscription?.month > 0 && !isExpired;
+
+  const price =
+    subscriptions.find((s) => s._id === selectedSubscriptionId)?.price || 0;
+
   return (
     <SubscriptionContainer>
       <View>
@@ -287,11 +330,9 @@ const SubscriptionScreen = () => {
         ))}
       </View>
 
-      <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-poppins-medium text-gray-700">Select plan</Text>
-      </View>
+      <Text className="font-poppins-medium text-gray-700">Select plan</Text>
 
-      <View className="flex-1 p-5">
+      <View className="flex-1 -mt-5">
         {loading ? (
           <Spinner size="md" />
         ) : (
@@ -311,15 +352,27 @@ const SubscriptionScreen = () => {
 
       <Button
         type="primary"
-        label={`Subscribe for $${subscriptions.find((s) => s._id === selectedSubscriptionId)?.price || 0}`}
+        label={
+          isCurrent && isActiveSubscription
+            ? `Ends on ${expiryDate}`
+            : isCurrent
+              ? ""
+              : `Subscribe for $${price}`
+        }
         buttonClassName="h-12"
-        disabled={loading || !selectedSubscriptionId}
+        disabled={
+          !!(
+            loading ||
+            !selectedSubscriptionId ||
+            (isCurrent && isActiveSubscription)
+          )
+        }
         onPress={() =>
           router.push({
             pathname: "/subscription/checkout",
             params: {
               id: selectedSubscriptionId,
-              oneMonthPrice: subscriptions[0].price,
+              oneMonthPrice,
             },
           })
         }

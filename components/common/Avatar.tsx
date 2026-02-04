@@ -1,4 +1,4 @@
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
@@ -38,7 +38,7 @@ const Avatar: React.FC<AvatarProps> = ({ name, source, size, onChange }) => {
     if (status !== "granted") {
       Alert.alert(
         "Permission Denied",
-        "Camera access is required to take a photo."
+        "Camera access is required to take a photo.",
       );
       return;
     }
@@ -63,7 +63,7 @@ const Avatar: React.FC<AvatarProps> = ({ name, source, size, onChange }) => {
       if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE)
         return Alert.alert(
           "File too large",
-          `The file is larger than 5MB. Please select a smaller file.`
+          `The file is larger than 5MB. Please select a smaller file.`,
         );
 
       const avatar = {
@@ -99,7 +99,7 @@ const Avatar: React.FC<AvatarProps> = ({ name, source, size, onChange }) => {
       if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE)
         return Alert.alert(
           "File too large",
-          `The file is larger than 5MB. Please select a smaller file.`
+          `The file is larger than 5MB. Please select a smaller file.`,
         );
 
       const avatar = {
@@ -151,7 +151,11 @@ const Avatar: React.FC<AvatarProps> = ({ name, source, size, onChange }) => {
           className="absolute right-0 bottom-0 w-12 h-12 bg-white flex items-center justify-center rounded-full"
           onPress={handlePick}
         >
-          <AntDesign name="cloud-upload" size={22} color="black" />
+          <MaterialCommunityIcons
+            name="cloud-upload-outline"
+            size={22}
+            color="#374151"
+          />
         </TouchableOpacity>
       )}
 

@@ -17,12 +17,12 @@ AxiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 AxiosInstance.interceptors.response.use(
   (response) => response.data,
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 export const setAuthToken = async (token: string | null) => {

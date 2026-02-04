@@ -99,7 +99,7 @@ const RegisterScreen = () => {
         googleUser.name,
         googleUser.email,
         googleUser.id,
-        googleUser.photo ?? ""
+        googleUser.photo ?? "",
       );
 
       const { token, user } = response.data;

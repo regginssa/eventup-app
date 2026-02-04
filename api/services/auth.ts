@@ -9,7 +9,7 @@ import {
 
 export const googleLogin = async (
   email: string,
-  google_id: string
+  google_id: string,
 ): Promise<ApiResponse<AuthResponse>> => {
   return await AxiosInstance.post(GOOGLE_LOGIN, { email, google_id });
 };
@@ -18,7 +18,7 @@ export const googleRegister = async (
   name: string,
   email: string,
   google_id: string,
-  avatar: string
+  avatar: string,
 ): Promise<ApiResponse<AuthResponse>> => {
   return await AxiosInstance.post(GOOGLE_REGISTER, {
     name,
@@ -30,7 +30,7 @@ export const googleRegister = async (
 
 export const emailLogin = async (
   email: string,
-  password: string
+  password: string,
 ): Promise<ApiResponse<AuthResponse>> => {
   return await AxiosInstance.post(EMAIL_LOGIN, { email, password });
 };
@@ -38,7 +38,7 @@ export const emailLogin = async (
 export const emailRegister = async (
   name: string,
   email: string,
-  password: string
+  password: string,
 ): Promise<ApiResponse<AuthResponse>> => {
   return await AxiosInstance.post(EMAIL_REGISTER, { name, email, password });
 };

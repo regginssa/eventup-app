@@ -8,7 +8,6 @@ import { TPaymentMethod } from "@/types";
 import { IStripePayload } from "@/types/stripe";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { confirmPayment } from "@stripe/stripe-react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -26,24 +25,15 @@ const Header = ({
   loading: boolean;
 }) => {
   if (loading) {
-    <View className="w-full flex flex-col items-center justify-center gap-2">
-      <ActivityIndicator size={24} />
+    <View className="w-full flex flex-col items-center justify-center gap-2 py-6 bg-white rounded-xl">
+      <ActivityIndicator size={24} color="#C427E0" />
       <Text className="text-[#C427E0] font-poppins-semibold">
         Fetching Ticket...
       </Text>
     </View>;
   }
 
-  if (!ticket) {
-    return (
-      <View className="w-full flex flex-col items-center justify-center gap-2">
-        <MaterialCommunityIcons name="cart-off" size={24} color="#374151" />
-        <Text className="font-poppins-semibold text-gray-700">
-          Ticket not found
-        </Text>
-      </View>
-    );
-  }
+  if (!ticket) return null;
 
   return (
     <View className="relative w-full h-[160px] rounded-xl overflow-hidden">
@@ -94,8 +84,8 @@ const Detail = ({
   loading: boolean;
 }) => {
   if (loading) {
-    <View className="flex-1 w-full flex flex-col items-center justify-center gap-2">
-      <ActivityIndicator size={24} />
+    <View className="flex-1 w-full flex flex-col items-center justify-center gap-2 py-6 bg-white rounded-xl">
+      <ActivityIndicator size={24} color="#C427E0" />
       <Text className="text-[#C427E0] font-poppins-semibold">
         Fetching Ticket Detail...
       </Text>
@@ -247,6 +237,7 @@ const TicketsCheckout = () => {
 
       if (!paymentResult) {
         Alert.alert("Error", "Payment Failed");
+        setBtnLabel("Purchase");
         return setPurchaseLoading(false);
       }
 

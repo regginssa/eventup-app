@@ -7,7 +7,7 @@ import { setAuthUser } from "@/store/slices/auth.slice";
 
 import { RootState } from "@/store";
 import { IUser } from "@/types/user";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
@@ -116,7 +116,11 @@ const OnboardingStep2Screen = () => {
         label="Professional title"
         placeholder="e.g. Designer, Teacher"
         icon={
-          <MaterialIcons name="business-center" size={16} color="#4b5563" />
+          <MaterialCommunityIcons
+            name="bag-personal-outline"
+            size={16}
+            color="#4b5563"
+          />
         }
         invalid={invalidTitle}
         invalidTxt="Text must be under 20 characters"
