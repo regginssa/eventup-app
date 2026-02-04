@@ -102,7 +102,7 @@ const CryptoPayout: React.FC<CryptoPayoutProps> = ({
 
       <Input
         type="string"
-        placeholder="Enter your Solana payout wallet address"
+        placeholder="Solana wallet address to receive funds"
         bordered
         className="rounded-lg"
         icon={
