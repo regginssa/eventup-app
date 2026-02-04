@@ -269,6 +269,7 @@ const MineSellTicketsCheckout = () => {
 
       if (response.data) {
         Alert.alert("Success", "Payout successfully");
+        router.back();
       }
     } catch (error: any) {
       console.log("[handle sell error]: ", error);
