@@ -1,6 +1,7 @@
 import { fetchTicketById } from "@/api/services/ticket";
 import { fetchTokenPrices } from "@/api/services/tokenPrices";
 import { Button, CheckoutContainer, CryptoPayout } from "@/components";
+import { TICKET_SELL_FEE } from "@/config/env";
 import { RootState } from "@/store";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
@@ -118,6 +119,13 @@ const Detail = ({
         </View>
 
         <View className="w-full flex flex-row items-center justify-between">
+          <Text className="font-dm-sans-medium text-gray-600">Price:</Text>
+          <Text className="font-poppins-semibold text-gray-800">
+            {ticket?.price || 0}
+          </Text>
+        </View>
+
+        <View className="w-full flex flex-row items-center justify-between">
           <Text className="font-dm-sans-medium text-gray-600">Currency:</Text>
           <Text className="font-poppins-semibold text-gray-800">
             {ticket?.currency.toUpperCase() || "-"}
@@ -125,9 +133,9 @@ const Detail = ({
         </View>
 
         <View className="w-full flex flex-row items-center justify-between">
-          <Text className="font-dm-sans-medium text-gray-600">Price:</Text>
+          <Text className="font-dm-sans-medium text-gray-600">Fee:</Text>
           <Text className="font-poppins-semibold text-gray-800">
-            {ticket?.price || 0}
+            {TICKET_SELL_FEE}%
           </Text>
         </View>
       </View>
@@ -183,6 +191,7 @@ const MineSellTicketsCheckout = () => {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [totalTokenAmount, setTotalTokenAmount] = useState<number>(0);
   const [tokenPrices, setTokenPrices] = useState({ chrle: 0, babyu: 0 });
+  const [tokenAmounts, setTokenAmounts] = useState({ chrle: 0, babyu: 0 });
   const [method, setMethod] = useState<"chrle" | "babyu">("chrle");
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -214,7 +223,7 @@ const MineSellTicketsCheckout = () => {
 
   useEffect(() => {
     if (!ticket?.price) return;
-    setTotalPrice(count * ticket.price);
+    setTotalPrice(count * ticket.price * (1 - TICKET_SELL_FEE / 100));
   }, [count, ticket?.price]);
 
   useEffect(() => {
@@ -225,6 +234,12 @@ const MineSellTicketsCheckout = () => {
 
     getTokenPrices();
   }, []);
+
+  useEffect(() => {
+    const chrleAmount = Number((totalPrice / tokenPrices.chrle).toFixed(2));
+    const babyuAmount = Number((totalPrice / tokenPrices.babyu).toFixed(2));
+    setTokenAmounts({ chrle: chrleAmount, babyu: babyuAmount });
+  }, [tokenPrices, totalPrice]);
 
   return (
     <CheckoutContainer>
@@ -242,6 +257,7 @@ const MineSellTicketsCheckout = () => {
       <CryptoPayout
         method={method}
         walletAddress={walletAddress}
+        tokenAmounts={tokenAmounts as any}
         onSelectMethod={setMethod}
         onWalletAddressChange={setWalletAddress}
       />

@@ -7,6 +7,7 @@ import { Input } from "../common";
 interface CryptoPayoutProps {
   method: "chrle" | "babyu";
   walletAddress: string;
+  tokenAmounts: { chrle: 0; babyu: 0 };
   onSelectMethod: (val: "chrle" | "babyu") => void;
   onWalletAddressChange: (val: string) => void;
 }
@@ -17,6 +18,7 @@ const babyuIcon = require("@/assets/images/babyu.png");
 const CryptoPayout: React.FC<CryptoPayoutProps> = ({
   method,
   walletAddress,
+  tokenAmounts,
   onSelectMethod,
   onWalletAddressChange,
 }) => {
@@ -30,7 +32,7 @@ const CryptoPayout: React.FC<CryptoPayoutProps> = ({
       <View>
         <Text className="font-poppins-semibold text-gray-700">Our Tokens</Text>
 
-        <Text className="font-dm-sans text-sm text-gray-400">
+        <Text className="font-dm-sans text-sm text-gray-600">
           Choose which token you want to receive from your sale.
         </Text>
       </View>
@@ -77,6 +79,25 @@ const CryptoPayout: React.FC<CryptoPayoutProps> = ({
             )}
           </TouchableOpacity>
         ))}
+      </View>
+
+      <View className="w-full flex flex-row items-center gap-4">
+        <Image
+          source={methods.find((m) => m.value === method)?.img}
+          alt={method.toUpperCase()}
+          style={{ width: 32, height: 32 }}
+          contentFit="cover"
+        />
+
+        <View className="flex flex-row items-start gap-1">
+          <Text className="font-poppins-semibold text-gray-600 text-xs">
+            ${methods.find((m) => m.value === method)?.label}
+          </Text>
+
+          <Text className="font-poppins-bold text-gray-800 text-xl">
+            {tokenAmounts[method]}
+          </Text>
+        </View>
       </View>
 
       <Input

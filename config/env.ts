@@ -16,3 +16,4 @@ export const CHRLE_TOKEN_ADDRESS =
   "G1ij1UjWBcUFtVHz5GVDAopPNMQcbwtdegH94LU6Jray";
 export const BABYU_TOKEN_ADDRESS =
   "7xAinob3Fmi6Sf1zA1kUDkuSuBh4KEVtuKqL6WM1DWKr";
+export const TICKET_SELL_FEE = 5;
