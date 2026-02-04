@@ -87,7 +87,7 @@ const Detail = ({
     <View className="flex-1 w-full flex flex-col items-center justify-center gap-2 py-6 bg-white rounded-xl">
       <ActivityIndicator size={24} color="#C427E0" />
       <Text className="text-[#C427E0] font-poppins-semibold">
-        Fetching Ticket Detail...
+        Fetching Ticket Details...
       </Text>
     </View>;
   }
@@ -272,7 +272,7 @@ const TicketsCheckout = () => {
 
       if (updated) {
         Alert.alert("Success", "Ticket is purchased");
-        router.back();
+        router.replace("/mine/tickets");
       }
     } catch (error: any) {
       Alert.alert("Error", error?.response?.message || "Internal Server Error");
@@ -299,7 +299,7 @@ const TicketsCheckout = () => {
         type="primary"
         label={btnLabel}
         buttonClassName="h-12"
-        disabled={loading}
+        disabled={loading || stripePaymentMethodId === ""}
         loading={purchaseLoading}
         onPress={handlePurchase}
       />

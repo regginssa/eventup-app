@@ -74,7 +74,7 @@ const CardPayment: React.FC<CardPaymentProps> = ({
       dispatch(setAuthUser(response.data));
       Alert.alert("Success", "Card is successfully saved");
     } catch (error) {
-      console.error("Error adding card:", error);
+      Alert.alert("Error", "Card is not added");
     } finally {
       setLoading(false);
     }

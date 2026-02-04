@@ -44,7 +44,7 @@ const SubscriptionScreen = () => {
   const [subscriptions, setSubscriptions] = useState<ISubscription[]>([]);
   const [currentSubscription, setCurrentSubscription] =
     useState<ISubscription | null>(null);
-  const [isExpired, setIsExpired] = useState<boolean>(false);
+  const [isExpired, setIsExpired] = useState<boolean>(true);
   const [expiryDate, setExpiryDate] = useState<string>("");
   const [oneMonthPrice, setOneMonthPrice] = useState<number>(0);
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
@@ -364,7 +364,8 @@ const SubscriptionScreen = () => {
           !!(
             loading ||
             !selectedSubscriptionId ||
-            (isCurrent && isActiveSubscription)
+            (isCurrent && isActiveSubscription) ||
+            !isExpired
           )
         }
         onPress={() =>

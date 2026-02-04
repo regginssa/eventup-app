@@ -31,23 +31,14 @@ const Header = ({
 }) => {
   if (loading) {
     <View className="w-full flex flex-col items-center justify-center gap-2">
-      <ActivityIndicator size={24} />
+      <ActivityIndicator size={24} color="#C427E0" />
       <Text className="text-[#C427E0] font-poppins-semibold">
         Fetching Ticket...
       </Text>
     </View>;
   }
 
-  if (!ticket) {
-    return (
-      <View className="w-full flex flex-col items-center justify-center gap-2 bg-white rounded-xl py-6">
-        <MaterialCommunityIcons name="cart-off" size={24} color="#374151" />
-        <Text className="font-poppins-semibold text-gray-700">
-          Ticket not found
-        </Text>
-      </View>
-    );
-  }
+  if (!ticket) return null;
 
   return (
     <View className="relative w-full h-[160px] rounded-xl overflow-hidden">
@@ -109,9 +100,9 @@ const Detail = ({
 }) => {
   if (loading) {
     <View className="flex-1 w-full flex flex-col items-center justify-center gap-2">
-      <ActivityIndicator size={24} />
+      <ActivityIndicator size={24} color="#C427E0" />
       <Text className="text-[#C427E0] font-poppins-semibold">
-        Fetching Ticket...
+        Fetching Ticket Details...
       </Text>
     </View>;
   }
@@ -240,7 +231,7 @@ const MineSellTicketsCheckout = () => {
   useEffect(() => {
     if (!ticket?.price) return;
     setTotalPrice(count * ticket.price * (1 - fee / 100));
-  }, [count, ticket?.price]);
+  }, [count, ticket?.price, fee]);
 
   useEffect(() => {
     const chrleAmount = Number((totalPrice / tokenPrices.chrle).toFixed(2));
