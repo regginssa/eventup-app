@@ -20,6 +20,7 @@ import { StripeProvider } from "@stripe/stripe-react-native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { KeyboardAvoidingView, Platform } from "react-native";
 import { Provider } from "react-redux";
 import "../global.css";
 
@@ -55,22 +56,27 @@ export default function RootLayout() {
     <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
       <Provider store={store}>
         <ThemeProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: "transparent" },
-            }}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={{ flex: 1 }}
           >
-            <Stack.Screen name="start" />
-            <Stack.Screen name="auth" />
-            <Stack.Screen name="home" />
-            <Stack.Screen name="map" />
-            <Stack.Screen name="didit" />
-            <Stack.Screen name="booking" />
-            <Stack.Screen name="profile" />
-            <Stack.Screen name="tickets" />
-            <Stack.Screen name="subscription" />
-          </Stack>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: "transparent" },
+              }}
+            >
+              <Stack.Screen name="start" />
+              <Stack.Screen name="auth" />
+              <Stack.Screen name="home" />
+              <Stack.Screen name="map" />
+              <Stack.Screen name="didit" />
+              <Stack.Screen name="booking" />
+              <Stack.Screen name="profile" />
+              <Stack.Screen name="tickets" />
+              <Stack.Screen name="subscription" />
+            </Stack>
+          </KeyboardAvoidingView>
           <InitContainer />
         </ThemeProvider>
       </Provider>
