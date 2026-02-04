@@ -1,5 +1,5 @@
 import { fetchTicketById } from "@/api/services/ticket";
-import { fetchTokenPrices } from "@/api/services/tokenPrices";
+import { fetchTokenPrices } from "@/api/services/web3";
 import { Button, CheckoutContainer, CryptoPayout } from "@/components";
 import { TICKET_SELL_FEE } from "@/config/env";
 import { RootState } from "@/store";
@@ -189,7 +189,6 @@ const MineSellTicketsCheckout = () => {
   const [ticket, setTicket] = useState<ITicket | null>(null);
   const [count, setCount] = useState<number>(1);
   const [totalPrice, setTotalPrice] = useState<number>(0);
-  const [totalTokenAmount, setTotalTokenAmount] = useState<number>(0);
   const [tokenPrices, setTokenPrices] = useState({ chrle: 0, babyu: 0 });
   const [tokenAmounts, setTokenAmounts] = useState({ chrle: 0, babyu: 0 });
   const [method, setMethod] = useState<"chrle" | "babyu">("chrle");
@@ -208,32 +207,28 @@ const MineSellTicketsCheckout = () => {
       if (!ticketId) return;
 
       try {
-        setLoading(true);
-
         const response = await fetchTicketById(ticketId as string);
         setTicket(response.data || null);
       } catch (error) {
       } finally {
-        setLoading(false);
       }
     };
 
+    const getTokenPrices = async () => {
+      const response = await fetchTokenPrices();
+      setTokenPrices(response.data);
+    };
+
+    setLoading(true);
     fetchTicket();
+    getTokenPrices();
+    setLoading(false);
   }, [ticketId]);
 
   useEffect(() => {
     if (!ticket?.price) return;
     setTotalPrice(count * ticket.price * (1 - TICKET_SELL_FEE / 100));
   }, [count, ticket?.price]);
-
-  useEffect(() => {
-    const getTokenPrices = async () => {
-      const prices = await fetchTokenPrices();
-      setTokenPrices(prices);
-    };
-
-    getTokenPrices();
-  }, []);
 
   useEffect(() => {
     const chrleAmount = Number((totalPrice / tokenPrices.chrle).toFixed(2));
@@ -258,6 +253,7 @@ const MineSellTicketsCheckout = () => {
         method={method}
         walletAddress={walletAddress}
         tokenAmounts={tokenAmounts as any}
+        loading={loading}
         onSelectMethod={setMethod}
         onWalletAddressChange={setWalletAddress}
       />

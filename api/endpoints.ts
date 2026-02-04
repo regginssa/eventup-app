@@ -56,3 +56,6 @@ export const TICKET_BASE = "/ticket/";
 
 // Transaction
 export const TRANSACTION_BASE = "/tx";
+
+// Web3
+export const FETCH_TOKEN_PRICES = "/web3/token-prices";

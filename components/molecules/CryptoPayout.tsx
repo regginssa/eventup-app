@@ -1,13 +1,20 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Input } from "../common";
 
 interface CryptoPayoutProps {
   method: "chrle" | "babyu";
   walletAddress: string;
   tokenAmounts: { chrle: 0; babyu: 0 };
+  loading: boolean;
   onSelectMethod: (val: "chrle" | "babyu") => void;
   onWalletAddressChange: (val: string) => void;
 }
@@ -19,6 +26,7 @@ const CryptoPayout: React.FC<CryptoPayoutProps> = ({
   method,
   walletAddress,
   tokenAmounts,
+  loading,
   onSelectMethod,
   onWalletAddressChange,
 }) => {
@@ -89,15 +97,24 @@ const CryptoPayout: React.FC<CryptoPayoutProps> = ({
           contentFit="cover"
         />
 
-        <View className="flex flex-row items-start gap-1">
-          <Text className="font-poppins-semibold text-gray-600 text-xs">
-            ${methods.find((m) => m.value === method)?.label}
-          </Text>
+        {loading ? (
+          <View className="flex flex-row items-center gap-2">
+            <Text className="font-dm-sans-medium text-sm text-gray-600">
+              Calculating amount...
+            </Text>
+            <ActivityIndicator size={18} color="#4b5563" />
+          </View>
+        ) : (
+          <View className="flex flex-row items-start gap-1">
+            <Text className="font-poppins-semibold text-gray-600 text-xs">
+              ${methods.find((m) => m.value === method)?.label}
+            </Text>
 
-          <Text className="font-poppins-bold text-gray-800 text-xl">
-            {tokenAmounts[method]}
-          </Text>
-        </View>
+            <Text className="font-poppins-bold text-gray-800 text-xl">
+              {tokenAmounts[method]}
+            </Text>
+          </View>
+        )}
       </View>
 
       <Input
