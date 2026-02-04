@@ -4,7 +4,7 @@ const BookingRootLayout = () => {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="booked" />
-      <Stack.Screen name="booking" />
+      <Stack.Screen name="booking-form" />
       <Stack.Screen name="checkout" />
     </Stack>
   );

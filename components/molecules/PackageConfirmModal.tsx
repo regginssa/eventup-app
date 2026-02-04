@@ -52,7 +52,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             updateBookingFlightOfferById({
               id: flight.id,
               offer: response.data[0],
-            })
+            }),
           );
         }
       }
@@ -65,13 +65,13 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             updateBookingHotelByIndex({
               index: 0,
               offer: response.data,
-            })
+            }),
           );
         }
       }
 
       router.push({
-        pathname: "/booking",
+        pathname: "/booking/booking-form",
         params: { eventId, packageType },
       });
     } catch (error: any) {
