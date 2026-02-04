@@ -228,7 +228,8 @@ const TicketsCheckout = () => {
     }
 
     const bodyData: ITransaction = {
-      type: "credit",
+      type: "buy",
+      paymentMethod: "credit",
       userId: user?._id as string,
       txId: paymentIntentId,
       amount,
