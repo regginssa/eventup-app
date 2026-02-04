@@ -12,8 +12,3 @@ export const SERVER_API_ENDPOINT = "http://192.168.125.100:5001/api";
 export const STRIPE_PUBLISHABLE_KEY =
   "pk_test_51RGgNOB3QdeQ8arQcprVRXtbcpeDjhIQV6pBlLRrNJpb9MqGi9lrR7VTLYaHbsnozaqQjP42RM8FBqSBPzmjAJ5m00FAlzmRBY";
 // pk_live_51RGgNHBskVGUaFIhHgMDMkSPvDXoWNtxj4IhiIM8aRMBZtsxMFqqu5ksk9oNaHdC1e09q5oeeGptrL4SfLflDdmB001j70onjH
-export const CHRLE_TOKEN_ADDRESS =
-  "G1ij1UjWBcUFtVHz5GVDAopPNMQcbwtdegH94LU6Jray";
-export const BABYU_TOKEN_ADDRESS =
-  "7xAinob3Fmi6Sf1zA1kUDkuSuBh4KEVtuKqL6WM1DWKr";
-export const TICKET_SELL_FEE = 5;

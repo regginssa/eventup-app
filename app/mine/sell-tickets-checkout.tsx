@@ -1,7 +1,6 @@
 import { fetchTicketById } from "@/api/services/ticket";
-import { fetchTokenPrices } from "@/api/services/web3";
+import { fetchTokenPricesAndFee } from "@/api/services/web3";
 import { Button, CheckoutContainer, CryptoPayout } from "@/components";
-import { TICKET_SELL_FEE } from "@/config/env";
 import { RootState } from "@/store";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
@@ -86,6 +85,7 @@ const Detail = ({
   ticket,
   totalCount,
   totalPrice,
+  fee,
   loading,
   count,
   setCount,
@@ -93,6 +93,7 @@ const Detail = ({
   ticket: ITicket | null;
   totalCount: number;
   totalPrice: number;
+  fee: number;
   count: number;
   loading: boolean;
   setCount: (val: number) => void;
@@ -134,9 +135,7 @@ const Detail = ({
 
         <View className="w-full flex flex-row items-center justify-between">
           <Text className="font-dm-sans-medium text-gray-600">Fee:</Text>
-          <Text className="font-poppins-semibold text-gray-800">
-            {TICKET_SELL_FEE}%
-          </Text>
+          <Text className="font-poppins-semibold text-gray-800">{fee}%</Text>
         </View>
       </View>
 
@@ -190,6 +189,7 @@ const MineSellTicketsCheckout = () => {
   const [count, setCount] = useState<number>(1);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [tokenPrices, setTokenPrices] = useState({ chrle: 0, babyu: 0 });
+  const [fee, setFee] = useState<number>(0);
   const [tokenAmounts, setTokenAmounts] = useState({ chrle: 0, babyu: 0 });
   const [method, setMethod] = useState<"chrle" | "babyu">("chrle");
   const [walletAddress, setWalletAddress] = useState<string>("");
@@ -214,20 +214,23 @@ const MineSellTicketsCheckout = () => {
       }
     };
 
-    const getTokenPrices = async () => {
-      const response = await fetchTokenPrices();
-      setTokenPrices(response.data);
+    const getTokenPricesAndFee = async () => {
+      const response = await fetchTokenPricesAndFee();
+      if (response.data) {
+        setTokenPrices({ ...response.data });
+        setFee(response.data.fee);
+      }
     };
 
     setLoading(true);
     fetchTicket();
-    getTokenPrices();
+    getTokenPricesAndFee();
     setLoading(false);
   }, [ticketId]);
 
   useEffect(() => {
     if (!ticket?.price) return;
-    setTotalPrice(count * ticket.price * (1 - TICKET_SELL_FEE / 100));
+    setTotalPrice(count * ticket.price * (1 - fee / 100));
   }, [count, ticket?.price]);
 
   useEffect(() => {
@@ -244,6 +247,7 @@ const MineSellTicketsCheckout = () => {
         ticket={ticket}
         totalCount={user?.tickets.filter((t) => t._id === ticketId).length || 0}
         totalPrice={totalPrice}
+        fee={fee}
         count={count}
         loading={loading}
         setCount={setCount}
