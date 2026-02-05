@@ -1,6 +1,6 @@
 import { fetchBookingByUserIdAndEventId } from "@/api/services/booking";
 import { fetchEvent } from "@/api/services/event";
-import { ApplicationCardGroup } from "@/components";
+import { AttendeesCardGroup } from "@/components";
 import { Spinner, Tabs } from "@/components/common";
 import {
   EventDetailContainer,
@@ -223,8 +223,8 @@ const EventDetailScreen = () => {
                 />
               ) : selectedTab.value === "itinerary" ? (
                 <EventDetailItinerary booking={booking} />
-              ) : selectedTab.value === "" ? (
-                <ApplicationCardGroup items={event.applications || []} />
+              ) : selectedTab.value === "attendees" ? (
+                <AttendeesCardGroup items={event.attendees || []} />
               ) : null}
             </View>
           </>

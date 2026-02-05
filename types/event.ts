@@ -68,7 +68,7 @@ export type TEventStatus =
   | "completed"
   | "cancelled";
 
-export type TApplication = {
+export type TAttendees = {
   user: IUser;
   ticket?: ITicket;
   status: "approved" | "blocked";
@@ -88,5 +88,5 @@ export interface IEvent {
   fee?: TEventFee;
   hoster?: IUser;
   status?: TEventStatus;
-  applications?: TApplication[];
+  attendees?: TAttendees[];
 }

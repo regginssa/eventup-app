@@ -1,32 +1,30 @@
-import { TApplication } from "@/types/event";
+import { TAttendees } from "@/types/event";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FlatList, Text, View } from "react-native";
 import { FlagButton } from "react-native-country-picker-modal";
 import { Avatar } from "../common";
 
-interface ApplicationCardGroupProps {
-  items: TApplication[];
+interface AttendeesCardGroupProps {
+  items: TAttendees[];
 }
 
-const ApplicationCardGroup: React.FC<ApplicationCardGroupProps> = ({
-  items,
-}) => {
+const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({ items }) => {
   if (items.length === 0) {
     return (
-      <View className="flex-1 bg-white rounded-xl py-4 gap-5">
+      <View className="flex-1 flex flex-col items-center justify-center bg-white rounded-xl py-4 gap-5">
         <MaterialCommunityIcons
           name="file-document-remove-outline"
           size={48}
           color="#1f2937"
         />
         <Text className="text-gray-800 font-poppins-semibold">
-          No Applications
+          No Attendees
         </Text>
       </View>
     );
   }
 
-  const renderItem = ({ item }: { item: TApplication }) => {
+  const renderItem = ({ item }: { item: TAttendees }) => {
     const { user, ticket, status } = item;
 
     const formattedRate = user.rate
@@ -72,7 +70,7 @@ const ApplicationCardGroup: React.FC<ApplicationCardGroupProps> = ({
   return (
     <View className="flex-1 bg-white rounded-xl p-4 gap-5">
       <Text className="font-poppins-semibold text-gray-800 text-lg">
-        Applications
+        Attendeess
       </Text>
       <FlatList
         data={items}
@@ -84,4 +82,4 @@ const ApplicationCardGroup: React.FC<ApplicationCardGroupProps> = ({
   );
 };
 
-export default ApplicationCardGroup;
+export default AttendeesCardGroup;

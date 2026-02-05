@@ -1,4 +1,4 @@
-export { default as ApplicationCardGroup } from "./ApplicationCardGroup";
+export { default as AttendeesCardGroup } from "./AttendeesCardGroup";
 export { default as BadgeGroup } from "./BadgeGroup";
 export { default as BookSearchInputGroup } from "./BookSearchInputGroup";
 export { default as CreateEventStepper } from "./CreateEventStepper";
