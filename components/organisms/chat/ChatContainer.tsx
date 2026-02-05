@@ -1,17 +1,18 @@
 import { ProfileDrawer } from "@/components/molecules";
-import { Footer, MainContainer } from "@/components/organisms/layout";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Footer, MainContainer } from "../layout";
 
-interface HomeContainerProps {
+interface ChatContainerProps {
   children: React.ReactNode;
 }
 
-const HomeContainer: React.FC<HomeContainerProps> = ({ children }) => {
+const ChatContainer: React.FC<ChatContainerProps> = ({ children }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
   const router = useRouter();
 
   return (
@@ -19,7 +20,7 @@ const HomeContainer: React.FC<HomeContainerProps> = ({ children }) => {
       <SafeAreaView className="flex-1 px-5 gap-5">
         <View className="w-full flex flex-row items-center justify-between sticky top-0">
           <Text className="font-poppins-semibold text-lg text-gray-800">
-            Events
+            Chat
           </Text>
 
           <View className="flex flex-row items-center gap-2">
@@ -72,4 +73,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeContainer;
+export default ChatContainer;

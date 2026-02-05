@@ -2,6 +2,7 @@ import { ProfileDrawer } from "@/components/molecules";
 import { Footer, MainContainer } from "@/components/organisms/layout";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { AntDesign } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ScrollView,
@@ -20,6 +21,7 @@ const BookedContainer: React.FC<BookedContainerProps> = ({ children }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { theme } = useTheme();
+  const router = useRouter();
 
   return (
     <MainContainer>
@@ -32,20 +34,35 @@ const BookedContainer: React.FC<BookedContainerProps> = ({ children }) => {
           >
             Booking Confirmation
           </Text>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              theme === "light" ? "bg-white" : "bg-[#171C1C]"
-            }`}
-            style={styles.bar}
-            onPress={() => setIsOpen(true)}
-          >
-            <AntDesign
-              name="bars"
-              size={20}
-              color={theme === "light" ? "#1f2937" : "#e5e7eb"}
-            />
-          </TouchableOpacity>
+          <View className="flex flex-row items-center gap-2">
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="w-10 h-10 rounded-full bg-white flex items-center justify-center relative"
+              style={styles.bar}
+              onPress={() => setIsOpen(true)}
+            >
+              <AntDesign name="bell" size={20} color="#1f2937" />
+
+              <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="w-10 h-10 rounded-full bg-white flex items-center justify-center relative"
+              style={styles.bar}
+              onPress={() => router.push("/chat" as any)}
+            >
+              <AntDesign name="message" size={20} color="#1f2937" />
+              <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="w-10 h-10 rounded-full bg-white flex items-center justify-center"
+              style={styles.bar}
+              onPress={() => setIsOpen(true)}
+            >
+              <AntDesign name="bars" size={20} color="#1f2937" />
+            </TouchableOpacity>
+          </View>
         </View>
         <ScrollView contentContainerStyle={{ flexGrow: 1, gap: 24 }}>
           {children}
