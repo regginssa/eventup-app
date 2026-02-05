@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 import { FlagButton } from "react-native-country-picker-modal";
 import { Avatar } from "../../common";
@@ -7,6 +8,7 @@ import { Avatar } from "../../common";
 const VerifiedBadge = require("@/assets/images/icons/verified_badge.png");
 
 interface ProfileHeaderProps {
+  _id?: string;
   name: string;
   avatar?: string;
   idVerified: boolean;
@@ -22,6 +24,7 @@ interface ProfileHeaderProps {
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+  _id,
   name,
   avatar,
   description,
@@ -32,6 +35,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   country,
   isMe,
 }) => {
+  const router = useRouter();
+
   const formattedRate = rate
     ? rate.toLocaleString(undefined, {
         minimumFractionDigits: 1,
@@ -94,6 +99,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <TouchableOpacity
               activeOpacity={0.8}
               className="w-8 h-8 rounded-lg bg-white flex items-center justify-center"
+              onPress={() =>
+                router.push({
+                  pathname: "/conversation",
+                  params: { otherUserId: _id },
+                })
+              }
             >
               <MaterialCommunityIcons
                 name="message-outline"

@@ -64,6 +64,7 @@ const ProfileScreen = () => {
       return (
         <>
           <ProfileHeader
+            _id={user._id}
             name={user?.name as string}
             idVerified={user?.idVerified as boolean}
             title={user?.title as string}

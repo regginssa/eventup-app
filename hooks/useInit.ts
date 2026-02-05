@@ -1,13 +1,12 @@
 import { fetchUser } from "@/api/services/user";
-import { setAuth } from "@/store/slices/auth.slice";
+import { useAuth } from "@/components/providers/AuthProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
-import { useDispatch } from "react-redux";
 import useRedirect from "./useRedirect";
 
 const useInit = () => {
   const { redirect } = useRedirect();
-  const dispatch = useDispatch();
+  const { setAuthUser } = useAuth();
 
   const initializeUser = async () => {
     const token = await AsyncStorage.getItem("Authorization");
@@ -20,9 +19,8 @@ const useInit = () => {
       const response = await fetchUser(decoded.id);
 
       if (response.data) {
-        dispatch(setAuth({ isAuthenticated: true, user: response.data }));
         redirect(response.data);
-
+        setAuthUser(response.data);
         return response.data;
       }
     } catch (error) {}
@@ -44,10 +42,7 @@ const useInit = () => {
   // };
 
   const initialize = async () => {
-    const user = await initializeUser();
-
-    // if (!user?._id) return;
-    // await initializeEvents(user._id);
+    await initializeUser();
   };
 
   return { initialize };

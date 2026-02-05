@@ -1,4 +1,4 @@
-import { fetchConversationMessages } from "@/api/services/message";
+import { fetchUserConversations } from "@/api/services/conversation";
 import {
   ConversationContainer,
   ConversationItem,
@@ -7,6 +7,7 @@ import {
 } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { IConversation } from "@/types/conversation";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, View } from "react-native";
 
@@ -19,15 +20,17 @@ const Conversation = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const { user } = useAuth();
+  const { otherUserId } = useLocalSearchParams();
 
   useEffect(() => {
     const init = async () => {
       if (!user?._id) return;
-
-      const response = await fetchConversationMessages(user?._id);
+      setLoading(true);
+      const response = await fetchUserConversations(user?._id);
       if (response.data) {
-        setConversations(conversations);
+        setConversations(response.data);
       }
+      setLoading(false);
     };
 
     init();
@@ -47,6 +50,15 @@ const Conversation = () => {
 
     setFilteredConversations(filtered);
   }, [conversations, search]);
+
+  useEffect(() => {
+    if (!otherUserId) return;
+
+    const existingDM = conversations.find(
+      (c) =>
+        c.type === "dm" && c.participants.some((p) => p._id === otherUserId),
+    );
+  }, [otherUserId, conversations]);
 
   return (
     <ConversationContainer>
