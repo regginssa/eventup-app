@@ -138,7 +138,7 @@ const TicketsCheckout = () => {
   const [purchaseLoading, setPurchaseLoading] = useState<boolean>(false);
   const [btnLabel, setBtnLabel] = useState<string>("Purchase");
 
-  const { id: ticketId } = useLocalSearchParams();
+  const { id: ticketId, from } = useLocalSearchParams();
   const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const router = useRouter();
@@ -272,7 +272,7 @@ const TicketsCheckout = () => {
 
       if (updated) {
         Alert.alert("Success", "Ticket is purchased");
-        router.replace("/mine/tickets");
+        router.replace(from || ("/mine/tickets" as any));
       }
     } catch (error: any) {
       Alert.alert("Error", error?.response?.message || "Internal Server Error");

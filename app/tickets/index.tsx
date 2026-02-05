@@ -1,14 +1,12 @@
 import { fetchAllTickets } from "@/api/services/ticket";
-import { Button, Spinner, TicketsContainer } from "@/components";
-import { RootState } from "@/store";
+import { Button, Modal, Spinner, TicketsContainer } from "@/components";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
-import { useSelector } from "react-redux";
 
 const bannerImage = require("@/assets/images/ticket_banner.png");
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
@@ -22,13 +20,14 @@ const currencies = [
 const TicketsScreen = () => {
   const [tickets, setTickets] = useState<ITicket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>(
     currencies[0].value,
   );
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { user } = useSelector((state: RootState) => state.auth);
-
+  const { amount, currency, from } = useLocalSearchParams();
   const router = useRouter();
 
   useEffect(() => {
@@ -63,6 +62,16 @@ const TicketsScreen = () => {
         break;
     }
   }, [selectedCurrency, tickets]);
+
+  useEffect(() => {
+    if (!amount || !currency || !from || tickets.length === 0) return;
+    setSelectedTicket(
+      tickets.find(
+        (t) => t.price === Number(amount) && t.currency === currency,
+      ) || null,
+    );
+    setIsOpen(true);
+  }, [amount, currency, from, tickets]);
 
   const renderItem = ({ item }: { item: ITicket }) => {
     return (
@@ -183,6 +192,78 @@ const TicketsScreen = () => {
           />
         )}
       </View>
+
+      <Modal
+        title="Confirm Ticket"
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        scrolled
+      >
+        {selectedTicket ? (
+          <View className="relative w-full h-[160px]">
+            <Image
+              source={ticketCardBg}
+              alt="Ticket Card BG"
+              style={{ width: "100%", height: "100%" }}
+            />
+
+            <View className="absolute inset-0 flex flex-row items-stretch justify-between">
+              <View className="flex flex-col items-center justify-center w-1/2">
+                <View className="w-[148px] h-[120px] rounded-lg overflow-hidden">
+                  <Image
+                    source={{ uri: selectedTicket.image }}
+                    alt={selectedTicket.name}
+                    style={{ width: "100%", height: "100%" }}
+                    contentFit="cover"
+                  />
+                </View>
+              </View>
+
+              <View className="flex flex-col items-center justify-center w-1/2">
+                <View className="flex flex-col items-center justify-between gap-6">
+                  <View className="flex flex-col items-center justify-center">
+                    <View className="flex flex-row items-start">
+                      <Text className="font-poppins-semibold text-lg text-gray-500">
+                        {getCurrencySymbol(selectedTicket.currency as any)}
+                      </Text>
+                      <Text className="font-poppins-semibold text-3xl text-gray-800">
+                        {selectedTicket.price}
+                      </Text>
+                    </View>
+
+                    <Text className="font-poppins text-gray-700">
+                      {selectedTicket.name}
+                    </Text>
+                  </View>
+
+                  <Button
+                    type="primary"
+                    label="Purchase"
+                    buttonClassName="w-[108px] h-10"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/tickets/checkout",
+                        params: { id: selectedTicket._id, from },
+                      })
+                    }
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        ) : (
+          <View className="flex-1 flex flex-col items-center justify-center gap-2">
+            <MaterialCommunityIcons
+              name="cart-remove"
+              size={24}
+              color="#4b5563"
+            />
+            <Text className="font-dm-sans-medium text-gray-600">
+              No Selected Ticket
+            </Text>
+          </View>
+        )}
+      </Modal>
     </TicketsContainer>
   );
 };

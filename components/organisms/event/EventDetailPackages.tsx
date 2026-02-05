@@ -10,6 +10,7 @@ import { getCurrencySymbol } from "@/utils/format";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSelector } from "react-redux";
@@ -47,6 +48,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   const { flight, hotel, transfer } = useSelector(
     (state: RootState) => state.booking,
   );
+  const router = useRouter();
 
   const standardItems = [
     "Flights (economy)",
@@ -293,6 +295,16 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
               <TouchableOpacity
                 activeOpacity={0.8}
                 className="flex flex-row items-center gap-1"
+                onPress={() =>
+                  router.replace({
+                    pathname: "/tickets",
+                    params: {
+                      amount: event.fee?.amount,
+                      currency: event.fee?.currency,
+                      from: `/event/${event._id}`,
+                    },
+                  })
+                }
               >
                 <Text className="font-dm-sans-bold text-sm text-blue-600 underline">
                   View

@@ -54,7 +54,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   >("current");
   const [departureDate, setDepartureDate] = useState<Date>(new Date());
   const [hotelDepartureDate, setHotelDepartureDate] = useState<Date>(
-    new Date()
+    new Date(),
   );
   const [hotelCheckoutDate, setHotelCheckoutDate] = useState<Date>(new Date());
   const [hotelRooms, setHotelRooms] = useState<number>(1);
@@ -112,13 +112,13 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     const flightArrival = new Date(flightArrivalDate);
     const flightArrivalDateTime = normalizeDateUTC(flightArrival);
     const eventOpeningDateTime = normalizeDateUTC(
-      new Date(event.dates?.start?.date as string)
+      new Date(event.dates?.start?.date as string),
     );
 
     if (flightArrivalDateTime > eventOpeningDateTime) {
       Alert.alert(
         "Invalid Flight Arrival Date",
-        "The flight arrival date cannot be before the event date."
+        "The flight arrival date cannot be before the event date.",
       );
       return null;
     }
@@ -144,7 +144,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       setBookingHotel({
         ...rdHotel,
         offers: response.data,
-      })
+      }),
     );
     dispatch(setBookingHotelRooms(hotelRooms));
 
@@ -155,7 +155,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
   const searchTransfers = async (
     flight: TFlightItemData,
-    hotel: THotelItemData
+    hotel: THotelItemData,
   ) => {
     if (!flight) {
       Alert.alert("Flight Not Selected");
@@ -173,7 +173,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (flightArrivalDateTime > hotelDepartureDateTime) {
       Alert.alert(
         "Invalid Hotel Departure Date",
-        "The hotel departure date cannot be before the flight arrival date."
+        "The hotel departure date cannot be before the flight arrival date.",
       );
       return;
     }
@@ -207,7 +207,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         ...rdTransfer,
         ah: response.data.airportToHotel,
         he: response.data.hotelToEvent,
-      })
+      }),
     );
   };
 
@@ -220,7 +220,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return Alert.alert("Event timezone is missing.");
 
     const eventDateTime = normalizeDateUTC(
-      new Date(event.dates?.start?.date as string)
+      new Date(event.dates?.start?.date as string),
     );
     const departureDateTime = normalizeDateUTC(departureDate);
 
@@ -231,28 +231,28 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (eventDateTime < departureDateTime) {
       return Alert.alert(
         "Invalid Departure Date",
-        "The departure date cannot be after the event date."
+        "The departure date cannot be after the event date.",
       );
     }
 
     if (eventDateTime > hotelCheckoutDateTime) {
       return Alert.alert(
         "Invalid Hotel Checkout Date",
-        "The hotel checkout date cannot be after the event date."
+        "The hotel checkout date cannot be after the event date.",
       );
     }
 
     if (hotelDepartureDateTime > eventDateTime) {
       return Alert.alert(
         "Invalid Hotel Departure Date",
-        "The hotel departure date cannot be after the event date."
+        "The hotel departure date cannot be after the event date.",
       );
     }
 
     if (travelers < hotelRooms) {
       return Alert.alert(
         "Invalid Travelers",
-        "The number of travelers cannot be less than the number of hotel rooms."
+        "The number of travelers cannot be less than the number of hotel rooms.",
       );
     }
 
@@ -332,12 +332,19 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       <View className="w-full h-[1px] bg-gray-200"></View>
 
-      <Text className="font-dm-sans-semibold text-sm text-red-500">
-        Important: All of your bookings will be based on event timezone:{" "}
-        <Text className="font-dm-sans-bold">
-          {event.dates?.timezone || "UTC"}
+      <View className="w-full p-4 rounded-xl flex flex-row items-start gap-2 bg-red-200 border border-red-600">
+        <MaterialCommunityIcons
+          name="information-outline"
+          size={24}
+          color="#dc2626"
+        />
+        <Text className="font-dm-sans-semibold text-sm text-red-600">
+          All of your bookings will be based on event timezone:{" "}
+          <Text className="font-dm-sans-bold">
+            {event.dates?.timezone || "UTC"}
+          </Text>
         </Text>
-      </Text>
+      </View>
 
       <View className="w-full h-[1px] bg-gray-200"></View>
 
@@ -441,7 +448,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                   ...flight.offers.filter((item) => item.id !== selected.id),
                 ];
                 dispatch(
-                  setBookingFlight({ ...flight, offers: reorderedData })
+                  setBookingFlight({ ...flight, offers: reorderedData }),
                 );
               }
             }}
@@ -462,11 +469,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 const reorderedData = [
                   selected,
                   ...rdHotel.offers.filter(
-                    (item) => item.hotel?.hotelId !== selected.hotel?.hotelId
+                    (item) => item.hotel?.hotelId !== selected.hotel?.hotelId,
                   ),
                 ];
                 dispatch(
-                  setBookingHotel({ ...rdHotel, offers: reorderedData })
+                  setBookingHotel({ ...rdHotel, offers: reorderedData }),
                 );
               }
             }}
