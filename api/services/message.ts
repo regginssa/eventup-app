@@ -6,5 +6,5 @@ import { CONVERSATION_BASE } from "../endpoints";
 export const fetchConversationMessages = async (
   conversationId: string,
 ): Promise<ApiResponse<IMessage[]>> => {
-  return await AxiosInstance(CONVERSATION_BASE + conversationId);
+  return await AxiosInstance.get(CONVERSATION_BASE + conversationId);
 };
