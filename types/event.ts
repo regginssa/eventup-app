@@ -1,3 +1,4 @@
+import { ITicket } from "./ticket";
 import { IUser } from "./user";
 
 type TM = {
@@ -67,6 +68,12 @@ export type TEventStatus =
   | "completed"
   | "cancelled";
 
+export type TApplication = {
+  user: IUser;
+  ticket?: ITicket;
+  status: "approved" | "blocked";
+};
+
 export interface IEvent {
   _id?: string;
   type?: "ai" | "user";
@@ -81,4 +88,5 @@ export interface IEvent {
   fee?: TEventFee;
   hoster?: IUser;
   status?: TEventStatus;
+  applications?: TApplication;
 }

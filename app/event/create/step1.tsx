@@ -77,8 +77,8 @@ const CreateEventStep1Screen = () => {
           vibe: vibe.map((v) => v.value.toString()),
           venue: venueType.map((v) => v.value.toString()),
         },
-        hoster: user._id as any,
-      })
+        hoster: user?._id as any,
+      }),
     );
     router.push("/event/create/step2");
   };
@@ -95,7 +95,7 @@ const CreateEventStep1Screen = () => {
     // ---- Restore Category ----
     if (category) {
       const selectedCategory = EVENT_CATEGORIES.find(
-        (c) => c.value === classifications?.category
+        (c) => c.value === classifications?.category,
       );
       setCategory(selectedCategory || null);
 
@@ -104,7 +104,7 @@ const CreateEventStep1Screen = () => {
         const key = selectedCategory.value as keyof typeof EVENT_SUB_CATEGORIES;
         const list = EVENT_SUB_CATEGORIES[key] || [];
         const restored = list.filter((sc: any) =>
-          subcategories.includes(sc.value)
+          subcategories.includes(sc.value),
         );
         setSubcategories(restored);
       }
@@ -122,7 +122,7 @@ const CreateEventStep1Screen = () => {
         const key = selectedCategory.value as keyof typeof EVENT_SUB_CATEGORIES;
         const list = EVENT_VENUE_TYPE[key] || [];
         const restored = list.filter((v: any) =>
-          classifications?.venue?.includes(v.value)
+          classifications?.venue?.includes(v.value),
         );
         setVenueType(restored);
       }
