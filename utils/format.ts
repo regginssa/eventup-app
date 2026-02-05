@@ -26,7 +26,7 @@ export const formatEventLabel = (key: string) => {
 
 export const formatEventDateTime = (
   date: string | undefined,
-  time: string | undefined
+  time: string | undefined,
 ) => {
   if (!date || !time) return "--:--";
 
@@ -83,11 +83,11 @@ export const formatTime = (date: Date): string => {
   return `${hours}:${minutes}`;
 };
 
-export const getCurrencySymbol = (code: "usd" | "eur" | "pln"): string => {
-  const map: Record<"usd" | "eur" | "pln", string> = {
-    usd: "$",
-    eur: "€",
-    pln: "zł",
+export const getCurrencySymbol = (code: "USD" | "EUR" | "PLN"): string => {
+  const map: Record<"USD" | "EUR" | "PLN", string> = {
+    USD: "$",
+    EUR: "€",
+    PLN: "zł",
   };
 
   return map[code];
@@ -126,7 +126,7 @@ export const formatName = (value: string) => {
           if (!part) return "";
           return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
         })
-        .join("-")
+        .join("-"),
     )
     .join(" ");
 };
@@ -148,7 +148,7 @@ export const formatDateTime = (dateStr: string) => {
 };
 
 export const formatTravelproDateTime = (
-  dateObj: Date
+  dateObj: Date,
 ): { date: string; time: string } => {
   const year = dateObj.getFullYear();
   const month = (dateObj.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-based

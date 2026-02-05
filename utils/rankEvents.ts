@@ -1,4 +1,5 @@
-import { IEvent, IUser } from "@/types/data";
+import { IEvent } from "@/types/event";
+import { IUser } from "@/types/user";
 
 type Ranked = {
   event: IEvent;
@@ -27,7 +28,7 @@ const isSubset = (needles: string[], hay: string[]) =>
 /** Haversine (meters) */
 function distanceMeters(
   a?: { latitude: number; longitude: number } | null,
-  b?: { latitude: number; longitude: number } | null
+  b?: { latitude: number; longitude: number } | null,
 ): number | undefined {
   if (!a || !b) return undefined;
   const R = 6371000;
@@ -59,18 +60,18 @@ function distanceMeters(
 function computeTier(
   ev: IEvent,
   user: IUser,
-  locationScore: number
+  locationScore: number,
 ): { tier: number; reasons: string[] } {
   const prefs = user.preferred ?? ({} as IUser["preferred"]);
   const prefCategory = prefs.category ?? null;
   const prefSubs = toArr(prefs.subcategories).map(lc);
   const prefVibe = toArr(prefs.vibe).map(lc);
-  const prefVenue = toArr(prefs.venue_type).map(lc);
+  const prefVenue = toArr(prefs.venueType).map(lc);
 
-  const evCategory = ev.category ?? null;
-  const evSubs = toArr(ev.subcategories).map(lc);
-  const evVibe = toArr(ev.vibe).map(lc);
-  const evVenue = toArr(ev.venue_type).map(lc);
+  const evCategory = ev.classifications?.category ?? null;
+  const evSubs = toArr(ev.classifications?.subcategories).map(lc);
+  const evVibe = toArr(ev.classifications?.vibe).map(lc);
+  const evVenue = toArr(ev.classifications?.venue).map(lc);
 
   const reasons: string[] = [];
 
@@ -113,14 +114,14 @@ function computeTier(
 /** Location score: nearby buckets OR same-country; city-mode: region equals user.region gives a bonus. */
 function computeLocationScore(
   ev: IEvent,
-  user: IUser
+  user: IUser,
 ): { score: number; distance?: number; reasons: string[] } {
   const reasons: string[] = [];
   const mode = user.preferred?.location ?? "nearby";
 
   const userCoord = user.location?.coordinate;
-  const evCoord = ev.coordinate;
-  const d = distanceMeters(userCoord, evCoord);
+  const evCoord = ev.location?.coordinate;
+  const d = distanceMeters(userCoord, evCoord as any);
 
   let base = 0;
   if (mode === "nearby" && d != null) {
@@ -136,9 +137,9 @@ function computeLocationScore(
     }
   } else if (mode === "country") {
     const sameCountry =
-      !!user.location?.country_code &&
-      !!ev.country_code &&
-      lc(user.location.country_code) === lc(ev.country_code);
+      !!user.location?.country.code &&
+      !!ev.location?.country.code &&
+      lc(user.location.country.code) === lc(ev.location.country.code);
     if (sameCountry) {
       base = 2;
       reasons.push("country:same");
@@ -147,8 +148,8 @@ function computeLocationScore(
 
   // "city" mode: user picks city/region string; events only have region
   if (mode === "city") {
-    const userRegion = lc(user.location?.region);
-    const evRegion = lc(ev.region);
+    const userRegion = lc(user.location.city.name);
+    const evRegion = lc(ev.location?.city.name);
     if (userRegion && evRegion && userRegion === evRegion) {
       base += 3;
       reasons.push("city:region-match");
@@ -195,8 +196,8 @@ export function rankEvents(events: IEvent[], user: IUser): IEvent[] {
     }
 
     // then earliest opening_date
-    const ad = a.event.opening_date
-      ? new Date(a.event.opening_date).getTime()
+    const ad = a.event.dates?.start.date
+      ? new Date(a.event.dates.start.date).getTime()
       : Number.MAX_SAFE_INTEGER;
     const bd = b.event.opening_date
       ? new Date(b.event.opening_date).getTime()

@@ -1,7 +1,7 @@
 export const CURRENCIES = [
-  { label: "USD", value: "usd" },
-  { label: "EUR", value: "eur" },
-  { label: "PLN", value: "pln" },
+  { label: "USD", value: "USD" },
+  { label: "EUR", value: "EUR" },
+  { label: "PLN", value: "PLN" },
 ];
 
 export const USD_VALUES = [

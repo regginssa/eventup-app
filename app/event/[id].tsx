@@ -18,6 +18,7 @@ import {
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
 import { EventDates, IEvent } from "@/types/event";
+import { ITicket } from "@/types/ticket";
 import { formatEventLabel } from "@/utils/format";
 import * as Location from "expo-location";
 import { useLocalSearchParams } from "expo-router";
@@ -43,13 +44,13 @@ const EventDetailScreen = () => {
   const [selectedTab, setSelectedTab] = useState<TDropdownItem>(userTabs[0]);
   const [currentLocationCoords, setCurrentLocationCoords] =
     useState<TCoordinate | null>(null);
-  ``;
   const [currentCity, setCurrentCity] = useState<string | null>(null);
   const [currentCountryCode, setCurrentCountryCode] = useState<string | null>(
     null,
   );
   const [booking, setBooking] = useState<IBooking | null>(null);
   const [services, setServices] = useState<string[]>([]);
+  const [ticket, setTicket] = useState<ITicket | null>(null);
 
   const { id, type } = useLocalSearchParams();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -153,6 +154,21 @@ const EventDetailScreen = () => {
     init();
   }, []);
 
+  useEffect(() => {
+    if (!user || !event?.fee) return;
+
+    if (event.fee.type === "free") {
+      setTicket(null);
+    } else {
+      const ticket = user.tickets.find(
+        (t) =>
+          t.currency === event.fee?.currency &&
+          t.price === Number(event.fee.amount),
+      );
+      setTicket(ticket || null);
+    }
+  }, [user, event]);
+
   return (
     <EventDetailContainer>
       <View className="flex-1 gap-6">
@@ -190,17 +206,7 @@ const EventDetailScreen = () => {
                   bookedPackageType={booking?.package || "standard"}
                   totalPrice={booking?.price.total || 0}
                   fee={event.type === "user" ? event.fee : undefined}
-                  isTicketOwned={
-                    event.type === "user" &&
-                    event.fee &&
-                    user?.tickets &&
-                    user?.tickets.length > 0 &&
-                    user?.tickets.some(
-                      (t) =>
-                        t.currency === event.fee?.currency &&
-                        t.price === event.fee.amount,
-                    )
-                  }
+                  ticket={ticket}
                 />
               ) : selectedTab.value === "overview" ? (
                 <EventDetailOverview

@@ -1,5 +1,5 @@
-import { fetchAllTickets } from "@/api/services/ticket";
 import { Button, Modal, Spinner, TicketsContainer } from "@/components";
+import { useTicket } from "@/components/providers/TicketProvider";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -18,7 +18,6 @@ const currencies = [
 ];
 
 const TicketsScreen = () => {
-  const [tickets, setTickets] = useState<ITicket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>(
@@ -30,24 +29,7 @@ const TicketsScreen = () => {
   const { amount, currency, from } = useLocalSearchParams();
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchTicketsData = async () => {
-      try {
-        setLoading(true);
-
-        const response = await fetchAllTickets();
-
-        if (response.data) {
-          setTickets(response.data);
-        }
-      } catch (error) {
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTicketsData();
-  }, []);
+  const { tickets } = useTicket();
 
   useEffect(() => {
     switch (selectedCurrency) {
@@ -75,7 +57,7 @@ const TicketsScreen = () => {
 
   const renderItem = ({ item }: { item: ITicket }) => {
     return (
-      <View className="relative w-full h-[160px]">
+      <View className="relative w-full h-[160px] rounded-xl overflow-hidden">
         <Image
           source={ticketCardBg}
           alt="Ticket Card BG"

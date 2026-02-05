@@ -1,5 +1,5 @@
 import { InitContainer } from "@/components/organisms";
-import { ThemeProvider } from "@/components/providers";
+import { ThemeProvider, TicketProvider } from "@/components/providers";
 import { STRIPE_PUBLISHABLE_KEY } from "@/config/env";
 import { store } from "@/store";
 import {
@@ -55,30 +55,32 @@ export default function RootLayout() {
   return (
     <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
       <Provider store={store}>
-        <ThemeProvider>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-            style={{ flex: 1 }}
-          >
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: "transparent" },
-              }}
+        <TicketProvider>
+          <ThemeProvider>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : undefined}
+              style={{ flex: 1 }}
             >
-              <Stack.Screen name="start" />
-              <Stack.Screen name="auth" />
-              <Stack.Screen name="home" />
-              <Stack.Screen name="map" />
-              <Stack.Screen name="didit" />
-              <Stack.Screen name="booking" />
-              <Stack.Screen name="profile" />
-              <Stack.Screen name="tickets" />
-              <Stack.Screen name="subscription" />
-            </Stack>
-          </KeyboardAvoidingView>
-          <InitContainer />
-        </ThemeProvider>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: "transparent" },
+                }}
+              >
+                <Stack.Screen name="start" />
+                <Stack.Screen name="auth" />
+                <Stack.Screen name="home" />
+                <Stack.Screen name="map" />
+                <Stack.Screen name="didit" />
+                <Stack.Screen name="booking" />
+                <Stack.Screen name="profile" />
+                <Stack.Screen name="tickets" />
+                <Stack.Screen name="subscription" />
+              </Stack>
+            </KeyboardAvoidingView>
+            <InitContainer />
+          </ThemeProvider>
+        </TicketProvider>
       </Provider>
     </StripeProvider>
   );

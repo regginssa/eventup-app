@@ -476,7 +476,7 @@ const TripSummary = ({
   currency: TCurrency;
 }) => {
   const { theme } = useTheme();
-  const currencySymbol = getCurrencySymbol(currency);
+  const currencySymbol = getCurrencySymbol(currency as any);
 
   return (
     <View
