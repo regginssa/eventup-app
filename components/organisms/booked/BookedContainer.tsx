@@ -49,7 +49,7 @@ const BookedContainer: React.FC<BookedContainerProps> = ({ children }) => {
               activeOpacity={0.8}
               className="w-10 h-10 rounded-full bg-white flex items-center justify-center relative"
               style={styles.bar}
-              onPress={() => router.push("/chat" as any)}
+              onPress={() => router.push("/conversation" as any)}
             >
               <AntDesign name="message" size={20} color="#1f2937" />
               <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>

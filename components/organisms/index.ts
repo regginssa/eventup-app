@@ -1,8 +1,8 @@
 export { default as AuthScreenContainer } from "./auth/AuthScreenContainer";
 export { default as BookedContainer } from "./booked/BookedContainer";
 export { default as BookingContainer } from "./booking/BookingContainer";
-export { default as ChatContainer } from "./chat/ChatContainer";
 export { default as CheckoutContainer } from "./checkout/CheckoutContainer";
+export { default as ConversationContainer } from "./conversation/ConversationContainer";
 export { default as CreateEventContainer } from "./event/CreateEventContainer";
 export { default as EventDetailContainer } from "./event/EventDetailContainer";
 export { default as EventDetailEmpty } from "./event/EventDetailEmpty";

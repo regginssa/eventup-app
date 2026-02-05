@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 
-const ChatRoomRootLayout = () => {
+const ChatRootLayout = () => {
   return (
     <Stack>
       <Stack.Screen name="group" />

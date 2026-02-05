@@ -4,11 +4,13 @@ import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MainContainer } from "../layout";
 
-interface ChatContainerProps {
+interface ConversationContainerProps {
   children: React.ReactNode;
 }
 
-const ChatContainer: React.FC<ChatContainerProps> = ({ children }) => {
+const ConversationContainer: React.FC<ConversationContainerProps> = ({
+  children,
+}) => {
   const router = useRouter();
 
   return (
@@ -23,7 +25,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ children }) => {
             <Feather name="arrow-left" size={16} color="#4b5563" />
           </TouchableOpacity>
           <Text className="font-poppins-semibold text-lg text-gray-800">
-            Chat
+            Conversation
           </Text>
           <View className="w-10"></View>
         </View>
@@ -34,4 +36,4 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ children }) => {
   );
 };
 
-export default ChatContainer;
+export default ConversationContainer;

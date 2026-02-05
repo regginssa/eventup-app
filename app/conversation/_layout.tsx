@@ -1,10 +1,12 @@
 import { Stack } from "expo-router";
 
-const ChatRootLayout = () => {
+const ConversationRootLayout = () => {
   return (
     <Stack>
       <Stack.Screen name="index" />
-      <Stack.Screen name="room" />
+      <Stack.Screen name="chat" />
     </Stack>
   );
 };
+
+export default ConversationRootLayout;

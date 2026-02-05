@@ -76,7 +76,7 @@ export default function RootLayout() {
                 <Stack.Screen name="profile" />
                 <Stack.Screen name="tickets" />
                 <Stack.Screen name="subscription" />
-                <Stack.Screen name="chat" />
+                <Stack.Screen name="conversation" />
               </Stack>
             </KeyboardAvoidingView>
             <InitContainer />

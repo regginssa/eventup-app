@@ -8,6 +8,8 @@ export const GOOGLE_WEB_CLIENT_ID =
 export const GOOGLE_WEB_CLIENT_SECRET = "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";
 export const SERVER_API_ENDPOINT =
   "https://eventup-server-production.up.railway.app/api/v1";
+export const SERVER_SOCKET_URL =
+  "wss://eventup-server-production.up.railway.app";
 // https://eventup-server-production.up.railway.app
 // http://192.168.125.100:5001
 export const STRIPE_PUBLISHABLE_KEY =

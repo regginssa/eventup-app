@@ -64,3 +64,9 @@ export const CREATE_TICKET_SELL_PAYOUT = "/web3/create/sell-ticket-payout";
 // Subscription
 export const FETCH_ALL_SUBSCRIPTIONS = "/subscription/all";
 export const SUBSCRIPTION_BASE = "/subscription/";
+
+// Conversation
+export const CONVERSATION_BASE = "/conversations/";
+
+// Message
+export const MESSAGE_BASE = "/messages/";
