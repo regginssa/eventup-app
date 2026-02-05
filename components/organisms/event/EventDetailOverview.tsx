@@ -1,8 +1,11 @@
 import { Avatar } from "@/components/common";
+import { RootState } from "@/store";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 import { FlagButton } from "react-native-country-picker-modal";
+import { useSelector } from "react-redux";
 
 const VerifiedBadge = require("@/assets/images/icons/verified_badge.png");
 
@@ -26,6 +29,9 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
   description,
   notes,
 }) => {
+  const { user } = useSelector((state: RootState) => state.auth);
+  const router = useRouter();
+
   return (
     <View className="flex-1 gap-4">
       <View className="w-full flex flex-row items-center justify-between">
@@ -69,14 +75,19 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
           </View>
         )}
 
-        {hoster && (
-          <TouchableOpacity activeOpacity={0.8}>
+        {hoster && hoster._id !== user?._id && (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() =>
+              router.push({ pathname: "/profile", params: { id: hoster._id } })
+            }
+          >
             <Feather name="arrow-right" size={20} color="#374151" />
           </TouchableOpacity>
         )}
       </View>
 
-      <View className="w-full gap-4">
+      <View className="w-full gap-2">
         <Text className="font-poppins-semibold text-gray-700">
           About this event
         </Text>
