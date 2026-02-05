@@ -45,7 +45,7 @@ const Tabs: React.FC<TabsProps> = ({
                 </Text>
               </View>
 
-              <View className="w-full h-[2px]">
+              <View className="w-full h-1">
                 {selectedTab.value === tab.value && (
                   <LinearGradient
                     colors={["#C427E0", "#844AFF", "#12A9FF"]}

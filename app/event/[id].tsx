@@ -1,5 +1,6 @@
 import { fetchBookingByUserIdAndEventId } from "@/api/services/booking";
 import { fetchEvent } from "@/api/services/event";
+import { ApplicationCardGroup } from "@/components";
 import { Spinner, Tabs } from "@/components/common";
 import {
   EventDetailContainer,
@@ -36,10 +37,10 @@ const ownerTabs: TDropdownItem[] = [
 ];
 
 const EventDetailScreen = () => {
-  const [tabs, setTabs] = useState<TDropdownItem[]>(userTabs);
+  const [tabs, setTabs] = useState<TDropdownItem[]>([]);
   const [event, setEvent] = useState<IEvent | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedTab, setSelectedTab] = useState<TDropdownItem>(tabs[0]);
+  const [selectedTab, setSelectedTab] = useState<TDropdownItem>(userTabs[0]);
   const [currentLocationCoords, setCurrentLocationCoords] =
     useState<TCoordinate | null>(null);
   ``;
@@ -76,10 +77,7 @@ const EventDetailScreen = () => {
       const response = await fetchEvent(id);
 
       setEvent(response.data);
-
-      if (response.data.hoster?._id === user?._id) {
-        setTabs(ownerTabs);
-      }
+      return response.data;
     } catch (error: any) {
       throw new Error(error.message);
     }
@@ -132,9 +130,20 @@ const EventDetailScreen = () => {
 
   const init = useCallback(async () => {
     setLoading(true);
-    await fetchEventData();
+    const fetchedEvent = await fetchEventData();
+
+    if (
+      fetchedEvent?.type === "user" &&
+      fetchedEvent.hoster?._id === user?._id
+    ) {
+      setLoading(false);
+      setTabs(ownerTabs);
+      setSelectedTab(ownerTabs[0]);
+      return;
+    }
     await fetchBookingData();
     await fetchUserCurrentLocation();
+    setTabs(userTabs);
     dispatch(setBookingFlight(null));
     dispatch(setBookingHotel(null));
     setLoading(false);
@@ -212,9 +221,11 @@ const EventDetailScreen = () => {
                   description={event.description}
                   eventType={event.type as any}
                 />
-              ) : (
+              ) : selectedTab.value === "itinerary" ? (
                 <EventDetailItinerary booking={booking} />
-              )}
+              ) : selectedTab.value === "" ? (
+                <ApplicationCardGroup items={event.applications || []} />
+              ) : null}
             </View>
           </>
         ) : (

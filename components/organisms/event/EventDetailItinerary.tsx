@@ -12,17 +12,15 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
 }) => {
   if (!booking) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <View className="flex-1 items-center justify-center gap-2">
-          <MaterialCommunityIcons
-            name="calendar-clock-outline"
-            size={48}
-            color="#1f2937"
-          />
-          <Text className="text-gray-800 font-poppins-semibold">
-            No itinerary
-          </Text>
-        </View>
+      <View className="flex-1 items-center justify-center gap-2">
+        <MaterialCommunityIcons
+          name="calendar-clock-outline"
+          size={48}
+          color="#1f2937"
+        />
+        <Text className="text-gray-800 font-poppins-semibold">
+          No itinerary
+        </Text>
       </View>
     );
   }

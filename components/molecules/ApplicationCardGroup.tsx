@@ -11,6 +11,21 @@ interface ApplicationCardGroupProps {
 const ApplicationCardGroup: React.FC<ApplicationCardGroupProps> = ({
   items,
 }) => {
+  if (items.length === 0) {
+    return (
+      <View className="flex-1 bg-white rounded-xl py-4 gap-5">
+        <MaterialCommunityIcons
+          name="file-document-remove-outline"
+          size={48}
+          color="#1f2937"
+        />
+        <Text className="text-gray-800 font-poppins-semibold">
+          No Applications
+        </Text>
+      </View>
+    );
+  }
+
   const renderItem = ({ item }: { item: TApplication }) => {
     const { user, ticket, status } = item;
 
