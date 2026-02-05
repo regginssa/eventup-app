@@ -1,5 +1,5 @@
 import { Button, MineContainer } from "@/components";
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -7,7 +7,6 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Text, View } from "react-native";
-import { useSelector } from "react-redux";
 
 const bannerImage = require("@/assets/images/ticket_banner.png");
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
@@ -20,7 +19,7 @@ type TTicketItem = {
 const MineTickets = () => {
   const [items, setItems] = useState<TTicketItem[]>([]);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {

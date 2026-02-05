@@ -4,7 +4,7 @@ import {
   fetchTokenPricesAndFee,
 } from "@/api/services/web3";
 import { Button, CheckoutContainer, CryptoPayout } from "@/components";
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -18,7 +18,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
 
@@ -198,8 +197,7 @@ const MineSellTicketsCheckout = () => {
   const [btnLabel, setBtnLabel] = useState<string>("Sell");
 
   const { id: ticketId } = useLocalSearchParams();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+  const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {

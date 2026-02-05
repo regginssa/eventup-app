@@ -1,13 +1,12 @@
 import { fetchIdentityVerificationSession } from "@/api/services/didit";
 import { Button, Modal } from "@/components/common";
 import { OnboardingContainer } from "@/components/organisms";
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Linking, StyleSheet, Text, View } from "react-native";
-import { useSelector } from "react-redux";
 
 const IdImage = require("@/assets/images/id_image.png");
 
@@ -16,7 +15,7 @@ const OnboardingStep3Screen = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
 
   const handleStart = async () => {
     if (!user?._id) return;

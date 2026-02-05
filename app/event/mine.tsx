@@ -3,12 +3,11 @@ import { fetchEventsByUser } from "@/api/services/event";
 import { Tabs } from "@/components/common";
 import { EventsPreviewGroup } from "@/components/molecules";
 import { MyEventsScreenContainer } from "@/components/organisms";
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { TDropdownItem } from "@/types";
 import { IEvent, TEventStatus } from "@/types/event";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 
 const tabs: TDropdownItem[] = [
   {
@@ -58,7 +57,7 @@ const MyEventsScreen = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [events, setEvents] = useState<IEvent[]>([]);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
 
   useEffect(() => {
     const loadData = async () => {

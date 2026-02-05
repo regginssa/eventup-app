@@ -3,15 +3,13 @@ import { updateUser } from "@/api/services/user";
 import { Avatar, Button, Input, Textarea } from "@/components/common";
 import { TAvatar } from "@/components/common/Avatar";
 import { OnboardingContainer } from "@/components/organisms";
-import { setAuthUser } from "@/store/slices/auth.slice";
 
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 
 const OnboardingStep2Screen = () => {
   const [avatar, setAvatar] = useState<string>("");
@@ -23,8 +21,7 @@ const OnboardingStep2Screen = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+  const { user, setAuthUser } = useAuth();
 
   const validate = () => {
     setInvalidTitle(title.trim().length === 0 || title.trim().length > 20);
@@ -75,7 +72,7 @@ const OnboardingStep2Screen = () => {
       const response = await updateUser(user._id, updates);
 
       if (response.ok) {
-        dispatch(setAuthUser(response.data));
+        setAuthUser(response.data);
 
         router.replace("/auth/onboarding/step3");
       }

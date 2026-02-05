@@ -3,8 +3,6 @@ import {
   fetchStripeCustomerId,
   saveStripePaymentMethod,
 } from "@/api/services/stripe";
-import { RootState } from "@/store";
-import { setAuthUser } from "@/store/slices/auth.slice";
 import {
   initPaymentSheet,
   presentPaymentSheet,
@@ -18,8 +16,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 import { StripePaymentMethodGroup } from "../molecules";
+import { useAuth } from "../providers/AuthProvider";
 
 const CardsGroup = require("@/assets/images/icons/credit_cards_group.png");
 
@@ -34,8 +32,7 @@ const CardPayment: React.FC<CardPaymentProps> = ({
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+  const { user, setAuthUser } = useAuth();
 
   const handleAddCard = async () => {
     try {
@@ -71,7 +68,7 @@ const CardPayment: React.FC<CardPaymentProps> = ({
 
       const response = await saveStripePaymentMethod(clientSecretRes.data);
 
-      dispatch(setAuthUser(response.data));
+      setAuthUser(response.data);
       Alert.alert("Success", "Card is successfully saved");
     } catch (error) {
       Alert.alert("Error", "Card is not added");

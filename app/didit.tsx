@@ -1,7 +1,6 @@
 import { fetchUser } from "@/api/services/user";
 import { Button } from "@/components/common";
-import { RootState } from "@/store";
-import { setAuthUser } from "@/store/slices/auth.slice";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { TKycStatus } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -10,7 +9,6 @@ import LottieView from "lottie-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useDispatch, useSelector } from "react-redux";
 
 const DiditScreen = () => {
   const [kycStatus, setKycStatus] = useState<TKycStatus>("In Progress");
@@ -19,8 +17,7 @@ const DiditScreen = () => {
 
   const { status } = useLocalSearchParams();
   const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+  const { user, setAuthUser } = useAuth();
 
   const handleGoBack = async () => {
     if (!user?._id) return;
@@ -31,7 +28,7 @@ const DiditScreen = () => {
       const response = await fetchUser(user._id);
 
       if (response.ok) {
-        dispatch(setAuthUser(response.data));
+        setAuthUser(response.data);
 
         if (kycStatus === "Approved") {
           router.replace("/auth/onboarding/step4");

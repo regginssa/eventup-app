@@ -1,15 +1,12 @@
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from "@/components/providers/AuthProvider";
 import useInit from "@/hooks/useInit";
-import { RootState } from "@/store";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
 
 const InitContainer = () => {
-  const authenticate = useAuth();
   const { initialize } = useInit();
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
 
   const router = useRouter();
 

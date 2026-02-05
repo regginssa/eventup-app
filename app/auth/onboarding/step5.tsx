@@ -1,15 +1,14 @@
 import { fetchUser } from "@/api/services/user";
 import { Button } from "@/components/common";
 import { OnboardingContainer } from "@/components/organisms";
-import { setAuthUser } from "@/store/slices/auth.slice";
 
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 import { useRef, useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 const CongImage = require("@/assets/images/cong_image.png");
 
@@ -18,7 +17,7 @@ const OnboarindStep5Screen = () => {
   const lottieRef = useRef<LottieView>(null);
 
   const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, setAuthUser } = useAuth();
   const dispatch = useDispatch();
 
   const handleJoinNow = async () => {
@@ -30,7 +29,7 @@ const OnboarindStep5Screen = () => {
       const response = await fetchUser(user._id);
 
       if (response.ok) {
-        dispatch(setAuthUser(response.data));
+        setAuthUser(response.data);
         router.replace("/home");
       }
     } catch (error: any) {

@@ -2,14 +2,13 @@ import { setAuthToken } from "@/api/client";
 import { emailRegister, googleRegister } from "@/api/services/auth";
 import { Button, Input, PasswordInput } from "@/components/common";
 import { AuthScreenContainer } from "@/components/organisms";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/config/env";
-import { setAuth } from "@/store/slices/auth.slice";
 import { Feather } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
-import { useDispatch } from "react-redux";
 
 const RegisterScreen = () => {
   const [fullname, setFullName] = useState<string>("");
@@ -28,7 +27,7 @@ const RegisterScreen = () => {
   >(undefined);
 
   const router = useRouter();
-  const dispatch = useDispatch();
+  const { setAuthUser } = useAuth();
 
   GoogleSignin.configure({
     webClientId: GOOGLE_WEB_CLIENT_ID,
@@ -104,7 +103,7 @@ const RegisterScreen = () => {
 
       const { token, user } = response.data;
       await setAuthToken(token);
-      dispatch(setAuth({ isAuthenticated: true, user }));
+      setAuthUser(user);
 
       Alert.alert("Welcome !!!");
       router.replace("/auth/onboarding/step1");
@@ -132,7 +131,7 @@ const RegisterScreen = () => {
 
       const { token, user } = response.data;
       await setAuthToken(token);
-      dispatch(setAuth({ isAuthenticated: true, user }));
+      setAuthUser(user);
 
       Alert.alert("Welcome !!!");
       router.replace("/auth/onboarding/step1");

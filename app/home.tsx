@@ -2,7 +2,7 @@ import { fetchEventsFeed } from "@/api/services/event";
 import { Input, Tabs } from "@/components/common";
 import { EventFilterModal, EventsPreviewGroup } from "@/components/molecules";
 import { HomeContainer } from "@/components/organisms";
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { TDropdownItem, TPagination } from "@/types";
 import { IEvent } from "@/types/event";
 import { Country, RegionType } from "@/types/location.types";
@@ -23,7 +23,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSelector } from "react-redux";
 
 const tabs: TDropdownItem[] = [
   {
@@ -58,7 +57,7 @@ const HomeScreen = () => {
   const [category, setCategory] = useState<TDropdownItem | null>(null);
 
   const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
 
   const handleNext = async () => {
     if (!user?._id) return;

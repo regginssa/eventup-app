@@ -1,11 +1,10 @@
 import { Avatar } from "@/components/common";
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 import { FlagButton } from "react-native-country-picker-modal";
-import { useSelector } from "react-redux";
 
 const VerifiedBadge = require("@/assets/images/icons/verified_badge.png");
 
@@ -29,7 +28,7 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
   description,
   notes,
 }) => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
   const router = useRouter();
 
   return (

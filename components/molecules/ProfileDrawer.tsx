@@ -1,4 +1,3 @@
-import { RootState } from "@/store";
 import { IUser } from "@/types/user";
 import {
   AntDesign,
@@ -20,8 +19,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSelector } from "react-redux";
 import { Avatar, Drawer } from "../common";
+import { useAuth } from "../providers/AuthProvider";
 import { useTheme } from "../providers/ThemeProvider";
 
 const LogoImage = require("@/assets/images/logo.png");
@@ -297,7 +296,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
 };
 
 const ProfileDrawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
 
   return (
     <Drawer

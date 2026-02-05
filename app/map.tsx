@@ -2,8 +2,8 @@ import { fetchAllEvents } from "@/api/services/event";
 import { Modal } from "@/components/common";
 import { MapMarker } from "@/components/molecules";
 import { MapContainer } from "@/components/organisms";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { COLORFUL_MAP_STYLE } from "@/constants/themes";
-import { RootState } from "@/store";
 import { IEvent } from "@/types/event";
 import { formatDateTime, formatEventLabel } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
@@ -18,19 +18,18 @@ import {
   View,
 } from "react-native";
 import RNMapView, { Marker } from "react-native-maps";
-import { useSelector } from "react-redux";
 
 const MapScreen = () => {
   const [events, setEvents] = useState<IEvent[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedEvent, setSelectedEvent] = useState<IEvent | undefined>(
-    undefined
+    undefined,
   );
   const [pressing, setPressing] = useState(false);
   const mapRef = useRef<RNMapView | null>(null);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
 
   const handleSelectEvent = (id?: string) => {
     if (pressing) return;
@@ -206,7 +205,7 @@ const MapScreen = () => {
               <Text className="font-dm-sans text-gray-800">
                 {selectedEvent?.dates?.start.date
                   ? `${selectedEvent.dates.start.time} / ${formatDateTime(
-                      selectedEvent.dates.start.date
+                      selectedEvent.dates.start.date,
                     )}`
                   : "N/A"}
               </Text>

@@ -2,8 +2,7 @@ import { createStripePaymentIntent } from "@/api/services/stripe";
 import { fetchSubscriptionById } from "@/api/services/subscription";
 import { fetchUser } from "@/api/services/user";
 import { Button, CheckoutContainer, PaymentMethodGroup } from "@/components";
-import { RootState } from "@/store";
-import { setAuthUser } from "@/store/slices/auth.slice";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { TPaymentMethod } from "@/types";
 import { IStripePayload } from "@/types/stripe";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -11,7 +10,6 @@ import { confirmPayment } from "@stripe/stripe-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Text, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 import { calculateSave, TSubscriptionItem } from ".";
 
 const Header = ({
@@ -170,8 +168,7 @@ const SubscriptionCheckout = () => {
   const [btnLabel, setBtnLabel] = useState<string>("Subscribe");
 
   const { id: subscriptionId, oneMonthPrice } = useLocalSearchParams();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+  const { user, setAuthUser } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -300,7 +297,7 @@ const SubscriptionCheckout = () => {
             const response = await fetchUser(user?._id as string);
 
             if (response.data.subscription.id === subscriptionId) {
-              dispatch(setAuthUser(response.data));
+              setAuthUser(response.data);
               clearInterval(interval);
               resolve(true);
             }

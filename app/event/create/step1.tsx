@@ -6,6 +6,7 @@ import {
   Textarea,
 } from "@/components/common";
 import { CreateEventContainer } from "@/components/organisms";
+import { useAuth } from "@/components/providers/AuthProvider";
 import {
   EVENT_CATEGORIES,
   EVENT_SUB_CATEGORIES,
@@ -34,7 +35,7 @@ const CreateEventStep1Screen = () => {
   const [invalidCategory, setInvalidCategory] = useState<boolean>(false);
   const [invalidDetail, setInvalidDetail] = useState<boolean>(false);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
   const { newEvent } = useSelector((state: RootState) => state.event);
   const dispatch = useDispatch();
 

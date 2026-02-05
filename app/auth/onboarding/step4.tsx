@@ -9,16 +9,14 @@ import {
   EVENT_VENUE_TYPE,
   EVENT_VIBE,
 } from "@/constants/events";
-import { setAuthUser } from "@/store/slices/auth.slice";
 
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { TDropdownItem } from "@/types";
 import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 
 const OnboardingStep4Screen = () => {
   const [category, setCategory] = useState<TDropdownItem | null>(null);
@@ -34,8 +32,7 @@ const OnboardingStep4Screen = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+  const { user, setAuthUser } = useAuth();
 
   const validate = () => {
     setInvalidCategory(!category);
@@ -71,7 +68,7 @@ const OnboardingStep4Screen = () => {
       const response = await updateUser(user._id, updates);
 
       if (response.ok) {
-        dispatch(setAuthUser(response.data));
+        setAuthUser(response.data);
 
         router.replace("/auth/onboarding/step5");
       }

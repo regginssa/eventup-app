@@ -1,6 +1,6 @@
 import { fetchAllSubscriptions } from "@/api/services/subscription";
 import { Button, Spinner, SubscriptionContainer } from "@/components";
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { ISubscription } from "@/types/subscription";
 import { formatDateTime } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -9,7 +9,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
-import { useSelector } from "react-redux";
 
 const introTexts = [
   "Unlimited access to all features",
@@ -52,7 +51,7 @@ const SubscriptionScreen = () => {
   >(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {

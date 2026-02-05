@@ -2,8 +2,7 @@ import { createStripePaymentIntent } from "@/api/services/stripe";
 import { fetchTicketById } from "@/api/services/ticket";
 import { fetchUser } from "@/api/services/user";
 import { Button, CheckoutContainer, PaymentMethodGroup } from "@/components";
-import { RootState } from "@/store";
-import { setAuthUser } from "@/store/slices/auth.slice";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { TPaymentMethod } from "@/types";
 import { IStripePayload } from "@/types/stripe";
 import { ITicket } from "@/types/ticket";
@@ -13,7 +12,7 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Text, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
 
@@ -139,7 +138,7 @@ const TicketsCheckout = () => {
   const [btnLabel, setBtnLabel] = useState<string>("Purchase");
 
   const { id: ticketId, from } = useLocalSearchParams();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, setAuthUser } = useAuth();
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -254,7 +253,7 @@ const TicketsCheckout = () => {
             const response = await fetchUser(user?._id as string);
 
             if (response.data.tickets.length > user?.tickets.length) {
-              dispatch(setAuthUser(response.data));
+              setAuthUser(response.data);
               clearInterval(interval);
               resolve(true);
             }

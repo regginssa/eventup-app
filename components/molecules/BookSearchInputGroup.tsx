@@ -30,6 +30,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Button, DateTimePicker, RadioButton } from "../common";
 import { TFlightItemData } from "../common/FlightItem";
 import { THotelItemData } from "../common/HotelItem";
+import { useAuth } from "../providers/AuthProvider";
 import FlightAvailabilityGroup from "./FlightAvailabilityGroup";
 import HotelAvailabilityGroup from "./HotelAvailabilityGroup";
 import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
@@ -64,7 +65,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
   const [travelers, setTravelers] = useState<number>(1);
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
   const {
     flight,
     hotel: rdHotel,

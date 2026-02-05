@@ -2,15 +2,14 @@ import { setAuthToken } from "@/api/client";
 import { emailLogin, googleLogin } from "@/api/services/auth";
 import { Button, Checkbox, Input, PasswordInput } from "@/components/common";
 import { AuthScreenContainer } from "@/components/organisms";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/config/env";
 import useRedirect from "@/hooks/useRedirect";
-import { setAuth } from "@/store/slices/auth.slice";
 import { Feather } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
-import { useDispatch } from "react-redux";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState<string>("");
@@ -21,8 +20,8 @@ const LoginScreen = () => {
   const [invalidEmail, setInvalidEmail] = useState<boolean>(false);
   const [invalidPassword, setInvalidPassword] = useState<boolean>(false);
 
-  const dispatch = useDispatch();
   const { redirect } = useRedirect();
+  const { setAuthUser } = useAuth();
 
   const router = useRouter();
 
@@ -63,8 +62,7 @@ const LoginScreen = () => {
 
       const { token, user } = response.data;
       await setAuthToken(token);
-      dispatch(setAuth({ isAuthenticated: true, user }));
-
+      setAuthUser(user);
       Alert.alert("Welcome back!!!");
 
       redirect(user);
@@ -91,7 +89,7 @@ const LoginScreen = () => {
 
       const { token, user } = response.data;
       await setAuthToken(token);
-      dispatch(setAuth({ isAuthenticated: true, user }));
+      setAuthUser(user);
 
       Alert.alert("Welcome back!!!");
 

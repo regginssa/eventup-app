@@ -9,6 +9,7 @@ import { createStripePaymentIntent } from "@/api/services/stripe";
 import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
 import { CheckoutContainer } from "@/components/organisms";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { RootState } from "@/store";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
 import { TAmadeusFlightOrder, TAmadeusHotelOrder } from "@/types/amadeus";
@@ -122,7 +123,7 @@ const EventDetail = ({
             </Text>
 
             <Text className="font-poppins-semibold text-lg text-gray-700">
-              {getCurrencySymbol(currency)}
+              {getCurrencySymbol(currency as any)}
               {totalPrice}
             </Text>
           </View>
@@ -159,7 +160,7 @@ const PriceDetail = ({
           ))}
         </View>
         <Text className="font-poppins-medium text-lg text-gray-500">
-          {getCurrencySymbol(currency)}
+          {getCurrencySymbol(currency as any)}
           {basePrice}
         </Text>
       </View>
@@ -174,7 +175,7 @@ const PriceDetail = ({
           </View>
         </View>
         <Text className="font-poppins-medium text-lg text-gray-500">
-          {getCurrencySymbol(currency)}
+          {getCurrencySymbol(currency as any)}
           {comissionPrice}
         </Text>
       </View>
@@ -187,7 +188,7 @@ const PriceDetail = ({
         </Text>
 
         <Text className="font-poppins-semibold text-lg text-gray-700">
-          {getCurrencySymbol(currency)}
+          {getCurrencySymbol(currency as any)}
           {totalPrice}
         </Text>
       </View>
@@ -211,7 +212,7 @@ const CheckoutScreen = () => {
   const { eventId, packageType } = useLocalSearchParams();
   const router = useRouter();
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
   const { flight, hotel, transfer } = useSelector(
     (state: RootState) => state.booking,
   );

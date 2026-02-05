@@ -5,14 +5,13 @@ import {
   ProfileHeader,
   ProfileReviews,
 } from "@/components/organisms";
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { IReview } from "@/types/review";
 import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import { useSelector } from "react-redux";
 
 const ProfileScreen = () => {
   const [user, setUser] = useState<IUser | null>(null);
@@ -21,7 +20,7 @@ const ProfileScreen = () => {
   const [isNotFound, setIsNotFound] = useState<boolean>(false);
 
   const { id: userId } = useLocalSearchParams();
-  const { user: authUser } = useSelector((state: RootState) => state.auth);
+  const { user: authUser } = useAuth();
 
   const fetchUserInfo = async () => {
     if (!userId) return;

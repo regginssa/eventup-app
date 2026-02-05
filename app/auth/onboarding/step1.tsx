@@ -6,8 +6,7 @@ import {
   RegionPicker,
 } from "@/components/common";
 import { OnboardingContainer } from "@/components/organisms";
-import { RootState } from "@/store";
-import { setAuthUser } from "@/store/slices/auth.slice";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { TCoordinate, TLocation } from "@/types";
 import { Country, RegionType } from "@/types/location.types";
 import { IUser } from "@/types/user";
@@ -15,7 +14,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 
 const OnboardingStep1Screen = () => {
   const [country, setCountry] = useState<Country | null>(null);
@@ -27,8 +25,7 @@ const OnboardingStep1Screen = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+  const { user, setAuthUser } = useAuth();
 
   const validate = () => {
     setInvalidCountry(!country);
@@ -66,7 +63,7 @@ const OnboardingStep1Screen = () => {
       const response = await updateUser(user._id, updates);
 
       if (response.ok) {
-        dispatch(setAuthUser(response.data));
+        setAuthUser(response.data);
         router.replace("/auth/onboarding/step2");
       }
     } catch (error: any) {

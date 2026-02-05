@@ -1,5 +1,6 @@
 import { InitContainer } from "@/components/organisms";
 import { ThemeProvider, TicketProvider } from "@/components/providers";
+import AuthProvider from "@/components/providers/AuthProvider";
 import { STRIPE_PUBLISHABLE_KEY } from "@/config/env";
 import { store } from "@/store";
 import {
@@ -55,33 +56,35 @@ export default function RootLayout() {
   return (
     <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
       <Provider store={store}>
-        <TicketProvider>
-          <ThemeProvider>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : undefined}
-              style={{ flex: 1 }}
-            >
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: "transparent" },
-                }}
+        <AuthProvider>
+          <TicketProvider>
+            <ThemeProvider>
+              <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+                style={{ flex: 1 }}
               >
-                <Stack.Screen name="start" />
-                <Stack.Screen name="auth" />
-                <Stack.Screen name="home" />
-                <Stack.Screen name="map" />
-                <Stack.Screen name="didit" />
-                <Stack.Screen name="booking" />
-                <Stack.Screen name="profile" />
-                <Stack.Screen name="tickets" />
-                <Stack.Screen name="subscription" />
-                <Stack.Screen name="conversation" />
-              </Stack>
-            </KeyboardAvoidingView>
-            <InitContainer />
-          </ThemeProvider>
-        </TicketProvider>
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: "transparent" },
+                  }}
+                >
+                  <Stack.Screen name="start" />
+                  <Stack.Screen name="auth" />
+                  <Stack.Screen name="home" />
+                  <Stack.Screen name="map" />
+                  <Stack.Screen name="didit" />
+                  <Stack.Screen name="booking" />
+                  <Stack.Screen name="profile" />
+                  <Stack.Screen name="tickets" />
+                  <Stack.Screen name="subscription" />
+                  <Stack.Screen name="conversation" />
+                </Stack>
+              </KeyboardAvoidingView>
+              <InitContainer />
+            </ThemeProvider>
+          </TicketProvider>
+        </AuthProvider>
       </Provider>
     </StripeProvider>
   );

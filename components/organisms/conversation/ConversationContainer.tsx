@@ -25,7 +25,7 @@ const ConversationContainer: React.FC<ConversationContainerProps> = ({
             <Feather name="arrow-left" size={16} color="#4b5563" />
           </TouchableOpacity>
           <Text className="font-poppins-semibold text-lg text-gray-800">
-            Conversation
+            Conversations
           </Text>
           <View className="w-10"></View>
         </View>

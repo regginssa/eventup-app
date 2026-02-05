@@ -10,7 +10,7 @@ import {
   EventDetailOverview,
   EventDetailPackages,
 } from "@/components/organisms";
-import { RootState } from "@/store";
+import { useAuth } from "@/components/providers/AuthProvider";
 import {
   setBookingFlight,
   setBookingHotel,
@@ -24,7 +24,7 @@ import * as Location from "expo-location";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 const userTabs: TDropdownItem[] = [
   { label: "Packages", value: "packages" },
@@ -53,7 +53,7 @@ const EventDetailScreen = () => {
   const [ticket, setTicket] = useState<ITicket | null>(null);
 
   const { id, type } = useLocalSearchParams();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth();
   const dispatch = useDispatch();
 
   const getUserLocationAndSave = async () => {
