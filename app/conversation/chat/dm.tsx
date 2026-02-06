@@ -43,18 +43,14 @@ const ChatDM = () => {
 
       setLoading(true);
 
-      // 1. Load previous messages (REST)
-      await loadMessages(conversationId as string);
-
-      // 2. Join socket room
-      joinConversation(conversationId as string);
-
-      // 3. Set DM partner info
       const otherUser = conv.participants.find((p) => p._id !== user._id);
       setName(otherUser?.name || "N/A");
       setAvatar(otherUser?.avatar as string | undefined);
       setOtherUserId(otherUser?._id || null);
       setStatus(otherUser?.status || "offline");
+
+      await loadMessages(conversationId as string);
+      joinConversation(conversationId as string);
 
       setLoading(false);
     };
@@ -63,7 +59,10 @@ const ChatDM = () => {
 
     // cleanup: leave room when navigating away
     return () => {
-      if (conversationId) leaveConversation(conversationId as string);
+      if (conversationId) {
+        // clearMessages();
+        leaveConversation(conversationId as string);
+      }
     };
   }, [conversationId, user?._id, conversations]);
 
@@ -78,6 +77,9 @@ const ChatDM = () => {
     };
 
     sendMessage(payload);
+
+    setText("");
+    setFiles([]);
   };
 
   return (
@@ -95,11 +97,10 @@ const ChatDM = () => {
           <FlatList
             ref={flatListRef}
             data={messages}
-            keyExtractor={(_, index) => index.toString()}
+            keyExtractor={(item, index) => item._id || index.toString()}
             renderItem={({ item }: { item: IMessage }) => (
               <MessageItem message={item} userId={user?._id as string} />
             )}
-            inverted
             contentContainerStyle={{ gap: 16 }}
           />
         </View>
