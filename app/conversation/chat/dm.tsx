@@ -21,7 +21,8 @@ const ChatDM = () => {
 
   const { conversationId } = useLocalSearchParams();
   const { user } = useAuth();
-  const { conversations } = useConversation();
+  const { conversations, joinConversation, leaveConversation } =
+    useConversation();
 
   useEffect(() => {
     const getConversationMessages = async () => {
@@ -40,6 +41,7 @@ const ChatDM = () => {
 
     if (!conversationId || !user?._id) return;
     const conv = conversations.find((c) => c._id === conversationId);
+    joinConversation(conversationId as string);
 
     if (!conv) return;
     const otherUser = conv.participants.find((c) => c._id !== user._id);
@@ -52,6 +54,10 @@ const ChatDM = () => {
 
     getConversationMessages();
     setLoading(false);
+
+    return () => {
+      leaveConversation(conversationId as string);
+    };
   }, [conversationId, user]);
 
   const handleSend = async () => {};
@@ -79,23 +85,43 @@ const ChatDM = () => {
         </View>
       )}
 
-      <View className="w-full flex flex-row items-center gap-4">
-        <Input
-          type="string"
-          placeholder="Write a message..."
-          className="flex-1 rounded-md"
-          bordered
-          value={text}
-          onChange={setText}
-        />
+      <View className="w-full flex flex-row items-end gap-2 bg-white rounded-xl px-2">
+        <View className="flex-1">
+          <Input
+            type="string"
+            placeholder="Write a message..."
+            multiline
+            maxHeight={130}
+            value={text}
+            onChange={setText}
+          />
+        </View>
 
-        <TouchableOpacity
-          activeOpacity={0.8}
-          className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center"
-          onPress={handleSend}
-        >
-          <MaterialCommunityIcons name="send-outline" size={24} color="white" />
-        </TouchableOpacity>
+        <View className="flex flex-row items-center gap-2 mb-3">
+          <TouchableOpacity activeOpacity={0.8} onPress={handleSend}>
+            <MaterialCommunityIcons
+              name="send-outline"
+              size={24}
+              color="#4b5563"
+            />
+          </TouchableOpacity>
+
+          <MaterialCommunityIcons
+            name="microphone-outline"
+            size={24}
+            color="#4b5563"
+          />
+          <MaterialCommunityIcons
+            name="emoticon-outline"
+            size={24}
+            color="#4b5563"
+          />
+          <MaterialCommunityIcons
+            name="cloud-arrow-up-outline"
+            size={24}
+            color="#4b5563"
+          />
+        </View>
       </View>
     </ChatContainer>
   );

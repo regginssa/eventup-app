@@ -1,4 +1,3 @@
-import { fetchUserConversations } from "@/api/services/conversation";
 import {
   ConversationContainer,
   ConversationItem,
@@ -7,38 +6,19 @@ import {
 } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
-import { useSocket } from "@/components/providers/SocketProvider";
 import { IConversation } from "@/types/conversation";
-import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, View } from "react-native";
 
 const Conversation = () => {
   const [search, setSearch] = useState<string>("");
-  const [conversations, setConversations] = useState<IConversation[]>([]);
   const [filteredConversations, setFilteredConversations] = useState<
     IConversation[]
   >([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { otherUserId } = useLocalSearchParams();
   const { user } = useAuth();
-  const socket = useSocket();
-  const { createConversation } = useConversation();
-
-  useEffect(() => {
-    const init = async () => {
-      if (!user?._id) return;
-      setLoading(true);
-      const response = await fetchUserConversations(user?._id);
-      if (response.data) {
-        setConversations(response.data);
-      }
-      setLoading(false);
-    };
-
-    init();
-  }, []);
+  const { conversations } = useConversation();
 
   useEffect(() => {
     if (!search.trim()) {
@@ -54,18 +34,6 @@ const Conversation = () => {
 
     setFilteredConversations(filtered);
   }, [conversations, search]);
-
-  useEffect(() => {
-    if (!otherUserId) return;
-
-    const existingDM = conversations.find(
-      (c) =>
-        c.type === "dm" && c.participants.some((p) => p._id === otherUserId),
-    );
-
-    if (!existingDM) {
-    }
-  }, [otherUserId, conversations, socket]);
 
   return (
     <ConversationContainer>

@@ -1,6 +1,7 @@
 import { InitContainer } from "@/components/organisms";
 import {
   ConversationProvider,
+  MessageProvider,
   SocketProvider,
   ThemeProvider,
   TicketProvider,
@@ -65,31 +66,33 @@ export default function RootLayout() {
           <TicketProvider>
             <SocketProvider>
               <ConversationProvider>
-                <ThemeProvider>
-                  <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : undefined}
-                    style={{ flex: 1 }}
-                  >
-                    <Stack
-                      screenOptions={{
-                        headerShown: false,
-                        contentStyle: { backgroundColor: "transparent" },
-                      }}
+                <MessageProvider>
+                  <ThemeProvider>
+                    <KeyboardAvoidingView
+                      behavior={Platform.OS === "ios" ? "padding" : undefined}
+                      style={{ flex: 1 }}
                     >
-                      <Stack.Screen name="start" />
-                      <Stack.Screen name="auth" />
-                      <Stack.Screen name="home" />
-                      <Stack.Screen name="map" />
-                      <Stack.Screen name="didit" />
-                      <Stack.Screen name="booking" />
-                      <Stack.Screen name="profile" />
-                      <Stack.Screen name="tickets" />
-                      <Stack.Screen name="subscription" />
-                      <Stack.Screen name="conversation" />
-                    </Stack>
-                  </KeyboardAvoidingView>
-                  <InitContainer />
-                </ThemeProvider>
+                      <Stack
+                        screenOptions={{
+                          headerShown: false,
+                          contentStyle: { backgroundColor: "transparent" },
+                        }}
+                      >
+                        <Stack.Screen name="start" />
+                        <Stack.Screen name="auth" />
+                        <Stack.Screen name="home" />
+                        <Stack.Screen name="map" />
+                        <Stack.Screen name="didit" />
+                        <Stack.Screen name="booking" />
+                        <Stack.Screen name="profile" />
+                        <Stack.Screen name="tickets" />
+                        <Stack.Screen name="subscription" />
+                        <Stack.Screen name="conversation" />
+                      </Stack>
+                    </KeyboardAvoidingView>
+                    <InitContainer />
+                  </ThemeProvider>
+                </MessageProvider>
               </ConversationProvider>
             </SocketProvider>
           </TicketProvider>

@@ -30,7 +30,7 @@ const ConversationContainer: React.FC<ConversationContainerProps> = ({
           <View className="w-10"></View>
         </View>
 
-        <View className="flex-1 p-5">{children}</View>
+        <View className="flex-1 px-5">{children}</View>
       </SafeAreaView>
     </MainContainer>
   );

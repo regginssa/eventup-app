@@ -41,18 +41,23 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
             <View className="flex flex-row items-center gap-2">
               <Avatar source={avatar} name={name} size={40} status={status} />
 
-              <Text className="font-poppins-semibold text-xs text-gray-800">
+              <Text className="font-poppins-semibold text-sm text-gray-800">
                 {name}
               </Text>
             </View>
           </View>
 
           <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="dots-vertical"
-              size={20}
-              color="#1f2937"
-            />
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="w-10 h-10 rounded-full bg-white flex flex-col items-center justify-center"
+            >
+              <MaterialCommunityIcons
+                name="dots-vertical"
+                size={16}
+                color="#4b5563"
+              />
+            </TouchableOpacity>
           </View>
         </View>
 

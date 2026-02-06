@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Text, TextInput, View } from "react-native";
 
 interface InputProps {
@@ -12,6 +13,8 @@ interface InputProps {
   invalidTxt?: string;
   value: any;
   onChange: (val: any) => void;
+  maxHeight?: number; // <<— Add this
+  multiline?: boolean; // <<— And this
 }
 
 const Input: React.FC<InputProps> = ({
@@ -26,24 +29,45 @@ const Input: React.FC<InputProps> = ({
   invalidTxt,
   value,
   onChange,
+  maxHeight = 120, // default max height (like WhatsApp)
+  multiline = false,
 }) => {
+  const [inputHeight, setInputHeight] = useState(40); // default height
+
   return (
     <View className="w-full gap-2">
       {label && (
         <Text className="font-dm-sans text-sm text-gray-700">{label}</Text>
       )}
+
       <View
         className={`py-1 px-3 gap-2 bg-white flex flex-row items-center ${className}`}
-        style={[{ borderWidth: bordered ? 1 : 0, borderColor: "#d1d5db" }]}
+        style={{
+          borderWidth: bordered ? 1 : 0,
+          borderColor: "#d1d5db",
+          minHeight: 40,
+        }}
       >
         {icon && icon}
+
         <TextInput
           placeholder={placeholder}
+          multiline={multiline}
+          onContentSizeChange={(e) => {
+            const h = e.nativeEvent.contentSize.height;
+            setInputHeight(Math.min(h, maxHeight));
+          }}
+          style={{
+            flex: 1,
+            minHeight: 40,
+            maxHeight: maxHeight,
+            height: multiline ? inputHeight : 40,
+          }}
           keyboardType={type === "number" ? "numeric" : "default"}
-          className="flex-1 bg-none text-black font-dm-sans text-sm"
           editable={!disabled}
           value={value}
           onChangeText={onChange}
+          className="bg-none text-black font-dm-sans text-sm"
         />
       </View>
 
