@@ -39,12 +39,12 @@ const ChatDM = () => {
     };
 
     if (!conversationId || !user?._id) return;
-    setLoading(true);
     const conv = conversations.find((c) => c._id === conversationId);
 
     if (!conv) return;
     const otherUser = conv.participants.find((c) => c._id !== user._id);
 
+    setLoading(true);
     setName(otherUser?.name || "N/A");
     setAvatar((otherUser?.avatar as string) || undefined);
     setOtherUserId(otherUser?._id || null);

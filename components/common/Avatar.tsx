@@ -144,7 +144,13 @@ const Avatar: React.FC<AvatarProps> = ({
           >
             <Text
               className={`text-white font-poppins-semibold ${
-                !size ? "text-7xl" : ""
+                !size
+                  ? "text-7xl"
+                  : size > 40 && size < 160
+                    ? "text-4xl"
+                    : size <= 40
+                      ? "text-sm"
+                      : ""
               }`}
             >
               {name ? name.charAt(0).toUpperCase() : ""}
@@ -156,7 +162,7 @@ const Avatar: React.FC<AvatarProps> = ({
 
       {status && (
         <View
-          className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${status === "online" ? "bg-green-500" : "bg-gray-300"}`}
+          className={`absolute bottom-0 right-1 w-3 h-3 rounded-full ${status === "online" ? "bg-green-500" : "bg-gray-300"}`}
         ></View>
       )}
 

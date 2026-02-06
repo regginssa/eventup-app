@@ -40,7 +40,7 @@ const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     return () => {
       sk.disconnect();
     };
-  }, []);
+  }, [user]);
 
   return (
     <SocketContext.Provider value={{ socket }}>

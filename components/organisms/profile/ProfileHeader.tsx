@@ -88,6 +88,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         });
       }
     } catch (error) {
+      console.log("[handle message error]: ", error);
     } finally {
       setMessageLoading(false);
     }

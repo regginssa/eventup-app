@@ -1,8 +1,8 @@
 import { fetchUserConversations } from "@/api/services/conversation";
-import { useSocket } from "@/hooks/useSocket";
 import { IConversation, TConversationType } from "@/types/conversation";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
+import { useSocket } from "./SocketProvider";
 
 interface ConversationContextProps {
   conversations: IConversation[];
@@ -39,7 +39,7 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const [conversations, setConversations] = useState<IConversation[]>([]);
 
   const { user } = useAuth();
-  const socket = useSocket(user as any);
+  const { socket } = useSocket();
 
   useEffect(() => {
     const getUserConversations = async () => {
@@ -58,10 +58,10 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
     payload: { user1Id: string; user2Id: string },
   ): Promise<IConversation> => {
     return new Promise((resolve, reject) => {
-      if (!socket.current) return reject("Socket not connected");
+      if (!socket) return reject("Socket not connected");
 
       // Emit creation request
-      socket.current.emit(`create_${type}`, payload);
+      socket.emit(`create_${type}`, payload);
 
       // Listen for success response
       const successEvent = `${type}_created`;
@@ -78,12 +78,12 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
       };
 
       const cleanup = () => {
-        socket.current.off(successEvent, handleSuccess);
-        socket.current.off(errorEvent, handleError);
+        socket.off(successEvent, handleSuccess);
+        socket.off(errorEvent, handleError);
       };
 
-      socket.current.on(successEvent, handleSuccess);
-      socket.current.on(errorEvent, handleError);
+      socket.on(successEvent, handleSuccess);
+      socket.on(errorEvent, handleError);
     });
   };
 
