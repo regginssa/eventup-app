@@ -29,7 +29,7 @@ const ChatDM = () => {
     leaveConversation,
     sendMessage,
     markMessageSeen,
-    setConversationId,
+    updateCurrentConversationId,
     messages,
   } = useMessage();
 
@@ -40,7 +40,7 @@ const ChatDM = () => {
   useEffect(() => {
     const init = async () => {
       if (!conversationId || !user?._id) return;
-      setConversationId(conversationId as string);
+      updateCurrentConversationId(conversationId as string);
 
       const conv = conversations.find((c) => c._id === conversationId);
       if (!conv) return;
@@ -53,9 +53,9 @@ const ChatDM = () => {
       setOtherUserId(otherUser?._id || null);
       setStatus(otherUser?.status || "offline");
 
-      await markMessagesSeenRest(conversationId as string);
       joinConversation(conversationId as string);
       await loadMessages(conversationId as string);
+      await markMessagesSeenRest(conversationId as string);
 
       setLoading(false);
     };

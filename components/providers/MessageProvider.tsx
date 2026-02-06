@@ -7,8 +7,8 @@ import { useSocket } from "./SocketProvider";
 
 interface MessageContextProps {
   messages: IMessage[];
-  conversationId: string;
-  setConversationId: (id: string) => void;
+  currentConversationId: string;
+  updateCurrentConversationId: (id: string) => void;
   loadMessages: (conversationId: string) => Promise<void>;
   joinConversation: (conversationId: string) => void;
   leaveConversation: (conversationId: string) => void;
@@ -31,7 +31,8 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [conversationId, setConversationId] = useState<string>("");
+  const [currentConversationId, setCurrentConversationId] =
+    useState<string>("");
 
   const { user } = useAuth();
   const { socket } = useSocket();
@@ -61,7 +62,7 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!socket) return;
 
     const handleIncoming = (msg: IMessage) => {
-      if (msg.conversation !== conversationId) return;
+      if (msg.conversation !== currentConversationId) return;
       setMessages((prev) => [...prev, msg]);
     };
 
@@ -72,9 +73,9 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
       cnvId: string;
       userId: string;
     }) => {
-      if (cnvId !== conversationId) return;
+      if (cnvId !== currentConversationId) return;
 
-      updateUnread(conversationId, userId, 0);
+      updateUnread(currentConversationId, userId, 0);
 
       setMessages((prev) =>
         prev.map((m) =>
@@ -90,7 +91,7 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
       socket.off("new_message", handleIncoming);
       socket.off("messages_seen");
     };
-  }, [socket]);
+  }, [socket, currentConversationId]);
 
   // SEND MESSAGE (no callback)
   const sendMessage = (payload: any) => {
@@ -107,12 +108,17 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
   // CLEAR MESSAGE
   const clearMessages = () => setMessages([]);
 
+  // UPDATE CURRENT CONVERSATION ID
+  const updateCurrentConversationId = (convId: string) => {
+    setCurrentConversationId(convId);
+  };
+
   return (
     <MessageContext.Provider
       value={{
         messages,
-        conversationId,
-        setConversationId,
+        currentConversationId,
+        updateCurrentConversationId,
         loadMessages,
         joinConversation,
         leaveConversation,
