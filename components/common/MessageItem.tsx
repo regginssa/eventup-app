@@ -39,17 +39,15 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, userId }) => {
             {formatTime(message.createdAt)}
           </Text>
 
-          {isMine && (
-            <Ionicons
-              name={
-                message.status === "sent"
-                  ? "checkmark-outline"
-                  : "checkmark-done-outline"
-              }
-              size={16}
-              color="#16a34a"
-            />
-          )}
+          <Ionicons
+            name={
+              message.status === "sent"
+                ? "checkmark-outline"
+                : "checkmark-done-outline"
+            }
+            size={16}
+            color="#16a34a"
+          />
         </View>
       </View>
     </View>

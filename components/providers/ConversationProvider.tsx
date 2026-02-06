@@ -6,6 +6,8 @@ import { useSocket } from "./SocketProvider";
 
 interface ConversationContextProps {
   conversations: IConversation[];
+  totalMessagesUnreads: number;
+  loadConversations: () => Promise<void>;
   createConversation: (
     type: TConversationType,
     payload: {
@@ -38,21 +40,19 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
   children,
 }) => {
   const [conversations, setConversations] = useState<IConversation[]>([]);
+  const [unreads, setUnreads] = useState<number>(0);
 
   const { user } = useAuth();
   const { socket } = useSocket();
 
-  useEffect(() => {
-    const getUserConversations = async () => {
-      if (!user?._id) return;
+  const loadConversations = async () => {
+    if (!user?._id) return;
 
-      const response = await fetchUserConversations(user._id);
+    const response = await fetchUserConversations(user._id);
 
-      if (!response.data) return;
-      setConversations(response.data);
-    };
-    getUserConversations();
-  }, [user]);
+    if (!response.data) return;
+    setConversations(response.data);
+  };
 
   const createConversation = async (
     type: "dm" | "group",
@@ -109,10 +109,35 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
     );
   };
 
+  useEffect(() => {
+    if (!user?._id) return;
+
+    let counts = 0;
+
+    conversations.map((c) => {
+      counts += c.unread?.[user?._id as any] || 0;
+    });
+
+    setUnreads(counts);
+  }, [conversations]);
+
+  useEffect(() => {
+    const getAllConversations = async () => {
+      if (!user?._id) return;
+
+      const response = await fetchUserConversations(user._id);
+      if (!response.data) return;
+      setConversations(response.data);
+    };
+    getAllConversations();
+  }, [user]);
+
   return (
     <ConversationContext.Provider
       value={{
         conversations,
+        totalMessagesUnreads: unreads,
+        loadConversations,
         createConversation,
         updateUnread,
       }}

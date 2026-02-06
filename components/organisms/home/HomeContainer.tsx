@@ -1,5 +1,6 @@
 import { ProfileDrawer } from "@/components/molecules";
 import { Footer, MainContainer } from "@/components/organisms/layout";
+import { useConversation } from "@/components/providers/ConversationProvider";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -12,7 +13,9 @@ interface HomeContainerProps {
 
 const HomeContainer: React.FC<HomeContainerProps> = ({ children }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
   const router = useRouter();
+  const { totalMessagesUnreads } = useConversation();
 
   return (
     <MainContainer>
@@ -40,7 +43,9 @@ const HomeContainer: React.FC<HomeContainerProps> = ({ children }) => {
               onPress={() => router.push("/conversation" as any)}
             >
               <AntDesign name="message" size={20} color="#1f2937" />
-              <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
+              {totalMessagesUnreads > 0 && (
+                <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.8}

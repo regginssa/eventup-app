@@ -73,6 +73,12 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
       cnvId: string;
       userId: string;
     }) => {
+      console.log(
+        "[message seen listened]: ",
+        cnvId,
+        currentConversationId,
+        userId,
+      );
       if (cnvId !== currentConversationId) return;
 
       updateUnread(currentConversationId, userId, 0);

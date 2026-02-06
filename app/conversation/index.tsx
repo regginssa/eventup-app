@@ -20,7 +20,21 @@ const Conversation = () => {
 
   const router = useRouter();
   const { user } = useAuth();
-  const { conversations } = useConversation();
+  const { loadConversations, conversations } = useConversation();
+
+  useEffect(() => {
+    const init = async () => {
+      if (!user) return;
+
+      setLoading(true);
+
+      await loadConversations();
+
+      setLoading(false);
+    };
+
+    init();
+  }, [user]);
 
   useEffect(() => {
     if (!search.trim()) {
