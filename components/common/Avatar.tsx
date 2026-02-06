@@ -1,3 +1,4 @@
+import { TOnlineStatus } from "@/types/user";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -24,10 +25,17 @@ interface AvatarProps {
   name?: string;
   source?: string;
   size?: number;
+  status?: TOnlineStatus;
   onChange?: (val: TAvatar) => void;
 }
 
-const Avatar: React.FC<AvatarProps> = ({ name, source, size, onChange }) => {
+const Avatar: React.FC<AvatarProps> = ({
+  name,
+  source,
+  size,
+  status,
+  onChange,
+}) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -145,6 +153,13 @@ const Avatar: React.FC<AvatarProps> = ({ name, source, size, onChange }) => {
           </LinearGradient>
         )}
       </View>
+
+      {status && (
+        <View
+          className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${status === "online" ? "bg-green-500" : "bg-gray-300"}`}
+        ></View>
+      )}
+
       {onChange && (
         <TouchableOpacity
           activeOpacity={0.8}

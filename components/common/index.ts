@@ -13,6 +13,7 @@ export { default as FlightItem } from "./FlightItem";
 export { default as HotelItem } from "./HotelItem";
 export { default as Input } from "./Input";
 export { default as LocationPicker } from "./LocationPicker";
+export { default as MessageItem } from "./MessageItem";
 export { default as Modal } from "./Modal";
 export { default as MultiSelectDropdown } from "./MultiSelectDropdown";
 export { default as NationalityPicker } from "./NationalityPicker";

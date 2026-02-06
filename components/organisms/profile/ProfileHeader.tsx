@@ -1,7 +1,16 @@
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useConversation } from "@/components/providers/ConversationProvider";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { FlagButton } from "react-native-country-picker-modal";
 import { Avatar } from "../../common";
 
@@ -24,7 +33,7 @@ interface ProfileHeaderProps {
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
-  _id,
+  _id: otherUserId,
   name,
   avatar,
   description,
@@ -35,7 +44,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   country,
   isMe,
 }) => {
+  const [messageLoading, setMessageLoading] = useState<boolean>(false);
+
   const router = useRouter();
+  const { conversations, createConversation } = useConversation();
+  const { user } = useAuth();
 
   const formattedRate = rate
     ? rate.toLocaleString(undefined, {
@@ -43,6 +56,42 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         maximumFractionDigits: 20,
       })
     : 0;
+
+  const handleMessage = async () => {
+    if (!otherUserId || !user?._id) return;
+    if (user._id === otherUserId) {
+      return Alert.alert("Error", "Something went wrong");
+    }
+
+    try {
+      setMessageLoading(true);
+
+      const conversation = conversations.find(
+        (c) =>
+          c.type === "dm" && c.participants.some((p) => p._id === otherUserId),
+      );
+
+      if (!conversation) {
+        const newConv = await createConversation("dm", {
+          user1Id: user._id,
+          user2Id: otherUserId,
+        });
+
+        router.push({
+          pathname: "/conversation/chat/dm",
+          params: { conversationId: newConv._id },
+        });
+      } else {
+        router.push({
+          pathname: "/conversation/chat/dm",
+          params: { conversationId: conversation._id },
+        });
+      }
+    } catch (error) {
+    } finally {
+      setMessageLoading(false);
+    }
+  };
 
   return (
     <View className="w-full flex flex-col items-center justify-center gap-4">
@@ -99,18 +148,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <TouchableOpacity
               activeOpacity={0.8}
               className="w-8 h-8 rounded-lg bg-white flex items-center justify-center"
-              onPress={() =>
-                router.push({
-                  pathname: "/conversation",
-                  params: { otherUserId: _id },
-                })
-              }
+              onPress={handleMessage}
             >
-              <MaterialCommunityIcons
-                name="message-outline"
-                size={18}
-                color="#374151"
-              />
+              {messageLoading ? (
+                <ActivityIndicator size={18} color="#374151" />
+              ) : (
+                <MaterialCommunityIcons
+                  name="message-outline"
+                  size={18}
+                  color="#374151"
+                />
+              )}
             </TouchableOpacity>
 
             {isMe && (

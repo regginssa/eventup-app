@@ -28,6 +28,8 @@ export type TUserLocation = {
   coordinate: TCoordinate;
 };
 
+export type TOnlineStatus = "online" | "offline";
+
 export interface IUser {
   _id?: string;
   name: string;
@@ -57,4 +59,5 @@ export interface IUser {
     id: string;
     startedAt?: string;
   };
+  status: TOnlineStatus;
 }
