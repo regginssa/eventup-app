@@ -1,66 +1,84 @@
-import { fetchConversationMessages } from "@/api/services/message";
 import { ChatContainer, Input, MessageItem, Spinner } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
-import { IMessage } from "@/types/message";
+import { useMessage } from "@/components/providers/MessageProvider";
+import { IMessage, TMessageFile } from "@/types/message";
 import { TOnlineStatus } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { Alert, FlatList, TouchableOpacity, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { FlatList, TouchableOpacity, View } from "react-native";
 
 const ChatDM = () => {
   const [name, setName] = useState<string>("N/A");
   const [avatar, setAvatar] = useState<string | undefined>(undefined);
   const [otherUserId, setOtherUserId] = useState<string | null>(null);
   const [status, setStatus] = useState<TOnlineStatus>("offline");
-  const [messages, setMessages] = useState<IMessage[]>([]);
   const [text, setText] = useState<string>("");
-
+  const [files, setFiles] = useState<TMessageFile[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const flatListRef = useRef<FlatList>(null);
 
   const { conversationId } = useLocalSearchParams();
   const { user } = useAuth();
-  const { conversations, joinConversation, leaveConversation } =
-    useConversation();
+  const { conversations } = useConversation();
+  const {
+    loadMessages,
+    joinConversation,
+    leaveConversation,
+    sendMessage,
+    messages,
+  } = useMessage();
 
   useEffect(() => {
-    const getConversationMessages = async () => {
-      try {
-        const response = await fetchConversationMessages(
-          conversationId as string,
-        );
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  }, [messages]);
 
-        if (response.data) {
-          setMessages(response.data);
-        }
-      } catch (error) {
-        Alert.alert("Error", "Failed to fetch messages");
-      }
+  useEffect(() => {
+    const init = async () => {
+      if (!conversationId || !user?._id) return;
+
+      const conv = conversations.find((c) => c._id === conversationId);
+      if (!conv) return;
+
+      setLoading(true);
+
+      // 1. Load previous messages (REST)
+      await loadMessages(conversationId as string);
+
+      // 2. Join socket room
+      joinConversation(conversationId as string);
+
+      // 3. Set DM partner info
+      const otherUser = conv.participants.find((p) => p._id !== user._id);
+      setName(otherUser?.name || "N/A");
+      setAvatar(otherUser?.avatar as string | undefined);
+      setOtherUserId(otherUser?._id || null);
+      setStatus(otherUser?.status || "offline");
+
+      setLoading(false);
     };
 
-    if (!conversationId || !user?._id) return;
-    const conv = conversations.find((c) => c._id === conversationId);
-    joinConversation(conversationId as string);
+    init();
 
-    if (!conv) return;
-    const otherUser = conv.participants.find((c) => c._id !== user._id);
-
-    setLoading(true);
-    setName(otherUser?.name || "N/A");
-    setAvatar((otherUser?.avatar as string) || undefined);
-    setOtherUserId(otherUser?._id || null);
-    setStatus(otherUser?.status || "offline");
-
-    getConversationMessages();
-    setLoading(false);
-
+    // cleanup: leave room when navigating away
     return () => {
-      leaveConversation(conversationId as string);
+      if (conversationId) leaveConversation(conversationId as string);
     };
-  }, [conversationId, user]);
+  }, [conversationId, user?._id, conversations]);
 
-  const handleSend = async () => {};
+  const handleSend = () => {
+    if (text.trim().length === 0) return;
+
+    const payload = {
+      conversationId,
+      senderId: user?._id,
+      text,
+      files,
+    };
+
+    sendMessage(payload);
+  };
 
   return (
     <ChatContainer
@@ -75,11 +93,13 @@ const ChatDM = () => {
       ) : (
         <View className="flex-1">
           <FlatList
+            ref={flatListRef}
             data={messages}
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item }: { item: IMessage }) => (
               <MessageItem message={item} userId={user?._id as string} />
             )}
+            inverted
             contentContainerStyle={{ gap: 16 }}
           />
         </View>

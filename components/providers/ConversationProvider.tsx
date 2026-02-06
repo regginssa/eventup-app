@@ -13,8 +13,6 @@ interface ConversationContextProps {
       user2Id: string;
     },
   ) => Promise<IConversation>;
-  joinConversation: (conversationId: string) => void;
-  leaveConversation: (conversationId: string) => void;
 }
 
 const ConversationContext = createContext<ConversationContextProps | undefined>(
@@ -90,21 +88,11 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
     });
   };
 
-  const joinConversation = (conversationId: string) => {
-    socket.emit("join_conversation", conversationId);
-  };
-
-  const leaveConversation = (conversationId: string) => {
-    socket.emit("leave_conversation", conversationId);
-  };
-
   return (
     <ConversationContext.Provider
       value={{
         conversations,
         createConversation,
-        joinConversation,
-        leaveConversation,
       }}
     >
       {children}

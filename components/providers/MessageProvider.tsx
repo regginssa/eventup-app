@@ -1,11 +1,15 @@
+import { fetchConversationMessages } from "@/api/services/message";
 import { IMessage } from "@/types/message";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useSocket } from "./SocketProvider";
 
 interface MessageContextProps {
   messages: IMessage[];
-  sendMessage: (payload: any) => Promise<IMessage>;
-  removeMessage: (messageId: string) => Promise<boolean>;
+  loadMessages: (conversationId: string) => Promise<void>;
+  joinConversation: (conversationId: string) => void;
+  leaveConversation: (conversationId: string) => void;
+  sendMessage: (payload: any) => void;
+  clearMessages: () => void;
 }
 
 const MessageContext = createContext<MessageContextProps | undefined>(
@@ -14,37 +18,69 @@ const MessageContext = createContext<MessageContextProps | undefined>(
 
 export const useMessage = () => {
   const context = useContext(MessageContext);
-
-  if (!context) {
-    throw new Error("useMessage must be within MessageProvider");
-  }
-
+  if (!context) throw new Error("useMessage must be within MessageProvider");
   return context;
 };
 
-interface MessageProviderProps {
-  children: React.ReactNode;
-}
-
-const MessageProvider: React.FC<MessageProviderProps> = ({ children }) => {
+const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { socket } = useSocket();
   const [messages, setMessages] = useState<IMessage[]>([]);
 
-  const { socket } = useSocket();
+  // Load initial messages
+  const loadMessages = async (conversationId: string) => {
+    const response = await fetchConversationMessages(conversationId);
 
-  const sendMessage = async (payload: any): Promise<IMessage> => {
-    return new Promise((resolve, reject) => {
-      if (!socket) return reject("Socket not connected");
-
-      socket.emit("send_message");
-    });
+    if (!response.data) return;
+    setMessages(response.data);
   };
 
-  const removeMessage = async (messageId: string): Promise<boolean> => {
-    return false;
+  // JOIN ROOM
+  const joinConversation = (conversationId: string) => {
+    socket?.emit("join_conversation", conversationId);
+    setMessages([]);
   };
+
+  const leaveConversation = (conversationId: string) => {
+    socket?.emit("leave_conversation", conversationId);
+    setMessages([]);
+  };
+
+  // LISTEN FOR new_message
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleIncoming = (msg: IMessage) => {
+      setMessages((prev) => [...prev, msg]);
+    };
+
+    socket.on("new_message", handleIncoming);
+
+    return () => {
+      socket.off("new_message", handleIncoming);
+    };
+  }, [socket]);
+
+  // SEND MESSAGE (no callback)
+  const sendMessage = (payload: any) => {
+    if (!socket) return;
+    socket.emit("send_message", payload);
+  };
+
+  const clearMessages = () => setMessages([]);
 
   return (
-    <MessageContext.Provider value={{ messages, sendMessage, removeMessage }}>
+    <MessageContext.Provider
+      value={{
+        messages,
+        loadMessages,
+        joinConversation,
+        leaveConversation,
+        sendMessage,
+        clearMessages,
+      }}
+    >
       {children}
     </MessageContext.Provider>
   );

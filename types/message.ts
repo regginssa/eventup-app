@@ -1,6 +1,6 @@
 import { IUser } from "./user";
 
-export type TFile = {
+export type TMessageFile = {
   url: string;
   type: "image" | "video" | "audio" | "file";
 };
@@ -12,7 +12,7 @@ export interface IMessage {
   conversation: string;
   sender: IUser;
   text: string;
-  files: TFile[];
+  files: TMessageFile[];
   status: TMessageStatus;
   createdAt: Date;
   updatedAt: Date;
