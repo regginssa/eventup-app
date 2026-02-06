@@ -2,6 +2,7 @@ import { fetchConversationMessages } from "@/api/services/message";
 import { IMessage } from "@/types/message";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
+import { useConversation } from "./ConversationProvider";
 import { useSocket } from "./SocketProvider";
 
 interface MessageContextProps {
@@ -34,6 +35,7 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const { user } = useAuth();
   const { socket } = useSocket();
+  const { updateUnread } = useConversation();
 
   // Load initial messages
   const loadMessages = async (conversationId: string) => {
@@ -63,8 +65,16 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
       setMessages((prev) => [...prev, msg]);
     };
 
-    const handleSuccessMessageSeen = ({ cnvId }: { cnvId: string }) => {
+    const handleSuccessMessageSeen = ({
+      cnvId,
+      userId,
+    }: {
+      cnvId: string;
+      userId: string;
+    }) => {
       if (cnvId !== conversationId) return;
+
+      updateUnread(conversationId, userId, 0);
 
       setMessages((prev) =>
         prev.map((m) =>

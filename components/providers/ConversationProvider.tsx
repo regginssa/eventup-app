@@ -13,6 +13,7 @@ interface ConversationContextProps {
       user2Id: string;
     },
   ) => Promise<IConversation>;
+  updateUnread: (conversationId: string, userId: string, value: number) => void;
 }
 
 const ConversationContext = createContext<ConversationContextProps | undefined>(
@@ -88,11 +89,32 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
     });
   };
 
+  const updateUnread = (
+    conversationId: string,
+    userId: string,
+    value: number,
+  ) => {
+    setConversations((prev) =>
+      prev.map((c) =>
+        c._id === conversationId
+          ? {
+              ...c,
+              unread: {
+                ...c.unread,
+                [userId]: value,
+              },
+            }
+          : c,
+      ),
+    );
+  };
+
   return (
     <ConversationContext.Provider
       value={{
         conversations,
         createConversation,
+        updateUnread,
       }}
     >
       {children}

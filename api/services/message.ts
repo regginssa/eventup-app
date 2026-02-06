@@ -8,3 +8,7 @@ export const fetchConversationMessages = async (
 ): Promise<ApiResponse<IMessage[]>> => {
   return await AxiosInstance.get(MESSAGE_BASE + conversationId);
 };
+
+export const markMessagesSeenRest = async (conversationId: string) => {
+  await AxiosInstance.post(MESSAGE_BASE + conversationId + "/seen");
+};

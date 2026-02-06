@@ -10,6 +10,7 @@ export interface IConversation {
   name?: string;
   avatar?: string;
   lastMessage: IMessage;
+  unread: Record<string, number>;
   createdAt: Date;
   updatedAt: Date;
 }

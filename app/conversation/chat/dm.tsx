@@ -1,3 +1,4 @@
+import { markMessagesSeenRest } from "@/api/services/message";
 import { ChatContainer, Input, MessageItem, Spinner } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
@@ -52,8 +53,8 @@ const ChatDM = () => {
       setOtherUserId(otherUser?._id || null);
       setStatus(otherUser?.status || "offline");
 
+      await markMessagesSeenRest(conversationId as string);
       joinConversation(conversationId as string);
-
       await loadMessages(conversationId as string);
 
       setLoading(false);

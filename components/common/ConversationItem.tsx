@@ -1,5 +1,6 @@
 import { IConversation } from "@/types/conversation";
 import { Text, TouchableOpacity, View } from "react-native";
+import { useAuth } from "../providers/AuthProvider";
 import Avatar from "./Avatar";
 
 interface ConversationItemProps {
@@ -13,8 +14,13 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
   myId,
   onPress,
 }) => {
+  const { user } = useAuth();
+
+  if (!user?._id) return;
+
   const otherUser =
     item.type === "dm" ? item.participants.find((i) => i._id === myId) : null;
+  const myUnread = item.unread?.[user?._id] || 0;
 
   const formatTime = (dateInput: string | number | Date): string => {
     const date = new Date(dateInput);
@@ -47,9 +53,18 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
             {item.lastMessage?.text || "No messages yet"}
           </Text>
         </View>
-        <Text className="font-dm-sans-medium text-xs text-gray-700">
-          {formatTime(item.lastMessage?.createdAt || new Date())}
-        </Text>
+        <View className="flex flex-col items-end justify-between">
+          <Text className="font-dm-sans-medium text-xs text-gray-700">
+            {formatTime(item.lastMessage?.createdAt || new Date())}
+          </Text>
+          {myUnread > 0 && (
+            <View className="w-8 h-8 flex items-center justify-center bg-red-500 rounded-full">
+              <Text className="font-poppins-semibold text-xs text-white">
+                {myUnread}
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
     </TouchableOpacity>
   );
