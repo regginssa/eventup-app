@@ -1,14 +1,18 @@
 import { fetchConversationMessages } from "@/api/services/message";
 import { IMessage } from "@/types/message";
 import { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthProvider";
 import { useSocket } from "./SocketProvider";
 
 interface MessageContextProps {
   messages: IMessage[];
+  conversationId: string;
+  setConversationId: (id: string) => void;
   loadMessages: (conversationId: string) => Promise<void>;
   joinConversation: (conversationId: string) => void;
   leaveConversation: (conversationId: string) => void;
   sendMessage: (payload: any) => void;
+  markMessageSeen: (payload: any) => void;
   clearMessages: () => void;
 }
 
@@ -25,8 +29,11 @@ export const useMessage = () => {
 const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { socket } = useSocket();
   const [messages, setMessages] = useState<IMessage[]>([]);
+  const [conversationId, setConversationId] = useState<string>("");
+
+  const { user } = useAuth();
+  const { socket } = useSocket();
 
   // Load initial messages
   const loadMessages = async (conversationId: string) => {
@@ -47,18 +54,31 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
     setMessages([]);
   };
 
-  // LISTEN FOR new_message
+  // LISTEN FOR MESSAGES EVENTS
   useEffect(() => {
     if (!socket) return;
 
     const handleIncoming = (msg: IMessage) => {
+      if (msg.conversation !== conversationId) return;
       setMessages((prev) => [...prev, msg]);
     };
 
+    const handleSuccessMessageSeen = ({ cnvId }: { cnvId: string }) => {
+      if (cnvId !== conversationId) return;
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.sender._id === user?._id ? { ...m, status: "seen" } : m,
+        ),
+      );
+    };
+
     socket.on("new_message", handleIncoming);
+    socket.on("messages_seen", handleSuccessMessageSeen);
 
     return () => {
       socket.off("new_message", handleIncoming);
+      socket.off("messages_seen");
     };
   }, [socket]);
 
@@ -68,16 +88,26 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
     socket.emit("send_message", payload);
   };
 
+  // MARK SEEN
+  const markMessageSeen = (payload: any) => {
+    if (!socket) return;
+    socket.emit("mark_message_seen", payload);
+  };
+
+  // CLEAR MESSAGE
   const clearMessages = () => setMessages([]);
 
   return (
     <MessageContext.Provider
       value={{
         messages,
+        conversationId,
+        setConversationId,
         loadMessages,
         joinConversation,
         leaveConversation,
         sendMessage,
+        markMessageSeen,
         clearMessages,
       }}
     >

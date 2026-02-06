@@ -5,7 +5,7 @@ export type TMessageFile = {
   type: "image" | "video" | "audio" | "file";
 };
 
-export type TMessageStatus = "sent" | "delivered" | "seen";
+export type TMessageStatus = "sent" | "seen";
 
 export interface IMessage {
   _id?: string;

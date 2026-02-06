@@ -1,6 +1,6 @@
 import { IMessage } from "@/types/message";
 import { Ionicons } from "@expo/vector-icons";
-import { Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 interface MessageItemProps {
   message: IMessage;
@@ -26,10 +26,13 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, userId }) => {
     >
       <View
         className={`w-2/3 ${isMine ? "bg-green-200" : "bg-slate-200"} rounded-xl p-2`}
+        style={{ maxHeight: 200 }}
       >
-        <Text className="font-poppins-medium text-sm text-gray-800">
-          {message.text}
-        </Text>
+        <ScrollView>
+          <Text className="font-poppins-medium text-sm text-gray-800">
+            {message.text}
+          </Text>
+        </ScrollView>
 
         <View className="w-full flex flex-row items-center justify-end gap-2">
           <Text className="font-dm-sans-medium text-gray-600 text-xs">
@@ -39,7 +42,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, userId }) => {
           {isMine && (
             <Ionicons
               name={
-                message.status === "delivered"
+                message.status === "sent"
                   ? "checkmark-outline"
                   : "checkmark-done-outline"
               }

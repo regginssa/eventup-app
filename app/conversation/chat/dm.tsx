@@ -27,6 +27,8 @@ const ChatDM = () => {
     joinConversation,
     leaveConversation,
     sendMessage,
+    markMessageSeen,
+    setConversationId,
     messages,
   } = useMessage();
 
@@ -37,6 +39,7 @@ const ChatDM = () => {
   useEffect(() => {
     const init = async () => {
       if (!conversationId || !user?._id) return;
+      setConversationId(conversationId as string);
 
       const conv = conversations.find((c) => c._id === conversationId);
       if (!conv) return;
@@ -49,8 +52,9 @@ const ChatDM = () => {
       setOtherUserId(otherUser?._id || null);
       setStatus(otherUser?.status || "offline");
 
-      await loadMessages(conversationId as string);
       joinConversation(conversationId as string);
+
+      await loadMessages(conversationId as string);
 
       setLoading(false);
     };
@@ -60,11 +64,24 @@ const ChatDM = () => {
     // cleanup: leave room when navigating away
     return () => {
       if (conversationId) {
-        // clearMessages();
         leaveConversation(conversationId as string);
       }
     };
   }, [conversationId, user?._id, conversations]);
+
+  useEffect(() => {
+    if (!messages.length || !otherUserId || !user?._id) return;
+
+    const unseen = messages.filter(
+      (m) => m.sender._id !== user._id && m.status !== "seen",
+    );
+
+    if (unseen.length === 0) return;
+    markMessageSeen({
+      conversationId,
+      userId: user._id,
+    });
+  }, [messages, conversationId, user?._id, otherUserId]);
 
   const handleSend = () => {
     if (text.trim().length === 0) return;
@@ -96,11 +113,12 @@ const ChatDM = () => {
         <View className="flex-1">
           <FlatList
             ref={flatListRef}
-            data={messages}
+            data={[...messages].reverse()}
             keyExtractor={(item, index) => item._id || index.toString()}
             renderItem={({ item }: { item: IMessage }) => (
               <MessageItem message={item} userId={user?._id as string} />
             )}
+            inverted
             contentContainerStyle={{ gap: 16 }}
           />
         </View>
