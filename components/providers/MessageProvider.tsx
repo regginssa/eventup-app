@@ -67,19 +67,13 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     const handleSuccessMessageSeen = ({
-      cnvId,
+      conversationId,
       userId,
     }: {
-      cnvId: string;
+      conversationId: string;
       userId: string;
     }) => {
-      console.log(
-        "[message seen listened]: ",
-        cnvId,
-        currentConversationId,
-        userId,
-      );
-      if (cnvId !== currentConversationId) return;
+      if (conversationId !== currentConversationId) return;
 
       updateUnread(currentConversationId, userId, 0);
 

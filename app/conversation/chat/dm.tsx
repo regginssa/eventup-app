@@ -71,7 +71,8 @@ const ChatDM = () => {
   }, [conversationId, user?._id, conversations]);
 
   useEffect(() => {
-    if (!messages.length || !otherUserId || !user?._id) return;
+    if (!messages.length || !otherUserId || !user?._id || !conversationId)
+      return;
 
     const unseen = messages.filter(
       (m) => m.sender._id !== user._id && m.status !== "seen",

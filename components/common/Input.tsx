@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, TextInput, View } from "react-native";
 
 interface InputProps {
@@ -13,8 +13,8 @@ interface InputProps {
   invalidTxt?: string;
   value: any;
   onChange: (val: any) => void;
-  maxHeight?: number; // <<— Add this
-  multiline?: boolean; // <<— And this
+  maxHeight?: number;
+  multiline?: boolean;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -29,10 +29,16 @@ const Input: React.FC<InputProps> = ({
   invalidTxt,
   value,
   onChange,
-  maxHeight = 120, // default max height (like WhatsApp)
+  maxHeight = 120,
   multiline = false,
 }) => {
-  const [inputHeight, setInputHeight] = useState(40); // default height
+  const [inputHeight, setInputHeight] = useState(40);
+
+  useEffect(() => {
+    if (!value) {
+      setInputHeight(40);
+    }
+  }, [value]);
 
   return (
     <View className="w-full gap-2">

@@ -1,5 +1,5 @@
 import { IMessage } from "@/types/message";
-import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ScrollView, Text, View } from "react-native";
 
 interface MessageItemProps {
@@ -39,14 +39,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, userId }) => {
             {formatTime(message.createdAt)}
           </Text>
 
-          <Ionicons
-            name={
-              message.status === "sent"
-                ? "checkmark-outline"
-                : "checkmark-done-outline"
-            }
+          <MaterialCommunityIcons
+            name={message.status === "sent" ? "check" : "check-all"}
             size={16}
-            color="#16a34a"
+            color={message.status === "sent" ? "#4b5563" : "#16a34a"}
           />
         </View>
       </View>
