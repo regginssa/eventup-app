@@ -1,5 +1,11 @@
 import { markMessagesSeenRest } from "@/api/services/message";
-import { ChatContainer, Input, MessageItem, Spinner } from "@/components";
+import {
+  ChatContainer,
+  Input,
+  MessageItem,
+  Modal,
+  Spinner,
+} from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
 import { useMessage } from "@/components/providers/MessageProvider";
@@ -8,7 +14,7 @@ import { TOnlineStatus } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { FlatList, TouchableOpacity, View } from "react-native";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
 
 const ChatDM = () => {
   const [name, setName] = useState<string>("N/A");
@@ -18,6 +24,9 @@ const ChatDM = () => {
   const [text, setText] = useState<string>("");
   const [files, setFiles] = useState<TMessageFile[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isMessageActionsOpen, setIsMessageActionsOpen] =
+    useState<boolean>(false);
+  const [selectedMessageId, setSelectedMessageId] = useState<string>("");
   const flatListRef = useRef<FlatList>(null);
 
   const { conversationId } = useLocalSearchParams();
@@ -118,7 +127,14 @@ const ChatDM = () => {
             data={[...messages].reverse()}
             keyExtractor={(item, index) => item._id || index.toString()}
             renderItem={({ item }: { item: IMessage }) => (
-              <MessageItem message={item} userId={user?._id as string} />
+              <MessageItem
+                message={item}
+                userId={user?._id as string}
+                onLongPressMessage={(messageId: string) => {
+                  setSelectedMessageId(messageId);
+                  setIsMessageActionsOpen(true);
+                }}
+              />
             )}
             inverted
             contentContainerStyle={{ gap: 16 }}
@@ -164,6 +180,43 @@ const ChatDM = () => {
           />
         </View>
       </View>
+
+      {/* Message Actions */}
+      <Modal
+        title="Actions"
+        scrolled
+        isOpen={isMessageActionsOpen}
+        onClose={() => {
+          setSelectedMessageId("");
+          setIsMessageActionsOpen(false);
+        }}
+      >
+        <View className="w-full gap-2">
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-full flex flex-row items-center gap-2 p-4 bg-gray-200 rounded-lg"
+          >
+            <MaterialCommunityIcons
+              name="pencil-outline"
+              size={18}
+              color="#1f2937"
+            />
+            <Text className="font-poppins-medium text-gray-800">Edit</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-full flex flex-row items-center gap-2 p-4 bg-red-200 rounded-lg"
+          >
+            <MaterialCommunityIcons
+              name="trash-can-outline"
+              size={18}
+              color="#dc2626"
+            />
+            <Text className="font-poppins-medium text-red-600">Delete</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </ChatContainer>
   );
 };
