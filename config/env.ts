@@ -13,3 +13,4 @@ export const SERVER_SOCKET_URL = "ws://192.168.125.100:5001";
 export const STRIPE_PUBLISHABLE_KEY =
   "pk_test_51RGgNOB3QdeQ8arQcprVRXtbcpeDjhIQV6pBlLRrNJpb9MqGi9lrR7VTLYaHbsnozaqQjP42RM8FBqSBPzmjAJ5m00FAlzmRBY";
 // pk_live_51RGgNHBskVGUaFIhHgMDMkSPvDXoWNtxj4IhiIM8aRMBZtsxMFqqu5ksk9oNaHdC1e09q5oeeGptrL4SfLflDdmB001j70onjH
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes

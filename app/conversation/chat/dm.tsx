@@ -13,9 +13,13 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
 import { useMessage } from "@/components/providers/MessageProvider";
 import { useToast } from "@/components/providers/ToastProvider";
-import { IMessage, TMessageFile } from "@/types/message";
+import { MAX_FILE_SIZE } from "@/config/env";
+import { IMessage } from "@/types/message";
 import { TOnlineStatus } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as DocumentPicker from "expo-document-picker";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -27,13 +31,20 @@ import {
   View,
 } from "react-native";
 
+type TFile = {
+  type: "image" | "document";
+  name: string;
+  mimeType: string;
+  uri: string;
+};
+
 const ChatDM = () => {
   const [name, setName] = useState<string>("N/A");
   const [avatar, setAvatar] = useState<string | undefined>(undefined);
   const [otherUserId, setOtherUserId] = useState<string | null>(null);
   const [status, setStatus] = useState<TOnlineStatus>("offline");
   const [text, setText] = useState<string>("");
-  const [files, setFiles] = useState<TMessageFile[]>([]);
+  const [files, setFiles] = useState<TFile[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isMessageActionsOpen, setIsMessageActionsOpen] =
     useState<boolean>(false);
@@ -42,6 +53,10 @@ const ChatDM = () => {
   const [editLoading, setEditLoading] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [isUploadOpen, setIsUploadOpen] = useState<boolean>(false);
+  const [imgUploadLoading, setImgUploadLoading] = useState<boolean>(false);
+  const [docUploadLoading, setDocUploadLoading] = useState<boolean>(false);
+
   const flatListRef = useRef<FlatList>(null);
 
   const { conversationId } = useLocalSearchParams();
@@ -167,6 +182,73 @@ const ChatDM = () => {
     }
   };
 
+  const handleImagePicker = async () => {
+    setImgUploadLoading(true);
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 4],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      console.log("uploaded image data:", result.assets[0]);
+    }
+
+    if (result?.assets) {
+      const assets = result.assets;
+      let imgs: TFile[] = [];
+
+      for (const asset of assets) {
+        if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
+          toast.warn("Image size must be less than 5MB");
+          setImgUploadLoading(false);
+          return;
+        }
+
+        const img = {
+          type: "image",
+          name: asset.fileName,
+          mimeType: asset.mimeType,
+          uri: asset.uri,
+        };
+
+        imgs.push(img as any);
+      }
+
+      setFiles(imgs);
+      toast.success(`Picked ${imgs.length} images`);
+    }
+    setImgUploadLoading(false);
+  };
+
+  const handleDocumentPicker = async () => {
+    setDocUploadLoading(true);
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "*/*",
+      copyToCacheDirectory: true,
+      multiple: true,
+    });
+
+    if (!result.assets || result.assets.length === 0)
+      return setDocUploadLoading(false);
+    const assets = result.assets;
+    let docs: TFile[] = [];
+
+    for (const asset of assets) {
+      const doc: TFile = {
+        type: "document",
+        name: asset.name,
+        mimeType: asset.mimeType as string,
+        uri: asset.uri,
+      };
+      docs.push(doc);
+    }
+    setFiles(docs);
+    setDocUploadLoading(false);
+    toast.success(`Picked ${docs.length} documents`);
+  };
+
   return (
     <ChatContainer
       conversationId={conversationId as string}
@@ -200,15 +282,52 @@ const ChatDM = () => {
       )}
 
       <View className="w-full flex flex-row items-end gap-2 bg-white rounded-xl px-2">
-        <View className="flex-1">
-          <Input
-            type="string"
-            placeholder="Write a message..."
-            multiline
-            maxHeight={130}
-            value={isEditing ? editText : text}
-            onChange={isEditing ? setEditText : setText}
-          />
+        <View className="flex-1 flex flex-col gap-2">
+          <View className="w-full">
+            <Input
+              type="string"
+              placeholder="Write a message..."
+              multiline
+              maxHeight={130}
+              value={isEditing ? editText : text}
+              onChange={isEditing ? setEditText : setText}
+            />
+          </View>
+
+          {files.length > 0 && (
+            <View className="w-full flex flex-row items-center gap-2 overflow-hidden">
+              {files.map((file, index) => (
+                <>
+                  {file.type === "image" ? (
+                    <Image
+                      key={index}
+                      source={{ uri: file.uri }}
+                      alt={file.name}
+                      style={{ width: 60, height: 60, borderRadius: 12 }}
+                    />
+                  ) : (
+                    <View
+                      key={index}
+                      className="w-[60px] h-[60px] flex items-center justify-center gap-4 rounded-xl overflow-hidden"
+                    >
+                      <MaterialCommunityIcons
+                        name="file-document-outline"
+                        size={32}
+                        color="#4b5563"
+                      />
+
+                      <Text
+                        className="font-dm-sans-medium text-sm text-gray-600"
+                        numberOfLines={1}
+                      >
+                        {file.name}
+                      </Text>
+                    </View>
+                  )}
+                </>
+              ))}
+            </View>
+          )}
         </View>
 
         <View className="flex flex-row items-center gap-2 mb-3">
@@ -233,11 +352,16 @@ const ChatDM = () => {
             size={24}
             color="#4b5563"
           />
-          <MaterialCommunityIcons
-            name="cloud-arrow-up-outline"
-            size={24}
-            color="#4b5563"
-          />
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setIsUploadOpen(true)}
+          >
+            <MaterialCommunityIcons
+              name="cloud-arrow-up-outline"
+              size={24}
+              color="#4b5563"
+            />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -287,6 +411,55 @@ const ChatDM = () => {
             />
             <Text className="font-poppins-medium text-red-600">Delete</Text>
             {deleteLoading && <ActivityIndicator size={18} color="#dc2626" />}
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      <Modal
+        title="Upload"
+        scrolled
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+      >
+        <View className="w-full flex flex-row items-center gap-4">
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-1/2 flex-1 flex flex-col items-center justify-center gap-2 border border-gray-400 rounded-xl py-4"
+            disabled={imgUploadLoading}
+            onPress={handleImagePicker}
+          >
+            {imgUploadLoading ? (
+              <ActivityIndicator size={18} color="#1f2937" />
+            ) : (
+              <MaterialCommunityIcons
+                name="image-outline"
+                size={18}
+                color="#1f2937"
+              />
+            )}
+            <Text className="font-dm-sans-medium text-sm text-gray-800">
+              Image
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-1/2 flex-1 flex flex-col items-center justify-center gap-2 border border-gray-400 rounded-xl py-4"
+            disabled={docUploadLoading}
+            onPress={handleDocumentPicker}
+          >
+            {docUploadLoading ? (
+              <ActivityIndicator size={18} color="#1f2937" />
+            ) : (
+              <MaterialCommunityIcons
+                name="file-document-outline"
+                size={18}
+                color="#1f2937"
+              />
+            )}
+            <Text className="font-dm-sans-medium text-sm text-gray-800">
+              Document
+            </Text>
           </TouchableOpacity>
         </View>
       </Modal>

@@ -43,9 +43,9 @@ const Modal: React.FC<ModalProps> = ({
 
       {/* SHEET */}
       <View
-        className="bg-white rounded-t-2xl p-4"
+        className="bg-white rounded-t-2xl p-5"
         style={{
-          maxHeight: SHEET_MAX_HEIGHT,
+          height: scrolled ? "auto" : SHEET_MAX_HEIGHT,
         }}
       >
         {/* HANDLE */}
@@ -75,7 +75,7 @@ const Modal: React.FC<ModalProps> = ({
             {children}
           </ScrollView>
         ) : (
-          <View>{children}</View>
+          <View className="flex-1">{children}</View>
         )}
       </View>
     </RNModal>
