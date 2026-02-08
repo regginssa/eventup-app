@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
 import { useMessage } from "@/components/providers/MessageProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { IMessage, TMessageFile } from "@/types/message";
 import { TOnlineStatus } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -57,6 +58,7 @@ const ChatDM = () => {
     removeMessage,
     messages,
   } = useMessage();
+  const toast = useToast();
 
   useEffect(() => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
@@ -129,10 +131,10 @@ const ChatDM = () => {
   const handleEdit = () => {
     if (!selectedMessageId) return Alert.alert("Warn", "No selected message");
     if (editText.trim().length === 0)
-      return Alert.alert("Warn", "Please type a message to edit");
+      return toast.warn("Please type a message to edit");
 
     const message = messages.find((m) => m._id === selectedMessageId);
-    if (!message) return Alert.alert("Warn", "No selected message");
+    if (!message) return toast.warn("No selected message");
 
     const updates: IMessage = {
       ...message,
@@ -145,7 +147,7 @@ const ChatDM = () => {
   };
 
   const handleDelete = async () => {
-    if (!selectedMessageId) return Alert.alert("Warn", "No selected message");
+    if (!selectedMessageId) return toast.warn("No selected message");
 
     try {
       setDeleteLoading(true);
@@ -257,7 +259,7 @@ const ChatDM = () => {
             onPress={() => {
               const message = messages.find((m) => m._id === selectedMessageId);
               if (message?.sender._id !== user?._id)
-                return Alert.alert("Warn", "The message is not yours");
+                return toast.warn("The message is not yours");
               setEditText(message?.text || "");
               setIsEditing(true);
               setIsMessageActionsOpen(false);

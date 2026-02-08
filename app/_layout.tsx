@@ -2,10 +2,10 @@ import { InitContainer } from "@/components/organisms";
 import {
   ConversationProvider,
   MessageProvider,
-  OverlayProvider,
   SocketProvider,
   ThemeProvider,
   TicketProvider,
+  ToastProvider,
 } from "@/components/providers";
 import AuthProvider from "@/components/providers/AuthProvider";
 import { STRIPE_PUBLISHABLE_KEY } from "@/config/env";
@@ -73,7 +73,7 @@ export default function RootLayout() {
                       behavior={Platform.OS === "ios" ? "padding" : undefined}
                       style={{ flex: 1 }}
                     >
-                      <OverlayProvider>
+                      <ToastProvider>
                         <Stack
                           screenOptions={{
                             headerShown: false,
@@ -91,7 +91,7 @@ export default function RootLayout() {
                           <Stack.Screen name="subscription" />
                           <Stack.Screen name="conversation" />
                         </Stack>
-                      </OverlayProvider>
+                      </ToastProvider>
                     </KeyboardAvoidingView>
                     <InitContainer />
                   </ThemeProvider>
