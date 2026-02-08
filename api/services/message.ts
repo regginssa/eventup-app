@@ -15,8 +15,9 @@ export const markMessagesSeenRest = async (conversationId: string) => {
 
 export const updateMessageById = async (
   messageId: string,
+  updates: IMessage,
 ): Promise<ApiResponse<IMessage>> => {
-  return await AxiosInstance.patch(MESSAGE_BASE + messageId);
+  return await AxiosInstance.patch(MESSAGE_BASE + messageId, updates);
 };
 
 export const removeMessageById = async (

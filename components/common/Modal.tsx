@@ -1,6 +1,8 @@
 import { Entypo } from "@expo/vector-icons";
 import {
   Dimensions,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   Modal as RNModal,
   ScrollView,
@@ -35,50 +37,60 @@ const Modal: React.FC<ModalProps> = ({
       transparent
       statusBarTranslucent
     >
-      {/* Backdrop */}
-      <Pressable className="flex-1 bg-black/30" onPress={onClose}>
-        {/* Bottom sheet wrapper */}
-        <View className="flex-1 justify-end">
-          {/* Sheet */}
-          <View
-            className="bg-white rounded-t-2xl p-4"
-            style={{
-              maxHeight: SHEET_MAX_HEIGHT,
-              height: !scrolled ? SHEET_MAX_HEIGHT : "auto",
-              width: "100%",
-            }}
-            onStartShouldSetResponder={() => true}
-          >
-            {/* Handle */}
-            <View className="items-center mb-3">
-              <View className="w-12 h-1 bg-gray-300 rounded-full" />
-            </View>
+      {/* BACKDROP */}
+      <Pressable
+        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)" }}
+        onPress={onClose}
+      />
 
-            {/* Header */}
-            <View className="flex-row items-center gap-4 mb-3">
-              <Text className="font-poppins-semibold text-lg text-gray-700 flex-1">
-                {title}
-              </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"
-                onPress={onClose}
-              >
-                <Entypo name="cross" size={16} color="#1f2937" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Body */}
-            {scrolled ? (
-              <ScrollView style={{ paddingBottom: 20, paddingHorizontal: 10 }}>
-                {children}
-              </ScrollView>
-            ) : (
-              <View className="flex-1">{children}</View>
-            )}
+      {/* KEYBOARD AVOIDING — MUST BE AT TOP */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          width: "100%",
+        }}
+      >
+        {/* SHEET */}
+        <View
+          className="bg-white rounded-t-2xl p-4"
+          style={{
+            maxHeight: SHEET_MAX_HEIGHT,
+          }}
+        >
+          {/* HANDLE */}
+          <View className="items-center mb-3">
+            <View className="w-12 h-1 bg-gray-300 rounded-full" />
           </View>
+
+          {/* HEADER */}
+          <View className="flex-row items-center gap-4 mb-3">
+            <Text className="font-poppins-semibold text-lg text-gray-700 flex-1">
+              {title}
+            </Text>
+            <TouchableOpacity
+              onPress={onClose}
+              className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"
+            >
+              <Entypo name="cross" size={16} color="#1f2937" />
+            </TouchableOpacity>
+          </View>
+
+          {/* BODY */}
+          {scrolled ? (
+            <ScrollView
+              contentContainerStyle={{ paddingBottom: 20 }}
+              keyboardShouldPersistTaps="handled"
+            >
+              {children}
+            </ScrollView>
+          ) : (
+            <View>{children}</View>
+          )}
         </View>
-      </Pressable>
+      </KeyboardAvoidingView>
     </RNModal>
   );
 };

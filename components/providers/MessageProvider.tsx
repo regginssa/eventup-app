@@ -14,8 +14,8 @@ interface MessageContextProps {
   leaveConversation: (conversationId: string) => void;
   sendMessage: (payload: any) => void;
   markMessageSeen: (payload: any) => void;
+  updateMessage: (payload: any) => void;
   removeMessage: (payload: any) => void;
-  clearMessages: () => void;
 }
 
 const MessageContext = createContext<MessageContextProps | undefined>(
@@ -93,18 +93,33 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
       conversationId: string;
     }) => {
       if (conversationId !== currentConversationId) return;
-      setMessages(messages.filter((m) => m._id !== messageId));
+
+      setMessages((prev) => prev.filter((m) => m._id !== messageId));
+    };
+
+    const handleMessageUpdated = (msg: IMessage) => {
+      if (msg.conversation !== currentConversationId) return;
+
+      setMessages((prev) =>
+        prev.map((m) => (m._id === msg._id ? { ...m, ...msg } : m)),
+      );
     };
 
     socket.on("new_message", handleIncoming);
     socket.on("messages_seen", handleSuccessMessageSeen);
     socket.on("message_removed", handleMessageRemoved);
+    socket.on("message_updated", handleMessageUpdated);
 
     return () => {
       socket.off("new_message", handleIncoming);
       socket.off("messages_seen");
     };
   }, [socket, currentConversationId]);
+
+  // UPDATE CURRENT CONVERSATION ID
+  const updateCurrentConversationId = (convId: string) => {
+    setCurrentConversationId(convId);
+  };
 
   // SEND MESSAGE (no callback)
   const sendMessage = (payload: any) => {
@@ -120,15 +135,11 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // REMOVE A MESSAGE
   const removeMessage = (payload: any) => {
-    socket.emit("send_message", payload);
+    socket.emit("remove_message", payload);
   };
 
-  // CLEAR MESSAGE
-  const clearMessages = () => setMessages([]);
-
-  // UPDATE CURRENT CONVERSATION ID
-  const updateCurrentConversationId = (convId: string) => {
-    setCurrentConversationId(convId);
+  const updateMessage = (payload: any) => {
+    socket.emit("update_message", payload);
   };
 
   return (
@@ -142,8 +153,8 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
         leaveConversation,
         sendMessage,
         markMessageSeen,
+        updateMessage,
         removeMessage,
-        clearMessages,
       }}
     >
       {children}

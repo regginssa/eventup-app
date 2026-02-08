@@ -36,7 +36,10 @@ const ChatDM = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [isMessageActionsOpen, setIsMessageActionsOpen] =
     useState<boolean>(false);
+  const [editText, setEditText] = useState<string>("");
   const [selectedMessageId, setSelectedMessageId] = useState<string>("");
+  const [editLoading, setEditLoading] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const flatListRef = useRef<FlatList>(null);
 
@@ -50,6 +53,7 @@ const ChatDM = () => {
     updateCurrentConversationId,
     sendMessage,
     markMessageSeen,
+    updateMessage,
     removeMessage,
     messages,
   } = useMessage();
@@ -122,6 +126,24 @@ const ChatDM = () => {
     setFiles([]);
   };
 
+  const handleEdit = () => {
+    if (!selectedMessageId) return Alert.alert("Warn", "No selected message");
+    if (editText.trim().length === 0)
+      return Alert.alert("Warn", "Please type a message to edit");
+
+    const message = messages.find((m) => m._id === selectedMessageId);
+    if (!message) return Alert.alert("Warn", "No selected message");
+
+    const updates: IMessage = {
+      ...message,
+      isEdited: true,
+      text: editText,
+    };
+
+    updateMessage({ updates, conversationId });
+    setIsEditing(false);
+  };
+
   const handleDelete = async () => {
     if (!selectedMessageId) return Alert.alert("Warn", "No selected message");
 
@@ -182,13 +204,16 @@ const ChatDM = () => {
             placeholder="Write a message..."
             multiline
             maxHeight={130}
-            value={text}
-            onChange={setText}
+            value={isEditing ? editText : text}
+            onChange={isEditing ? setEditText : setText}
           />
         </View>
 
         <View className="flex flex-row items-center gap-2 mb-3">
-          <TouchableOpacity activeOpacity={0.8} onPress={handleSend}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={isEditing ? handleEdit : handleSend}
+          >
             <MaterialCommunityIcons
               name="send-outline"
               size={24}
@@ -228,6 +253,15 @@ const ChatDM = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             className="w-full flex flex-row items-center gap-2 p-4 bg-gray-200 rounded-lg"
+            disabled={editLoading}
+            onPress={() => {
+              const message = messages.find((m) => m._id === selectedMessageId);
+              if (message?.sender._id !== user?._id)
+                return Alert.alert("Warn", "The message is not yours");
+              setEditText(message?.text || "");
+              setIsEditing(true);
+              setIsMessageActionsOpen(false);
+            }}
           >
             <MaterialCommunityIcons
               name="pencil-outline"
@@ -235,6 +269,7 @@ const ChatDM = () => {
               color="#1f2937"
             />
             <Text className="font-poppins-medium text-gray-800">Edit</Text>
+            {editLoading && <ActivityIndicator size={18} color="#1f2937" />}
           </TouchableOpacity>
 
           <TouchableOpacity
