@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Dimensions, Text } from "react-native";
-import Animated, {
-  FadeOut,
-  SlideInUp,
-  SlideOutUp,
-} from "react-native-reanimated";
+import Animated, { SlideInUp, SlideOutUp } from "react-native-reanimated";
 
 export type ToastType = "success" | "error" | "info" | "warn";
 
@@ -35,13 +31,15 @@ const Toast: React.FC<ToastProps> = ({
       ? "bg-green-600"
       : type === "error"
         ? "bg-red-600"
-        : "bg-blue-600";
+        : type === "warn"
+          ? "bg-yellow-600"
+          : "bg-blue-600";
 
   return (
     <Animated.View
-      entering={SlideInUp}
-      exiting={[SlideOutUp.duration(300), FadeOut] as any}
-      className={`absolute top-14 self-center ${bgColor} rounded-2xl px-6 py-3 w-[${width * 0.7}px] shadow-lg`}
+      entering={SlideInUp.duration(300)}
+      exiting={SlideOutUp.duration(300).build()}
+      className={`absolute top-14 self-center ${bgColor} rounded-2xl px-6 py-3 w-[${width * 0.7}px] shadow-lg `}
     >
       <Text className="text-white text-center font-semibold text-base">
         {message}

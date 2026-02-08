@@ -1,8 +1,6 @@
 import { Entypo } from "@expo/vector-icons";
 import {
   Dimensions,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   Modal as RNModal,
   ScrollView,
@@ -43,54 +41,43 @@ const Modal: React.FC<ModalProps> = ({
         onPress={onClose}
       />
 
-      {/* KEYBOARD AVOIDING — MUST BE AT TOP */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+      {/* SHEET */}
+      <View
+        className="bg-white rounded-t-2xl p-4"
         style={{
-          position: "absolute",
-          bottom: 0,
-          width: "100%",
+          maxHeight: SHEET_MAX_HEIGHT,
         }}
       >
-        {/* SHEET */}
-        <View
-          className="bg-white rounded-t-2xl p-4"
-          style={{
-            maxHeight: SHEET_MAX_HEIGHT,
-          }}
-        >
-          {/* HANDLE */}
-          <View className="items-center mb-3">
-            <View className="w-12 h-1 bg-gray-300 rounded-full" />
-          </View>
-
-          {/* HEADER */}
-          <View className="flex-row items-center gap-4 mb-3">
-            <Text className="font-poppins-semibold text-lg text-gray-700 flex-1">
-              {title}
-            </Text>
-            <TouchableOpacity
-              onPress={onClose}
-              className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"
-            >
-              <Entypo name="cross" size={16} color="#1f2937" />
-            </TouchableOpacity>
-          </View>
-
-          {/* BODY */}
-          {scrolled ? (
-            <ScrollView
-              contentContainerStyle={{ paddingBottom: 20 }}
-              keyboardShouldPersistTaps="handled"
-            >
-              {children}
-            </ScrollView>
-          ) : (
-            <View>{children}</View>
-          )}
+        {/* HANDLE */}
+        <View className="items-center mb-3">
+          <View className="w-12 h-1 bg-gray-300 rounded-full" />
         </View>
-      </KeyboardAvoidingView>
+
+        {/* HEADER */}
+        <View className="flex-row items-center gap-4 mb-3">
+          <Text className="font-poppins-semibold text-lg text-gray-700 flex-1">
+            {title}
+          </Text>
+          <TouchableOpacity
+            onPress={onClose}
+            className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"
+          >
+            <Entypo name="cross" size={16} color="#1f2937" />
+          </TouchableOpacity>
+        </View>
+
+        {/* BODY */}
+        {scrolled ? (
+          <ScrollView
+            contentContainerStyle={{ paddingBottom: 20 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            {children}
+          </ScrollView>
+        ) : (
+          <View>{children}</View>
+        )}
+      </View>
     </RNModal>
   );
 };
