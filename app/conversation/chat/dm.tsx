@@ -2,6 +2,7 @@ import {
   markMessagesSeenRest,
   removeMessageById,
 } from "@/api/services/message";
+import { uploadFile } from "@/api/services/upload";
 import {
   ChatContainer,
   Input,
@@ -14,9 +15,9 @@ import { useConversation } from "@/components/providers/ConversationProvider";
 import { useMessage } from "@/components/providers/MessageProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { MAX_FILE_SIZE } from "@/config/env";
-import { IMessage } from "@/types/message";
+import { IMessage, TMessageFile } from "@/types/message";
 import { TOnlineStatus } from "@/types/user";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -26,13 +27,14 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 
 type TFile = {
-  type: "image" | "document";
+  type: "image" | "file";
   name: string;
   mimeType: string;
   uri: string;
@@ -56,6 +58,7 @@ const ChatDM = () => {
   const [isUploadOpen, setIsUploadOpen] = useState<boolean>(false);
   const [imgUploadLoading, setImgUploadLoading] = useState<boolean>(false);
   const [docUploadLoading, setDocUploadLoading] = useState<boolean>(false);
+  const [uploadLoading, setUploadLoading] = useState<boolean>(false);
 
   const flatListRef = useRef<FlatList>(null);
 
@@ -127,14 +130,56 @@ const ChatDM = () => {
     });
   }, [messages, conversationId, user?._id, otherUserId]);
 
-  const handleSend = () => {
+  const getMimeType = (uri: string) => {
+    const ext = uri.split(".").pop()?.toLowerCase();
+
+    if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+    if (ext === "png") return "image/png";
+    if (ext === "heic") return "image/heic";
+    return "application/octet-stream";
+  };
+
+  const handleSend = async () => {
     if (text.trim().length === 0) return;
+
+    let uploadedFiles: TMessageFile[] = [];
+
+    if (files.length > 0) {
+      try {
+        setUploadLoading(true);
+
+        for (const file of files) {
+          const uri = file.uri;
+          const name = file.name || `file_${Date.now()}`;
+          const mimeType =
+            file.mimeType ||
+            (file.type === "image"
+              ? getMimeType(file.uri)
+              : "application/octet-stream");
+
+          const formData = new FormData();
+          formData.append("file", { uri, name, type: mimeType } as any);
+
+          const response = await uploadFile(formData);
+
+          if (response?.data) {
+            uploadedFiles.push({
+              type: file.type,
+              url: response.data,
+            });
+          }
+        }
+      } catch (error) {
+      } finally {
+        setUploadLoading(false);
+      }
+    }
 
     const payload = {
       conversationId,
       senderId: user?._id,
       text,
-      files,
+      files: uploadedFiles,
     };
 
     sendMessage(payload);
@@ -186,9 +231,7 @@ const ChatDM = () => {
     setImgUploadLoading(true);
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 4],
-      quality: 1,
+      allowsMultipleSelection: true,
     });
 
     if (!result.canceled) {
@@ -216,7 +259,7 @@ const ChatDM = () => {
         imgs.push(img as any);
       }
 
-      setFiles(imgs);
+      setFiles([...files, ...imgs]);
       toast.success(`Picked ${imgs.length} images`);
     }
     setImgUploadLoading(false);
@@ -237,16 +280,16 @@ const ChatDM = () => {
 
     for (const asset of assets) {
       const doc: TFile = {
-        type: "document",
+        type: "file",
         name: asset.name,
         mimeType: asset.mimeType as string,
         uri: asset.uri,
       };
       docs.push(doc);
     }
-    setFiles(docs);
+    setFiles([...files, ...docs]);
     setDocUploadLoading(false);
-    toast.success(`Picked ${docs.length} documents`);
+    toast.success(`Picked ${docs.length} files`);
   };
 
   return (
@@ -295,38 +338,64 @@ const ChatDM = () => {
           </View>
 
           {files.length > 0 && (
-            <View className="w-full flex flex-row items-center gap-2 overflow-hidden">
-              {files.map((file, index) => (
-                <>
-                  {file.type === "image" ? (
-                    <Image
-                      key={index}
-                      source={{ uri: file.uri }}
-                      alt={file.name}
-                      style={{ width: 60, height: 60, borderRadius: 12 }}
-                    />
-                  ) : (
-                    <View
-                      key={index}
-                      className="w-[60px] h-[60px] flex items-center justify-center gap-4 rounded-xl overflow-hidden"
-                    >
-                      <MaterialCommunityIcons
-                        name="file-document-outline"
-                        size={32}
-                        color="#4b5563"
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="w-full"
+            >
+              <View className="w-full flex flex-row items-center gap-2 py-2">
+                {files.map((file) => (
+                  <View
+                    key={file.uri}
+                    className="w-[80px] h-[80px] flex items-center justify-center gap-4 rounded-xl overflow-hidden relative"
+                  >
+                    {file.type === "image" ? (
+                      <Image
+                        key={file.uri}
+                        source={{ uri: file.uri }}
+                        alt={file.name}
+                        style={{ width: "100%", height: "100%" }}
+                        contentFit="cover"
                       />
+                    ) : (
+                      <>
+                        <MaterialCommunityIcons
+                          name="file-document-outline"
+                          size={32}
+                          color="#4b5563"
+                        />
 
-                      <Text
-                        className="font-dm-sans-medium text-sm text-gray-600"
-                        numberOfLines={1}
-                      >
-                        {file.name}
-                      </Text>
-                    </View>
-                  )}
-                </>
-              ))}
-            </View>
+                        <Text
+                          className="font-dm-sans-medium text-sm text-gray-600"
+                          numberOfLines={1}
+                        >
+                          {file.name}
+                        </Text>
+                      </>
+                    )}
+
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      className="absolute w-8 h-8 flex items-center justify-center bg-gray-300 rounded-full top-0 right-0"
+                      disabled={uploadLoading}
+                      onPress={() => {
+                        setFiles((prev) =>
+                          prev.filter((p) => p.uri !== file.uri),
+                        );
+                      }}
+                    >
+                      <Feather name="x" size={14} color="#1f2937" />
+                    </TouchableOpacity>
+
+                    {uploadLoading && (
+                      <View className="absolute inset-0 flex items-center justify-center z-40 bg-white/30 opacity-70">
+                        <ActivityIndicator size={18} color="#1f2937" />
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
           )}
         </View>
 
@@ -458,7 +527,7 @@ const ChatDM = () => {
               />
             )}
             <Text className="font-dm-sans-medium text-sm text-gray-800">
-              Document
+              File
             </Text>
           </TouchableOpacity>
         </View>
