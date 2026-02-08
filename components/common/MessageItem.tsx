@@ -48,6 +48,11 @@ const MessageItem: React.FC<MessageItemProps> = ({
           </ScrollView>
 
           <View className="w-full flex flex-row items-center justify-end gap-2">
+            {message.isEdited && (
+              <Text className="font-dm-sans-medium text-gray-600 text-xs">
+                Edited
+              </Text>
+            )}
             <Text className="font-dm-sans-medium text-gray-600 text-xs">
               {formatTime(message.createdAt)}
             </Text>

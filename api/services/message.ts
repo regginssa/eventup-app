@@ -12,3 +12,15 @@ export const fetchConversationMessages = async (
 export const markMessagesSeenRest = async (conversationId: string) => {
   await AxiosInstance.post(MESSAGE_BASE + conversationId + "/seen");
 };
+
+export const updateMessageById = async (
+  messageId: string,
+): Promise<ApiResponse<IMessage>> => {
+  return await AxiosInstance.patch(MESSAGE_BASE + messageId);
+};
+
+export const removeMessageById = async (
+  messageId: string,
+): Promise<ApiResponse<boolean>> => {
+  return await AxiosInstance.delete(MESSAGE_BASE + messageId);
+};

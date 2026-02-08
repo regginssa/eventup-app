@@ -1,4 +1,7 @@
-import { markMessagesSeenRest } from "@/api/services/message";
+import {
+  markMessagesSeenRest,
+  removeMessageById,
+} from "@/api/services/message";
 import {
   ChatContainer,
   Input,
@@ -14,7 +17,14 @@ import { TOnlineStatus } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const ChatDM = () => {
   const [name, setName] = useState<string>("N/A");
@@ -27,6 +37,7 @@ const ChatDM = () => {
   const [isMessageActionsOpen, setIsMessageActionsOpen] =
     useState<boolean>(false);
   const [selectedMessageId, setSelectedMessageId] = useState<string>("");
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const flatListRef = useRef<FlatList>(null);
 
   const { conversationId } = useLocalSearchParams();
@@ -36,9 +47,10 @@ const ChatDM = () => {
     loadMessages,
     joinConversation,
     leaveConversation,
+    updateCurrentConversationId,
     sendMessage,
     markMessageSeen,
-    updateCurrentConversationId,
+    removeMessage,
     messages,
   } = useMessage();
 
@@ -108,6 +120,27 @@ const ChatDM = () => {
 
     setText("");
     setFiles([]);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedMessageId) return Alert.alert("Warn", "No selected message");
+
+    try {
+      setDeleteLoading(true);
+
+      await removeMessageById(selectedMessageId);
+
+      removeMessage({
+        messageId: selectedMessageId,
+        conversationId,
+      });
+
+      setIsMessageActionsOpen(false);
+    } catch (error) {
+      console.log("[delete message error]: ", error);
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   return (
@@ -207,6 +240,8 @@ const ChatDM = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             className="w-full flex flex-row items-center gap-2 p-4 bg-red-200 rounded-lg"
+            disabled={deleteLoading}
+            onPress={handleDelete}
           >
             <MaterialCommunityIcons
               name="trash-can-outline"
@@ -214,6 +249,7 @@ const ChatDM = () => {
               color="#dc2626"
             />
             <Text className="font-poppins-medium text-red-600">Delete</Text>
+            {deleteLoading && <ActivityIndicator size={18} color="#dc2626" />}
           </TouchableOpacity>
         </View>
       </Modal>

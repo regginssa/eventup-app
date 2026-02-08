@@ -14,6 +14,7 @@ export interface IMessage {
   text: string;
   files: TMessageFile[];
   status: TMessageStatus;
+  isEdited: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

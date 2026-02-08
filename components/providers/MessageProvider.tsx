@@ -14,6 +14,7 @@ interface MessageContextProps {
   leaveConversation: (conversationId: string) => void;
   sendMessage: (payload: any) => void;
   markMessageSeen: (payload: any) => void;
+  removeMessage: (payload: any) => void;
   clearMessages: () => void;
 }
 
@@ -84,8 +85,20 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
       );
     };
 
+    const handleMessageRemoved = ({
+      messageId,
+      conversationId,
+    }: {
+      messageId: string;
+      conversationId: string;
+    }) => {
+      if (conversationId !== currentConversationId) return;
+      setMessages(messages.filter((m) => m._id !== messageId));
+    };
+
     socket.on("new_message", handleIncoming);
     socket.on("messages_seen", handleSuccessMessageSeen);
+    socket.on("message_removed", handleMessageRemoved);
 
     return () => {
       socket.off("new_message", handleIncoming);
@@ -103,6 +116,11 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
   const markMessageSeen = (payload: any) => {
     if (!socket) return;
     socket.emit("mark_message_seen", payload);
+  };
+
+  // REMOVE A MESSAGE
+  const removeMessage = (payload: any) => {
+    socket.emit("send_message", payload);
   };
 
   // CLEAR MESSAGE
@@ -124,6 +142,7 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
         leaveConversation,
         sendMessage,
         markMessageSeen,
+        removeMessage,
         clearMessages,
       }}
     >
