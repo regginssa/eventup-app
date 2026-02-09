@@ -34,13 +34,19 @@ const TicketsScreen = () => {
   useEffect(() => {
     switch (selectedCurrency) {
       case "eur":
-        setFilteredTickets(tickets.filter((t) => t.currency === "eur"));
+        setFilteredTickets(
+          tickets.filter((t) => t.currency.toUpperCase() === "EUR"),
+        );
         break;
       case "pln":
-        setFilteredTickets(tickets.filter((t) => t.currency === "pln"));
+        setFilteredTickets(
+          tickets.filter((t) => t.currency.toUpperCase() === "PLN"),
+        );
         break;
       default:
-        setFilteredTickets(tickets.filter((t) => t.currency === "usd"));
+        setFilteredTickets(
+          tickets.filter((t) => t.currency.toUpperCase() === "USD"),
+        );
         break;
     }
   }, [selectedCurrency, tickets]);
@@ -49,7 +55,9 @@ const TicketsScreen = () => {
     if (!amount || !currency || !from || tickets.length === 0) return;
     setSelectedTicket(
       tickets.find(
-        (t) => t.price === Number(amount) && t.currency === currency,
+        (t) =>
+          t.price === Number(amount) &&
+          t.currency.toUpperCase() === currency.toString().toUpperCase(),
       ) || null,
     );
     setIsOpen(true);

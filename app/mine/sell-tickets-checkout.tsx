@@ -1,23 +1,15 @@
 import { fetchTicketById } from "@/api/services/ticket";
-import {
-  createSellTicketPayout,
-  fetchTokenPricesAndFee,
-} from "@/api/services/web3";
+import { fetchTokenPricesAndFee } from "@/api/services/web3";
 import { Button, CheckoutContainer, CryptoPayout } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
 
@@ -200,6 +192,8 @@ const MineSellTicketsCheckout = () => {
   const { user } = useAuth();
   const router = useRouter();
 
+  const toast = useToast();
+
   useEffect(() => {
     const fetchTicket = async () => {
       if (!ticketId) return;
@@ -254,12 +248,15 @@ const MineSellTicketsCheckout = () => {
         metadata,
       };
 
-      const response = await createSellTicketPayout(bodyData);
+      toast.success("Sold successfully");
+      router.replace("/home");
 
-      if (response.data) {
-        Alert.alert("Success", "Payout successfully");
-        router.back();
-      }
+      // const response = await createSellTicketPayout(bodyData);
+
+      // if (response.data) {
+      //   Alert.alert("Success", "Payout successfully");
+      //   router.back();
+      // }
     } catch (error: any) {
       console.log("[handle sell error]: ", error);
     } finally {
