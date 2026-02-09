@@ -46,6 +46,8 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const { user } = useAuth();
   const { socket } = useSocket();
 
+  useEffect(() => {}, [socket, user]);
+
   const loadConversations = async () => {
     if (!user?._id) return;
 
@@ -108,6 +110,10 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
           : c,
       ),
     );
+  };
+
+  const removeConversationForMe = (payload: any) => {
+    socket.emit("");
   };
 
   const removeConversationById = (id: string) => {

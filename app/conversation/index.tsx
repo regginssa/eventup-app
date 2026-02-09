@@ -1,4 +1,4 @@
-import { removeOneConversation } from "@/api/services/conversation";
+import { removeConversationForMe } from "@/api/services/conversation";
 import {
   ConversationContainer,
   ConversationItem,
@@ -72,12 +72,12 @@ const Conversation = () => {
     setIsActionsOpen(true);
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (type: "me" | "everyone") => {
     if (!selectedConversationId) return toast.warn("No selected conversation");
     try {
       setDeleteLoading(true);
 
-      await removeOneConversation(selectedConversationId);
+      await removeConversationForMe(selectedConversationId);
       removeConversationById(selectedConversationId);
     } catch (error) {
       console.log("[delete conversation error]: ", error);
@@ -139,11 +139,11 @@ const Conversation = () => {
           <View className="w-full flex flex-row items-center justify-end gap-4">
             <TouchableOpacity
               activeOpacity={0.8}
-              className="flex flex-row items-center gap-2 p-4 rounded-lg bg-gray-200"
+              className="flex flex-row items-center gap-2 p-2 rounded-lg bg-gray-200"
               disabled={deleteLoading}
-              onPress={handleDelete}
+              onPress={() => handleDelete("me")}
             >
-              <Text className="font-poppins-medium text-gray-800">
+              <Text className="font-poppins-medium text-gray-800 text-sm">
                 Delete For Me
               </Text>
               {deleteLoading && <ActivityIndicator size={18} color="#1f2937" />}
@@ -151,11 +151,11 @@ const Conversation = () => {
 
             <TouchableOpacity
               activeOpacity={0.8}
-              className="flex flex-row items-center gap-2 p-4 rounded-lg bg-gray-200"
+              className="flex flex-row items-center gap-2 p-2 rounded-lg bg-gray-200"
               disabled={deleteLoading}
-              onPress={handleDelete}
+              onPress={() => handleDelete("everyone")}
             >
-              <Text className="font-poppins-medium text-gray-800">
+              <Text className="font-poppins-medium text-gray-800 text-sm">
                 Delete For Everyone
               </Text>
               {deleteLoading && <ActivityIndicator size={18} color="#1f2937" />}

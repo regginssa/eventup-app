@@ -9,8 +9,16 @@ export const fetchUserConversations = async (
   return await AxiosInstance.get(CONVERSATION_BASE + userId);
 };
 
-export const removeOneConversation = async (
+export const removeConversationForMe = async (
   conversationId: string,
 ): Promise<ApiResponse<boolean>> => {
-  return await AxiosInstance.delete(CONVERSATION_BASE + conversationId);
+  return await AxiosInstance.delete(CONVERSATION_BASE + conversationId + "/me");
+};
+
+export const removeConversationForAll = async (
+  conversationId: string,
+): Promise<ApiResponse<boolean>> => {
+  return await AxiosInstance.delete(
+    CONVERSATION_BASE + conversationId + "/all",
+  );
 };

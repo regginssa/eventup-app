@@ -112,7 +112,9 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
 
     return () => {
       socket.off("new_message", handleIncoming);
-      socket.off("messages_seen");
+      socket.off("messages_seen", handleSuccessMessageSeen);
+      socket.off("message_removed", handleMessageRemoved);
+      socket.off("message_updated", handleMessageUpdated);
     };
   }, [socket, currentConversationId]);
 
