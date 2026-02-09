@@ -81,19 +81,17 @@ const Conversation = () => {
         setDeleteAllLoading(true);
       }
 
-      let result = null;
-
-      if (action === "me") {
-        result = await deleteDMConversation({
-          conversationId: selectedConversationId,
-          action,
-          userId: user?._id,
-        });
-      }
+      const result = await deleteDMConversation({
+        conversationId: selectedConversationId,
+        action,
+        userId: user?._id,
+      });
 
       if (!result) {
         toast.error("Something went wrong");
       }
+      setIsActionsOpen(false);
+      setSelectedConversationId(null);
     } catch (error) {
       console.log("[delete conversation error]: ", error);
       toast.error("Failed to delete");
