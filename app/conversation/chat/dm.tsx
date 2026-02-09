@@ -292,6 +292,8 @@ const ChatDM = () => {
     toast.success(`Picked ${docs.length} files`);
   };
 
+  const handleVoice = async () => {};
+
   return (
     <ChatContainer
       conversationId={conversationId as string}
@@ -411,11 +413,13 @@ const ChatDM = () => {
             />
           </TouchableOpacity>
 
-          <MaterialCommunityIcons
-            name="microphone-outline"
-            size={24}
-            color="#4b5563"
-          />
+          <TouchableOpacity activeOpacity={0.8} onPress={handleVoice}>
+            <MaterialCommunityIcons
+              name="microphone-outline"
+              size={24}
+              color="#4b5563"
+            />
+          </TouchableOpacity>
           <MaterialCommunityIcons
             name="emoticon-outline"
             size={24}
