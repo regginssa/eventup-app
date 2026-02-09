@@ -18,6 +18,7 @@ export { default as MessageItem } from "./MessageItem";
 export { default as Modal } from "./Modal";
 export { default as MultiSelectDropdown } from "./MultiSelectDropdown";
 export { default as NationalityPicker } from "./NationalityPicker";
+export { default as NormalModal } from "./NormalModal";
 export { default as PasswordInput } from "./PasswordInput";
 export { default as RadioButton } from "./RadioButton";
 export { default as RegionPicker } from "./RegionPicker";

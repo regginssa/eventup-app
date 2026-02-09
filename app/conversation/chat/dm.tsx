@@ -18,6 +18,13 @@ import { MAX_FILE_SIZE } from "@/config/env";
 import { IMessage, TMessageFile } from "@/types/message";
 import { TOnlineStatus } from "@/types/user";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  AudioModule,
+  RecordingPresets,
+  setAudioModeAsync,
+  useAudioRecorder,
+  useAudioRecorderState,
+} from "expo-audio";
 import * as DocumentPicker from "expo-document-picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -61,6 +68,8 @@ const ChatDM = () => {
   const [uploadLoading, setUploadLoading] = useState<boolean>(false);
 
   const flatListRef = useRef<FlatList>(null);
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(audioRecorder);
 
   const { conversationId } = useLocalSearchParams();
   const { user } = useAuth();
@@ -77,6 +86,20 @@ const ChatDM = () => {
     messages,
   } = useMessage();
   const toast = useToast();
+
+  useEffect(() => {
+    (async () => {
+      const status = await AudioModule.requestRecordingPermissionsAsync();
+      if (!status.granted) {
+        Alert.alert("Permission to access microphone was denied");
+      }
+
+      setAudioModeAsync({
+        playsInSilentMode: true,
+        allowsRecording: true,
+      });
+    })();
+  }, []);
 
   useEffect(() => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
@@ -292,6 +315,17 @@ const ChatDM = () => {
     toast.success(`Picked ${docs.length} files`);
   };
 
+  const startRecording = async () => {
+    await audioRecorder.prepareToRecordAsync();
+    audioRecorder.record();
+  };
+
+  const stopRecording = async () => {
+    // The recording will be available on `audioRecorder.uri`.
+    await audioRecorder.stop();
+    console.log("[audio recording uri]: ", audioRecorder.uri);
+  };
+
   const handleVoice = async () => {};
 
   return (
@@ -413,18 +447,21 @@ const ChatDM = () => {
             />
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.8} onPress={handleVoice}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={recorderState.isRecording ? stopRecording : startRecording}
+          >
             <MaterialCommunityIcons
-              name="microphone-outline"
+              name={
+                recorderState.isRecording
+                  ? "stop-circle-outline"
+                  : "microphone-outline"
+              }
               size={24}
               color="#4b5563"
             />
           </TouchableOpacity>
-          <MaterialCommunityIcons
-            name="emoticon-outline"
-            size={24}
-            color="#4b5563"
-          />
+
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => setIsUploadOpen(true)}
