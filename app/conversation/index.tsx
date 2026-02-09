@@ -10,7 +10,6 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { IConversation } from "@/types/conversation";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -133,21 +132,35 @@ const Conversation = () => {
           setIsActionsOpen(false);
         }}
       >
-        <View className="w-full gap-2">
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className="w-full flex flex-row items-center gap-2 py-4"
-            disabled={deleteLoading}
-            onPress={handleDelete}
-          >
-            <MaterialCommunityIcons
-              name="trash-can-outline"
-              size={18}
-              color="#dc2626"
-            />
-            <Text className="font-poppins-medium text-red-600">Delete</Text>
-            {deleteLoading && <ActivityIndicator size={18} color="#dc2626" />}
-          </TouchableOpacity>
+        <View className="w-full gap-4">
+          <Text className="font-dm-sans-medium">
+            Are you sure you want to delete all message history?
+          </Text>
+          <View className="w-full flex flex-row items-center justify-end gap-4">
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="flex flex-row items-center gap-2 p-4 rounded-lg bg-gray-200"
+              disabled={deleteLoading}
+              onPress={handleDelete}
+            >
+              <Text className="font-poppins-medium text-gray-800">
+                Delete For Me
+              </Text>
+              {deleteLoading && <ActivityIndicator size={18} color="#1f2937" />}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="flex flex-row items-center gap-2 p-4 rounded-lg bg-gray-200"
+              disabled={deleteLoading}
+              onPress={handleDelete}
+            >
+              <Text className="font-poppins-medium text-gray-800">
+                Delete For Everyone
+              </Text>
+              {deleteLoading && <ActivityIndicator size={18} color="#1f2937" />}
+            </TouchableOpacity>
+          </View>
         </View>
       </NormalModal>
     </ConversationContainer>
