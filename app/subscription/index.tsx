@@ -359,14 +359,7 @@ const SubscriptionScreen = () => {
               : `Subscribe for $${price}`
         }
         buttonClassName="h-12"
-        disabled={
-          !!(
-            loading ||
-            !selectedSubscriptionId ||
-            (isCurrent && isActiveSubscription) ||
-            !isExpired
-          )
-        }
+        disabled={loading}
         onPress={() =>
           router.push({
             pathname: "/subscription/checkout",

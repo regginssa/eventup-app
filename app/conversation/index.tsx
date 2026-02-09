@@ -108,7 +108,7 @@ const Conversation = () => {
               renderItem={({ item }: { item: IConversation }) => (
                 <ConversationItem
                   item={item}
-                  myId={user?._id || ""}
+                  myId={user?._id as string}
                   onPress={(conversationId: string) =>
                     router.push({
                       pathname: `/conversation/chat/${item.type}`,
