@@ -7,12 +7,14 @@ interface ConversationItemProps {
   item: IConversation;
   myId: string;
   onPress: (conversationId: string) => void;
+  onLongPress: (conversationId: string) => void;
 }
 
 const ConversationItem: React.FC<ConversationItemProps> = ({
   item,
   myId,
   onPress,
+  onLongPress,
 }) => {
   const { user } = useAuth();
 
@@ -34,6 +36,8 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
 
   return (
     <TouchableOpacity
+      onLongPress={() => onLongPress(item._id as string)}
+      delayLongPress={200}
       activeOpacity={0.8}
       className="w-full flex flex-row items-center gap-3 border-b border-gray-200 p-2"
       onPress={() => onPress(item._id as string)}

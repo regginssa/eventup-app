@@ -16,6 +16,7 @@ interface ConversationContextProps {
     },
   ) => Promise<IConversation>;
   updateUnread: (conversationId: string, userId: string, value: number) => void;
+  removeConversationById: (id: string) => void;
 }
 
 const ConversationContext = createContext<ConversationContextProps | undefined>(
@@ -109,6 +110,10 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
     );
   };
 
+  const removeConversationById = (id: string) => {
+    setConversations((prev) => prev.filter((p) => p._id !== id));
+  };
+
   useEffect(() => {
     if (!user?._id) return;
 
@@ -140,6 +145,7 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
         loadConversations,
         createConversation,
         updateUnread,
+        removeConversationById,
       }}
     >
       {children}

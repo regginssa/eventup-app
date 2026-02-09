@@ -11,6 +11,7 @@ export interface IConversation {
   avatar?: string;
   lastMessage: IMessage;
   unread: Record<string, number>;
+  hiddenFor: string[];
   createdAt: Date;
   updatedAt: Date;
 }

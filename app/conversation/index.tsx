@@ -1,26 +1,43 @@
+import { removeOneConversation } from "@/api/services/conversation";
 import {
   ConversationContainer,
   ConversationItem,
   Input,
+  NormalModal,
   Spinner,
 } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { IConversation } from "@/types/conversation";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { FlatList, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const Conversation = () => {
   const [search, setSearch] = useState<string>("");
   const [filteredConversations, setFilteredConversations] = useState<
     IConversation[]
   >([]);
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
+  const [isActionsOpen, setIsActionsOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   const router = useRouter();
   const { user } = useAuth();
-  const { loadConversations, conversations } = useConversation();
+  const { conversations, loadConversations, removeConversationById } =
+    useConversation();
+  const toast = useToast();
 
   useEffect(() => {
     const init = async () => {
@@ -51,6 +68,26 @@ const Conversation = () => {
     setFilteredConversations(filtered);
   }, [conversations, search]);
 
+  const handleLongPress = (conversationId: string) => {
+    setSelectedConversationId(conversationId);
+    setIsActionsOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedConversationId) return toast.warn("No selected conversation");
+    try {
+      setDeleteLoading(true);
+
+      await removeOneConversation(selectedConversationId);
+      removeConversationById(selectedConversationId);
+    } catch (error) {
+      console.log("[delete conversation error]: ", error);
+      toast.error("Failed to delete");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <ConversationContainer>
       <View className="flex-1 bg-white rounded-xl overflow-hidden p-4 gap-5">
@@ -79,6 +116,7 @@ const Conversation = () => {
                       params: { conversationId },
                     })
                   }
+                  onLongPress={handleLongPress}
                 />
               )}
               contentContainerStyle={{ gap: 16 }}
@@ -86,6 +124,32 @@ const Conversation = () => {
           </View>
         )}
       </View>
+
+      <NormalModal
+        title="Actions"
+        isOpen={isActionsOpen}
+        onClose={() => {
+          setSelectedConversationId(null);
+          setIsActionsOpen(false);
+        }}
+      >
+        <View className="w-full gap-2">
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-full flex flex-row items-center gap-2 py-4"
+            disabled={deleteLoading}
+            onPress={handleDelete}
+          >
+            <MaterialCommunityIcons
+              name="trash-can-outline"
+              size={18}
+              color="#dc2626"
+            />
+            <Text className="font-poppins-medium text-red-600">Delete</Text>
+            {deleteLoading && <ActivityIndicator size={18} color="#dc2626" />}
+          </TouchableOpacity>
+        </View>
+      </NormalModal>
     </ConversationContainer>
   );
 };
