@@ -16,7 +16,7 @@ interface ConversationContextProps {
     },
   ) => Promise<IConversation>;
   updateUnread: (conversationId: string, userId: string, value: number) => void;
-  removeConversationById: (id: string) => void;
+  deleteDMConversation: (payload: any) => Promise<string>;
 }
 
 const ConversationContext = createContext<ConversationContextProps | undefined>(
@@ -46,8 +46,6 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const { user } = useAuth();
   const { socket } = useSocket();
 
-  useEffect(() => {}, [socket, user]);
-
   const loadConversations = async () => {
     if (!user?._id) return;
 
@@ -69,7 +67,6 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
       // Listen for success response
       const successEvent = `${type}_created`;
-      const errorEvent = `${type}_error`;
 
       const handleSuccess = (data: any) => {
         setConversations([...conversations, data]);
@@ -77,18 +74,11 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
         cleanup();
       };
 
-      const handleError = (err: any) => {
-        reject(err);
-        cleanup();
-      };
-
       const cleanup = () => {
         socket.off(successEvent, handleSuccess);
-        socket.off(errorEvent, handleError);
       };
 
       socket.on(successEvent, handleSuccess);
-      socket.on(errorEvent, handleError);
     });
   };
 
@@ -112,12 +102,19 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
     );
   };
 
-  const removeConversationForMe = (payload: any) => {
-    socket.emit("");
-  };
+  const deleteDMConversation = async (payload: any): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      if (!socket) return reject("Socket not connected");
 
-  const removeConversationById = (id: string) => {
-    setConversations((prev) => prev.filter((p) => p._id !== id));
+      socket.emit("delete_dm_conversation", payload);
+
+      socket.once("conversation_dm_deleted", (conversationId: string) => {
+        setConversations((prev) =>
+          prev.filter((p) => p._id !== conversationId),
+        );
+        resolve(conversationId);
+      });
+    });
   };
 
   useEffect(() => {
@@ -151,7 +148,7 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
         loadConversations,
         createConversation,
         updateUnread,
-        removeConversationById,
+        deleteDMConversation,
       }}
     >
       {children}

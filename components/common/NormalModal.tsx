@@ -33,6 +33,7 @@ const NormalModal: React.FC<NormalModalProps> = ({
             </Text>
 
             <TouchableOpacity
+              activeOpacity={0.8}
               onPress={onClose}
               className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"
             >

@@ -1,4 +1,3 @@
-import { removeConversationForMe } from "@/api/services/conversation";
 import {
   ConversationContainer,
   ConversationItem,
@@ -30,11 +29,12 @@ const Conversation = () => {
   >(null);
   const [isActionsOpen, setIsActionsOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [deleteMeLoading, setDeleteMeLoading] = useState<boolean>(false);
+  const [deleteAllLoading, setDeleteAllLoading] = useState<boolean>(false);
 
   const router = useRouter();
   const { user } = useAuth();
-  const { conversations, loadConversations, removeConversationById } =
+  const { conversations, loadConversations, deleteDMConversation } =
     useConversation();
   const toast = useToast();
 
@@ -72,18 +72,34 @@ const Conversation = () => {
     setIsActionsOpen(true);
   };
 
-  const handleDelete = async (type: "me" | "everyone") => {
+  const handleDelete = async (action: "me" | "all") => {
     if (!selectedConversationId) return toast.warn("No selected conversation");
     try {
-      setDeleteLoading(true);
+      if (action === "me") {
+        setDeleteMeLoading(true);
+      } else {
+        setDeleteAllLoading(true);
+      }
 
-      await removeConversationForMe(selectedConversationId);
-      removeConversationById(selectedConversationId);
+      let result = null;
+
+      if (action === "me") {
+        result = await deleteDMConversation({
+          conversationId: selectedConversationId,
+          action,
+          userId: user?._id,
+        });
+      }
+
+      if (!result) {
+        toast.error("Something went wrong");
+      }
     } catch (error) {
       console.log("[delete conversation error]: ", error);
       toast.error("Failed to delete");
     } finally {
-      setDeleteLoading(false);
+      setDeleteAllLoading(false);
+      setDeleteMeLoading(false);
     }
   };
 
@@ -140,25 +156,29 @@ const Conversation = () => {
             <TouchableOpacity
               activeOpacity={0.8}
               className="flex flex-row items-center gap-2 p-2 rounded-lg bg-gray-200"
-              disabled={deleteLoading}
+              disabled={deleteMeLoading}
               onPress={() => handleDelete("me")}
             >
               <Text className="font-poppins-medium text-gray-800 text-sm">
                 Delete For Me
               </Text>
-              {deleteLoading && <ActivityIndicator size={18} color="#1f2937" />}
+              {deleteMeLoading && (
+                <ActivityIndicator size={18} color="#1f2937" />
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
               activeOpacity={0.8}
               className="flex flex-row items-center gap-2 p-2 rounded-lg bg-gray-200"
-              disabled={deleteLoading}
-              onPress={() => handleDelete("everyone")}
+              disabled={deleteAllLoading}
+              onPress={() => handleDelete("all")}
             >
               <Text className="font-poppins-medium text-gray-800 text-sm">
-                Delete For Everyone
+                Delete For All
               </Text>
-              {deleteLoading && <ActivityIndicator size={18} color="#1f2937" />}
+              {deleteAllLoading && (
+                <ActivityIndicator size={18} color="#1f2937" />
+              )}
             </TouchableOpacity>
           </View>
         </View>

@@ -36,7 +36,12 @@ const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       query: { userId: user._id },
     });
 
+    sk.on("connect", () => {
+      sk.emit("user_connected", user._id);
+    });
+
     setSocket(sk);
+
     return () => {
       sk.disconnect();
     };
