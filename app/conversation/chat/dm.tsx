@@ -212,7 +212,7 @@ const ChatDM = () => {
   };
 
   const handleEdit = () => {
-    if (!selectedMessageId) return Alert.alert("Warn", "No selected message");
+    if (!selectedMessageId) return toast.warn("No selected message");
     if (editText.trim().length === 0)
       return toast.warn("Please type a message to edit");
 

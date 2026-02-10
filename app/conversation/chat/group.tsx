@@ -14,7 +14,7 @@ import { useToast } from "@/components/providers/ToastProvider";
 import { IConversation } from "@/types/conversation";
 import { IMessage } from "@/types/message";
 import { IUser } from "@/types/user";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   AudioModule,
   RecordingPresets,
@@ -22,14 +22,11 @@ import {
   useAudioRecorder,
   useAudioRecorderState,
 } from "expo-audio";
-import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Dimensions,
   FlatList,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -64,6 +61,8 @@ const ChatGroup = () => {
     leaveConversation,
     loadMessages,
     updateCurrentConversationId,
+    sendMessage,
+    updateMessage,
     messages,
   } = useMessage();
   const toast = useToast();
@@ -119,9 +118,35 @@ const ChatGroup = () => {
     };
   }, [conversationId, user?._id, conversations]);
 
-  const handleSend = () => {};
+  const handleSend = () => {
+    const payload = {
+      conversationId,
+      senderId: user?._id,
+      text,
+      files: [],
+    };
 
-  const handleEdit = () => {};
+    sendMessage(payload);
+    setText("");
+  };
+
+  const handleEdit = () => {
+    if (!selectedMessageId) return toast.warn("No selected message");
+    if (editText.trim().length === 0)
+      return toast.warn("Please type a message to edit");
+
+    const message = messages.find((m) => m._id === selectedMessageId);
+    if (!message) return toast.warn("No selected message");
+
+    const updates: IMessage = {
+      ...message,
+      isEdited: true,
+      text: editText,
+    };
+
+    updateMessage({ updates, conversationId });
+    setIsEditing(false);
+  };
 
   const startRecording = async () => {
     await audioRecorder.prepareToRecordAsync();
@@ -198,67 +223,6 @@ const ChatGroup = () => {
               onChange={isEditing ? setEditText : setText}
             />
           </View>
-
-          {files.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              className="w-full"
-            >
-              <View className="w-full flex flex-row items-center gap-2 py-2">
-                {files.map((file) => (
-                  <View
-                    key={file.uri}
-                    className="w-[80px] h-[80px] flex items-center justify-center gap-4 rounded-xl overflow-hidden relative"
-                  >
-                    {file.type === "image" ? (
-                      <Image
-                        key={file.uri}
-                        source={{ uri: file.uri }}
-                        alt={file.name}
-                        style={{ width: "100%", height: "100%" }}
-                        contentFit="cover"
-                      />
-                    ) : (
-                      <>
-                        <MaterialCommunityIcons
-                          name="file-document-outline"
-                          size={32}
-                          color="#4b5563"
-                        />
-
-                        <Text
-                          className="font-dm-sans-medium text-sm text-gray-600"
-                          numberOfLines={1}
-                        >
-                          {file.name}
-                        </Text>
-                      </>
-                    )}
-
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      className="absolute w-8 h-8 flex items-center justify-center bg-gray-300 rounded-full top-0 right-0"
-                      disabled={uploadLoading}
-                      onPress={() => {
-                        setFiles((prev) =>
-                          prev.filter((p) => p.uri !== file.uri),
-                        );
-                      }}
-                    >
-                      <Feather name="x" size={14} color="#1f2937" />
-                    </TouchableOpacity>
-
-                    {uploadLoading && (
-                      <View className="absolute inset-0 flex items-center justify-center z-40 bg-white/30 opacity-70">
-                        <ActivityIndicator size={18} color="#1f2937" />
-                      </View>
-                    )}
-                  </View>
-                ))}
-              </View>
-            </ScrollView>
-          )}
         </View>
 
         <View className="flex flex-row items-center gap-2 mb-3">
@@ -283,17 +247,6 @@ const ChatGroup = () => {
                   ? "stop-circle-outline"
                   : "microphone-outline"
               }
-              size={24}
-              color="#4b5563"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setIsUploadOpen(true)}
-          >
-            <MaterialCommunityIcons
-              name="cloud-arrow-up-outline"
               size={24}
               color="#4b5563"
             />

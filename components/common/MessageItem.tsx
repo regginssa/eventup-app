@@ -77,7 +77,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
           gap: 10,
         }}
       >
-        {type === "group" && (
+        {type === "group" && !isMine && (
           <Avatar source={sender.avatar} name={sender.name} size={40} />
         )}
         <View
