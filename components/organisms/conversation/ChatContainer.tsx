@@ -42,11 +42,14 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
 
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() =>
-                  router.push({
-                    pathname: "/profile",
-                    params: { id: otherUserId },
-                  })
+                onPress={
+                  otherUserId
+                    ? () =>
+                        router.push({
+                          pathname: "/profile",
+                          params: { id: otherUserId },
+                        })
+                    : undefined
                 }
                 className="flex flex-row items-center gap-2"
               >

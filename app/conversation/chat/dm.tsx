@@ -40,7 +40,7 @@ import {
   View,
 } from "react-native";
 
-type TFile = {
+export type TFile = {
   type: "image" | "file";
   name: string;
   mimeType: string;

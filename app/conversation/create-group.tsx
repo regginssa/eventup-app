@@ -53,7 +53,7 @@ const CreateGroupChat = () => {
       const bodyData: IConversation = {
         avatar: uploaded.data,
         name,
-        participants: [],
+        participants: [user._id as any],
         createdAt: new Date(),
         updatedAt: new Date(),
         hiddenFor: [],
