@@ -5,6 +5,7 @@ const ConversationRootLayout = () => {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="chat" />
+      <Stack.Screen name="create-group" />
     </Stack>
   );
 };

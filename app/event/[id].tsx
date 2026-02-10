@@ -1,7 +1,7 @@
 import { fetchBookingByUserIdAndEventId } from "@/api/services/booking";
 import { fetchEvent } from "@/api/services/event";
 import { AttendeesCardGroup } from "@/components";
-import { Spinner, Tabs } from "@/components/common";
+import { Button, Spinner, Tabs } from "@/components/common";
 import {
   EventDetailContainer,
   EventDetailEmpty,
@@ -20,10 +20,11 @@ import { IBooking } from "@/types/booking";
 import { EventDates, IEvent } from "@/types/event";
 import { ITicket } from "@/types/ticket";
 import { formatEventLabel } from "@/utils/format";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import { useDispatch } from "react-redux";
 
 const userTabs: TDropdownItem[] = [
@@ -52,7 +53,8 @@ const EventDetailScreen = () => {
   const [services, setServices] = useState<string[]>([]);
   const [ticket, setTicket] = useState<ITicket | null>(null);
 
-  const { id, type } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
+  const router = useRouter();
   const { user } = useAuth();
   const dispatch = useDispatch();
 
@@ -233,6 +235,34 @@ const EventDetailScreen = () => {
                 <AttendeesCardGroup items={event.attendees || []} />
               ) : null}
             </View>
+
+            {event.type === "user" && event.hoster?._id === user?._id && (
+              <View className="w-full gap-4">
+                <View className="w-full flex flex-row items-start gap-2 rounded-xl border border-blue-500 bg-blue-200 p-4">
+                  <MaterialCommunityIcons
+                    name="information-outline"
+                    size={24}
+                    color="#3b82f6"
+                  />
+                  <Text className="flex-1 font-dm-sans-medium text-sm text-blue-600">
+                    A group chat allows you to easily manage and communicate
+                    with your attendees.
+                  </Text>
+                </View>
+
+                <Button
+                  type="primary"
+                  label="Create"
+                  buttonClassName="h-12"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/conversation/create-group",
+                      params: { eventId: event._id },
+                    })
+                  }
+                />
+              </View>
+            )}
           </>
         ) : (
           <EventDetailEmpty />

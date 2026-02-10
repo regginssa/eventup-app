@@ -1,4 +1,7 @@
-import { fetchUserConversations } from "@/api/services/conversation";
+import {
+  createRestConversation,
+  fetchUserConversations,
+} from "@/api/services/conversation";
 import { IConversation, TConversationType } from "@/types/conversation";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
@@ -15,6 +18,7 @@ interface ConversationContextProps {
       user2Id: string;
     },
   ) => Promise<IConversation>;
+  createGroupConversation: (payload: any) => Promise<IConversation>;
   updateUnread: (conversationId: string, userId: string, value: number) => void;
   deleteDMConversation: (payload: any) => Promise<string>;
 }
@@ -82,6 +86,14 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
     });
   };
 
+  const createGroupConversation = async (
+    payload: any,
+  ): Promise<IConversation> => {
+    const response = await createRestConversation(payload);
+    setConversations((prev) => [...prev, response.data]);
+    return response.data;
+  };
+
   const updateUnread = (
     conversationId: string,
     userId: string,
@@ -147,6 +159,7 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
         totalMessagesUnreads: unreads,
         loadConversations,
         createConversation,
+        createGroupConversation,
         updateUnread,
         deleteDMConversation,
       }}

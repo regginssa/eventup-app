@@ -9,6 +9,12 @@ export const fetchUserConversations = async (
   return await AxiosInstance.get(CONVERSATION_BASE + userId);
 };
 
+export const createRestConversation = async (
+  bodyData: IConversation,
+): Promise<ApiResponse<IConversation>> => {
+  return await AxiosInstance.post(CONVERSATION_BASE, bodyData);
+};
+
 export const removeConversationForMe = async (
   conversationId: string,
 ): Promise<ApiResponse<boolean>> => {

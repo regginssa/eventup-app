@@ -1,3 +1,4 @@
+import { IEvent } from "./event";
 import { IMessage } from "./message";
 import { IUser } from "./user";
 
@@ -9,8 +10,10 @@ export interface IConversation {
   participants: IUser[];
   name?: string;
   avatar?: string;
-  lastMessage: IMessage;
-  unread: Record<string, number>;
+  creator?: IUser;
+  event?: IEvent;
+  lastMessage?: IMessage;
+  unread?: Record<string, number>;
   hiddenFor: string[];
   createdAt: Date;
   updatedAt: Date;

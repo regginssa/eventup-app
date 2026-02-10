@@ -21,7 +21,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
   if (!user?._id) return;
 
   const otherUser =
-    item.type === "dm" ? item.participants.find((i) => i._id !== myId) : null;
+    item.type === "dm" ? item.participants.find((i) => i._id !== myId) : item;
   const myUnread = item.unread?.[user?._id] || 0;
 
   const formatTime = (dateInput: string | number | Date): string => {
