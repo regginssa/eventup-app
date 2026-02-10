@@ -86,7 +86,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={`Confirm ${packageType} package`}
-      scrolled={true}
+      scrolled
     >
       <View className="w-full gap-3 p-2 rounded-lg border border-gray-200 mb-3">
         {!flight ? (
@@ -143,8 +143,6 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
         loading={loading}
         onPress={handleProceedToBooking}
       />
-
-      <View className="h-3"></View>
     </Modal>
   );
 };

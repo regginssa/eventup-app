@@ -33,7 +33,7 @@ import {
 } from "@/types/amadeus";
 import { IEvent } from "@/types/event";
 import { Country } from "@/types/location.types";
-import { formatDateTime } from "@/utils/format";
+import { formatDateTime, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -70,11 +70,24 @@ const EventDetail = ({
       ) : (
         <>
           <View className="w-full flex flex-row items-center gap-4 overflow-hidden">
-            <Image
-              source={event.images?.[0] as string}
-              contentFit="cover"
-              style={{ width: 100, height: 100, borderRadius: 6 }}
-            />
+            {event.images?.length === 0 ? (
+              <View className="w-[100px] h-[100px] flex flex-col items-center justify-center gap-2">
+                <MaterialCommunityIcons
+                  name="image-off-outline"
+                  size={24}
+                  color="#4b5563"
+                />
+                <Text className="font-dm-sans-medium text-sm text-gray-600">
+                  No Picture
+                </Text>
+              </View>
+            ) : (
+              <Image
+                source={event.images?.[0] as string}
+                contentFit="cover"
+                style={{ width: 100, height: 100, borderRadius: 6 }}
+              />
+            )}
             <View className="gap-4 flex-1">
               <Text className="font-poppins-semibold text-gray-700 line-clamp-2">
                 {event.name as string}
@@ -115,6 +128,20 @@ const EventDetail = ({
                     {event?.dates?.timezone ?? "--"}
                   </Text>
                 </View>
+
+                {event.type === "user" && event.fee?.type === "paid" && (
+                  <View className="flex flex-row items-center gap-2">
+                    <MaterialCommunityIcons
+                      name="cart-outline"
+                      size={16}
+                      color="#374151"
+                    />
+                    <Text className="font-dm-sans-medium text-sm text-gray-700">
+                      {getCurrencySymbol(event.fee?.currency as any)}
+                      {event?.fee?.amount ?? "--"}
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
           </View>
