@@ -1,5 +1,6 @@
 import { IMessage, TMessageFile } from "@/types/message";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Directory, File, Paths } from "expo-file-system";
 import { Image } from "expo-image";
 import { useState } from "react";
@@ -14,6 +15,7 @@ import {
 import { useToast } from "../providers/ToastProvider";
 import Avatar from "./Avatar";
 import Modal from "./Modal";
+import VoiceMessage from "./VoiceMessage";
 
 interface MessageItemProps {
   type: "dm" | "group";
@@ -36,6 +38,11 @@ const MessageItem: React.FC<MessageItemProps> = ({
 
   const sender = message.sender;
 
+  const player = useAudioPlayer(message.files[0]?.url || "");
+  const status = useAudioPlayerStatus(player);
+
+  const isVoice = message.files.some((f) => f.type === "audio");
+
   const formatTime = (dateInput: string | number | Date): string => {
     const date = new Date(dateInput);
 
@@ -46,6 +53,23 @@ const MessageItem: React.FC<MessageItemProps> = ({
     });
   };
 
+  const formatDuration = (seconds: number) => {
+    if (!seconds || seconds < 1) return "0s";
+
+    // If less than 60 seconds → "12 seconds"
+    if (seconds < 60) {
+      return `${Math.floor(seconds)} seconds`;
+    }
+
+    // Convert to mm:ss
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+
+    const mm = minutes < 10 ? `0${minutes}` : `${minutes}`;
+    const ss = secs < 10 ? `0${secs}` : `${secs}`;
+
+    return `${mm}:${ss}`;
+  };
   const downloadFile = async (url: string) => {
     try {
       setDownloadLoading(true);
@@ -83,71 +107,77 @@ const MessageItem: React.FC<MessageItemProps> = ({
         <View
           className={`w-2/3 ${isMine ? "bg-green-200" : "bg-slate-200"} rounded-xl p-2`}
         >
-          {message.files.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              className="w-full"
-            >
-              <View className="w-full flex flex-row items-center gap-2">
-                {message.files.map((file, index) => (
-                  <TouchableOpacity
-                    key={file.url}
-                    activeOpacity={0.8}
-                    className="w-[80px] h-[80px] relative overflow-hidden flex items-center justify-center rounded-xl"
-                    onPress={async () => {
-                      if (file.type === "image") {
-                        setSelectedImage(file);
-                        setIsOpen(true);
-                      } else if (file.type === "file") {
-                        await downloadFile(file.url);
-                      }
-                    }}
-                  >
-                    {file.type === "image" ? (
-                      <Image
-                        source={{ uri: file.url }}
-                        alt="Image"
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    ) : (
-                      <MaterialCommunityIcons
-                        name="file-document-outline"
-                        size={40}
-                        color="#1f2937"
-                      />
-                    )}
+          {!isVoice ? (
+            <>
+              {message.files.length > 0 && (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  className="w-full"
+                >
+                  <View className="w-full flex flex-row items-center gap-2">
+                    {message.files.map((file, index) => (
+                      <TouchableOpacity
+                        key={file.url}
+                        activeOpacity={0.8}
+                        className="w-[80px] h-[80px] relative overflow-hidden flex items-center justify-center rounded-xl"
+                        onPress={async () => {
+                          if (file.type === "image") {
+                            setSelectedImage(file);
+                            setIsOpen(true);
+                          } else if (file.type === "file") {
+                            await downloadFile(file.url);
+                          }
+                        }}
+                      >
+                        {file.type === "image" ? (
+                          <Image
+                            source={{ uri: file.url }}
+                            alt="Image"
+                            style={{ width: "100%", height: "100%" }}
+                          />
+                        ) : (
+                          <MaterialCommunityIcons
+                            name="file-document-outline"
+                            size={40}
+                            color="#1f2937"
+                          />
+                        )}
 
-                    {downloadLoading && (
-                      <View className="absolute inset-0 flex items-center justify-center bg-white/30 opacity-70">
-                        <ActivityIndicator size={24} color="#1f2937" />
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </ScrollView>
-          )}
-          <Text className="font-poppins-medium text-sm text-gray-800">
-            {message.text}
-          </Text>
-
-          <View className="w-full flex flex-row items-center justify-end gap-2">
-            {message.isEdited && (
-              <Text className="font-dm-sans-medium text-gray-600 text-xs">
-                Edited
+                        {downloadLoading && (
+                          <View className="absolute inset-0 flex items-center justify-center bg-white/30 opacity-70">
+                            <ActivityIndicator size={24} color="#1f2937" />
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
+              )}
+              <Text className="font-poppins-medium text-sm text-gray-800">
+                {message.text}
               </Text>
-            )}
-            <Text className="font-dm-sans-medium text-gray-600 text-xs">
-              {formatTime(message.createdAt)}
-            </Text>
 
-            <MaterialCommunityIcons
-              name={message.status === "sent" ? "check" : "check-all"}
-              size={16}
-              color={message.status === "sent" ? "#4b5563" : "#16a34a"}
-            />
-          </View>
+              <View className="w-full flex flex-row items-center justify-end gap-2">
+                {message.isEdited && (
+                  <Text className="font-dm-sans-medium text-gray-600 text-xs">
+                    Edited
+                  </Text>
+                )}
+                <Text className="font-dm-sans-medium text-gray-600 text-xs">
+                  {formatTime(message.createdAt)}
+                </Text>
+
+                <MaterialCommunityIcons
+                  name={message.status === "sent" ? "check" : "check-all"}
+                  size={16}
+                  color={message.status === "sent" ? "#4b5563" : "#16a34a"}
+                />
+              </View>
+            </>
+          ) : message.files[0].url ? (
+            <VoiceMessage url={message.files[0].url} />
+          ) : null}
         </View>
       </Pressable>
 

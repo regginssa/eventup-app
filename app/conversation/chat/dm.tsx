@@ -66,6 +66,7 @@ const ChatDM = () => {
   const [imgUploadLoading, setImgUploadLoading] = useState<boolean>(false);
   const [docUploadLoading, setDocUploadLoading] = useState<boolean>(false);
   const [uploadLoading, setUploadLoading] = useState<boolean>(false);
+  const [voiceLoading, setVoiceLoading] = useState<boolean>(false);
 
   const flatListRef = useRef<FlatList>(null);
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
@@ -321,12 +322,52 @@ const ChatDM = () => {
   };
 
   const stopRecording = async () => {
-    // The recording will be available on `audioRecorder.uri`.
+    setVoiceLoading(true);
     await audioRecorder.stop();
-    console.log("[audio recording uri]: ", audioRecorder.uri);
+    await handleVoice();
+    setVoiceLoading(false);
   };
 
-  const handleVoice = async () => {};
+  const handleVoice = async () => {
+    if (!audioRecorder.uri) return;
+
+    try {
+      const uriParts = audioRecorder.uri.split("/");
+      const fileName = uriParts[uriParts.length - 1];
+
+      const formData = new FormData();
+      formData.append("file", {
+        uri: audioRecorder.uri,
+        name: fileName,
+        type: "audio/m4a",
+      } as any);
+
+      const response = await uploadFile(formData);
+
+      if (response.data) {
+        sendMessage({
+          conversationId,
+          senderId: user?._id,
+          text: "",
+          files: [
+            {
+              type: "audio",
+              url: response.data,
+              mimeType: "audio/m4a",
+            },
+          ],
+        });
+      } else {
+        toast.error("Upload failed");
+      }
+
+      console.log("[uploaded url]: ", response.data);
+    } catch (error) {
+      console.log("[handle voice error]: ", error);
+      toast.error("Something went wrong");
+    } finally {
+    }
+  };
 
   return (
     <ChatContainer
@@ -451,17 +492,22 @@ const ChatDM = () => {
 
           <TouchableOpacity
             activeOpacity={0.8}
+            disabled={voiceLoading}
             onPress={recorderState.isRecording ? stopRecording : startRecording}
           >
-            <MaterialCommunityIcons
-              name={
-                recorderState.isRecording
-                  ? "stop-circle-outline"
-                  : "microphone-outline"
-              }
-              size={24}
-              color="#4b5563"
-            />
+            {voiceLoading ? (
+              <ActivityIndicator size={24} color="#4b5563" />
+            ) : (
+              <MaterialCommunityIcons
+                name={
+                  recorderState.isRecording
+                    ? "stop-circle-outline"
+                    : "microphone-outline"
+                }
+                size={24}
+                color="#4b5563"
+              />
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
