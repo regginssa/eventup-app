@@ -1,10 +1,19 @@
 import { markMessagesSeenRest } from "@/api/services/message";
-import { ChatContainer, Input, MessageItem, Spinner } from "@/components";
+import {
+  Avatar,
+  ChatContainer,
+  Input,
+  MessageItem,
+  NormalModal,
+  Spinner,
+} from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
 import { useMessage } from "@/components/providers/MessageProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import { IConversation } from "@/types/conversation";
 import { IMessage } from "@/types/message";
+import { IUser } from "@/types/user";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   AudioModule,
@@ -14,7 +23,7 @@ import {
   useAudioRecorderState,
 } from "expo-audio";
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -27,13 +36,13 @@ import {
 import { TFile } from "./dm";
 
 const ChatGroup = () => {
-  const [avatar, setAvatar] = useState<string | undefined>("");
-  const [name, setName] = useState<string>("");
+  const [conversation, setConversation] = useState<IConversation | null>(null);
   const [files, setFiles] = useState<TFile[]>([]);
   const [selectedMessageId, setSelectedMessageId] = useState<string>("");
   const [isMessageActionsOpen, setIsMessageActionsOpen] =
     useState<boolean>(false);
   const [isUploadOpen, setIsUploadOpen] = useState<boolean>(false);
+  const [isViewGroupOpen, setIsViewGroupOpen] = useState<boolean>(false);
   const [text, setText] = useState<string>("");
   const [editText, setEditText] = useState<string>("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -44,6 +53,7 @@ const ChatGroup = () => {
   const recorderState = useAudioRecorderState(audioRecorder);
 
   const { conversationId } = useLocalSearchParams();
+  const router = useRouter();
   const { user } = useAuth();
   const { conversations } = useConversation();
   const {
@@ -88,8 +98,7 @@ const ChatGroup = () => {
 
       setLoading(true);
 
-      setName(conv?.name || "N/A");
-      setAvatar(conv?.avatar as string | undefined);
+      setConversation(conv);
       joinConversation(conversationId as string);
       await loadMessages(conversationId as string);
       await markMessagesSeenRest(conversationId as string);
@@ -122,11 +131,38 @@ const ChatGroup = () => {
     console.log("[audio recording uri]: ", audioRecorder.uri);
   };
 
+  const renderMembers = ({ item }: { item: IUser }) => {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.8}
+        className="w-full flex flex-row items-center gap-2"
+        onPress={() =>
+          router.push({ pathname: "/profile", params: { id: item._id } })
+        }
+      >
+        <Avatar
+          source={item.avatar}
+          name={item.name}
+          size={32}
+          status={item.status}
+        />
+        <Text className="font-poppins-medium text-sm text-gray-800">
+          {item.name}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <ChatContainer
+      type="group"
       conversationId={conversationId as string}
-      name={name}
-      avatar={avatar}
+      name={conversation?.name || "N/A"}
+      avatar={conversation?.avatar}
+      onViewGroup={() => {
+        if (!conversation) return;
+        setIsViewGroupOpen(true);
+      }}
     >
       {loading ? (
         <Spinner size="md" />
@@ -267,6 +303,85 @@ const ChatGroup = () => {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* View Group Modal */}
+      <NormalModal
+        isOpen={isViewGroupOpen}
+        onClose={() => setIsViewGroupOpen(false)}
+      >
+        <View className="w-full flex flex-col items-center justify-center gap-4">
+          <Avatar
+            source={conversation?.avatar}
+            name={conversation?.name}
+            size={80}
+          />
+          <Text className="font-poppins-semibold text-gray-800">
+            {conversation?.name || "N/A"}
+          </Text>
+        </View>
+
+        <View className="w-full gap-2">
+          <View className="w-full flex flex-row items-center gap-4 border-b border-gray-300 py-2">
+            <View className="w-full flex flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="account-outline"
+                size={16}
+                color="#374151"
+              />
+              <Text className="font-dm-sans-medium text-sm text-gray-700">
+                Creator:
+              </Text>
+            </View>
+
+            <Text className="font-poppins-semibold text-sm text-gray-800">
+              {conversation?.creator?.name}
+            </Text>
+          </View>
+
+          <View className="w-full flex flex-row items-center gap-4 border-b border-gray-300 py-2">
+            <View className="w-full flex flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="calendar-check-outline"
+                size={16}
+                color="#374151"
+              />
+              <Text className="font-dm-sans-medium text-sm text-gray-700">
+                Event:
+              </Text>
+            </View>
+
+            <Text className="font-poppins-semibold text-sm text-gray-800">
+              {conversation?.event?.name}
+            </Text>
+          </View>
+
+          <View className="w-full flex flex-row items-center gap-4 py-2">
+            <View className="w-full flex flex-row items-center gap-2">
+              <MaterialCommunityIcons
+                name="account-group-outline"
+                size={16}
+                color="#374151"
+              />
+              <Text className="font-dm-sans-medium text-sm text-gray-700">
+                Members:
+              </Text>
+            </View>
+
+            <Text className="font-poppins-semibold text-sm text-gray-800">
+              {conversation?.participants.length}
+            </Text>
+          </View>
+
+          <View className="">
+            <FlatList
+              data={conversation?.participants}
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={renderMembers}
+              contentContainerStyle={{ gap: 16 }}
+            />
+          </View>
+        </View>
+      </NormalModal>
     </ChatContainer>
   );
 };

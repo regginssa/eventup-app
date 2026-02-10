@@ -330,6 +330,7 @@ const ChatDM = () => {
 
   return (
     <ChatContainer
+      type="dm"
       conversationId={conversationId as string}
       name={name}
       avatar={avatar}

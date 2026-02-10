@@ -8,20 +8,24 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MainContainer } from "../layout";
 
 interface ChatContainerProps {
+  type: "dm" | "group";
   children: React.ReactNode;
   conversationId: string | null;
   otherUserId?: string;
   name: string;
   avatar?: string;
   status?: TOnlineStatus;
+  onViewGroup?: () => void;
 }
 
 const ChatContainer: React.FC<ChatContainerProps> = ({
+  type,
   children,
   otherUserId,
   name,
   avatar,
   status,
+  onViewGroup,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const router = useRouter();
@@ -85,52 +89,78 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
             />
 
             <View className="absolute top-[88px] right-6 w-[180px] bg-white p-4 rounded-lg z-50 shadow-lg flex flex-col gap-4">
-              <TouchableOpacity
-                activeOpacity={0.8}
-                className="flex flex-row items-center gap-2"
-                onPress={() => {
-                  setIsOpen(false);
-                }}
-              >
-                <MaterialCommunityIcons
-                  name="phone-outline"
-                  size={18}
-                  color="#1f2937"
-                />
-                <Text className="font-dm-sans-medium text-sm text-gray-800">
-                  Call
-                </Text>
-              </TouchableOpacity>
+              {type === "dm" ? (
+                <>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    className="flex flex-row items-center gap-2"
+                    onPress={() => {
+                      setIsOpen(false);
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="phone-outline"
+                      size={18}
+                      color="#1f2937"
+                    />
+                    <Text className="font-dm-sans-medium text-sm text-gray-800">
+                      Call
+                    </Text>
+                  </TouchableOpacity>
 
-              <TouchableOpacity
-                activeOpacity={0.8}
-                className="flex flex-row items-center gap-2"
-                onPress={() => {
-                  setIsOpen(false);
-                }}
-              >
-                <MaterialCommunityIcons
-                  name="trash-can-outline"
-                  size={18}
-                  color="#1f2937"
-                />
-                <Text className="font-dm-sans-medium text-sm text-gray-800">
-                  Delete All
-                </Text>
-              </TouchableOpacity>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    className="flex flex-row items-center gap-2"
+                    onPress={() => {
+                      setIsOpen(false);
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="trash-can-outline"
+                      size={18}
+                      color="#1f2937"
+                    />
+                    <Text className="font-dm-sans-medium text-sm text-gray-800">
+                      Delete All
+                    </Text>
+                  </TouchableOpacity>
 
-              <TouchableOpacity
-                activeOpacity={0.8}
-                className="flex flex-row items-center gap-2"
-                onPress={() => {
-                  setIsOpen(false);
-                }}
-              >
-                <Ionicons name="ban" size={18} color="#1f2937" />
-                <Text className="font-dm-sans-medium text-sm text-gray-800">
-                  Block
-                </Text>
-              </TouchableOpacity>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    className="flex flex-row items-center gap-2"
+                    onPress={() => {
+                      setIsOpen(false);
+                    }}
+                  >
+                    <Ionicons name="ban" size={18} color="#1f2937" />
+                    <Text className="font-dm-sans-medium text-sm text-gray-800">
+                      Block
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    className="flex flex-row items-center gap-2"
+                    onPress={() => {
+                      if (onViewGroup) {
+                        onViewGroup();
+                      }
+                      setIsOpen(false);
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="account-group-outline"
+                      size={18}
+                      color="#1f2937"
+                    />
+                    <Text className="font-dm-sans-medium text-sm text-gray-800">
+                      View Group
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           </>
         )}

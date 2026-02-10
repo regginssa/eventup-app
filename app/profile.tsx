@@ -39,7 +39,6 @@ const ProfileScreen = () => {
   };
 
   useEffect(() => {
-    console.log(userId);
     if (!userId) return;
     fetchUserInfo();
   }, [userId]);
