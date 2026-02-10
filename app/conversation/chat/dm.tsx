@@ -50,7 +50,7 @@ type TFile = {
 const ChatDM = () => {
   const [name, setName] = useState<string>("N/A");
   const [avatar, setAvatar] = useState<string | undefined>(undefined);
-  const [otherUserId, setOtherUserId] = useState<string | null>(null);
+  const [otherUserId, setOtherUserId] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<TOnlineStatus>("offline");
   const [text, setText] = useState<string>("");
   const [files, setFiles] = useState<TFile[]>([]);
@@ -118,7 +118,7 @@ const ChatDM = () => {
       const otherUser = conv.participants.find((p) => p._id !== user._id);
       setName(otherUser?.name || "N/A");
       setAvatar(otherUser?.avatar as string | undefined);
-      setOtherUserId(otherUser?._id || null);
+      setOtherUserId(otherUser?._id || undefined);
       setStatus(otherUser?.status || "offline");
 
       joinConversation(conversationId as string);
@@ -346,8 +346,9 @@ const ChatDM = () => {
             keyExtractor={(item, index) => item._id || index.toString()}
             renderItem={({ item }: { item: IMessage }) => (
               <MessageItem
+                type="dm"
                 message={item}
-                userId={user?._id as string}
+                isMine={item.sender._id === user?._id}
                 onLongPressMessage={(messageId: string) => {
                   setSelectedMessageId(messageId);
                   setIsMessageActionsOpen(true);

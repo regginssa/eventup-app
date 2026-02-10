@@ -12,26 +12,29 @@ import {
   View,
 } from "react-native";
 import { useToast } from "../providers/ToastProvider";
+import Avatar from "./Avatar";
 import Modal from "./Modal";
 
 interface MessageItemProps {
+  type: "dm" | "group";
   message: IMessage;
-  userId: string;
+  isMine: boolean;
   onLongPressMessage: (messageId: string) => void;
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({
+  type,
   message,
-  userId,
+  isMine,
   onLongPressMessage,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedImage, setSelectedImage] = useState<TMessageFile | null>(null);
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false);
 
-  const isMine = message.sender._id === userId;
-
   const toast = useToast();
+
+  const sender = message.sender;
 
   const formatTime = (dateInput: string | number | Date): string => {
     const date = new Date(dateInput);
@@ -71,8 +74,12 @@ const MessageItem: React.FC<MessageItemProps> = ({
           flexDirection: "row",
           justifyContent: isMine ? "flex-end" : "flex-start",
           marginVertical: 6,
+          gap: 10,
         }}
       >
+        {type === "group" && (
+          <Avatar source={sender.avatar} name={sender.name} size={40} />
+        )}
         <View
           className={`w-2/3 ${isMine ? "bg-green-200" : "bg-slate-200"} rounded-xl p-2`}
         >

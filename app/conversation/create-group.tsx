@@ -63,6 +63,13 @@ const CreateGroupChat = () => {
       };
 
       const newConv = await createGroupConversation(bodyData);
+
+      if (newConv) {
+        router.push({
+          pathname: "/conversation/chat/group",
+          params: { conversationId: newConv._id },
+        });
+      }
     } catch (err) {
       console.log("[create conversation error]: ", err);
       toast.error("Internal server error");

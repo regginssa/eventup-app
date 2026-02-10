@@ -10,10 +10,10 @@ import { MainContainer } from "../layout";
 interface ChatContainerProps {
   children: React.ReactNode;
   conversationId: string | null;
-  otherUserId: string | null;
+  otherUserId?: string;
   name: string;
   avatar?: string;
-  status: TOnlineStatus;
+  status?: TOnlineStatus;
 }
 
 const ChatContainer: React.FC<ChatContainerProps> = ({
