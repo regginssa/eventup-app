@@ -27,6 +27,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Dimensions,
   FlatList,
   ScrollView,
   Text,
@@ -49,8 +50,10 @@ const ChatGroup = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadLoading, setUploadLoading] = useState<boolean>(false);
   const flatListRef = useRef<FlatList>(null);
+
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(audioRecorder);
+  const SCREEN_HEIGHT = Dimensions.get("window").height;
 
   const { conversationId } = useLocalSearchParams();
   const router = useRouter();
@@ -133,13 +136,7 @@ const ChatGroup = () => {
 
   const renderMembers = ({ item }: { item: IUser }) => {
     return (
-      <TouchableOpacity
-        activeOpacity={0.8}
-        className="w-full flex flex-row items-center gap-2"
-        onPress={() =>
-          router.push({ pathname: "/profile", params: { id: item._id } })
-        }
-      >
+      <View className="w-full flex flex-row items-center gap-2">
         <Avatar
           source={item.avatar}
           name={item.name}
@@ -149,7 +146,7 @@ const ChatGroup = () => {
         <Text className="font-poppins-medium text-sm text-gray-800">
           {item.name}
         </Text>
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -321,8 +318,8 @@ const ChatGroup = () => {
         </View>
 
         <View className="w-full gap-2">
-          <View className="w-full flex flex-row items-center gap-4 border-b border-gray-300 py-2">
-            <View className="w-full flex flex-row items-center gap-2">
+          <View className="w-full flex flex-row items-start gap-4 border-b border-gray-300 py-2">
+            <View className="flex flex-row items-center gap-2">
               <MaterialCommunityIcons
                 name="account-outline"
                 size={16}
@@ -333,13 +330,29 @@ const ChatGroup = () => {
               </Text>
             </View>
 
-            <Text className="font-poppins-semibold text-sm text-gray-800">
+            <Text className="font-poppins-semibold text-sm text-gray-800 flex-1">
               {conversation?.creator?.name}
             </Text>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() =>
+                router.push({
+                  pathname: "/profile",
+                  params: { id: conversation?.creator?._id },
+                })
+              }
+            >
+              <MaterialCommunityIcons
+                name="arrow-right"
+                size={16}
+                color="#1f2937"
+              />
+            </TouchableOpacity>
           </View>
 
-          <View className="w-full flex flex-row items-center gap-4 border-b border-gray-300 py-2">
-            <View className="w-full flex flex-row items-center gap-2">
+          <View className="w-full flex flex-row items-start gap-4 border-b border-gray-300 py-2">
+            <View className="flex flex-row items-center gap-2">
               <MaterialCommunityIcons
                 name="calendar-check-outline"
                 size={16}
@@ -350,9 +363,20 @@ const ChatGroup = () => {
               </Text>
             </View>
 
-            <Text className="font-poppins-semibold text-sm text-gray-800">
+            <Text className="font-poppins-semibold text-sm text-gray-800 flex-1">
               {conversation?.event?.name}
             </Text>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push(`/event/${conversation?.event?._id}`)}
+            >
+              <MaterialCommunityIcons
+                name="arrow-right"
+                size={16}
+                color="#1f2937"
+              />
+            </TouchableOpacity>
           </View>
 
           <View className="w-full flex flex-row items-center gap-4 py-2">
@@ -372,7 +396,7 @@ const ChatGroup = () => {
             </Text>
           </View>
 
-          <View className="">
+          <View style={{ maxHeight: SCREEN_HEIGHT * 0.4 }}>
             <FlatList
               data={conversation?.participants}
               keyExtractor={(_, index) => index.toString()}
