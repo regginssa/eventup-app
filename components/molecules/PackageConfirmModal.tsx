@@ -8,12 +8,19 @@ import {
 } from "@/store/slices/booking.slice";
 import { TTransfer } from "@/types";
 import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "@/types/amadeus";
+import { ITicket } from "@/types/ticket";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { useDispatch } from "react-redux";
-import { Button, FlightItem, HotelItem, Modal } from "../common";
+import {
+  Button,
+  FlightItem,
+  HotelItem,
+  Modal,
+  UserTicketItem,
+} from "../common";
 import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
 
 interface PackageConfirmModalProps {
@@ -21,6 +28,7 @@ interface PackageConfirmModalProps {
   onClose: () => void;
   packageType: "standard" | "gold";
   eventId: string;
+  ticket?: ITicket;
   flight?: TAmadeusFlightOffer;
   hotel?: TAmadeusHotelOffer;
   transfer: TTransfer | null;
@@ -31,6 +39,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   onClose,
   packageType,
   eventId,
+  ticket,
   flight,
   hotel,
   transfer,
@@ -72,7 +81,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
 
       router.push({
         pathname: "/booking/booking-form",
-        params: { eventId, packageType },
+        params: { eventId, packageType, ticketId: ticket?._id },
       });
     } catch (error: any) {
       console.log("error updating flight offer price: ", error);
@@ -88,6 +97,8 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
       title={`Confirm ${packageType} package`}
       scrolled
     >
+      {ticket && <UserTicketItem item={ticket} />}
+
       <View className="w-full gap-3 p-2 rounded-lg border border-gray-200 mb-3">
         {!flight ? (
           <View className="w-full flex flex-col items-center justify-center gap-3">

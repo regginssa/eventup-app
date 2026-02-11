@@ -358,6 +358,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
       <PackageConfirmModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
+        ticket={ticket || undefined}
         flight={flight?.offers[0]}
         hotel={hotel?.offers[0]}
         transfer={transfer}

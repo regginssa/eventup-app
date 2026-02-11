@@ -10,6 +10,8 @@ import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
 import { CheckoutContainer } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useTicket } from "@/components/providers/TicketProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { RootState } from "@/store";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
 import { TAmadeusFlightOrder, TAmadeusHotelOrder } from "@/types/amadeus";
@@ -20,32 +22,31 @@ import {
   TBookingTransfer,
 } from "@/types/booking";
 import { IEvent } from "@/types/event";
+import { ITicket } from "@/types/ticket";
 import { formatDateTime, formatName, getCurrencySymbol } from "@/utils/format";
 import {
   mapAmadeusFlightOrderToBookingFlightData,
   mapAmadeusHotelOrderToBookingHotelData,
   mapAmadeusTransferOrderToBookingTransferData,
 } from "@/utils/map";
-import { Fontisto, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { confirmPayment } from "@stripe/stripe-react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { Alert, Text, View } from "react-native";
+import { useSelector } from "react-redux";
 
 const EventDetail = ({
   event,
   loading,
   packageType,
   totalPrice,
-  currency,
 }: {
   event?: IEvent;
   loading: boolean;
   packageType: "standard" | "gold";
   totalPrice: number;
-  currency: TCurrency;
 }) => {
   return (
     <View className="w-full bg-white rounded-xl p-4 gap-6">
@@ -69,11 +70,24 @@ const EventDetail = ({
       ) : (
         <>
           <View className="w-full flex flex-row items-center gap-4 overflow-hidden">
-            <Image
-              source={event.images?.[0] as string}
-              contentFit="cover"
-              style={{ width: 100, height: 100, borderRadius: 6 }}
-            />
+            {event.images?.length === 0 ? (
+              <View className="w-[100px] h-[100px] flex flex-col items-center justify-center gap-2">
+                <MaterialCommunityIcons
+                  name="image-off-outline"
+                  size={24}
+                  color="#4b5563"
+                />
+                <Text className="font-dm-sans-medium text-sm text-gray-600">
+                  No Picture
+                </Text>
+              </View>
+            ) : (
+              <Image
+                source={event.images?.[0] as string}
+                contentFit="cover"
+                style={{ width: 100, height: 100, borderRadius: 6 }}
+              />
+            )}
             <View className="gap-4 flex-1">
               <Text className="font-poppins-semibold text-gray-700 line-clamp-2">
                 {event.name as string}
@@ -81,7 +95,11 @@ const EventDetail = ({
 
               <View className="gap-2">
                 <View className="flex flex-row items-center gap-2">
-                  <Fontisto name="map-marker-alt" size={20} color="#374151" />
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    size={20}
+                    color="#374151"
+                  />
                   <Text className="font-dm-sans-medium text-sm text-gray-700">
                     {event?.location?.city
                       ? `${event.location.city.name}, ${event.location.country.name}`
@@ -111,6 +129,22 @@ const EventDetail = ({
                     {event.dates?.timezone ?? "--"}
                   </Text>
                 </View>
+
+                {event.type === "user" &&
+                  event.fee &&
+                  event.fee.type === "paid" && (
+                    <View className="flex flex-row items-center gap-2">
+                      <MaterialCommunityIcons
+                        name="cart-outline"
+                        size={16}
+                        color="#374151"
+                      />
+                      <Text className="font-dm-sans-medium text-sm text-gray-700">
+                        {getCurrencySymbol(event.fee.currency as any)}
+                        {event.fee.amount}
+                      </Text>
+                    </View>
+                  )}
               </View>
             </View>
           </View>
@@ -122,10 +156,14 @@ const EventDetail = ({
               {formatName(packageType)} Package
             </Text>
 
-            <Text className="font-poppins-semibold text-lg text-gray-700">
-              {getCurrencySymbol(currency as any)}
-              {totalPrice}
-            </Text>
+            <View className="flex flex-row items-start">
+              <Text className="font-dm-sans-medium text-sm text-gray-600">
+                $
+              </Text>
+              <Text className="font-poppins-bold text-lg text-gray-800">
+                {totalPrice}
+              </Text>
+            </View>
           </View>
         </>
       )}
@@ -138,13 +176,11 @@ const PriceDetail = ({
   totalPrice,
   basePrice,
   comissionPrice,
-  currency,
 }: {
   services: string[];
   totalPrice: number;
   basePrice: number;
   comissionPrice: number;
-  currency: TCurrency;
 }) => {
   return (
     <View className="w-full bg-white rounded-xl p-4 gap-6">
@@ -159,10 +195,12 @@ const PriceDetail = ({
             </View>
           ))}
         </View>
-        <Text className="font-poppins-medium text-lg text-gray-500">
-          {getCurrencySymbol(currency as any)}
-          {basePrice}
-        </Text>
+        <View className="flex flex-row items-start">
+          <Text className="font-dm-sans-medium text-sm text-gray-600">$</Text>
+          <Text className="font-poppins-semibold text-lg text-gray-700">
+            {basePrice}
+          </Text>
+        </View>
       </View>
 
       <View className="w-full flex flex-row items-start gap-6">
@@ -174,10 +212,13 @@ const PriceDetail = ({
             </Text>
           </View>
         </View>
-        <Text className="font-poppins-medium text-lg text-gray-500">
-          {getCurrencySymbol(currency as any)}
-          {comissionPrice}
-        </Text>
+
+        <View className="flex flex-row items-start">
+          <Text className="font-dm-sans-medium text-sm text-gray-600">$</Text>
+          <Text className="font-poppins-semibold text-lg text-gray-700">
+            {comissionPrice}
+          </Text>
+        </View>
       </View>
 
       <View className="w-full h-[1px] bg-gray-200"></View>
@@ -187,10 +228,12 @@ const PriceDetail = ({
           Total
         </Text>
 
-        <Text className="font-poppins-semibold text-lg text-gray-700">
-          {getCurrencySymbol(currency as any)}
-          {totalPrice}
-        </Text>
+        <View className="flex flex-row items-start">
+          <Text className="font-dm-sans-medium text-sm text-gray-600">$</Text>
+          <Text className="font-poppins-bold text-xl text-gray-800">
+            {totalPrice}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -198,6 +241,7 @@ const PriceDetail = ({
 
 const CheckoutScreen = () => {
   const [event, setEvent] = useState<IEvent | undefined>(undefined);
+  const [ticket, setTicket] = useState<ITicket | null>(null);
   const [eventLoading, setEventLoading] = useState<boolean>(false);
   const [basePrice, setBasePrice] = useState<number>(0);
   const [totalPrice, setTotalPrice] = useState<number>(0);
@@ -208,17 +252,17 @@ const CheckoutScreen = () => {
   const [stripePaymentMethodId, setStripePaymentMethodId] =
     useState<string>("");
   const [bookLoading, setBookLoading] = useState<boolean>(false);
+  const [bookLabel, setBookLabel] = useState<string>("Book Now");
 
-  const { eventId, packageType } = useLocalSearchParams();
+  const { eventId, packageType, ticketId } = useLocalSearchParams();
   const router = useRouter();
 
   const { user } = useAuth();
   const { flight, hotel, transfer } = useSelector(
     (state: RootState) => state.booking,
   );
-  const [bookLabel, setBookLabel] = useState<string>("Book Now");
-
-  const dispatch = useDispatch();
+  const { tickets } = useTicket();
+  const toast = useToast();
 
   const getEvent = useCallback(async () => {
     if (!eventId || typeof eventId !== "string") return;
@@ -242,6 +286,11 @@ const CheckoutScreen = () => {
   }, []);
 
   useEffect(() => {
+    if (!ticketId) return;
+    setTicket(tickets.find((t) => t._id === ticketId) || null);
+  }, [ticketId]);
+
+  useEffect(() => {
     if (!user?.stripe) return;
 
     if (user.stripe.paymentMethods.length === 0) return;
@@ -251,6 +300,11 @@ const CheckoutScreen = () => {
   useEffect(() => {
     let base = 0;
     let services: string[] = [];
+
+    if (ticket) {
+      services.push("Ticket");
+      base += Number(ticket.price);
+    }
 
     if (flight?.offers) {
       services.push("Flight");
@@ -434,7 +488,7 @@ const CheckoutScreen = () => {
   };
 
   const handleBook = async (paymentMethod: TPaymentMethod) => {
-    if (!user?._id || !eventId) return Alert.alert("Error", "Unauthorized");
+    if (!user?._id || !eventId) return toast.error("Unauthorized");
 
     try {
       setBookLoading(true);
@@ -444,7 +498,7 @@ const CheckoutScreen = () => {
       // Refund payment if failed to book (flight, hotel, transfers)
       if (!basicBookingData) {
         setBookLabel("Book Now");
-        return Alert.alert("Error", "Failed to book.");
+        return toast.error("Failed to book.");
       }
 
       setBookLabel("Creating Booking...");
@@ -481,8 +535,7 @@ const CheckoutScreen = () => {
       }
     } catch (error: any) {
       console.error("handle book error: ", error);
-      const message = error?.response?.data?.message;
-      Alert.alert("Error", message);
+      toast.error("Booking failed");
     } finally {
       setBookLabel("Book Now");
       setBookLoading(false);
@@ -496,14 +549,12 @@ const CheckoutScreen = () => {
         loading={eventLoading}
         packageType={packageType as any}
         totalPrice={totalPrice}
-        currency="usd"
       />
       <PriceDetail
         services={services}
         totalPrice={totalPrice}
         basePrice={basePrice}
         comissionPrice={commissionPrice}
-        currency={currency}
       />
       <PaymentMethodGroup
         method={paymentMethod}
@@ -523,19 +574,5 @@ const CheckoutScreen = () => {
     </CheckoutContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  paymentMethodGradient: {
-    position: "absolute",
-    inset: 1,
-    borderRadius: 6,
-    zIndex: 10,
-  },
-
-  cryptoIcon: {
-    width: 16,
-    height: 16,
-  },
-});
 
 export default CheckoutScreen;

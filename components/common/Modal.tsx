@@ -46,6 +46,7 @@ const Modal: React.FC<ModalProps> = ({
         className="bg-white rounded-t-2xl p-5"
         style={{
           height: scrolled ? "auto" : SHEET_MAX_HEIGHT,
+          maxHeight: SHEET_MAX_HEIGHT,
         }}
       >
         {/* HANDLE */}

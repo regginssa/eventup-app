@@ -39,10 +39,10 @@ const bookingSlice = createSlice({
     },
     updateBookingFlightOfferById(
       state,
-      action: PayloadAction<{ id: string; offer: TAmadeusFlightOffer }>
+      action: PayloadAction<{ id: string; offer: TAmadeusFlightOffer }>,
     ) {
       const index = state.flight?.offers.findIndex(
-        (f) => f.id === action.payload.id
+        (f) => f.id === action.payload.id,
       );
 
       if (index !== -1) {
@@ -51,7 +51,7 @@ const bookingSlice = createSlice({
     },
     setBookingFlightRequest(
       state,
-      action: PayloadAction<TAmadeusFlightBookingRequest>
+      action: PayloadAction<TAmadeusFlightBookingRequest>,
     ) {
       state.flight!.request = action.payload;
     },
@@ -64,13 +64,13 @@ const bookingSlice = createSlice({
     },
     updateBookingHotelByIndex(
       state,
-      action: PayloadAction<{ index: number; offer: TAmadeusHotelOffer }>
+      action: PayloadAction<{ index: number; offer: TAmadeusHotelOffer }>,
     ) {
       state.hotel!.offers[action.payload.index] = action.payload.offer;
     },
     setBookingHotelRequest(
       state,
-      action: PayloadAction<TAmadeusHotelBookingRequest>
+      action: PayloadAction<TAmadeusHotelBookingRequest>,
     ) {
       state.hotel!.request = action.payload;
     },
@@ -83,13 +83,14 @@ const bookingSlice = createSlice({
     },
     setBookingTransferRequest(
       state,
-      action: PayloadAction<TAmadeusTransferBookingRequest[]>
+      action: PayloadAction<TAmadeusTransferBookingRequest[]>,
     ) {
-      state.transfer!.requests = action.payload;
+      if (!state.transfer) return;
+      state.transfer.requests = action.payload;
     },
     setBookingTransferOrder(
       state,
-      action: PayloadAction<TAmadeusTransferOrder[]>
+      action: PayloadAction<TAmadeusTransferOrder[]>,
     ) {
       state.transfer!.orders = action.payload;
     },

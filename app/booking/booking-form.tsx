@@ -9,6 +9,7 @@ import {
   Input,
   LocationPicker,
   Spinner,
+  UserTicketItem,
 } from "@/components/common";
 import { TransferAvailabilityGroup } from "@/components/molecules";
 import TravelerDetailInputGroup, {
@@ -17,6 +18,8 @@ import TravelerDetailInputGroup, {
   TTraveler,
 } from "@/components/molecules/TravelerDetailInputGroup";
 import { BookingContainer } from "@/components/organisms";
+import { useTicket } from "@/components/providers/TicketProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { RootState } from "@/store";
 import {
   setBookingFlightRequest,
@@ -33,12 +36,13 @@ import {
 } from "@/types/amadeus";
 import { IEvent } from "@/types/event";
 import { Country } from "@/types/location.types";
+import { ITicket } from "@/types/ticket";
 import { formatDateTime, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const EventDetail = ({
@@ -147,6 +151,26 @@ const EventDetail = ({
           </View>
         </>
       )}
+    </View>
+  );
+};
+
+const TicketDetail = ({
+  eventType,
+  ticket,
+}: {
+  eventType: "user" | "ai";
+  ticket: ITicket | null;
+}) => {
+  if (!ticket) return null;
+
+  return (
+    <View className="w-full bg-white rounded-xl p-4 gap-6">
+      <Text className="font-poppins-semibold text-lg text-gray-800">
+        Ticket Details
+      </Text>
+
+      {eventType === "user" ? <UserTicketItem item={ticket} /> : <></>}
     </View>
   );
 };
@@ -411,45 +435,28 @@ interface SummaryProps {
 }
 
 const Summary: React.FC<SummaryProps> = ({ flight, hotel, transfer }) => {
-  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
-
   return (
     <View className="w-full bg-white rounded-xl p-4 gap-6">
-      <TouchableOpacity
-        activeOpacity={0.8}
-        className="flex flex-row items-center justify-between"
-        onPress={() => setIsSummaryOpen(!isSummaryOpen)}
-      >
-        <Text className="font-poppins-semibold text-lg text-gray-800">
-          Summary
-        </Text>
+      <Text className="font-poppins-semibold text-lg text-gray-800">
+        Summary
+      </Text>
 
-        <MaterialCommunityIcons
-          name={isSummaryOpen ? "chevron-up" : "chevron-down"}
-          size={24}
-          color="#4b5563"
-        />
-      </TouchableOpacity>
+      {flight && <FlightItem data={flight} />}
 
-      {isSummaryOpen && (
-        <>
-          {flight && <FlightItem data={flight} />}
+      <View className="w-full h-[1px] bg-gray-200"></View>
 
-          <View className="w-full h-[1px] bg-gray-200"></View>
+      {hotel && <HotelItem data={hotel} hiddenImages={true} />}
 
-          {hotel && <HotelItem data={hotel} hiddenImages={true} />}
+      <View className="w-full h-[1px] bg-gray-200"></View>
 
-          <View className="w-full h-[1px] bg-gray-200"></View>
-
-          {transfer && <TransferAvailabilityGroup transfer={transfer} />}
-        </>
-      )}
+      {transfer && <TransferAvailabilityGroup transfer={transfer} />}
     </View>
   );
 };
 
 const BookingScreen = () => {
   const [event, setEvent] = useState<IEvent | null>(null);
+  const [ticket, setTicket] = useState<ITicket | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [flightTravelers, setFlightTravelers] = useState<TFlightTraveler[]>([]);
   const [hotelTravelers, setHotelTravelers] = useState<THotelTraveler[]>([]);
@@ -468,12 +475,13 @@ const BookingScreen = () => {
     cityName: "",
   });
 
-  const { eventId, packageType } = useLocalSearchParams();
+  const { eventId, packageType, ticketId } = useLocalSearchParams();
   const router = useRouter();
-
   const { flight, hotel, transfer, travelers } = useSelector(
     (state: RootState) => state.booking,
   );
+  const { tickets } = useTicket();
+  const toast = useToast();
 
   const [isConfirmed, setIsConfirmed] = useState<boolean[]>(
     Array.from({ length: travelers }, () => false),
@@ -501,6 +509,11 @@ const BookingScreen = () => {
     init();
   }, []);
 
+  useEffect(() => {
+    if (!ticketId) return;
+    setTicket(tickets.find((t) => t._id === ticketId) || null);
+  }, [ticketId]);
+
   const handleTravelerDetailsConfirm = (
     travelerDetails: TTraveler,
     id: number,
@@ -526,221 +539,230 @@ const BookingScreen = () => {
 
   const handleCheckout = async () => {
     if (isConfirmed.some((confirmed) => !confirmed))
-      return Alert.alert("Error", "Please confirm all passenger details");
+      return toast.warn("Please confirm all passenger details");
 
-    const flightBookingRequest: TAmadeusFlightBookingRequest = {
-      flightOffers: [flight?.offers[0]] as any,
-      travelers: flightTravelers,
-      contacts: [
-        {
-          addresseeName: {
-            firstName: "Lukasz",
-            lastName: "Szymborski",
-          },
-          companyName: "CHARLIE UNICORN AI",
-          purpose: "STANDARD",
-          phones: [
-            {
-              deviceType: "MOBILE",
-              countryCallingCode: "48",
-              number: "504412991",
-            },
-          ],
-          emailAddress: "team@charlieunicornai.eu",
-          address: {
-            lines: ["Kolejowa 10/12"],
-            postalCode: "00-811",
-            cityName: "Warsaw",
-            countryCode: "PL",
-          },
-        },
-      ],
-      remarks: {
-        general: [
+    if (flight && flight?.offers && flight?.offers.length > 0) {
+      const flightBookingRequest: TAmadeusFlightBookingRequest = {
+        flightOffers: [flight?.offers[0]] as any,
+        travelers: flightTravelers,
+        contacts: [
           {
-            subType: "GENERAL_MISCELLANEOUS",
-            text: "ONLINE BOOKING FROM CHARLIE UNICORN AI",
+            addresseeName: {
+              firstName: "Lukasz",
+              lastName: "Szymborski",
+            },
+            companyName: "CHARLIE UNICORN AI",
+            purpose: "STANDARD",
+            phones: [
+              {
+                deviceType: "MOBILE",
+                countryCallingCode: "48",
+                number: "504412991",
+              },
+            ],
+            emailAddress: "team@charlieunicornai.eu",
+            address: {
+              lines: ["Kolejowa 10/12"],
+              postalCode: "00-811",
+              cityName: "Warsaw",
+              countryCode: "PL",
+            },
           },
         ],
-      },
-    };
+        remarks: {
+          general: [
+            {
+              subType: "GENERAL_MISCELLANEOUS",
+              text: "ONLINE BOOKING FROM CHARLIE UNICORN AI",
+            },
+          ],
+        },
+      };
+      dispatch(setBookingFlightRequest(flightBookingRequest));
+    }
 
     const paymentExpiryDateSplit = paymentDetails.expiryDate
       .split("T")[0]
       .split("-");
 
-    const hotelBookingRequest: TAmadeusHotelBookingRequest = {
-      guests: hotelTravelers.map((traveler) => traveler.info) as any,
-      travelAgent: {
-        contact: {
-          email: "team@charlieunicornai.eu",
-        },
-      },
-      roomAssociations: hotelTravelers.map((traveler) => ({
-        guestReferences: [{ guestReference: traveler.info.tid.toString() }],
-        hotelOfferId: traveler.offerId,
-      })),
-      payment: {
-        method: paymentDetails.method as any,
-        paymentCard: {
-          paymentCardInfo: {
-            vendorCode: paymentDetails.vendorCode,
-            cardNumber: paymentDetails.cardNumber,
-            expiryDate:
-              paymentExpiryDateSplit[0] + "-" + paymentExpiryDateSplit[1],
-            holderName: paymentDetails.holderName,
+    if (hotel && hotel?.offers && hotel.offers.length > 0) {
+      const hotelBookingRequest: TAmadeusHotelBookingRequest = {
+        guests: hotelTravelers.map((traveler) => traveler.info) as any,
+        travelAgent: {
+          contact: {
+            email: "team@charlieunicornai.eu",
           },
         },
-      },
-    };
+        roomAssociations: hotelTravelers.map((traveler) => ({
+          guestReferences: [{ guestReference: traveler.info.tid.toString() }],
+          hotelOfferId: traveler.offerId,
+        })),
+        payment: {
+          method: paymentDetails.method as any,
+          paymentCard: {
+            paymentCardInfo: {
+              vendorCode: paymentDetails.vendorCode,
+              cardNumber: paymentDetails.cardNumber,
+              expiryDate:
+                paymentExpiryDateSplit[0] + "-" + paymentExpiryDateSplit[1],
+              holderName: paymentDetails.holderName,
+            },
+          },
+        },
+      };
+      dispatch(setBookingHotelRequest(hotelBookingRequest));
+    }
 
     const expiryDate = paymentDetails.expiryDate.split("T")[0];
     const expiryDateMMYY =
       expiryDate.split("-")[1] + expiryDate.split("-")[0].slice(2, 4);
 
-    const ahTransfer = transfer?.ah[0];
-    const heTransfer = transfer?.he[0];
+    let transferRequests: TAmadeusTransferBookingRequest[] = [];
 
-    const ahTransferBookingRequest: TAmadeusTransferBookingRequest = {
-      id: transfer?.ah[0].id as string,
-      passengers: hotelTravelers.map((traveler) => {
-        const { firstName, lastName, phone, email, title } = traveler.info;
-        return {
-          firstName,
-          lastName,
-          title,
-          contacts: {
-            phoneNumber: phone,
-            email,
-          },
-          billingAddress: {
-            line: billingAddress.line?.description ?? "",
-            zip: billingAddress.zip,
-            countryCode: billingAddress.country?.cca2 ?? "",
-            cityName: billingAddress.line?.cityName ?? "",
-          },
-        };
-      }),
-      payment: {
-        methodOfPayment: paymentDetails.method as any,
-        creditCard: {
-          number: paymentDetails.cardNumber,
-          holderName: paymentDetails.holderName,
-          vendorCode: paymentDetails.vendorCode,
-          expiryDate: expiryDateMMYY,
-          cvv: paymentDetails.cvv as string,
-        },
-      },
-      startConnectedSegment: {
-        transportationType:
-          ahTransfer?.startConnectedSegment?.transportationType ?? "",
-        transportationNumber:
-          ahTransfer?.startConnectedSegment?.transportationNumber ?? "",
-        departure: {
-          iataCode: ahTransfer?.start?.locationCode ?? "",
-          localDateTime: ahTransfer?.start?.dateTime ?? "",
-        },
-        arrival: {
-          iataCode: ahTransfer?.end?.locationCode ?? "",
-          localDateTime: ahTransfer?.end?.dateTime ?? "",
-        },
-      },
-      extraServices:
-        ahTransfer?.extraServices?.map((extraService) => ({
-          code: extraService.code,
-          itemId: extraService.itemId,
-        })) ?? [],
-      equipment:
-        ahTransfer?.equipment?.map((equipment) => ({
-          code: equipment.code,
-        })) ?? [],
-      agency: {
-        contacts: [
-          {
-            email: {
-              address: "team@charlieunicornai.eu",
+    if (transfer && transfer.ah.length > 0) {
+      const ahTransfer = transfer?.ah[0];
+      const ahTransferBookingRequest: TAmadeusTransferBookingRequest = {
+        id: transfer?.ah[0].id as string,
+        passengers: hotelTravelers.map((traveler) => {
+          const { firstName, lastName, phone, email, title } = traveler.info;
+          return {
+            firstName,
+            lastName,
+            title,
+            contacts: {
+              phoneNumber: phone,
+              email,
             },
-          },
-        ],
-      },
-    };
-
-    const heTransferBookingRequest: TAmadeusTransferBookingRequest = {
-      id: transfer?.he[0].id as string,
-      passengers: hotelTravelers.map((traveler) => {
-        const { firstName, lastName, phone, email, title } = traveler.info;
-        return {
-          firstName,
-          lastName,
-          title,
-          contacts: {
-            phoneNumber: phone,
-            email,
-          },
-          billingAddress: {
-            line: billingAddress.line?.description ?? "",
-            zip: billingAddress.zip,
-            countryCode: billingAddress.country?.cca2 ?? "",
-            cityName: billingAddress.line?.cityName ?? "",
-          },
-        };
-      }),
-      payment: {
-        methodOfPayment: paymentDetails.method as any,
-        creditCard: {
-          number: paymentDetails.cardNumber,
-          holderName: paymentDetails.holderName,
-          vendorCode: paymentDetails.vendorCode,
-          expiryDate: expiryDateMMYY,
-          cvv: paymentDetails.cvv as string,
-        },
-      },
-      startConnectedSegment: {
-        transportationType:
-          heTransfer?.startConnectedSegment?.transportationType ?? "",
-        transportationNumber:
-          heTransfer?.startConnectedSegment?.transportationNumber ?? "",
-        departure: {
-          iataCode: heTransfer?.start?.locationCode ?? "",
-          localDateTime: heTransfer?.start?.dateTime ?? "",
-        },
-        arrival: {
-          iataCode: heTransfer?.end?.locationCode ?? "",
-          localDateTime: heTransfer?.end?.dateTime ?? "",
-        },
-      },
-      extraServices:
-        heTransfer?.extraServices?.map((extraService) => ({
-          code: extraService.code,
-          itemId: extraService.itemId,
-        })) ?? [],
-      equipment:
-        heTransfer?.equipment?.map((equipment) => ({
-          code: equipment.code,
-        })) ?? [],
-      agency: {
-        contacts: [
-          {
-            email: {
-              address: "team@charlieunicornai.eu",
+            billingAddress: {
+              line: billingAddress.line?.description ?? "",
+              zip: billingAddress.zip,
+              countryCode: billingAddress.country?.cca2 ?? "",
+              cityName: billingAddress.line?.cityName ?? "",
             },
+          };
+        }),
+        payment: {
+          methodOfPayment: paymentDetails.method as any,
+          creditCard: {
+            number: paymentDetails.cardNumber,
+            holderName: paymentDetails.holderName,
+            vendorCode: paymentDetails.vendorCode,
+            expiryDate: expiryDateMMYY,
+            cvv: paymentDetails.cvv as string,
           },
-        ],
-      },
-    };
+        },
+        startConnectedSegment: {
+          transportationType:
+            ahTransfer?.startConnectedSegment?.transportationType ?? "",
+          transportationNumber:
+            ahTransfer?.startConnectedSegment?.transportationNumber ?? "",
+          departure: {
+            iataCode: ahTransfer?.start?.locationCode ?? "",
+            localDateTime: ahTransfer?.start?.dateTime ?? "",
+          },
+          arrival: {
+            iataCode: ahTransfer?.end?.locationCode ?? "",
+            localDateTime: ahTransfer?.end?.dateTime ?? "",
+          },
+        },
+        extraServices:
+          ahTransfer?.extraServices?.map((extraService) => ({
+            code: extraService.code,
+            itemId: extraService.itemId,
+          })) ?? [],
+        equipment:
+          ahTransfer?.equipment?.map((equipment) => ({
+            code: equipment.code,
+          })) ?? [],
+        agency: {
+          contacts: [
+            {
+              email: {
+                address: "team@charlieunicornai.eu",
+              },
+            },
+          ],
+        },
+      };
 
-    dispatch(setBookingFlightRequest(flightBookingRequest));
-    dispatch(setBookingHotelRequest(hotelBookingRequest));
-    dispatch(
-      setBookingTransferRequest([
-        ahTransferBookingRequest,
-        heTransferBookingRequest,
-      ]),
-    );
+      transferRequests.push(ahTransferBookingRequest);
+    }
+
+    if (transfer && transfer.he.length > 0) {
+      const heTransfer = transfer?.he[0];
+
+      const heTransferBookingRequest: TAmadeusTransferBookingRequest = {
+        id: transfer?.he[0].id as string,
+        passengers: hotelTravelers.map((traveler) => {
+          const { firstName, lastName, phone, email, title } = traveler.info;
+          return {
+            firstName,
+            lastName,
+            title,
+            contacts: {
+              phoneNumber: phone,
+              email,
+            },
+            billingAddress: {
+              line: billingAddress.line?.description ?? "",
+              zip: billingAddress.zip,
+              countryCode: billingAddress.country?.cca2 ?? "",
+              cityName: billingAddress.line?.cityName ?? "",
+            },
+          };
+        }),
+        payment: {
+          methodOfPayment: paymentDetails.method as any,
+          creditCard: {
+            number: paymentDetails.cardNumber,
+            holderName: paymentDetails.holderName,
+            vendorCode: paymentDetails.vendorCode,
+            expiryDate: expiryDateMMYY,
+            cvv: paymentDetails.cvv as string,
+          },
+        },
+        startConnectedSegment: {
+          transportationType:
+            heTransfer?.startConnectedSegment?.transportationType ?? "",
+          transportationNumber:
+            heTransfer?.startConnectedSegment?.transportationNumber ?? "",
+          departure: {
+            iataCode: heTransfer?.start?.locationCode ?? "",
+            localDateTime: heTransfer?.start?.dateTime ?? "",
+          },
+          arrival: {
+            iataCode: heTransfer?.end?.locationCode ?? "",
+            localDateTime: heTransfer?.end?.dateTime ?? "",
+          },
+        },
+        extraServices:
+          heTransfer?.extraServices?.map((extraService) => ({
+            code: extraService.code,
+            itemId: extraService.itemId,
+          })) ?? [],
+        equipment:
+          heTransfer?.equipment?.map((equipment) => ({
+            code: equipment.code,
+          })) ?? [],
+        agency: {
+          contacts: [
+            {
+              email: {
+                address: "team@charlieunicornai.eu",
+              },
+            },
+          ],
+        },
+      };
+
+      transferRequests.push(heTransferBookingRequest);
+    }
+
+    dispatch(setBookingTransferRequest(transferRequests));
 
     router.push({
       pathname: "/booking/checkout",
-      params: { eventId, packageType },
+      params: { eventId, packageType, ticketId },
     });
   };
 
@@ -759,6 +781,8 @@ const BookingScreen = () => {
     <BookingContainer>
       <View className="flex-1 gap-4">
         <EventDetail loading={loading} event={event} />
+
+        <TicketDetail eventType={event?.type as any} ticket={ticket} />
 
         <TravelerDetailsForm
           travelers={travelers}
