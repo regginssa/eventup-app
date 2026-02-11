@@ -18,14 +18,10 @@ import TravelerDetailInputGroup, {
   TTraveler,
 } from "@/components/molecules/TravelerDetailInputGroup";
 import { BookingContainer } from "@/components/organisms";
+import { useBooking } from "@/components/providers/BookingProvider";
 import { useTicket } from "@/components/providers/TicketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
-import { RootState } from "@/store";
-import {
-  setBookingFlightRequest,
-  setBookingHotelRequest,
-  setBookingTransferRequest,
-} from "@/store/slices/booking.slice";
+
 import { TDropdownItem, TLocation, TTransfer } from "@/types";
 import {
   TAmadeusFlightBookingRequest,
@@ -43,7 +39,6 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 
 const EventDetail = ({
   loading,
@@ -477,17 +472,21 @@ const BookingScreen = () => {
 
   const { eventId, packageType, ticketId } = useLocalSearchParams();
   const router = useRouter();
-  const { flight, hotel, transfer, travelers } = useSelector(
-    (state: RootState) => state.booking,
-  );
+  const {
+    flight,
+    hotel,
+    transfer,
+    travelers,
+    setBookingFlightRequest,
+    setBookingHotelRequest,
+    setBookingTransferRequest,
+  } = useBooking();
   const { tickets } = useTicket();
   const toast = useToast();
 
   const [isConfirmed, setIsConfirmed] = useState<boolean[]>(
     Array.from({ length: travelers }, () => false),
   );
-
-  const dispatch = useDispatch();
 
   const init = useCallback(async () => {
     if (!eventId || typeof eventId !== "string") return;
@@ -578,7 +577,7 @@ const BookingScreen = () => {
           ],
         },
       };
-      dispatch(setBookingFlightRequest(flightBookingRequest));
+      setBookingFlightRequest(flightBookingRequest);
     }
 
     const paymentExpiryDateSplit = paymentDetails.expiryDate
@@ -610,7 +609,7 @@ const BookingScreen = () => {
           },
         },
       };
-      dispatch(setBookingHotelRequest(hotelBookingRequest));
+      setBookingHotelRequest(hotelBookingRequest);
     }
 
     const expiryDate = paymentDetails.expiryDate.split("T")[0];
@@ -758,7 +757,7 @@ const BookingScreen = () => {
       transferRequests.push(heTransferBookingRequest);
     }
 
-    dispatch(setBookingTransferRequest(transferRequests));
+    setBookingTransferRequest(transferRequests);
 
     router.push({
       pathname: "/booking/checkout",

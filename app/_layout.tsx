@@ -1,15 +1,4 @@
-import { InitContainer } from "@/components/organisms";
-import {
-  ConversationProvider,
-  MessageProvider,
-  SocketProvider,
-  ThemeProvider,
-  TicketProvider,
-  ToastProvider,
-} from "@/components/providers";
-import AuthProvider from "@/components/providers/AuthProvider";
-import { STRIPE_PUBLISHABLE_KEY } from "@/config/env";
-import { store } from "@/store";
+import { InitContainer } from "@/components";
 import {
   DMSans_400Regular,
   DMSans_500Medium,
@@ -24,12 +13,9 @@ import {
   Poppins_700Bold,
   useFonts as usePoppins,
 } from "@expo-google-fonts/poppins";
-import { StripeProvider } from "@stripe/stripe-react-native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { KeyboardAvoidingView, Platform } from "react-native";
-import { Provider } from "react-redux";
 import "../global.css";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -61,46 +47,24 @@ export default function RootLayout() {
     return null;
   }
   return (
-    <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
-      <Provider store={store}>
-        <AuthProvider>
-          <TicketProvider>
-            <SocketProvider>
-              <ConversationProvider>
-                <MessageProvider>
-                  <ThemeProvider>
-                    <KeyboardAvoidingView
-                      behavior={Platform.OS === "ios" ? "padding" : undefined}
-                      style={{ flex: 1 }}
-                    >
-                      <ToastProvider>
-                        <Stack
-                          screenOptions={{
-                            headerShown: false,
-                            contentStyle: { backgroundColor: "transparent" },
-                          }}
-                        >
-                          <Stack.Screen name="start" />
-                          <Stack.Screen name="auth" />
-                          <Stack.Screen name="home" />
-                          <Stack.Screen name="map" />
-                          <Stack.Screen name="didit" />
-                          <Stack.Screen name="booking" />
-                          <Stack.Screen name="profile" />
-                          <Stack.Screen name="tickets" />
-                          <Stack.Screen name="subscription" />
-                          <Stack.Screen name="conversation" />
-                        </Stack>
-                      </ToastProvider>
-                    </KeyboardAvoidingView>
-                    <InitContainer />
-                  </ThemeProvider>
-                </MessageProvider>
-              </ConversationProvider>
-            </SocketProvider>
-          </TicketProvider>
-        </AuthProvider>
-      </Provider>
-    </StripeProvider>
+    <InitContainer>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: "transparent" },
+        }}
+      >
+        <Stack.Screen name="start" />
+        <Stack.Screen name="auth" />
+        <Stack.Screen name="home" />
+        <Stack.Screen name="map" />
+        <Stack.Screen name="didit" />
+        <Stack.Screen name="booking" />
+        <Stack.Screen name="profile" />
+        <Stack.Screen name="tickets" />
+        <Stack.Screen name="subscription" />
+        <Stack.Screen name="conversation" />
+      </Stack>
+    </InitContainer>
   );
 }

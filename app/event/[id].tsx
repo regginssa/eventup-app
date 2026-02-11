@@ -11,10 +11,7 @@ import {
   EventDetailPackages,
 } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
-import {
-  setBookingFlight,
-  setBookingHotel,
-} from "@/store/slices/booking.slice";
+import { useBooking } from "@/components/providers/BookingProvider";
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
 import { EventDates, IEvent } from "@/types/event";
@@ -56,7 +53,7 @@ const EventDetailScreen = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
-  const dispatch = useDispatch();
+  const { setBookingFlight, setBookingHotel } = useBooking();
 
   const getUserLocationAndSave = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -147,8 +144,8 @@ const EventDetailScreen = () => {
     await fetchBookingData();
     await fetchUserCurrentLocation();
     setTabs(userTabs);
-    dispatch(setBookingFlight(null));
-    dispatch(setBookingHotel(null));
+    setBookingFlight(null);
+    setBookingHotel(null);
     setLoading(false);
   }, [id]);
 

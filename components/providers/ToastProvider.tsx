@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { Toast } from "../common";
 import { ToastType } from "../common/Toast";
 
@@ -27,7 +27,11 @@ export const useToast = () => {
   return ctx;
 };
 
-const ToastProvider = ({ children }: { children: ReactNode }) => {
+interface ToastProviderProps {
+  children: React.ReactNode;
+}
+
+const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toast, setToast] = useState<ToastState>({
     message: "",
     type: "info",

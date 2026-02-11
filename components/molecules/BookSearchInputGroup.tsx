@@ -3,14 +3,6 @@ import {
   fetchHotelOffers,
   fetchTransferOffers,
 } from "@/api/services/booking";
-import { RootState } from "@/store";
-import {
-  setBookingFlight,
-  setBookingHotel,
-  setBookingHotelRooms,
-  setBookingTransfer,
-  setBookingTravelers,
-} from "@/store/slices/booking.slice";
 import { TCoordinate, TPackageType } from "@/types";
 import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "@/types/amadeus";
 import { IEvent } from "@/types/event";
@@ -26,11 +18,11 @@ import {
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 import { Button, DateTimePicker, RadioButton } from "../common";
 import { TFlightItemData } from "../common/FlightItem";
 import { THotelItemData } from "../common/HotelItem";
 import { useAuth } from "../providers/AuthProvider";
+import { useBooking } from "../providers/BookingProvider";
 import FlightAvailabilityGroup from "./FlightAvailabilityGroup";
 import HotelAvailabilityGroup from "./HotelAvailabilityGroup";
 import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
@@ -70,8 +62,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     flight,
     hotel: rdHotel,
     transfer: rdTransfer,
-  } = useSelector((state: RootState) => state.booking);
-  const dispatch = useDispatch();
+    setBookingFlight,
+    setBookingHotel,
+    setBookingTransfer,
+    setBookingTravelers,
+    setBookingHotelRooms,
+  } = useBooking();
 
   const searchFlights = async () => {
     const params = {
@@ -95,8 +91,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return null;
     }
 
-    dispatch(setBookingFlight({ ...flight, offers: response.data }));
-    dispatch(setBookingTravelers(travelers));
+    setBookingFlight({ ...flight, offers: response.data });
+    setBookingTravelers(travelers);
 
     const flightData = mapAmadeusFlightOfferToFlightItemData(response.data[0]);
     return flightData;
@@ -135,19 +131,15 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     const response = await fetchHotelOffers(params);
 
-    console.log("[hotel offers data]: ", response.data);
-
     if (!response.data) {
       return null;
     }
 
-    dispatch(
-      setBookingHotel({
-        ...rdHotel,
-        offers: response.data,
-      }),
-    );
-    dispatch(setBookingHotelRooms(hotelRooms));
+    setBookingHotel({
+      ...rdHotel,
+      offers: response.data,
+    });
+    setBookingHotelRooms(hotelRooms);
 
     const hotelOffer = mapAmadeusHotelOfferToHotelItemData(response.data[0]);
 
@@ -203,18 +195,16 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     console.log("[transfer offer data]: ", response.data);
 
-    dispatch(
-      setBookingTransfer({
-        ...rdTransfer,
-        ah: response.data.airportToHotel,
-        he: response.data.hotelToEvent,
-      }),
-    );
+    setBookingTransfer({
+      ...rdTransfer,
+      ah: response.data.airportToHotel,
+      he: response.data.hotelToEvent,
+    });
   };
 
   const handleSearch = async () => {
-    dispatch(setBookingFlight(null));
-    dispatch(setBookingHotel(null));
+    setBookingFlight(null);
+    setBookingHotel(null);
     if (!event._id) return Alert.alert("Event ID is missing.");
 
     if (!event.dates?.timezone)
@@ -448,9 +438,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                   selected,
                   ...flight.offers.filter((item) => item.id !== selected.id),
                 ];
-                dispatch(
-                  setBookingFlight({ ...flight, offers: reorderedData }),
-                );
+
+                setBookingFlight({ ...flight, offers: reorderedData });
               }
             }}
           />
@@ -473,9 +462,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                     (item) => item.hotel?.hotelId !== selected.hotel?.hotelId,
                   ),
                 ];
-                dispatch(
-                  setBookingHotel({ ...rdHotel, offers: reorderedData }),
-                );
+                setBookingHotel({ ...rdHotel, offers: reorderedData });
               }
             }}
           />
