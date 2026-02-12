@@ -77,6 +77,7 @@ const CreateEventStep2Screen = () => {
         amount: Number(fee.value),
         currency: currency.value as string,
       },
+      attendees: [],
     };
 
     updateNewEvent(updates);
@@ -86,17 +87,17 @@ const CreateEventStep2Screen = () => {
 
   useEffect(() => {
     switch (currency.value) {
-      case "usd":
+      case "USD":
         setFee(USD_VALUES[0]);
         break;
-      case "eur":
+      case "EUR":
         setFee(EUR_VALUES[0]);
         break;
-      case "pln":
+      case "PLN":
         setFee(PLN_VALUES[0]);
         break;
       default:
-        break;
+        setFee(USD_VALUES[0]);
     }
   }, [currency]);
 
@@ -158,9 +159,9 @@ const CreateEventStep2Screen = () => {
             label="Entry fee"
             placeholder="Select your preferred currency"
             items={
-              currency.value === "usd"
+              currency.value === "USD"
                 ? USD_VALUES
-                : currency.value === "eur"
+                : currency.value === "EUR"
                   ? EUR_VALUES
                   : PLN_VALUES
             }

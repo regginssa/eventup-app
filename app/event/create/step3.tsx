@@ -142,6 +142,7 @@ const CreateEventStep3Screen = () => {
         },
         timezone: timezone || undefined,
       },
+      attendees: [],
     };
 
     try {

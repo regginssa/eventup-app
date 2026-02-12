@@ -75,6 +75,7 @@ const CreateEventStep1Screen = () => {
         venue: venueType.map((v) => v.value.toString()),
       },
       hoster: user?._id as any,
+      attendees: [],
     });
     router.push("/event/create/step2");
   };
