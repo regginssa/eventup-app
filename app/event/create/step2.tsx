@@ -6,6 +6,7 @@ import {
   RegionPicker,
 } from "@/components/common";
 import { CreateEventContainer } from "@/components/organisms";
+import { useEvent } from "@/components/providers/EventProvider";
 import { EVENT_ENTRY_TYPES } from "@/constants/events";
 import {
   CURRENCIES,
@@ -13,8 +14,6 @@ import {
   PLN_VALUES,
   USD_VALUES,
 } from "@/constants/values";
-import { RootState } from "@/store";
-import { setNewEvent } from "@/store/slices/event.slice";
 import { TCoordinate, TDropdownItem, TLocation } from "@/types";
 import { IEvent } from "@/types/event";
 import { RegionType } from "@/types/location.types";
@@ -22,14 +21,13 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Country } from "react-native-country-picker-modal";
-import { useDispatch, useSelector } from "react-redux";
 
 const CreateEventStep2Screen = () => {
   const [country, setCountry] = useState<Country | null>(null);
   const [region, setRegion] = useState<RegionType | null>(null);
   const [address, setAddress] = useState<TLocation | null>(null);
   const [entryType, setEntryType] = useState<TDropdownItem>(
-    EVENT_ENTRY_TYPES[0]
+    EVENT_ENTRY_TYPES[0],
   );
   const [currency, setCurrency] = useState<TDropdownItem>(CURRENCIES[0]);
   const [fee, setFee] = useState<TDropdownItem>(USD_VALUES[0]);
@@ -38,8 +36,7 @@ const CreateEventStep2Screen = () => {
   const [invalidAddress, setInvalidAddress] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { newEvent } = useSelector((state: RootState) => state.event);
-  const dispatch = useDispatch();
+  const { newEvent, updateNewEvent } = useEvent();
 
   const router = useRouter();
 
@@ -82,7 +79,7 @@ const CreateEventStep2Screen = () => {
       },
     };
 
-    dispatch(setNewEvent(updates));
+    updateNewEvent(updates);
 
     router.push("/event/create/step3");
   };
@@ -164,8 +161,8 @@ const CreateEventStep2Screen = () => {
               currency.value === "usd"
                 ? USD_VALUES
                 : currency.value === "eur"
-                ? EUR_VALUES
-                : PLN_VALUES
+                  ? EUR_VALUES
+                  : PLN_VALUES
             }
             className="rounded-md"
             direction="up"

@@ -1,8 +1,7 @@
-import { createEvent } from "@/api/services/event";
+import eventRestServices from "@/api/services/event";
 import { Button, DateTimePicker, TimezonePicker } from "@/components/common";
 import { CreateEventContainer } from "@/components/organisms";
-import { RootState } from "@/store";
-import { setNewEvent } from "@/store/slices/event.slice";
+import { useEvent } from "@/components/providers/EventProvider";
 import { IEvent } from "@/types/event";
 import { formatBookingDate, formatTime } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
@@ -19,7 +18,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 
 const CreateEventStep3Screen = () => {
   const [images, setImages] = useState<string[]>([]);
@@ -28,8 +26,7 @@ const CreateEventStep3Screen = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const router = useRouter();
-  const { newEvent } = useSelector((state: RootState) => state.event);
-  const dispatch = useDispatch();
+  const { newEvent, updateNewEvent } = useEvent();
 
   const handleGalleryPick = async () => {
     const permissionResult =
@@ -38,7 +35,7 @@ const CreateEventStep3Screen = () => {
     if (!permissionResult.granted) {
       Alert.alert(
         "Permission required",
-        "Permission to access the media library is required."
+        "Permission to access the media library is required.",
       );
       return;
     }
@@ -56,7 +53,7 @@ const CreateEventStep3Screen = () => {
         if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
           Alert.alert(
             "File too large",
-            `The file is larger than 5MB. Please select a smaller file.`
+            `The file is larger than 5MB. Please select a smaller file.`,
           );
           return false;
         }
@@ -76,7 +73,7 @@ const CreateEventStep3Screen = () => {
     if (!permissionResult.granted) {
       Alert.alert(
         "Permission required",
-        "Permission to access the camera is required."
+        "Permission to access the camera is required.",
       );
       return;
     }
@@ -96,7 +93,7 @@ const CreateEventStep3Screen = () => {
       if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
         Alert.alert(
           "File too large",
-          "The captured file is larger than 5MB. Please try again with lower quality settings."
+          "The captured file is larger than 5MB. Please try again with lower quality settings.",
         );
         return;
       }
@@ -150,17 +147,17 @@ const CreateEventStep3Screen = () => {
     try {
       setLoading(true);
 
-      const response = await createEvent(newEventData);
+      const response = await eventRestServices.create(newEventData);
 
       if (response.ok) {
-        dispatch(setNewEvent(response.data));
+        updateNewEvent(response.data);
         router.push("/event/create/step4");
       }
     } catch (error: any) {
       console.log("[create event] error", error.response.data);
       Alert.alert(
         "Error",
-        error.response.data.message || "Something went wrong"
+        error.response.data.message || "Something went wrong",
       );
     } finally {
       setLoading(false);

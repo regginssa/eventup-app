@@ -6,10 +6,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 interface EventDetailContainerProps {
   children: React.ReactNode;
+  callback?: string;
 }
 
 const EventDetailContainer: React.FC<EventDetailContainerProps> = ({
   children,
+  callback,
 }) => {
   const router = useRouter();
 
@@ -20,7 +22,9 @@ const EventDetailContainer: React.FC<EventDetailContainerProps> = ({
           <TouchableOpacity
             activeOpacity={0.8}
             className="w-10 h-10 rounded-full bg-white flex flex-col items-center justify-center"
-            onPress={() => router.back()}
+            onPress={() =>
+              callback ? router.replace(callback as any) : router.back()
+            }
           >
             <Feather name="arrow-left" size={16} color="#4b5563" />
           </TouchableOpacity>

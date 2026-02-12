@@ -1,4 +1,3 @@
-import { ITicket } from "./ticket";
 import { IUser } from "./user";
 
 type TM = {
@@ -68,11 +67,18 @@ export type TEventStatus =
   | "completed"
   | "cancelled";
 
-export type TAttendees = {
+export type TAttendessTicketStatus = "deposited" | "released" | "refunded";
+
+export type TAttendeesStatus = "approved" | "blocked";
+
+export interface TAttendees {
   user: IUser;
-  ticket?: ITicket;
-  status: "approved" | "blocked";
-};
+  ticket?: {
+    ticketId: string;
+    status: TAttendessTicketStatus;
+  };
+  status: TAttendeesStatus;
+}
 
 export interface IEvent {
   _id?: string;

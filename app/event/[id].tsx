@@ -1,5 +1,5 @@
 import { fetchBookingByUserIdAndEventId } from "@/api/services/booking";
-import { fetchEvent } from "@/api/services/event";
+import eventRestServices from "@/api/services/event";
 import { AttendeesCardGroup } from "@/components";
 import { Button, Spinner, Tabs } from "@/components/common";
 import {
@@ -22,7 +22,6 @@ import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import { useDispatch } from "react-redux";
 
 const userTabs: TDropdownItem[] = [
   { label: "Packages", value: "packages" },
@@ -50,7 +49,7 @@ const EventDetailScreen = () => {
   const [services, setServices] = useState<string[]>([]);
   const [ticket, setTicket] = useState<ITicket | null>(null);
 
-  const { id } = useLocalSearchParams();
+  const { id, callback } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
   const { setBookingFlight, setBookingHotel } = useBooking();
@@ -74,7 +73,7 @@ const EventDetailScreen = () => {
   const fetchEventData = async () => {
     if (!id || typeof id !== "string") return;
     try {
-      const response = await fetchEvent(id);
+      const response = await eventRestServices.fetchById(id);
 
       setEvent(response.data);
       return response.data;
@@ -169,7 +168,7 @@ const EventDetailScreen = () => {
   }, [user, event]);
 
   return (
-    <EventDetailContainer>
+    <EventDetailContainer callback={callback as any}>
       <View className="flex-1 gap-6">
         {loading ? (
           <Spinner size="md" />

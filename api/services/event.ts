@@ -2,14 +2,13 @@ import { ApiResponse, EventsFeedResponse } from "@/types/api";
 import { IEvent, TEventStatus } from "@/types/event";
 import AxiosInstance from "../client";
 import {
-  CREATE_EVENT,
+  EVENT_BASE,
   FETCH_ALL_EVENTS,
-  FETCH_EVENT,
   FETCH_EVENTS_BY_USER,
   FETCH_EVENTS_FEED,
 } from "../endpoints";
 
-export const fetchEventsFeed = async (
+const fetchFeed = async (
   userId: string,
   type: "ai" | "user",
   startDate?: Date,
@@ -33,16 +32,16 @@ export const fetchEventsFeed = async (
   );
 };
 
-export const fetchAllEvents = async (): Promise<ApiResponse<IEvent[]>> => {
+const fetchAll = async (): Promise<ApiResponse<IEvent[]>> => {
   return await AxiosInstance.get(FETCH_ALL_EVENTS);
 };
 
-export const fetchEvent = async (id: string): Promise<ApiResponse<IEvent>> => {
-  return await AxiosInstance.get(FETCH_EVENT + id);
+const fetchById = async (id: string): Promise<ApiResponse<IEvent>> => {
+  return await AxiosInstance.get(EVENT_BASE + id);
 };
 
 // Fetch events by user
-export const fetchEventsByUser = async (
+const fetchByUserId = async (
   userId: string,
   status: TEventStatus,
 ): Promise<ApiResponse<IEvent[]>> => {
@@ -52,8 +51,23 @@ export const fetchEventsByUser = async (
 };
 
 // Create event
-export const createEvent = async (
-  event: IEvent,
+const create = async (event: IEvent): Promise<ApiResponse<IEvent>> => {
+  return await AxiosInstance.post(EVENT_BASE, event);
+};
+
+// --- Update Event ---
+const update = async (
+  id: string,
+  bodyData: IEvent,
 ): Promise<ApiResponse<IEvent>> => {
-  return await AxiosInstance.post(CREATE_EVENT, event);
+  return await AxiosInstance.patch(EVENT_BASE + id, bodyData);
+};
+
+export default {
+  fetchAll,
+  fetchById,
+  fetchByUserId,
+  fetchFeed,
+  create,
+  update,
 };

@@ -10,9 +10,9 @@ import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
 import { CheckoutContainer } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useBooking } from "@/components/providers/BookingProvider";
 import { useTicket } from "@/components/providers/TicketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
-import { RootState } from "@/store";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
 import { TAmadeusFlightOrder, TAmadeusHotelOrder } from "@/types/amadeus";
 import {
@@ -35,7 +35,6 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Text, View } from "react-native";
-import { useSelector } from "react-redux";
 
 const EventDetail = ({
   event,
@@ -241,7 +240,7 @@ const PriceDetail = ({
 
 const CheckoutScreen = () => {
   const [event, setEvent] = useState<IEvent | undefined>(undefined);
-  const [ticket, setTicket] = useState<ITicket | null>(null);
+  const [userTicket, setUserTicket] = useState<ITicket | null>(null);
   const [eventLoading, setEventLoading] = useState<boolean>(false);
   const [basePrice, setBasePrice] = useState<number>(0);
   const [totalPrice, setTotalPrice] = useState<number>(0);
@@ -258,9 +257,8 @@ const CheckoutScreen = () => {
   const router = useRouter();
 
   const { user } = useAuth();
-  const { flight, hotel, transfer } = useSelector(
-    (state: RootState) => state.booking,
-  );
+  const { flight, hotel, transfer } = useBooking();
+
   const { tickets } = useTicket();
   const toast = useToast();
 
@@ -287,7 +285,7 @@ const CheckoutScreen = () => {
 
   useEffect(() => {
     if (!ticketId) return;
-    setTicket(tickets.find((t) => t._id === ticketId) || null);
+    setUserTicket(tickets.find((t) => t._id === ticketId) || null);
   }, [ticketId]);
 
   useEffect(() => {
@@ -300,11 +298,6 @@ const CheckoutScreen = () => {
   useEffect(() => {
     let base = 0;
     let services: string[] = [];
-
-    if (ticket) {
-      services.push("Ticket");
-      base += Number(ticket.price);
-    }
 
     if (flight?.offers) {
       services.push("Flight");
@@ -385,7 +378,7 @@ const CheckoutScreen = () => {
     return true;
   };
 
-  const book = async () => {
+  const bookServices = async () => {
     let flightOrder: TBookingFlight | undefined;
     let hotelOrder: TBookingHotel | undefined;
     let transferOrders: {
@@ -412,7 +405,7 @@ const CheckoutScreen = () => {
 
     if (!paymentResult) {
       setBookLabel("Book Now");
-      return Alert.alert("Error", "Failed to make payment.");
+      return toast.error("Failed to make payment.");
     }
 
     try {
@@ -487,13 +480,17 @@ const CheckoutScreen = () => {
     }
   };
 
+  const handleUserTicket = async () => {
+    if (!user?._id || !event?._id) return toast.error("Something went wrong");
+  };
+
   const handleBook = async (paymentMethod: TPaymentMethod) => {
     if (!user?._id || !eventId) return toast.error("Unauthorized");
 
     try {
       setBookLoading(true);
 
-      const basicBookingData = await book();
+      const basicBookingData = await bookServices();
 
       // Refund payment if failed to book (flight, hotel, transfers)
       if (!basicBookingData) {
@@ -521,18 +518,24 @@ const CheckoutScreen = () => {
         package: packageType as any,
       };
 
-      const response = await createBooking(bookingData);
+      const bookingRes = await createBooking(bookingData);
 
-      if (response.data) {
-        router.push({
-          pathname: "/booking/booked",
-          params: {
-            bookingId: response.data._id as string,
-            eventId,
-            packageType,
-          },
-        });
+      if (!bookingRes.data) {
+        toast.error("Saving booking error");
+        return setBookLoading(false);
       }
+
+      if (userTicket) {
+      }
+
+      router.push({
+        pathname: "/booking/booked",
+        params: {
+          bookingId: bookingRes.data._id as string,
+          eventId,
+          packageType,
+        },
+      });
     } catch (error: any) {
       console.error("handle book error: ", error);
       toast.error("Booking failed");

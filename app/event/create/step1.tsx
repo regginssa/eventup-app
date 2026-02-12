@@ -7,21 +7,19 @@ import {
 } from "@/components/common";
 import { CreateEventContainer } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useEvent } from "@/components/providers/EventProvider";
 import {
   EVENT_CATEGORIES,
   EVENT_SUB_CATEGORIES,
   EVENT_VENUE_TYPE,
   EVENT_VIBE,
 } from "@/constants/events";
-import { RootState } from "@/store";
-import { setNewEvent } from "@/store/slices/event.slice";
 import { TDropdownItem } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
 
 const CreateEventStep1Screen = () => {
   const [title, setTitle] = useState<string>("");
@@ -36,8 +34,7 @@ const CreateEventStep1Screen = () => {
   const [invalidDetail, setInvalidDetail] = useState<boolean>(false);
 
   const { user } = useAuth();
-  const { newEvent } = useSelector((state: RootState) => state.event);
-  const dispatch = useDispatch();
+  const { newEvent, updateNewEvent } = useEvent();
 
   const router = useRouter();
 
@@ -67,20 +64,18 @@ const CreateEventStep1Screen = () => {
       router.replace("/start");
     }
 
-    dispatch(
-      setNewEvent({
-        name: title,
-        description: detail,
-        type: "user",
-        classifications: {
-          category: category?.value.toString() || undefined,
-          subcategories: subcategories.map((s) => s.value.toString()),
-          vibe: vibe.map((v) => v.value.toString()),
-          venue: venueType.map((v) => v.value.toString()),
-        },
-        hoster: user?._id as any,
-      }),
-    );
+    updateNewEvent({
+      name: title,
+      description: detail,
+      type: "user",
+      classifications: {
+        category: category?.value.toString() || undefined,
+        subcategories: subcategories.map((s) => s.value.toString()),
+        vibe: vibe.map((v) => v.value.toString()),
+        venue: venueType.map((v) => v.value.toString()),
+      },
+      hoster: user?._id as any,
+    });
     router.push("/event/create/step2");
   };
 

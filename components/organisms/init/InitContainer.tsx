@@ -1,6 +1,7 @@
 import {
   BookingProvider,
   ConversationProvider,
+  EventProvider,
   MessageProvider,
   SocketProvider,
   ThemeProvider,
@@ -35,20 +36,22 @@ const InitContainer: React.FC<InitContainerProps> = ({ children }) => {
       <AuthProvider>
         <TicketProvider>
           <SocketProvider>
-            <BookingProvider>
-              <ConversationProvider>
-                <MessageProvider>
-                  <ThemeProvider>
-                    <KeyboardAvoidingView
-                      behavior={Platform.OS === "ios" ? "padding" : undefined}
-                      style={{ flex: 1 }}
-                    >
-                      <ToastProvider>{children}</ToastProvider>
-                    </KeyboardAvoidingView>
-                  </ThemeProvider>
-                </MessageProvider>
-              </ConversationProvider>
-            </BookingProvider>
+            <EventProvider>
+              <BookingProvider>
+                <ConversationProvider>
+                  <MessageProvider>
+                    <ThemeProvider>
+                      <KeyboardAvoidingView
+                        behavior={Platform.OS === "ios" ? "padding" : undefined}
+                        style={{ flex: 1 }}
+                      >
+                        <ToastProvider>{children}</ToastProvider>
+                      </KeyboardAvoidingView>
+                    </ThemeProvider>
+                  </MessageProvider>
+                </ConversationProvider>
+              </BookingProvider>
+            </EventProvider>
           </SocketProvider>
         </TicketProvider>
       </AuthProvider>

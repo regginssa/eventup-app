@@ -1,4 +1,4 @@
-import { fetchEventsFeed } from "@/api/services/event";
+import eventRestServices from "@/api/services/event";
 import { Input, Tabs } from "@/components/common";
 import { EventFilterModal, EventsPreviewGroup } from "@/components/molecules";
 import { HomeContainer } from "@/components/organisms";
@@ -68,7 +68,7 @@ const HomeScreen = () => {
     try {
       setLoading(true);
 
-      const response = await fetchEventsFeed(
+      const response = await eventRestServices.fetchFeed(
         user?._id ?? "",
         selectedTab.value as any,
         startDate as any,
@@ -98,7 +98,7 @@ const HomeScreen = () => {
     try {
       setLoading(true);
 
-      const response = await fetchEventsFeed(
+      const response = await eventRestServices.fetchFeed(
         user?._id ?? "",
         selectedTab.value as any,
         startDate as any,
@@ -130,7 +130,7 @@ const HomeScreen = () => {
         hasMore: true,
       });
 
-      const response = await fetchEventsFeed(
+      const response = await eventRestServices.fetchFeed(
         user?._id ?? "",
         selectedTab.value as any,
         startDate as any,
@@ -166,7 +166,7 @@ const HomeScreen = () => {
     try {
       setLoading(true);
 
-      const response = await fetchEventsFeed(
+      const response = await eventRestServices.fetchFeed(
         user?._id ?? "",
         selectedTab.value as any,
         startDate as any,
