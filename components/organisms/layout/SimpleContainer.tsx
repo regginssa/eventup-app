@@ -7,12 +7,14 @@ import MainContainer from "./MainContainer";
 interface SimpleContainerProps {
   children: React.ReactNode;
   title: string;
+  scrolled?: boolean;
   backRoute?: string;
 }
 
 const SimpleContainer: React.FC<SimpleContainerProps> = ({
   children,
   title,
+  scrolled,
   backRoute,
 }) => {
   const router = useRouter();
@@ -36,9 +38,13 @@ const SimpleContainer: React.FC<SimpleContainerProps> = ({
           <View className="w-10"></View>
         </View>
 
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          {children}
-        </ScrollView>
+        {scrolled ? (
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            {children}
+          </ScrollView>
+        ) : (
+          <View className="flex-1">{children}</View>
+        )}
       </SafeAreaView>
     </MainContainer>
   );

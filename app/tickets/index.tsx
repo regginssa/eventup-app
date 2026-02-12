@@ -27,7 +27,7 @@ const TicketsScreen = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { amount, currency, from } = useLocalSearchParams();
+  const { amount, currency, from, callback } = useLocalSearchParams();
   const router = useRouter();
 
   const { tickets } = useTicket();
@@ -119,7 +119,7 @@ const TicketsScreen = () => {
   };
 
   return (
-    <SimpleContainer>
+    <SimpleContainer title="Tickets" backRoute={(callback as any) || undefined}>
       <View className="relative w-full h-[275px] overflow-hidden">
         <Image
           source={bannerImage}

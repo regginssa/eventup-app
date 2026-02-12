@@ -40,7 +40,12 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const token = await AsyncStorage.getItem("Authorization");
 
         if (!token) {
-          if (pathname !== "/start") router.replace("/start");
+          if (
+            pathname !== "/start" &&
+            pathname !== "/auth/login" &&
+            pathname !== "/auth/register"
+          )
+            router.replace("/start");
           setAuthChecked(true);
           return;
         }

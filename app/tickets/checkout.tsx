@@ -1,6 +1,6 @@
+import { getMe } from "@/api/services/auth";
 import { createStripePaymentIntent } from "@/api/services/stripe";
 import { fetchTicketById } from "@/api/services/ticket";
-import { fetchUser } from "@/api/services/user";
 import { Button, PaymentMethodGroup } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -249,7 +249,7 @@ const TicketsCheckout = () => {
           const interval = setInterval(async () => {
             elapsed += intervalTime;
 
-            const response = await fetchUser(user?._id as string);
+            const response = await getMe();
 
             if (response.data.tickets.length > user?.tickets.length) {
               setAuthUser(response.data);
@@ -281,7 +281,7 @@ const TicketsCheckout = () => {
   };
 
   return (
-    <SimpleContainer>
+    <SimpleContainer title="Checkout">
       <View className="flex-1 gap-6">
         <Header ticket={ticket} loading={loading} />
 

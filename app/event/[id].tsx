@@ -34,6 +34,12 @@ const ownerTabs: TDropdownItem[] = [
   { label: "Overview", value: "overview" },
 ];
 
+const attendeesTabs: TDropdownItem[] = [
+  { label: "Attendees", value: "attendees" },
+  { label: "Overview", value: "overview" },
+  { label: "Itinerary", value: "itinerary" },
+];
+
 const EventDetailScreen = () => {
   const [tabs, setTabs] = useState<TDropdownItem[]>([]);
   const [event, setEvent] = useState<IEvent | undefined>(undefined);
@@ -133,14 +139,16 @@ const EventDetailScreen = () => {
 
     if (fetchedEvent?.type === "user") {
       setLoading(false);
-      if (
-        fetchedEvent.hoster?._id === user?._id ||
+      if (fetchedEvent.hoster?._id === user?._id) {
+        setTabs(ownerTabs);
+        setSelectedTab(ownerTabs[0]);
+        return;
+      } else if (
         fetchedEvent.attendees?.some((a) => a.user._id === user?._id)
       ) {
-        setTabs(ownerTabs);
+        setTabs(attendeesTabs);
+        setSelectedTab(attendeesTabs[0]);
       }
-      setSelectedTab(ownerTabs[0]);
-      return;
     }
     await fetchBookingData();
     await fetchUserCurrentLocation();

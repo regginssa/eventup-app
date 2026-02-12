@@ -1,4 +1,4 @@
-import eventRestServices from "@/api/services/event";
+import eventServices from "@/api/services/event";
 import { Input, Tabs } from "@/components/common";
 import { EventFilterModal, EventsPreviewGroup } from "@/components/molecules";
 import { LayoutContainer } from "@/components/organisms/layout";
@@ -68,7 +68,7 @@ const HomeScreen = () => {
     try {
       setLoading(true);
 
-      const response = await eventRestServices.fetchFeed(
+      const response = await eventServices.getFeed(
         user?._id ?? "",
         selectedTab.value as any,
         startDate as any,
@@ -98,7 +98,7 @@ const HomeScreen = () => {
     try {
       setLoading(true);
 
-      const response = await eventRestServices.fetchFeed(
+      const response = await eventServices.getFeed(
         user?._id ?? "",
         selectedTab.value as any,
         startDate as any,
@@ -130,7 +130,7 @@ const HomeScreen = () => {
         hasMore: true,
       });
 
-      const response = await eventRestServices.fetchFeed(
+      const response = await eventServices.getFeed(
         user?._id ?? "",
         selectedTab.value as any,
         startDate as any,
@@ -166,7 +166,7 @@ const HomeScreen = () => {
     try {
       setLoading(true);
 
-      const response = await eventRestServices.fetchFeed(
+      const response = await eventServices.getFeed(
         user?._id ?? "",
         selectedTab.value as any,
         startDate as any,

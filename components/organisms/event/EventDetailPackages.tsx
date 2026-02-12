@@ -286,7 +286,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
                 activeOpacity={0.8}
                 className="flex flex-row items-center gap-1"
                 onPress={() =>
-                  router.replace({
+                  router.push({
                     pathname: "/tickets",
                     params: {
                       amount: event.fee?.amount,
