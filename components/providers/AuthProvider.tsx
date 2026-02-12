@@ -83,6 +83,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await getMe();
       if (!response.data) return;
 
+      console.log("[me]: ", response.data);
+
       setUser(response.data);
     };
 

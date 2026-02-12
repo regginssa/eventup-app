@@ -14,7 +14,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useBooking } from "@/components/providers/BookingProvider";
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
-import { EventDates, IEvent } from "@/types/event";
+import { EventDates, IEvent, TAttendees } from "@/types/event";
 import { ITicket } from "@/types/ticket";
 import { formatEventLabel } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -34,12 +34,6 @@ const ownerTabs: TDropdownItem[] = [
   { label: "Overview", value: "overview" },
 ];
 
-const attendeesTabs: TDropdownItem[] = [
-  { label: "Attendees", value: "attendees" },
-  { label: "Overview", value: "overview" },
-  { label: "Itinerary", value: "itinerary" },
-];
-
 const EventDetailScreen = () => {
   const [tabs, setTabs] = useState<TDropdownItem[]>([]);
   const [event, setEvent] = useState<IEvent | undefined>(undefined);
@@ -54,6 +48,7 @@ const EventDetailScreen = () => {
   const [booking, setBooking] = useState<IBooking | null>(null);
   const [services, setServices] = useState<string[]>([]);
   const [ticket, setTicket] = useState<ITicket | null>(null);
+  const [attendees, setAttendees] = useState<TAttendees | null>(null);
 
   const { id, callback } = useLocalSearchParams();
   const router = useRouter();
@@ -137,19 +132,19 @@ const EventDetailScreen = () => {
     setLoading(true);
     const fetchedEvent = await fetchEventData();
 
-    if (fetchedEvent?.type === "user") {
+    if (
+      fetchedEvent?.type === "user" &&
+      fetchedEvent.hoster?._id === user?._id
+    ) {
       setLoading(false);
-      if (fetchedEvent.hoster?._id === user?._id) {
-        setTabs(ownerTabs);
-        setSelectedTab(ownerTabs[0]);
-        return;
-      } else if (
-        fetchedEvent.attendees?.some((a) => a.user._id === user?._id)
-      ) {
-        setTabs(attendeesTabs);
-        setSelectedTab(attendeesTabs[0]);
-      }
+      setTabs(ownerTabs);
+      setSelectedTab(ownerTabs[0]);
+      return;
     }
+
+    const att = fetchedEvent?.attendees.find((a) => a.user._id === user?._id);
+    setAttendees(att || null);
+
     await fetchBookingData();
     await fetchUserCurrentLocation();
     setTabs(userTabs);
@@ -176,6 +171,16 @@ const EventDetailScreen = () => {
       setTicket(ticket || null);
     }
   }, [user, event]);
+
+  useEffect(() => {
+    if (
+      attendees &&
+      attendees.ticket &&
+      attendees.ticket.status !== "refunded"
+    ) {
+      setServices([...services, "Ticket"]);
+    }
+  }, [attendees]);
 
   return (
     <EventDetailContainer callback={callback as any}>

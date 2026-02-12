@@ -5,7 +5,7 @@ import {
 } from "@/components/molecules";
 import { useBooking } from "@/components/providers/BookingProvider";
 import { TCoordinate } from "@/types";
-import { IEvent, TEventFee } from "@/types/event";
+import { IEvent, TAttendees, TEventFee } from "@/types/event";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -29,6 +29,7 @@ interface EventDetailPackagesProps {
   totalPrice: number;
   fee?: TEventFee;
   ticket: ITicket | null;
+  attendees?: TAttendees;
 }
 
 const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
@@ -41,6 +42,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   totalPrice,
   fee,
   ticket,
+  attendees,
 }) => {
   const [eventPackage, setEventPackage] = useState<"standard" | "gold">(
     "standard",
@@ -165,7 +167,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
               <ScrollView contentContainerStyle={{ flexGrow: 1, gap: 4 }}>
                 {standardItems.map((item, index) => (
                   <View
-                    key={index}
+                    key={`standard-package-item-${index}`}
                     className="w-full flex flex-row items-start gap-1"
                   >
                     <MaterialCommunityIcons

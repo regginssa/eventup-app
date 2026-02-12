@@ -6,6 +6,7 @@ import {
 } from "@/api/services/booking";
 import eventServices from "@/api/services/event";
 import { createStripePaymentIntent } from "@/api/services/stripe";
+import userServices from "@/api/services/user";
 import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
 import { SimpleContainer } from "@/components/organisms/layout";
@@ -23,6 +24,7 @@ import {
 } from "@/types/booking";
 import { IEvent } from "@/types/event";
 import { ITicket } from "@/types/ticket";
+import { IUser } from "@/types/user";
 import { formatDateTime, formatName, getCurrencySymbol } from "@/utils/format";
 import {
   mapAmadeusFlightOrderToBookingFlightData,
@@ -87,7 +89,7 @@ const EventDetail = ({
                 style={{ width: 100, height: 100, borderRadius: 6 }}
               />
             )}
-            <View className="gap-4 flex-1">
+            <View className="gap-2 flex-1">
               <Text className="font-poppins-semibold text-gray-700 line-clamp-2">
                 {event.name as string}
               </Text>
@@ -256,7 +258,7 @@ const CheckoutScreen = () => {
   const { eventId, packageType, ticketId } = useLocalSearchParams();
   const router = useRouter();
 
-  const { user } = useAuth();
+  const { user, setAuthUser } = useAuth();
   const { flight, hotel, transfer } = useBooking();
 
   const { tickets } = useTicket();
@@ -480,20 +482,51 @@ const CheckoutScreen = () => {
     }
   };
 
-  const handleUserTicket = async () => {
-    if (!user?._id || !event?._id) return toast.error("Something went wrong");
+  const removeOneTicket = (tickets: ITicket[], ticketId: string) => {
+    const index = tickets.findIndex((t) => t._id === ticketId);
+    if (index === -1) return tickets;
+    const updated = [...tickets];
+    updated.splice(index, 1);
 
-    const updates: IEvent = {
+    return updated;
+  };
+
+  const handleUserTicket = async (): Promise<boolean> => {
+    if (!userTicket) return false;
+    if (!user?._id || !event?._id || !event.hoster?._id) return false;
+
+    // Remove user ticket
+    const userBodyData: IUser = {
+      ...user,
+      tickets: removeOneTicket(user.tickets, userTicket?._id as string),
+    };
+
+    const meRes = await userServices.update(user._id, userBodyData);
+    if (meRes.data) {
+      setAuthUser(meRes.data);
+      return false;
+    }
+
+    // Add attendees to the event
+    const eventBodyData: IEvent = {
       ...event,
       attendees: [
         ...event.attendees,
         {
           user: user._id as any,
-          ticket: userTicket?._id as any,
+          ticket: {
+            ticketId: userTicket._id as string,
+            status: "deposited",
+          },
           status: "approved",
         },
       ],
     };
+
+    const eventRes = await eventServices.update(event._id, eventBodyData);
+    if (!eventRes.data) return false;
+
+    return true;
   };
 
   const handleBook = async (paymentMethod: TPaymentMethod) => {
@@ -507,10 +540,23 @@ const CheckoutScreen = () => {
       // Refund payment if failed to book (flight, hotel, transfers)
       if (!basicBookingData) {
         setBookLabel("Book Now");
-        return toast.error("Failed to book.");
+        toast.error("Failed to book.");
+        return setBookLoading(false);
       }
 
       setBookLabel("Creating Booking...");
+
+      let ticketTransferResult = false;
+
+      if (event?.type === "user" && userTicket) {
+        ticketTransferResult = await handleUserTicket();
+      }
+
+      if (!ticketTransferResult) {
+        toast.error("Transfer ticket error");
+        setBookLabel("Book Now");
+        return setBookLoading(false);
+      }
 
       const bookingData: IBooking = {
         flight: basicBookingData.flightOrder as any,
@@ -534,10 +580,8 @@ const CheckoutScreen = () => {
 
       if (!bookingRes.data) {
         toast.error("Saving booking error");
+        setBookLabel("Book Now");
         return setBookLoading(false);
-      }
-
-      if (userTicket) {
       }
 
       router.push({
@@ -546,10 +590,11 @@ const CheckoutScreen = () => {
           bookingId: bookingRes.data._id as string,
           eventId,
           packageType,
+          ticketId: userTicket?._id,
         },
       });
     } catch (error: any) {
-      console.error("handle book error: ", error);
+      console.log("handle book error: ", error);
       toast.error("Booking failed");
     } finally {
       setBookLabel("Book Now");

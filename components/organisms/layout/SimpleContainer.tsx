@@ -39,11 +39,11 @@ const SimpleContainer: React.FC<SimpleContainerProps> = ({
         </View>
 
         {scrolled ? (
-          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, gap: 24 }}>
             {children}
           </ScrollView>
         ) : (
-          <View className="flex-1">{children}</View>
+          <View className="flex-1 gap-6">{children}</View>
         )}
       </SafeAreaView>
     </MainContainer>
