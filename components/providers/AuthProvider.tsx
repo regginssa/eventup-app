@@ -1,8 +1,9 @@
+import { getMe } from "@/api/services/auth";
 import { IUser } from "@/types/user";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { usePathname, useRouter } from "expo-router";
 import { jwtDecode } from "jwt-decode";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextProps {
   isAuthenticated: boolean;
@@ -28,33 +29,76 @@ interface AuthProviderProps {
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<IUser | null>(null);
-  const hasRun = useRef(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (hasRun.current) return;
-    hasRun.current = true;
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem("Authorization");
 
-    const checkAuthenticate = async () => {
-      const token = await AsyncStorage.getItem("Authorization");
+        if (!token) {
+          if (pathname !== "/start") router.replace("/start");
+          setAuthChecked(true);
+          return;
+        }
 
-      if (token) {
         const decoded = jwtDecode(token) as any;
         const now = Date.now() / 1000;
 
         if (!decoded.exp || decoded.exp < now) {
           await AsyncStorage.removeItem("Authorization");
-          router.replace("/start");
+          if (pathname !== "/start") router.replace("/start");
+          setAuthChecked(true);
+          return;
         }
-      } else {
-        router.replace("/start");
+
+        // Token valid
+        setAuthChecked(true);
+      } catch (err) {
+        await AsyncStorage.removeItem("Authorization");
+        if (pathname !== "/start") router.replace("/start");
+        setAuthChecked(true);
       }
     };
 
-    checkAuthenticate();
+    checkAuth();
   }, [pathname]);
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      if (!authChecked) return;
+      if (user) return;
+
+      const token = await AsyncStorage.getItem("Authorization");
+      if (!token) return;
+
+      const response = await getMe();
+      if (!response.data) return;
+
+      setUser(response.data);
+    };
+
+    fetchMe();
+  }, [authChecked]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    if (user.blocked) {
+      router.replace("/auth/login");
+    } else if (!user.location?.country?.name) {
+      router.replace("/auth/onboarding/step1");
+    } else if (!user.title) {
+      router.replace("/auth/onboarding/step2");
+    } else if (!user.preferred?.category) {
+      router.replace("/auth/onboarding/step4");
+    } else {
+      router.replace("/home");
+    }
+  }, [user]);
 
   return (
     <AuthContext.Provider

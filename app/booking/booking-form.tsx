@@ -1,4 +1,4 @@
-import { fetchEvent } from "@/api/services/event";
+import eventServices from "@/api/services/event";
 import {
   Button,
   CountryPicker,
@@ -494,7 +494,7 @@ const BookingScreen = () => {
     try {
       setLoading(true);
 
-      const response = await fetchEvent(eventId);
+      const response = await eventServices.get(eventId);
 
       setEvent(response.data);
     } catch (error: any) {

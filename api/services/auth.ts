@@ -1,8 +1,10 @@
 import { ApiResponse, AuthResponse } from "@/types/api";
+import { IUser } from "@/types/user";
 import AxiosInstance from "../client";
 import {
   EMAIL_LOGIN,
   EMAIL_REGISTER,
+  GET_ME,
   GOOGLE_LOGIN,
   GOOGLE_REGISTER,
 } from "../endpoints";
@@ -41,4 +43,8 @@ export const emailRegister = async (
   password: string,
 ): Promise<ApiResponse<AuthResponse>> => {
   return await AxiosInstance.post(EMAIL_REGISTER, { name, email, password });
+};
+
+export const getMe = async (): Promise<ApiResponse<IUser>> => {
+  return await AxiosInstance.get(GET_ME);
 };

@@ -8,7 +8,7 @@ import {
   FETCH_EVENTS_FEED,
 } from "../endpoints";
 
-const fetchFeed = async (
+const getFeed = async (
   userId: string,
   type: "ai" | "user",
   startDate?: Date,
@@ -32,16 +32,16 @@ const fetchFeed = async (
   );
 };
 
-const fetchAll = async (): Promise<ApiResponse<IEvent[]>> => {
+const getAll = async (): Promise<ApiResponse<IEvent[]>> => {
   return await AxiosInstance.get(FETCH_ALL_EVENTS);
 };
 
-const fetchById = async (id: string): Promise<ApiResponse<IEvent>> => {
+const get = async (id: string): Promise<ApiResponse<IEvent>> => {
   return await AxiosInstance.get(EVENT_BASE + id);
 };
 
 // Fetch events by user
-const fetchByUserId = async (
+const getByUserId = async (
   userId: string,
   status: TEventStatus,
 ): Promise<ApiResponse<IEvent[]>> => {
@@ -64,10 +64,10 @@ const update = async (
 };
 
 export default {
-  fetchAll,
-  fetchById,
-  fetchByUserId,
-  fetchFeed,
+  get,
+  getAll,
+  getFeed,
+  getByUserId,
   create,
   update,
 };

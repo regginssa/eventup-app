@@ -94,5 +94,5 @@ export interface IEvent {
   fee?: TEventFee;
   hoster?: IUser;
   status?: TEventStatus;
-  attendees?: TAttendees[];
+  attendees: TAttendees[];
 }

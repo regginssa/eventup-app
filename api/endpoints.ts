@@ -1,8 +1,10 @@
 // Auth apis
+export const AUTH_BASE = "/auth/";
 export const GOOGLE_LOGIN = "/auth/login-google";
 export const GOOGLE_REGISTER = "/auth/register-google";
 export const EMAIL_LOGIN = "/auth/login-email";
 export const EMAIL_REGISTER = "/auth/register-email";
+export const GET_ME = "/auth/me";
 
 // User apis
 export const FETCH_USER = "/user/";

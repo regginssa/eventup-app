@@ -4,7 +4,7 @@ import {
   createHotelOrder,
   createTransferOrder,
 } from "@/api/services/booking";
-import eventRestServices from "@/api/services/event";
+import eventServices from "@/api/services/event";
 import { createStripePaymentIntent } from "@/api/services/stripe";
 import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
@@ -268,7 +268,7 @@ const CheckoutScreen = () => {
     try {
       setEventLoading(true);
 
-      const response = await eventRestServices.fetchById(eventId);
+      const response = await eventServices.get(eventId);
 
       setEvent(response.data);
     } catch (error: any) {
@@ -482,6 +482,18 @@ const CheckoutScreen = () => {
 
   const handleUserTicket = async () => {
     if (!user?._id || !event?._id) return toast.error("Something went wrong");
+
+    const updates: IEvent = {
+      ...event,
+      attendees: [
+        ...event.attendees,
+        {
+          user: user._id as any,
+          ticket: userTicket?._id as any,
+          status: "approved",
+        },
+      ],
+    };
   };
 
   const handleBook = async (paymentMethod: TPaymentMethod) => {

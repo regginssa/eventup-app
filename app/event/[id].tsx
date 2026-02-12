@@ -1,5 +1,5 @@
 import { fetchBookingByUserIdAndEventId } from "@/api/services/booking";
-import eventRestServices from "@/api/services/event";
+import eventServices from "@/api/services/event";
 import { AttendeesCardGroup } from "@/components";
 import { Button, Spinner, Tabs } from "@/components/common";
 import {
@@ -73,7 +73,7 @@ const EventDetailScreen = () => {
   const fetchEventData = async () => {
     if (!id || typeof id !== "string") return;
     try {
-      const response = await eventRestServices.fetchById(id);
+      const response = await eventServices.get(id);
 
       setEvent(response.data);
       return response.data;

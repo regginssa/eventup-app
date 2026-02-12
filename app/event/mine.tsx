@@ -1,5 +1,5 @@
 import { fetchAllBookings } from "@/api/services/booking";
-import { fetchEventsByUser } from "@/api/services/event";
+import eventServices from "@/api/services/event";
 import { Tabs } from "@/components/common";
 import { EventsPreviewGroup } from "@/components/molecules";
 import { MyEventsScreenContainer } from "@/components/organisms";
@@ -72,7 +72,7 @@ const MyEventsScreen = () => {
             setEvents(events);
           }
         } else {
-          const response = await fetchEventsByUser(
+          const response = await eventServices.getByUserId(
             user._id,
             selectedTab.value as TEventStatus,
           );
