@@ -131,12 +131,14 @@ const EventDetailScreen = () => {
     setLoading(true);
     const fetchedEvent = await fetchEventData();
 
-    if (
-      fetchedEvent?.type === "user" &&
-      fetchedEvent.hoster?._id === user?._id
-    ) {
+    if (fetchedEvent?.type === "user") {
       setLoading(false);
-      setTabs(ownerTabs);
+      if (
+        fetchedEvent.hoster?._id === user?._id ||
+        fetchedEvent.attendees?.some((a) => a.user._id === user?._id)
+      ) {
+        setTabs(ownerTabs);
+      }
       setSelectedTab(ownerTabs[0]);
       return;
     }

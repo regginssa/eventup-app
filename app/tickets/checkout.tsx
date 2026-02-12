@@ -1,7 +1,8 @@
 import { createStripePaymentIntent } from "@/api/services/stripe";
 import { fetchTicketById } from "@/api/services/ticket";
 import { fetchUser } from "@/api/services/user";
-import { Button, CheckoutContainer, PaymentMethodGroup } from "@/components";
+import { Button, PaymentMethodGroup } from "@/components";
+import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { TPaymentMethod } from "@/types";
 import { IStripePayload } from "@/types/stripe";
@@ -280,27 +281,29 @@ const TicketsCheckout = () => {
   };
 
   return (
-    <CheckoutContainer>
-      <Header ticket={ticket} loading={loading} />
+    <SimpleContainer>
+      <View className="flex-1 gap-6">
+        <Header ticket={ticket} loading={loading} />
 
-      <Detail ticket={ticket} loading={loading} />
+        <Detail ticket={ticket} loading={loading} />
 
-      <PaymentMethodGroup
-        method={method}
-        stripePaymentMethodId={stripePaymentMethodId}
-        onSelectMethod={setMethod}
-        onSelectStripePaymentMethod={setStripePaymentMethodId}
-      />
+        <PaymentMethodGroup
+          method={method}
+          stripePaymentMethodId={stripePaymentMethodId}
+          onSelectMethod={setMethod}
+          onSelectStripePaymentMethod={setStripePaymentMethodId}
+        />
 
-      <Button
-        type="primary"
-        label={btnLabel}
-        buttonClassName="h-12"
-        disabled={loading || stripePaymentMethodId === ""}
-        loading={purchaseLoading}
-        onPress={handlePurchase}
-      />
-    </CheckoutContainer>
+        <Button
+          type="primary"
+          label={btnLabel}
+          buttonClassName="h-12"
+          disabled={loading || stripePaymentMethodId === ""}
+          loading={purchaseLoading}
+          onPress={handlePurchase}
+        />
+      </View>
+    </SimpleContainer>
   );
 };
 

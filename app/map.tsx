@@ -1,7 +1,7 @@
-import { fetchAllEvents } from "@/api/services/event";
+import eventRestServices from "@/api/services/event";
 import { Modal } from "@/components/common";
 import { MapMarker } from "@/components/molecules";
-import { MapContainer } from "@/components/organisms";
+import { LayoutContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { COLORFUL_MAP_STYLE } from "@/constants/themes";
 import { IEvent } from "@/types/event";
@@ -50,7 +50,7 @@ const MapScreen = () => {
     try {
       setLoading(true);
 
-      const response = await fetchAllEvents();
+      const response = await eventRestServices.fetchAll();
 
       if (response.ok) {
         setEvents(response.data);
@@ -66,7 +66,7 @@ const MapScreen = () => {
   }, []);
 
   return (
-    <MapContainer>
+    <LayoutContainer title="Map">
       <View className="flex flex-row items-center gap-2">
         <MaterialIcons name="event-available" size={24} color="#374151" />
         <Text className="font-poppins-semibold text-sm text-gray-700">
@@ -213,7 +213,7 @@ const MapScreen = () => {
           </View>
         </View>
       </Modal>
-    </MapContainer>
+    </LayoutContainer>
   );
 };
 

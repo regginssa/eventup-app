@@ -1,4 +1,5 @@
-import { Button, Modal, Spinner, TicketsContainer } from "@/components";
+import { Button, Modal, Spinner } from "@/components";
+import { SimpleContainer } from "@/components/organisms/layout";
 import { useTicket } from "@/components/providers/TicketProvider";
 import { ITicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
@@ -118,7 +119,7 @@ const TicketsScreen = () => {
   };
 
   return (
-    <TicketsContainer>
+    <SimpleContainer>
       <View className="relative w-full h-[275px] overflow-hidden">
         <Image
           source={bannerImage}
@@ -254,7 +255,7 @@ const TicketsScreen = () => {
           </View>
         )}
       </Modal>
-    </TicketsContainer>
+    </SimpleContainer>
   );
 };
 

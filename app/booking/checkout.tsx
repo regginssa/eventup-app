@@ -8,7 +8,7 @@ import eventRestServices from "@/api/services/event";
 import { createStripePaymentIntent } from "@/api/services/stripe";
 import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
-import { CheckoutContainer } from "@/components/organisms";
+import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useBooking } from "@/components/providers/BookingProvider";
 import { useTicket } from "@/components/providers/TicketProvider";
@@ -546,7 +546,7 @@ const CheckoutScreen = () => {
   };
 
   return (
-    <CheckoutContainer>
+    <SimpleContainer title="Checkout">
       <EventDetail
         event={event}
         loading={eventLoading}
@@ -574,7 +574,7 @@ const CheckoutScreen = () => {
         loading={bookLoading}
         onPress={() => handleBook(paymentMethod)}
       />
-    </CheckoutContainer>
+    </SimpleContainer>
   );
 };
 

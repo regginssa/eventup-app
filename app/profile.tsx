@@ -1,10 +1,7 @@
 import { fetchUser } from "@/api/services/user";
 import { Spinner } from "@/components/common";
-import {
-  ProfileContainer,
-  ProfileHeader,
-  ProfileReviews,
-} from "@/components/organisms";
+import { ProfileHeader, ProfileReviews } from "@/components/organisms";
+import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { IReview } from "@/types/review";
 import { IUser } from "@/types/user";
@@ -82,9 +79,9 @@ const ProfileScreen = () => {
   };
 
   return (
-    <ProfileContainer title={user?.name || "Profile"}>
+    <SimpleContainer title={user?.name || "Profile"}>
       {renderContent()}
-    </ProfileContainer>
+    </SimpleContainer>
   );
 };
 

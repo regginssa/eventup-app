@@ -1,7 +1,7 @@
 import eventRestServices from "@/api/services/event";
 import { Input, Tabs } from "@/components/common";
 import { EventFilterModal, EventsPreviewGroup } from "@/components/molecules";
-import { HomeContainer } from "@/components/organisms";
+import { LayoutContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { TDropdownItem, TPagination } from "@/types";
 import { IEvent } from "@/types/event";
@@ -203,7 +203,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <HomeContainer>
+    <LayoutContainer title="Events">
       <View className="w-full gap-5">
         <View className="w-full flex flex-row items-center gap-3">
           <View className="flex-1">
@@ -398,7 +398,7 @@ const HomeScreen = () => {
         onApply={handleFilterApply}
         onReset={handleFilterReset}
       />
-    </HomeContainer>
+    </LayoutContainer>
   );
 };
 
