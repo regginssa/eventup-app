@@ -1,11 +1,10 @@
-import { RootState } from "@/store";
 import { TAmadeusTransferOffer } from "@/types/amadeus";
 import { formatDateTime, formatTime, getCurrencySymbol } from "@/utils/format";
 import { mapAmadeusTransferOfferToTransferItemData } from "@/utils/map";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useSelector } from "react-redux";
+import { useBooking } from "../providers/BookingProvider";
 
 // TTransferItemData - essential fields from Amadeus Transfer Offer
 export type TTransferItemData = {
@@ -84,7 +83,7 @@ const TransferItem: React.FC<TransferItemProps> = ({
     rating,
   } = mapAmadeusTransferOfferToTransferItemData(data);
 
-  const { travelers } = useSelector((state: RootState) => state.booking);
+  const { travelers } = useBooking();
 
   const handleSelect = () => {
     if (onSelect) {
@@ -310,7 +309,7 @@ const TransferItem: React.FC<TransferItemProps> = ({
           <Text className="font-poppins-bold text-gray-600 text-xl">
             <Text className="text-base">
               {getCurrencySymbol(
-                (price.currency.toLowerCase() as any) || "usd"
+                (price.currency.toLowerCase() as any) || "usd",
               )}
             </Text>
             {price.total}

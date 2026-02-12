@@ -4,7 +4,7 @@ import {
   createHotelOrder,
   createTransferOrder,
 } from "@/api/services/booking";
-import { fetchEvent } from "@/api/services/event";
+import eventRestServices from "@/api/services/event";
 import { createStripePaymentIntent } from "@/api/services/stripe";
 import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
@@ -268,7 +268,7 @@ const CheckoutScreen = () => {
     try {
       setEventLoading(true);
 
-      const response = await fetchEvent(eventId);
+      const response = await eventRestServices.fetchById(eventId);
 
       setEvent(response.data);
     } catch (error: any) {

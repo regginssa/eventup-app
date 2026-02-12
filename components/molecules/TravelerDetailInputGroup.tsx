@@ -1,11 +1,9 @@
-import { RootState } from "@/store";
 import { TDropdownItem } from "@/types";
 import { formatBookingDate } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { Country } from "react-native-country-picker-modal";
-import { useSelector } from "react-redux";
 import {
   Button,
   CountryPicker,
@@ -13,6 +11,7 @@ import {
   Dropdown,
   Input,
 } from "../common";
+import { useBooking } from "../providers/BookingProvider";
 import HotelOfferGroup from "./HotelOfferGroup";
 
 const documentTypes = [
@@ -43,7 +42,7 @@ export type TFlightTraveler = {
         deviceType: string;
         countryCallingCode: string;
         number: string;
-      }
+      },
     ];
   };
   document: {
@@ -91,7 +90,7 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
   const [email, setEmail] = useState("vladislav.gostiuc@gmail.com");
   const [phone, setPhone] = useState("+37369123456");
   const [documentType, setDocumentType] = useState<TDropdownItem>(
-    documentTypes[0]
+    documentTypes[0],
   );
   const [birthPlace, setBirthPlace] = useState("Madrid");
   const [issuanceLocation, setIssuanceLocation] = useState("Madrid");
@@ -99,13 +98,13 @@ const TravelerDetailInputGroup: React.FC<TravelerDetailInputGroupProps> = ({
   const [number, setNumber] = useState("123456790");
   const [expiryDate, setExpiryDate] = useState(new Date("2028-01-01"));
   const [issuranceCountry, setIssuranceCountry] = useState<Country | null>(
-    null
+    null,
   );
   const [validityCountry, setValidityCountry] = useState<Country | null>(null);
   const [nationality, setNationality] = useState<Country | null>(null);
   const [selectedHotelOfferIndex, setSelectedHotelOfferIndex] = useState(0);
 
-  const { hotel } = useSelector((state: RootState) => state.booking);
+  const { hotel } = useBooking();
 
   const validate = () => {
     if (firstName.trim().length === 0) {

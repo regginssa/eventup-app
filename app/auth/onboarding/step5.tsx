@@ -8,7 +8,6 @@ import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 import { useRef, useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
-import { useDispatch } from "react-redux";
 
 const CongImage = require("@/assets/images/cong_image.png");
 
@@ -18,7 +17,6 @@ const OnboarindStep5Screen = () => {
 
   const router = useRouter();
   const { user, setAuthUser } = useAuth();
-  const dispatch = useDispatch();
 
   const handleJoinNow = async () => {
     if (!user?._id) return;

@@ -1,7 +1,9 @@
 import { TFlight, THotel, TTransfer } from "@/types";
 import {
   TAmadeusFlightBookingRequest,
+  TAmadeusFlightOffer,
   TAmadeusHotelBookingRequest,
+  TAmadeusHotelOffer,
   TAmadeusTransferBookingRequest,
 } from "@/types/amadeus";
 import { createContext, useContext, useState } from "react";
@@ -20,6 +22,14 @@ interface BookingContextProps {
   setBookingTransferRequest: (val: TAmadeusTransferBookingRequest[]) => void;
   setBookingHotelRooms: (val: number) => void;
   setBookingTravelers: (val: number) => void;
+  updateBookingFlightOfferById: (val: {
+    id: string;
+    offer: TAmadeusFlightOffer;
+  }) => void;
+  updateBookingHotelByIndex: (val: {
+    index: number;
+    offer: TAmadeusHotelOffer;
+  }) => void;
 }
 
 const BookingContext = createContext<BookingContextProps | undefined>(
@@ -63,6 +73,42 @@ const BookingProvider: React.FC<BookingProviderProps> = ({ children }) => {
     setTransfer({ ...transfer, requests });
   };
 
+  const updateBookingFlightOfferById = ({
+    id,
+    offer,
+  }: {
+    id: string;
+    offer: TAmadeusFlightOffer;
+  }) => {
+    if (!flight) return;
+    const updated = flight.offers.map((o) => (o.id === id ? offer : o));
+    setFlight({ ...flight, offers: updated });
+  };
+
+  const updateBookingHotelByIndex = ({
+    index,
+    offer,
+  }: {
+    index: number;
+    offer: any;
+  }) => {
+    setHotel((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        offers: [
+          {
+            ...prev.offers[0],
+            offers: prev.offers[0].offers.map((o, i) =>
+              i === index ? offer : o,
+            ),
+          },
+        ],
+      };
+    });
+  };
+
   return (
     <BookingContext.Provider
       value={{
@@ -79,6 +125,8 @@ const BookingProvider: React.FC<BookingProviderProps> = ({ children }) => {
         setBookingTransferRequest: setTransferRequest,
         setBookingHotelRooms: setHotelRooms,
         setBookingTravelers: setTransvelers,
+        updateBookingFlightOfferById,
+        updateBookingHotelByIndex,
       }}
     >
       {children}

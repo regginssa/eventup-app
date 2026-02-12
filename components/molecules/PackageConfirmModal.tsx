@@ -2,10 +2,6 @@ import {
   fetchFlightOffersPricing,
   fetchHotelOfferPricing,
 } from "@/api/services/booking";
-import {
-  updateBookingFlightOfferById,
-  updateBookingHotelByIndex,
-} from "@/store/slices/booking.slice";
 import { TTransfer } from "@/types";
 import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "@/types/amadeus";
 import { ITicket } from "@/types/ticket";
@@ -13,7 +9,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
-import { useDispatch } from "react-redux";
 import {
   Button,
   FlightItem,
@@ -21,6 +16,7 @@ import {
   Modal,
   UserTicketItem,
 } from "../common";
+import { useBooking } from "../providers/BookingProvider";
 import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
 
 interface PackageConfirmModalProps {
@@ -47,7 +43,8 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
 
   const router = useRouter();
-  const dispatch = useDispatch();
+  const { updateBookingFlightOfferById, updateBookingHotelByIndex } =
+    useBooking();
 
   const handleProceedToBooking = async () => {
     try {
@@ -57,12 +54,10 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
         const response = await fetchFlightOffersPricing({ offers: [flight] });
 
         if (response.ok) {
-          dispatch(
-            updateBookingFlightOfferById({
-              id: flight.id,
-              offer: response.data[0],
-            }),
-          );
+          updateBookingFlightOfferById({
+            id: flight.id,
+            offer: response.data[0],
+          });
         }
       }
 
@@ -70,12 +65,10 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
         const response = await fetchHotelOfferPricing(hotel.offers[0].id);
 
         if (response.ok) {
-          dispatch(
-            updateBookingHotelByIndex({
-              index: 0,
-              offer: response.data,
-            }),
-          );
+          updateBookingHotelByIndex({
+            index: 0,
+            offer: response.data,
+          });
         }
       }
 

@@ -12,7 +12,6 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Text, View } from "react-native";
-import { useDispatch } from "react-redux";
 
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
 
@@ -139,7 +138,6 @@ const TicketsCheckout = () => {
 
   const { id: ticketId, from } = useLocalSearchParams();
   const { user, setAuthUser } = useAuth();
-  const dispatch = useDispatch();
   const router = useRouter();
 
   useEffect(() => {

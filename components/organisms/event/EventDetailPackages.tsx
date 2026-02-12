@@ -3,7 +3,7 @@ import {
   BookSearchInputGroup,
   PackageConfirmModal,
 } from "@/components/molecules";
-import { RootState } from "@/store";
+import { useBooking } from "@/components/providers/BookingProvider";
 import { TCoordinate } from "@/types";
 import { IEvent, TEventFee } from "@/types/event";
 import { ITicket } from "@/types/ticket";
@@ -15,7 +15,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { useSelector } from "react-redux";
 
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
 
@@ -49,9 +48,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const { flight, hotel, transfer } = useSelector(
-    (state: RootState) => state.booking,
-  );
+  const { flight, hotel, transfer } = useBooking();
   const router = useRouter();
 
   const standardItems = [
