@@ -81,7 +81,6 @@ const MyEventsScreen = () => {
           }
         }
       } catch (error) {
-        console.error("fetch events error: ", error);
       }
 
       setLoading(false);

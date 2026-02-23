@@ -221,6 +221,8 @@ const TravelerDetailsForm: React.FC<TravelerDetailsFormProps> = ({
     { label: "VCC B2B WALLET", value: "VCC_B2B_WALLET" },
   ];
 
+  if (travelers === 0) return null;
+
   return (
     <>
       <View className="w-full bg-white rounded-xl p-4 gap-6">
@@ -430,6 +432,8 @@ interface SummaryProps {
 }
 
 const Summary: React.FC<SummaryProps> = ({ flight, hotel, transfer }) => {
+  if (!flight && !hotel && !transfer) return null;
+
   return (
     <View className="w-full bg-white rounded-xl p-4 gap-6">
       <Text className="font-poppins-semibold text-lg text-gray-800">
@@ -498,7 +502,6 @@ const BookingScreen = () => {
 
       setEvent(response.data);
     } catch (error: any) {
-      console.error(error);
     } finally {
       setLoading(false);
     }

@@ -109,7 +109,7 @@ const RegisterScreen = () => {
       router.replace("/auth/onboarding/step1");
     } catch (error: any) {
       const message = error?.response?.data?.message;
-      console.error(error);
+      // console.error(error);
 
       if (error?.status === 400) {
         Alert.alert(message);

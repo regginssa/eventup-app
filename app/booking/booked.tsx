@@ -1,5 +1,5 @@
 import { fetchBooking } from "@/api/services/booking";
-import { fetchEvent } from "@/api/services/event";
+import eventServices from "@/api/services/event";
 import { Button, Spinner, TicketQR } from "@/components/common";
 import { BookedContainer } from "@/components/organisms";
 import { useTheme } from "@/components/providers/ThemeProvider";
@@ -601,7 +601,7 @@ const BookedScreen = () => {
     try {
       setLoading(true);
 
-      const eventRes = await fetchEvent(eventId);
+      const eventRes = await eventServices.get(eventId);
 
       setEvent(eventRes.data);
 
@@ -623,7 +623,7 @@ const BookedScreen = () => {
       setServices(selectedServices);
       setHasLoadedSuccessfully(true);
     } catch (error: any) {
-      console.error(error);
+      // console.error(error);
       setHasLoadedSuccessfully(false);
     } finally {
       setLoading(false);

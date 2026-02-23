@@ -7,8 +7,7 @@ export const EMAIL_REGISTER = "/auth/register-email";
 export const GET_ME = "/auth/me";
 
 // User apis
-export const FETCH_USER = "/user/";
-export const UPDATE_USER = "/user/";
+export const USER_BASE = "/user/";
 
 // Upload api
 export const UPLOAD = "/upload";

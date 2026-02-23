@@ -300,6 +300,7 @@ const CheckoutScreen = () => {
   useEffect(() => {
     let base = 0;
     let services: string[] = [];
+    let total = 0;
 
     if (flight?.offers) {
       services.push("Flight");
@@ -325,13 +326,19 @@ const CheckoutScreen = () => {
       base += Number(transferPrice);
     }
 
-    const total = base + base * 0.1;
+    if (userTicket) {
+      services.push("Ticket");
+      base += Number(userTicket.price);
+      total = base;
+    } else {
+      total = base + base * 0.1;
+    }
 
     setBasePrice(Number(base.toFixed(2)));
     setTotalPrice(Number(total.toFixed(2)));
-    setCommissionPrice(Number((base * 0.1).toFixed(2)));
+    setCommissionPrice(Number((total - base).toFixed(2)));
     setServices(services);
-  }, [flight, hotel, transfer]);
+  }, [flight, hotel, transfer, userTicket]);
 
   const handleStripePayment = async (
     amount: number,
@@ -403,12 +410,12 @@ const CheckoutScreen = () => {
 
     // Pay total amount first
     setBookLabel("Processing Payment...");
-    const paymentResult = await handleStripePayment(totalPrice, currency);
+    // const paymentResult = await handleStripePayment(totalPrice, currency);
 
-    if (!paymentResult) {
-      setBookLabel("Book Now");
-      return toast.error("Failed to make payment.");
-    }
+    // if (!paymentResult) {
+    //   setBookLabel("Book Now");
+    //   return toast.error("Failed to make payment.");
+    // }
 
     try {
       if (flight?.request) {
@@ -537,14 +544,7 @@ const CheckoutScreen = () => {
 
       const basicBookingData = await bookServices();
 
-      // Refund payment if failed to book (flight, hotel, transfers)
-      if (!basicBookingData) {
-        setBookLabel("Book Now");
-        toast.error("Failed to book.");
-        return setBookLoading(false);
-      }
-
-      setBookLabel("Creating Booking...");
+      setBookLabel("Booking...");
 
       let ticketTransferResult = false;
 
@@ -559,9 +559,9 @@ const CheckoutScreen = () => {
       }
 
       const bookingData: IBooking = {
-        flight: basicBookingData.flightOrder as any,
-        hotel: basicBookingData.hotelOrder as any,
-        transfer: basicBookingData.transferOrders as any,
+        flight: basicBookingData?.flightOrder as any,
+        hotel: basicBookingData?.hotelOrder as any,
+        transfer: basicBookingData?.transferOrders as any,
         timezone: event?.dates?.timezone || "",
         event: event?._id as any,
         user: user._id as any,
@@ -571,8 +571,8 @@ const CheckoutScreen = () => {
           comission: commissionPrice,
           currency: currency.toUpperCase(),
         },
-        billingAddress: basicBookingData.billingAddress as any,
-        billingPayment: basicBookingData.billingPayment as any,
+        billingAddress: basicBookingData?.billingAddress as any,
+        billingPayment: basicBookingData?.billingPayment as any,
         package: packageType as any,
       };
 
@@ -596,14 +596,13 @@ const CheckoutScreen = () => {
     } catch (error: any) {
       console.log("handle book error: ", error);
       toast.error("Booking failed");
-    } finally {
       setBookLabel("Book Now");
       setBookLoading(false);
     }
   };
 
   return (
-    <SimpleContainer title="Checkout">
+    <SimpleContainer title="Checkout" scrolled>
       <EventDetail
         event={event}
         loading={eventLoading}

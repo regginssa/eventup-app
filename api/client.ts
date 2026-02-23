@@ -35,7 +35,7 @@ export const setAuthToken = async (token: string | null) => {
       delete AxiosInstance.defaults.headers.common["Authorization"];
     }
   } catch (error) {
-    console.error("Error setting auth token:", error);
+    // console.error("Error setting auth token:", error);
   }
 };
 
