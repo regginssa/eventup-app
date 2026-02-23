@@ -1,8 +1,10 @@
 import { fetchBooking } from "@/api/services/booking";
 import eventServices from "@/api/services/event";
-import { Button, Spinner, TicketQR } from "@/components/common";
+import { Button, Spinner, TicketQR, UserTicketItem } from "@/components/common";
 import { BookedContainer } from "@/components/organisms";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { useTicket } from "@/components/providers/TicketProvider";
 import { TCurrency, TPackageType } from "@/types";
 import {
   IBooking,
@@ -11,6 +13,7 @@ import {
   TBookingTransfer,
 } from "@/types/booking";
 import { IEvent } from "@/types/event";
+import { ITicket } from "@/types/ticket";
 import { formatDateTime, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -25,9 +28,11 @@ const BookedDarkImage = require("@/assets/images/booked_image_dark.png");
 const EventTicket = ({
   event,
   packageType,
+  userTicket,
 }: {
   event: IEvent | null;
   packageType: TPackageType;
+  userTicket: ITicket | null;
 }) => {
   const [items, setItems] = useState<any[]>([]);
   const { theme } = useTheme();
@@ -85,28 +90,32 @@ const EventTicket = ({
         Event Ticket
       </Text>
 
-      <View className="w-full flex flex-row gap-3">
-        <TicketQR size={120} />
+      {event?.type === "user" && userTicket ? (
+        <UserTicketItem item={userTicket} />
+      ) : (
+        <View className="w-full flex flex-row gap-3">
+          <TicketQR size={120} />
 
-        <View className="flex-1 items-start justify-between gap-1">
-          {items.map((item, index) => (
-            <View key={index} className="flex flex-row items-start gap-1.5">
-              <MaterialCommunityIcons
-                name={item.icon as any}
-                size={16}
-                color={theme === "light" ? "#4b5563" : "#9ca3af"}
-              />
-              <Text
-                className={`font-dm-sans text-sm ${
-                  theme === "light" ? "text-gray-600" : "text-gray-400"
-                } line-clamp-3`}
-              >
-                {item.label}
-              </Text>
-            </View>
-          ))}
+          <View className="flex-1 items-start justify-between gap-1">
+            {items.map((item, index) => (
+              <View key={index} className="flex flex-row items-start gap-1.5">
+                <MaterialCommunityIcons
+                  name={item.icon as any}
+                  size={16}
+                  color={theme === "light" ? "#4b5563" : "#9ca3af"}
+                />
+                <Text
+                  className={`font-dm-sans text-sm ${
+                    theme === "light" ? "text-gray-600" : "text-gray-400"
+                  } line-clamp-3`}
+                >
+                  {item.label}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 };
@@ -584,9 +593,12 @@ const BookedScreen = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [hasLoadedSuccessfully, setHasLoadedSuccessfully] =
     useState<boolean>(false);
+  const [userTicket, setUserTicket] = useState<ITicket | null>(null);
   const lottieRef = useRef<LottieView>(null);
 
   const { bookingId, eventId, packageType } = useLocalSearchParams();
+  const { user } = useAuth();
+  const { tickets } = useTicket();
   const { theme } = useTheme();
 
   const init = useCallback(async () => {
@@ -634,6 +646,19 @@ const BookedScreen = () => {
     init();
   }, []);
 
+  useEffect(() => {
+    if (
+      !event ||
+      event?.type === "ai" ||
+      !user?._id ||
+      event.attendees.length === 0
+    )
+      return;
+    const myAttend = event.attendees.find((a) => a.user._id === user._id);
+    const myTicket = tickets.find((t) => t._id === myAttend?.ticket?.ticketId);
+    setUserTicket(myTicket || null);
+  }, [event]);
+
   return (
     <BookedContainer>
       {loading ? (
@@ -663,6 +688,7 @@ const BookedScreen = () => {
           <EventTicket
             event={event}
             packageType={(packageType as any) || "standard"}
+            userTicket={userTicket}
           />
           <FlightDetails flight={booking?.flight} packageType="standard" />
           <HotelDetails hotel={booking?.hotel} />

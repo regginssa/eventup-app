@@ -326,17 +326,11 @@ const CheckoutScreen = () => {
       base += Number(transferPrice);
     }
 
-    if (userTicket) {
-      services.push("Ticket");
-      base += Number(userTicket.price);
-      total = base;
-    } else {
-      total = base + base * 0.1;
-    }
+    total = base + base * 0.1;
 
     setBasePrice(Number(base.toFixed(2)));
     setTotalPrice(Number(total.toFixed(2)));
-    setCommissionPrice(Number((total - base).toFixed(2)));
+    setCommissionPrice(Number((base * 0.1).toFixed(2)));
     setServices(services);
   }, [flight, hotel, transfer, userTicket]);
 
@@ -499,8 +493,8 @@ const CheckoutScreen = () => {
   };
 
   const handleUserTicket = async (): Promise<boolean> => {
-    if (!userTicket) return false;
-    if (!user?._id || !event?._id || !event.hoster?._id) return false;
+    if (!userTicket || !user?._id || !event?._id || !event.hoster?._id)
+      return false;
 
     // Remove user ticket
     const userBodyData: IUser = {
@@ -511,6 +505,7 @@ const CheckoutScreen = () => {
     const meRes = await userServices.update(user._id, userBodyData);
     if (meRes.data) {
       setAuthUser(meRes.data);
+    } else {
       return false;
     }
 
@@ -546,16 +541,14 @@ const CheckoutScreen = () => {
 
       setBookLabel("Booking...");
 
-      let ticketTransferResult = false;
-
       if (event?.type === "user" && userTicket) {
-        ticketTransferResult = await handleUserTicket();
-      }
+        const ticketTransferResult = await handleUserTicket();
 
-      if (!ticketTransferResult) {
-        toast.error("Transfer ticket error");
-        setBookLabel("Book Now");
-        return setBookLoading(false);
+        if (!ticketTransferResult) {
+          toast.error("Transfer ticket error");
+          setBookLabel("Book Now");
+          return setBookLoading(false);
+        }
       }
 
       const bookingData: IBooking = {

@@ -12,6 +12,7 @@ import {
 } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useBooking } from "@/components/providers/BookingProvider";
+import { useTicket } from "@/components/providers/TicketProvider";
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
 import { EventDates, IEvent, TAttendees } from "@/types/event";
@@ -53,6 +54,7 @@ const EventDetailScreen = () => {
   const { id, callback } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { tickets } = useTicket();
   const { setBookingFlight, setBookingHotel } = useBooking();
 
   const getUserLocationAndSave = async () => {
@@ -181,6 +183,14 @@ const EventDetailScreen = () => {
       setServices([...services, "Ticket"]);
     }
   }, [attendees]);
+
+  useEffect(() => {
+    if (!booking || !event || event.type === "ai" || !user?._id) return;
+
+    const myAttend = event.attendees.find((a) => a.user._id === user._id);
+    const myTicket = tickets.find((t) => t._id === myAttend?.ticket?.ticketId);
+    setTicket(myTicket || null);
+  }, [booking, event, user]);
 
   return (
     <EventDetailContainer callback={callback as any}>

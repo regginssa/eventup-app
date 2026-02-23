@@ -1,4 +1,4 @@
-import { Button } from "@/components/common";
+import { Button, UserTicketItem } from "@/components/common";
 import {
   BookSearchInputGroup,
   PackageConfirmModal,
@@ -83,7 +83,11 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
           </Text>
         </View>
 
-        <Text className="font-poppins-semibold">Standard Package</Text>
+        <Text className="font-poppins-semibold text-sm text-gray-600">
+          Standard Package
+        </Text>
+
+        {ticket && <UserTicketItem item={ticket} />}
 
         <View className="gap-2">
           {services.map((s) => (
@@ -92,15 +96,18 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
             </Text>
           ))}
         </View>
+
         <View className="w-full h-[1px] bg-gray-200 mt-2 mb-2"></View>
         <View className="w-full flex flex-row items-center justify-between">
           <Text className="font-dm-sans-bold text-xl text-gray-800">
             Total:
           </Text>
-          <Text className="font-poppins-bold text-green-500">
-            <Text className="text-sm">$</Text>
-            <Text className="text-xl">{totalPrice}</Text>
-          </Text>
+          <View className="flex flex-row items-start gap-0">
+            <Text className="font-poppins-bold text-green-500 text-sm">$</Text>
+            <Text className="font-poppins-bold text-green-500 text-xl">
+              {totalPrice}
+            </Text>
+          </View>
         </View>
       </View>
     );
