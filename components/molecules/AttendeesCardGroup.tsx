@@ -1,40 +1,59 @@
-import { TAttendees } from "@/types/event";
+import conversationServices from "@/api/services/conversation";
+import notificationServices from "@/api/services/notification";
+import { IConversation } from "@/types/conversation";
+import { IEvent, TAttendees } from "@/types/event";
+import { INotification } from "@/types/notification";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { Avatar } from "../common";
 import { useConversation } from "../providers/ConversationProvider";
+import { useNotification } from "../providers/NotificationProvider";
 import { useToast } from "../providers/ToastProvider";
 
 interface AttendeesCardGroupProps {
   items: TAttendees[];
-  eventId: string;
+  event?: IEvent;
 }
 
 const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
   items,
-  eventId,
+  event,
 }) => {
   const [inviteLoading, setInviteLoading] = useState<Map<string, boolean>>(
     new Map(),
   );
-  const { conversations } = useConversation();
+  const [isValidInvite, setIsValidInvite] = useState<Map<string, boolean>>(
+    new Map(),
+  );
+  const { conversations, addNewConversation, updateConversation } =
+    useConversation();
+  const { send: sendNotification } = useNotification();
   const toast = useToast();
 
-  const handleInvite = async (userId: string) => {
-    let conv = null;
-    for (const c of conversations) {
-      if (
-        c.type === "group" &&
-        c.event?._id === eventId &&
-        c.participants.some((p) => p._id === userId)
-      ) {
-        conv = c;
-        break;
-      }
+  useEffect(() => {
+    const conv = conversations.find(
+      (c) => c.type === "group" && c.event?._id === event?._id,
+    );
+    if (!conv) return;
+    const attendeeIds = new Set(items.map((i) => i.user._id));
+    const nextMap = new Map<string, boolean>();
+    for (const p of conv.participants) {
+      nextMap.set(p._id as string, attendeeIds.has(p._id));
     }
+    setIsValidInvite(nextMap);
+  }, [conversations, event, items]);
 
-    if (conv) {
+  const handleInvite = async (userId: string) => {
+    if (!event?._id) return;
+
+    const conv = conversations.find(
+      (c) => c.type === "group" && c.event?._id === event._id,
+    );
+
+    if (!conv) return;
+
+    if (conv?.participants.some((p) => p._id === userId)) {
       return toast.error("The user has already joined the group chat");
     }
 
@@ -44,7 +63,45 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
         next.set(userId, true);
         return next;
       });
+
+      // Add the user to the conversation participants
+      const convBodyData: IConversation = {
+        ...conv,
+        participants: [...conv.participants, userId as any],
+      };
+
+      const convRes = await conversationServices.update(
+        conv._id as string,
+        convBodyData,
+      );
+
+      if (convRes.data) {
+        updateConversation({ conversationId: conv._id, userId });
+        addNewConversation(convRes.data);
+      }
+
+      // Send an invitation notification to the user
+      const newNotification: INotification = {
+        type: "receive_invite_group_chat",
+        metadata: {
+          conversationId: conv?._id,
+          eventId: event._id,
+        },
+        title: `Invitation`,
+        body: `You have been invited to "${event.name}" group chat`,
+        user: userId as any,
+        isRead: false,
+        isArchived: false,
+        link: "/conversation/chat/group",
+      };
+
+      const notifyRes = await notificationServices.create(newNotification);
+
+      if (notifyRes.ok) {
+        sendNotification({ notificationId: notifyRes.data._id, userId });
+      }
     } catch (err) {
+      toast.error("Invitation failed");
     } finally {
       setInviteLoading((prev) => {
         const next = new Map(prev);
@@ -155,8 +212,11 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
 
           <TouchableOpacity
             activeOpacity={0.8}
-            className="p-2 rounded-xl w-full bg-green-600 flex flex-row items-center justify-center gap-2"
-            disabled={inviteLoading.get(item.user._id as string)}
+            className={`p-2 rounded-xl w-full flex flex-row items-center justify-center gap-2 ${isValidInvite.get(item.user._id as string) ? "bg-gray-400" : "bg-green-600"}`}
+            disabled={
+              inviteLoading.get(item.user._id as string) ||
+              isValidInvite.get(item.user._id as string)
+            }
             onPress={() => handleInvite(item.user._id as string)}
           >
             {inviteLoading.get(item.user._id as string) ? (
@@ -169,7 +229,9 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
               />
             )}
             <Text className="font-poppins-medium text-sm text-white">
-              Invite
+              {isValidInvite.get(item.user._id as string)
+                ? "Invited"
+                : "Invite"}
             </Text>
           </TouchableOpacity>
         </View>

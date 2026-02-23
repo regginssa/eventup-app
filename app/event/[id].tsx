@@ -211,12 +211,9 @@ const EventDetailScreen = () => {
   }, [attendees]);
 
   useEffect(() => {
-    if (conversations.length === 0 || event?.hoster?._id !== user?._id) return;
+    if (conversations.length === 0) return;
     const conv = conversations.find((c) => c.event?._id === event?._id);
     setGroupConversation(conv || null);
-
-    console.log(conversations);
-    console.log("[eventId]: ", event?._id);
   }, [conversations, event, user?._id]);
 
   const handleUserTicketRelease = async () => {
@@ -346,54 +343,60 @@ const EventDetailScreen = () => {
               ) : selectedTab.value === "attendees" ? (
                 <AttendeesCardGroup
                   items={event.attendees || []}
-                  eventId={event._id as string}
+                  event={event}
                 />
               ) : null}
             </View>
 
-            {event.type === "user" && event.hoster?._id === user?._id && (
-              <View className="w-full gap-4">
-                <View className="w-full flex flex-row items-start gap-2 rounded-xl border border-blue-500 bg-blue-200 p-4">
-                  <MaterialCommunityIcons
-                    name="information-outline"
-                    size={24}
-                    color="#3b82f6"
-                  />
-                  <Text className="flex-1 font-dm-sans-medium text-sm text-blue-600">
-                    A group chat allows you to easily manage and communicate
-                    with your attendees.
-                  </Text>
-                </View>
+            {event.type === "user" &&
+              (event.hoster?._id === user?._id ||
+                conversations.some((c) =>
+                  c.participants.some((p) => p._id === attendees?.user._id),
+                )) && (
+                <View className="w-full gap-4">
+                  {event.hoster?._id === user?._id && (
+                    <View className="w-full flex flex-row items-start gap-2 rounded-xl border border-blue-500 bg-blue-200 p-4">
+                      <MaterialCommunityIcons
+                        name="information-outline"
+                        size={24}
+                        color="#3b82f6"
+                      />
+                      <Text className="flex-1 font-dm-sans-medium text-sm text-blue-600">
+                        A group chat allows you to easily manage and communicate
+                        with your attendees.
+                      </Text>
+                    </View>
+                  )}
 
-                {!groupConversation ? (
-                  <Button
-                    type="primary"
-                    label="Create"
-                    buttonClassName="h-12"
-                    onPress={() =>
-                      router.push({
-                        pathname: "/conversation/create-group",
-                        params: { eventId: event._id },
-                      })
-                    }
-                  />
-                ) : (
-                  <Button
-                    type="primary"
-                    label="Go to group chat"
-                    buttonClassName="h-12"
-                    onPress={() =>
-                      router.push({
-                        pathname: "/conversation/chat/group",
-                        params: {
-                          conversationId: groupConversation._id,
-                        },
-                      })
-                    }
-                  />
-                )}
-              </View>
-            )}
+                  {!groupConversation ? (
+                    <Button
+                      type="primary"
+                      label="Create"
+                      buttonClassName="h-12"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/conversation/create-group",
+                          params: { eventId: event._id },
+                        })
+                      }
+                    />
+                  ) : (
+                    <Button
+                      type="primary"
+                      label="Go to group chat"
+                      buttonClassName="h-12"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/conversation/chat/group",
+                          params: {
+                            conversationId: groupConversation._id,
+                          },
+                        })
+                      }
+                    />
+                  )}
+                </View>
+              )}
           </>
         ) : (
           <EventDetailEmpty />

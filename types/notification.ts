@@ -7,6 +7,7 @@ export type TNotificationType =
   | "ticket_purchase"
   | "event_ticket_released"
   | "event_ticket_refunded"
+  | "receive_invite_group_chat"
   | "system";
 
 export interface INotification {

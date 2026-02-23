@@ -9,8 +9,11 @@ export const fetchConversationMessages = async (
   return await AxiosInstance.get(MESSAGE_BASE + conversationId);
 };
 
-export const markMessagesSeenRest = async (conversationId: string) => {
-  await AxiosInstance.post(MESSAGE_BASE + conversationId + "/seen");
+export const markMessagesSeenRest = async (
+  conversationId: string,
+  userId: string,
+) => {
+  await AxiosInstance.patch(MESSAGE_BASE + "seen", { conversationId, userId });
 };
 
 export const updateMessageById = async (

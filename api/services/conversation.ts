@@ -3,28 +3,43 @@ import { IConversation } from "@/types/conversation";
 import AxiosInstance from "../client";
 import { CONVERSATION_BASE } from "../endpoints";
 
-export const fetchUserConversations = async (
+const getByUserId = async (
   userId: string,
 ): Promise<ApiResponse<IConversation[]>> => {
   return await AxiosInstance.get(CONVERSATION_BASE + userId);
 };
 
-export const createRestConversation = async (
+const create = async (
   bodyData: IConversation,
 ): Promise<ApiResponse<IConversation>> => {
   return await AxiosInstance.post(CONVERSATION_BASE, bodyData);
 };
 
-export const removeConversationForMe = async (
+const update = async (
+  id: string,
+  bodyData: IConversation,
+): Promise<ApiResponse<IConversation>> => {
+  return AxiosInstance.patch(CONVERSATION_BASE + id, bodyData);
+};
+
+const removeForMe = async (
   conversationId: string,
 ): Promise<ApiResponse<boolean>> => {
   return await AxiosInstance.delete(CONVERSATION_BASE + conversationId + "/me");
 };
 
-export const removeConversationForAll = async (
+const removeForAll = async (
   conversationId: string,
 ): Promise<ApiResponse<boolean>> => {
   return await AxiosInstance.delete(
     CONVERSATION_BASE + conversationId + "/all",
   );
+};
+
+export default {
+  getByUserId,
+  create,
+  update,
+  removeForMe,
+  removeForAll,
 };

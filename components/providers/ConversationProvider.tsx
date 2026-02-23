@@ -1,7 +1,4 @@
-import {
-  createRestConversation,
-  fetchUserConversations,
-} from "@/api/services/conversation";
+import conversationServices from "@/api/services/conversation";
 import { IConversation, TConversationType } from "@/types/conversation";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
@@ -19,6 +16,8 @@ interface ConversationContextProps {
     },
   ) => Promise<IConversation>;
   createGroupConversation: (payload: any) => Promise<IConversation>;
+  addNewConversation: (conversation: IConversation) => void;
+  updateConversation: (payload: any) => void;
   updateUnread: (conversationId: string, userId: string, value: number) => void;
   deleteDMConversation: (payload: any) => Promise<string>;
 }
@@ -29,11 +28,9 @@ const ConversationContext = createContext<ConversationContextProps | undefined>(
 
 export const useConversation = () => {
   const context = useContext(ConversationContext);
-
   if (!context) {
     throw new Error("useConversation must be within ConversationProvider");
   }
-
   return context;
 };
 
@@ -53,7 +50,7 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const loadConversations = async () => {
     if (!user?._id) return;
 
-    const response = await fetchUserConversations(user._id);
+    const response = await conversationServices.getByUserId(user._id);
 
     if (!response.data) return;
     setConversations(response.data);
@@ -89,9 +86,19 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const createGroupConversation = async (
     payload: any,
   ): Promise<IConversation> => {
-    const response = await createRestConversation(payload);
+    const response = await conversationServices.create(payload);
     setConversations((prev) => [...prev, response.data]);
     return response.data;
+  };
+
+  const addNewConversation = (conv: IConversation) => {
+    if (conversations.some((c) => c._id === conv._id)) return;
+    setConversations((prev) => [...prev, conv]);
+  };
+
+  const updateConversation = (payload: any) => {
+    if (!socket) return;
+    socket.emit("update_conversation", payload);
   };
 
   const updateUnread = (
@@ -145,12 +152,26 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
     const getAllConversations = async () => {
       if (!user?._id) return;
 
-      const response = await fetchUserConversations(user._id);
+      const response = await conversationServices.getByUserId(user._id);
       if (!response.data) return;
       setConversations(response.data);
     };
     getAllConversations();
   }, [user]);
+
+  useEffect(() => {
+    const handleUpdatedConversation = (conversation: IConversation) => {
+      setConversations((prev) =>
+        prev.map((p) => (p._id === conversation._id ? conversation : p)),
+      );
+    };
+
+    socket.on("conversation_updated", handleUpdatedConversation);
+
+    return () => {
+      socket.off("conversation_updated", handleUpdatedConversation);
+    };
+  }, [socket, user]);
 
   return (
     <ConversationContext.Provider
@@ -160,6 +181,8 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
         loadConversations,
         createConversation,
         createGroupConversation,
+        addNewConversation,
+        updateConversation,
         updateUnread,
         deleteDMConversation,
       }}

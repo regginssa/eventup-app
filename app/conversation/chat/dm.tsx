@@ -124,7 +124,7 @@ const ChatDM = () => {
 
       joinConversation(conversationId as string);
       await loadMessages(conversationId as string);
-      await markMessagesSeenRest(conversationId as string);
+      await markMessagesSeenRest(conversationId as string, user._id);
 
       setLoading(false);
     };
@@ -164,7 +164,7 @@ const ChatDM = () => {
   };
 
   const handleSend = async () => {
-    if (text.trim().length === 0) return;
+    if (text.trim().length === 0 && files.length === 0) return;
 
     let uploadedFiles: TMessageFile[] = [];
 

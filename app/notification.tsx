@@ -24,6 +24,15 @@ const NotificationScreen = () => {
   const renderItem = ({ item }: { item: INotification }) => {
     const { isRead, title, body, link, metadata, type } = item;
 
+    let params = {};
+
+    switch (type) {
+      case "receive_invite_group_chat":
+        params = { conversationId: metadata.conversationId };
+      default:
+        params = {};
+    }
+
     return (
       <View
         className={`w-full p-2 rounded-xl ${isRead ? "bg-white" : "bg-gray-200"}`}
@@ -57,7 +66,7 @@ const NotificationScreen = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             className="flex flex-row items-end gap-1"
-            onPress={() => router.push(link as any)}
+            onPress={() => router.push({ pathname: link as any, params })}
           >
             <Text className="font-dm-sans-medium text-sm text-blue-600">
               View

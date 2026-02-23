@@ -103,7 +103,7 @@ const ChatGroup = () => {
       setConversation(conv);
       joinConversation(conversationId as string);
       await loadMessages(conversationId as string);
-      await markMessagesSeenRest(conversationId as string);
+      await markMessagesSeenRest(conversationId as string, user._id);
 
       setLoading(false);
     };
@@ -119,6 +119,8 @@ const ChatGroup = () => {
   }, [conversationId, user?._id, conversations]);
 
   const handleSend = () => {
+    if (text.trim().length === 0) return;
+
     const payload = {
       conversationId,
       senderId: user?._id,
