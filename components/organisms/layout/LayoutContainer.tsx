@@ -1,5 +1,6 @@
 import { ProfileDrawer } from "@/components/molecules";
 import { useConversation } from "@/components/providers/ConversationProvider";
+import { useNotification } from "@/components/providers/NotificationProvider";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -20,6 +21,7 @@ const LayoutContainer: React.FC<LayoutContainerProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const router = useRouter();
+  const { totalNotificationsUnreads } = useNotification();
   const { totalMessagesUnreads } = useConversation();
 
   return (
@@ -39,7 +41,9 @@ const LayoutContainer: React.FC<LayoutContainerProps> = ({
             >
               <AntDesign name="bell" size={20} color="#1f2937" />
 
-              <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
+              {totalNotificationsUnreads > 0 && (
+                <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.8}

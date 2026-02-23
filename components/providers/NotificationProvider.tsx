@@ -1,3 +1,4 @@
+import notificationServices from "@/api/services/notification";
 import { INotification } from "@/types/notification";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
@@ -5,6 +6,7 @@ import { useSocket } from "./SocketProvider";
 
 interface NotificationContextProps {
   notifications: INotification[];
+  totalNotificationsUnreads: number;
   sendNotification: (payload: any) => void;
 }
 
@@ -28,6 +30,8 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,
 }) => {
   const [notifications, setNotifications] = useState<INotification[]>([]);
+  const [totalNotificationsUnreads, setTotalNotificationsUnreads] =
+    useState<number>(0);
 
   const { user } = useAuth();
   const { socket } = useSocket();
@@ -36,12 +40,39 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
   useEffect(() => {
     if (!socket) return;
 
-    //   socket.on("new_message", handleIncoming);
+    const handleIncoming = ({
+      notification,
+      userId,
+    }: {
+      notification: INotification;
+      userId: string;
+    }) => {
+      if (user?._id !== userId) return;
+      setNotifications((prev) => [notification, ...prev]);
+    };
+
+    socket.on("notification_sent", handleIncoming);
 
     return () => {
-      // socket.off("new_message", handleIncoming);
+      socket.off("notification_sent", handleIncoming);
     };
   }, [socket, user?._id]);
+
+  useEffect(() => {
+    const init = async () => {
+      if (!user?._id) return;
+      const response = await notificationServices.getByUserId(user._id);
+      if (!response.data) return;
+      setNotifications(response.data);
+    };
+
+    init();
+  }, [user?._id]);
+
+  useEffect(() => {
+    const unreadCount = notifications.filter((n) => !n.isRead).length;
+    setTotalNotificationsUnreads(unreadCount);
+  }, [notifications]);
 
   const sendNotification = (payload: any) => {
     if (!socket) return;
@@ -49,7 +80,9 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
   };
 
   return (
-    <NotificationContext.Provider value={{ notifications, sendNotification }}>
+    <NotificationContext.Provider
+      value={{ notifications, totalNotificationsUnreads, sendNotification }}
+    >
       {children}
     </NotificationContext.Provider>
   );
