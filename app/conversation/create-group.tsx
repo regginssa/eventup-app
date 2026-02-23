@@ -65,7 +65,7 @@ const CreateGroupChat = () => {
       const newConv = await createGroupConversation(bodyData);
 
       if (newConv) {
-        router.push({
+        router.replace({
           pathname: "/conversation/chat/group",
           params: { conversationId: newConv._id },
         });

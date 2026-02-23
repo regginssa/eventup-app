@@ -14,11 +14,13 @@ import {
 } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useBooking } from "@/components/providers/BookingProvider";
+import { useConversation } from "@/components/providers/ConversationProvider";
 import { useNotification } from "@/components/providers/NotificationProvider";
 import { useTicket } from "@/components/providers/TicketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
+import { IConversation } from "@/types/conversation";
 import { EventDates, IEvent, TAttendees } from "@/types/event";
 import { INotification } from "@/types/notification";
 import { ITicket } from "@/types/ticket";
@@ -57,14 +59,15 @@ const EventDetailScreen = () => {
   const [ticket, setTicket] = useState<ITicket | null>(null);
   const [attendees, setAttendees] = useState<TAttendees | null>(null);
   const [releaseLoading, setReleaseLoading] = useState<boolean>(false);
-  const [cancelEntryLoading, setCancelEntryLoading] = useState<boolean>(false);
-
+  const [groupConversation, setGroupConversation] =
+    useState<IConversation | null>(null);
   const { id, callback } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
   const { tickets } = useTicket();
   const { setBookingFlight, setBookingHotel } = useBooking();
   const { send: sendNotification } = useNotification();
+  const { conversations } = useConversation();
   const toast = useToast();
 
   const getUserLocationAndSave = async () => {
@@ -207,6 +210,15 @@ const EventDetailScreen = () => {
     setTicket(myTicket || null);
   }, [attendees]);
 
+  useEffect(() => {
+    if (conversations.length === 0 || event?.hoster?._id !== user?._id) return;
+    const conv = conversations.find((c) => c.event?._id === event?._id);
+    setGroupConversation(conv || null);
+
+    console.log(conversations);
+    console.log("[eventId]: ", event?._id);
+  }, [conversations, event, user?._id]);
+
   const handleUserTicketRelease = async () => {
     if (!event?._id || !attendees || !event.hoster?._id) return;
 
@@ -332,7 +344,10 @@ const EventDetailScreen = () => {
               ) : selectedTab.value === "itinerary" ? (
                 <EventDetailItinerary booking={booking} />
               ) : selectedTab.value === "attendees" ? (
-                <AttendeesCardGroup items={event.attendees || []} />
+                <AttendeesCardGroup
+                  items={event.attendees || []}
+                  eventId={event._id as string}
+                />
               ) : null}
             </View>
 
@@ -350,17 +365,33 @@ const EventDetailScreen = () => {
                   </Text>
                 </View>
 
-                <Button
-                  type="primary"
-                  label="Create"
-                  buttonClassName="h-12"
-                  onPress={() =>
-                    router.push({
-                      pathname: "/conversation/create-group",
-                      params: { eventId: event._id },
-                    })
-                  }
-                />
+                {!groupConversation ? (
+                  <Button
+                    type="primary"
+                    label="Create"
+                    buttonClassName="h-12"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/conversation/create-group",
+                        params: { eventId: event._id },
+                      })
+                    }
+                  />
+                ) : (
+                  <Button
+                    type="primary"
+                    label="Go to group chat"
+                    buttonClassName="h-12"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/conversation/chat/group",
+                        params: {
+                          conversationId: groupConversation._id,
+                        },
+                      })
+                    }
+                  />
+                )}
               </View>
             )}
           </>

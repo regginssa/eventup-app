@@ -1,13 +1,59 @@
 import { TAttendees } from "@/types/event";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Text, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { Avatar } from "../common";
+import { useConversation } from "../providers/ConversationProvider";
+import { useToast } from "../providers/ToastProvider";
 
 interface AttendeesCardGroupProps {
   items: TAttendees[];
+  eventId: string;
 }
 
-const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({ items }) => {
+const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
+  items,
+  eventId,
+}) => {
+  const [inviteLoading, setInviteLoading] = useState<Map<string, boolean>>(
+    new Map(),
+  );
+  const { conversations } = useConversation();
+  const toast = useToast();
+
+  const handleInvite = async (userId: string) => {
+    let conv = null;
+    for (const c of conversations) {
+      if (
+        c.type === "group" &&
+        c.event?._id === eventId &&
+        c.participants.some((p) => p._id === userId)
+      ) {
+        conv = c;
+        break;
+      }
+    }
+
+    if (conv) {
+      return toast.error("The user has already joined the group chat");
+    }
+
+    try {
+      setInviteLoading((prev) => {
+        const next = new Map(prev);
+        next.set(userId, true);
+        return next;
+      });
+    } catch (err) {
+    } finally {
+      setInviteLoading((prev) => {
+        const next = new Map(prev);
+        next.set(userId, false);
+        return next;
+      });
+    }
+  };
+
   if (items.length === 0) {
     return (
       <View className="flex-1">
@@ -110,12 +156,18 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({ items }) => {
           <TouchableOpacity
             activeOpacity={0.8}
             className="p-2 rounded-xl w-full bg-green-600 flex flex-row items-center justify-center gap-2"
+            disabled={inviteLoading.get(item.user._id as string)}
+            onPress={() => handleInvite(item.user._id as string)}
           >
-            <MaterialCommunityIcons
-              name="account-plus-outline"
-              size={16}
-              color="white"
-            />
+            {inviteLoading.get(item.user._id as string) ? (
+              <ActivityIndicator size={16} color="white" />
+            ) : (
+              <MaterialCommunityIcons
+                name="account-plus-outline"
+                size={16}
+                color="white"
+              />
+            )}
             <Text className="font-poppins-medium text-sm text-white">
               Invite
             </Text>
