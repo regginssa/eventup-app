@@ -34,7 +34,7 @@ const Conversation = () => {
 
   const router = useRouter();
   const { user } = useAuth();
-  const { conversations, loadConversations, deleteDMConversation } =
+  const { conversations, loadConversations, deleteConversation } =
     useConversation();
   const toast = useToast();
 
@@ -74,6 +74,15 @@ const Conversation = () => {
 
   const handleDelete = async (action: "me" | "all") => {
     if (!selectedConversationId) return toast.warn("No selected conversation");
+    const conv = conversations.find((c) => c._id === selectedConversationId);
+    if (!conv) return toast.warn("Conversation not found");
+    if (
+      conv.creator?._id !== user?._id &&
+      conv.type === "group" &&
+      action === "all"
+    )
+      return toast.warn("No permission to delete for all");
+
     try {
       if (action === "me") {
         setDeleteMeLoading(true);
@@ -81,7 +90,7 @@ const Conversation = () => {
         setDeleteAllLoading(true);
       }
 
-      const result = await deleteDMConversation({
+      const result = await deleteConversation({
         conversationId: selectedConversationId,
         action,
         userId: user?._id,

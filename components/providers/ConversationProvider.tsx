@@ -19,7 +19,7 @@ interface ConversationContextProps {
   addNewConversation: (conversation: IConversation) => void;
   updateConversation: (payload: any) => void;
   updateUnread: (conversationId: string, userId: string, value: number) => void;
-  deleteDMConversation: (payload: any) => Promise<string>;
+  deleteConversation: (payload: any) => Promise<string>;
 }
 
 const ConversationContext = createContext<ConversationContextProps | undefined>(
@@ -121,13 +121,13 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
     );
   };
 
-  const deleteDMConversation = async (payload: any): Promise<string> => {
+  const deleteConversation = async (payload: any): Promise<string> => {
     return new Promise((resolve, reject) => {
       if (!socket) return reject("Socket not connected");
 
-      socket.emit("delete_dm_conversation", payload);
+      socket.emit("delete_conversation", payload);
 
-      socket.once("conversation_dm_deleted", (conversationId: string) => {
+      socket.once("conversation_deleted", (conversationId: string) => {
         setConversations((prev) =>
           prev.filter((p) => p._id !== conversationId),
         );
@@ -186,7 +186,7 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
         addNewConversation,
         updateConversation,
         updateUnread,
-        deleteDMConversation,
+        deleteConversation,
       }}
     >
       {children}
