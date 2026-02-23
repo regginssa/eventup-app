@@ -37,7 +37,7 @@ const LayoutContainer: React.FC<LayoutContainerProps> = ({
               activeOpacity={0.8}
               className="w-10 h-10 rounded-full bg-white flex items-center justify-center relative"
               style={styles.bar}
-              onPress={() => setIsOpen(true)}
+              onPress={() => router.push("/notification")}
             >
               <AntDesign name="bell" size={20} color="#1f2937" />
 

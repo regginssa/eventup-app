@@ -64,6 +64,7 @@ export default function RootLayout() {
         <Stack.Screen name="tickets" />
         <Stack.Screen name="subscription" />
         <Stack.Screen name="conversation" />
+        <Stack.Screen name="notification" />
       </Stack>
     </InitContainer>
   );

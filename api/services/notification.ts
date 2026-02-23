@@ -16,18 +16,22 @@ const getByUserId = async (
 const create = async (
   bodyData: INotification,
 ): Promise<ApiResponse<INotification>> => {
-  return AxiosInstance.post(NOTIFICATION_BASE, bodyData);
+  return await AxiosInstance.post(NOTIFICATION_BASE, bodyData);
 };
 
 const update = async (
   id: string,
   bodyData: INotification,
 ): Promise<ApiResponse<INotification>> => {
-  return AxiosInstance.patch(NOTIFICATION_BASE + id, bodyData);
+  return await AxiosInstance.patch(NOTIFICATION_BASE + id, bodyData);
 };
 
 const remove = async (id: string): Promise<ApiResponse<boolean>> => {
-  return AxiosInstance.delete(NOTIFICATION_BASE + id);
+  return await AxiosInstance.delete(NOTIFICATION_BASE + id);
+};
+
+const markRead = async (ids: string[]): Promise<ApiResponse<boolean>> => {
+  return await AxiosInstance.patch(NOTIFICATION_BASE + "read/bulk", { ids });
 };
 
 export default {
@@ -36,4 +40,5 @@ export default {
   create,
   update,
   remove,
+  markRead,
 };

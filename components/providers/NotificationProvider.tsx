@@ -7,7 +7,9 @@ import { useSocket } from "./SocketProvider";
 interface NotificationContextProps {
   notifications: INotification[];
   totalNotificationsUnreads: number;
-  sendNotification: (payload: any) => void;
+  send: (payload: any) => void;
+  markRead: () => Promise<void>;
+  remove: (id: string) => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextProps | undefined>(
@@ -74,14 +76,34 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
     setTotalNotificationsUnreads(unreadCount);
   }, [notifications]);
 
-  const sendNotification = (payload: any) => {
+  const send = (payload: any) => {
     if (!socket) return;
     socket.emit("send_notification", payload);
   };
 
+  const markRead = async () => {
+    const unreadIds = notifications.filter((n) => !n.isRead).map((n) => n._id);
+    if (unreadIds.length === 0) return;
+    await notificationServices.markRead(unreadIds as string[]);
+    setNotifications((prev) =>
+      prev.map((n) => (unreadIds.includes(n._id) ? { ...n, isRead: true } : n)),
+    );
+  };
+
+  const remove = async (id: string) => {
+    await notificationServices.remove(id);
+    setNotifications((prev) => prev.filter((p) => p._id !== id));
+  };
+
   return (
     <NotificationContext.Provider
-      value={{ notifications, totalNotificationsUnreads, sendNotification }}
+      value={{
+        notifications,
+        totalNotificationsUnreads,
+        send,
+        markRead,
+        remove,
+      }}
     >
       {children}
     </NotificationContext.Provider>

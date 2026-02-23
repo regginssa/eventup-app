@@ -64,7 +64,7 @@ const EventDetailScreen = () => {
   const { user } = useAuth();
   const { tickets } = useTicket();
   const { setBookingFlight, setBookingHotel } = useBooking();
-  const { sendNotification } = useNotification();
+  const { send: sendNotification } = useNotification();
   const toast = useToast();
 
   const getUserLocationAndSave = async () => {
@@ -196,14 +196,10 @@ const EventDetailScreen = () => {
   }, [user, event]);
 
   useEffect(() => {
-    if (
-      attendees &&
-      attendees.ticket &&
-      attendees.ticket.status !== "refunded"
-    ) {
-      setServices([...services, "Ticket"]);
-    }
-  }, [attendees]);
+    if (!event || !user?._id) return;
+    const att = event.attendees.find((att) => att.user._id === user._id);
+    setAttendees(att || null);
+  }, [event, user?._id]);
 
   useEffect(() => {
     if (!attendees) return;
@@ -256,6 +252,7 @@ const EventDetailScreen = () => {
           isRead: false,
           isArchived: false,
           user: event.hoster._id as any,
+          link: `/event/${event._id}`,
         };
 
         const notifyRes = await notificationServices.create(newNotification);
