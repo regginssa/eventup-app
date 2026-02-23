@@ -89,6 +89,29 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
 
         {ticket && <UserTicketItem item={ticket} />}
 
+        {attendees && (
+          <View className="flex flex-row items-center gap-2">
+            {attendees.ticket && (
+              <View className="flex flex-row items-start gap-2">
+                <MaterialCommunityIcons
+                  name={
+                    attendees.ticket?.status === "deposited"
+                      ? "clock-outline"
+                      : attendees.ticket.status === "released"
+                        ? "checkbox-marked-circle-outline"
+                        : "cash-refund"
+                  }
+                  size={18}
+                  color="#ca8a04"
+                />
+                <Text className="font-poppins-medium text-yellow-600 text-sm">
+                  Ticket is {attendees.ticket?.status}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+
         <View className="gap-2">
           {services.map((s) => (
             <Text className="font-dm-sans-bold text-sm text-gray-700">

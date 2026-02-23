@@ -22,7 +22,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 const userTabs: TDropdownItem[] = [
   { label: "Packages", value: "packages" },
@@ -141,11 +141,22 @@ const EventDetailScreen = () => {
       setLoading(false);
       setTabs(ownerTabs);
       setSelectedTab(ownerTabs[0]);
+      setBookingFlight(null);
+      setBookingHotel(null);
       return;
     }
 
     const att = fetchedEvent?.attendees.find((a) => a.user._id === user?._id);
     setAttendees(att || null);
+
+    if (att) {
+      await fetchBookingData();
+      setTabs(userTabs);
+      setBookingFlight(null);
+      setBookingHotel(null);
+      setLoading(false);
+      return;
+    }
 
     await fetchBookingData();
     await fetchUserCurrentLocation();
@@ -185,12 +196,10 @@ const EventDetailScreen = () => {
   }, [attendees]);
 
   useEffect(() => {
-    if (!booking || !event || event.type === "ai" || !user?._id) return;
-
-    const myAttend = event.attendees.find((a) => a.user._id === user._id);
-    const myTicket = tickets.find((t) => t._id === myAttend?.ticket?.ticketId);
+    if (!attendees) return;
+    const myTicket = tickets.find((t) => t._id === attendees.ticket?.ticketId);
     setTicket(myTicket || null);
-  }, [booking, event, user]);
+  }, [attendees]);
 
   return (
     <EventDetailContainer callback={callback as any}>
@@ -230,6 +239,7 @@ const EventDetailScreen = () => {
                   totalPrice={booking?.price.total || 0}
                   fee={event.type === "user" ? event.fee : undefined}
                   ticket={ticket}
+                  attendees={attendees || undefined}
                 />
               ) : selectedTab.value === "overview" ? (
                 <EventDetailOverview
@@ -289,6 +299,29 @@ const EventDetailScreen = () => {
           <EventDetailEmpty />
         )}
       </View>
+
+      {!loading && user?._id !== event?.hoster?._id && attendees && (
+        <>
+          {attendees.ticket?.status === "deposited" && (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="w-full p-4 rounded-xl bg-green-600 flex flex-row items-center justify-center mt-4"
+            >
+              <Text className="font-poppins-medium text-sm text-white">
+                Release Ticket
+              </Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="w-full p-4 rounded-xl bg-red-600 flex flex-row items-center justify-center mt-4"
+          >
+            <Text className="font-poppins-medium text-sm text-white">
+              Cancel Entry
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
     </EventDetailContainer>
   );
 };
