@@ -204,7 +204,7 @@ const HomeScreen = () => {
 
   return (
     <LayoutContainer title="Events">
-      <View className="w-full gap-5">
+      <View className="w-full gap-5 mb-2">
         <View className="w-full flex flex-row items-center gap-3">
           <View className="flex-1">
             <Input
@@ -263,7 +263,7 @@ const HomeScreen = () => {
         onSelct={setSelectedTab}
       />
 
-      <View className="flex-1 ">
+      <View className="flex-1 mt-4">
         <EventsPreviewGroup
           events={events}
           loading={loading}

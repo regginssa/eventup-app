@@ -1,5 +1,6 @@
 import { fetchBookingByUserIdAndEventId } from "@/api/services/booking";
 import eventServices from "@/api/services/event";
+import notificationServices from "@/api/services/notification";
 import userServices from "@/api/services/user";
 import { AttendeesCardGroup } from "@/components";
 import { Button, Spinner, Tabs } from "@/components/common";
@@ -13,11 +14,13 @@ import {
 } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useBooking } from "@/components/providers/BookingProvider";
+import { useNotification } from "@/components/providers/NotificationProvider";
 import { useTicket } from "@/components/providers/TicketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
 import { EventDates, IEvent, TAttendees } from "@/types/event";
+import { INotification } from "@/types/notification";
 import { ITicket } from "@/types/ticket";
 import { IUser } from "@/types/user";
 import { formatEventLabel } from "@/utils/format";
@@ -61,6 +64,7 @@ const EventDetailScreen = () => {
   const { user } = useAuth();
   const { tickets } = useTicket();
   const { setBookingFlight, setBookingHotel } = useBooking();
+  const { sendNotification } = useNotification();
   const toast = useToast();
 
   const getUserLocationAndSave = async () => {
@@ -213,27 +217,55 @@ const EventDetailScreen = () => {
     try {
       setReleaseLoading(true);
 
-      const updatedAttendees: any[] = event.attendees.map((att) =>
-        att.user._id === user?._id
-          ? { ...att, ticket: { ...att.ticket, status: "released" } }
-          : att,
-      );
-
+      // Change the ticket status from event attendees
       const eventBodyData: IEvent = {
         ...event,
-        attendees: updatedAttendees,
+        attendees: event.attendees.map((att) =>
+          att.user._id === user?._id
+            ? { ...att, ticket: { ...att.ticket, status: "released" } }
+            : att,
+        ) as any,
       };
 
       const eventRes = await eventServices.update(event._id, eventBodyData);
 
       setEvent(eventRes.data || null);
 
+      // Add ticket to the event hoster's tickets array
       const hosterBodyData: IUser = {
         ...event.hoster,
         tickets: [...event.hoster.tickets, attendees.ticket?.ticketId as any],
       };
 
-      await userServices.update(hosterBodyData._id as string, hosterBodyData);
+      const hosterRes = await userServices.update(
+        hosterBodyData._id as string,
+        hosterBodyData,
+      );
+
+      // Send a notification to the event hoster
+      if (hosterRes.ok) {
+        // Create a new notification
+        const newNotification: INotification = {
+          type: "event_ticket_released",
+          metadata: {
+            eventId: event._id,
+            ticketUserId: user?._id,
+          },
+          title: `A ticket has been released`,
+          body: `${user?.name}'s ticket for the event "${event.name}" has been successfully released.`,
+          isRead: false,
+          isArchived: false,
+          user: event.hoster._id as any,
+        };
+
+        const notifyRes = await notificationServices.create(newNotification);
+        if (notifyRes.data) {
+          sendNotification({
+            notificationId: notifyRes.data._id,
+            userId: event.hoster._id,
+          });
+        }
+      }
     } catch (error) {
       toast.error("Release ticket error");
     } finally {
@@ -356,7 +388,7 @@ const EventDetailScreen = () => {
               </Text>
               {releaseLoading && <ActivityIndicator size={16} color="white" />}
             </TouchableOpacity>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               activeOpacity={0.8}
               className="w-full p-4 rounded-xl bg-red-600 flex flex-row items-center justify-center gap-2 mt-4"
               disabled={cancelEntryLoading}
@@ -367,7 +399,7 @@ const EventDetailScreen = () => {
               {cancelEntryLoading && (
                 <ActivityIndicator size={16} color="white" />
               )}
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </>
         )}
     </EventDetailContainer>
