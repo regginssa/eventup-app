@@ -90,26 +90,52 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
         {ticket && <UserTicketItem item={ticket} />}
 
         {attendees && (
-          <View className="flex flex-row items-center gap-2">
-            {attendees.ticket && (
-              <View className="flex flex-row items-start gap-2">
-                <MaterialCommunityIcons
-                  name={
-                    attendees.ticket?.status === "deposited"
-                      ? "clock-outline"
-                      : attendees.ticket.status === "released"
-                        ? "checkbox-marked-circle-outline"
-                        : "cash-refund"
-                  }
-                  size={18}
-                  color="#ca8a04"
-                />
-                <Text className="font-poppins-medium text-yellow-600 text-sm">
-                  Ticket is {attendees.ticket?.status}
-                </Text>
-              </View>
-            )}
-          </View>
+          <>
+            <View className="flex flex-row items-center gap-2">
+              {attendees.ticket && (
+                <View className="flex flex-row items-start gap-2">
+                  <MaterialCommunityIcons
+                    name={
+                      attendees.ticket?.status === "deposited"
+                        ? "clock-outline"
+                        : attendees.ticket.status === "released"
+                          ? "checkbox-marked-circle-outline"
+                          : "cash-refund"
+                    }
+                    size={18}
+                    color={
+                      attendees.ticket.status === "deposited"
+                        ? "#ca8a04"
+                        : attendees.ticket.status === "released"
+                          ? "#16a34a"
+                          : "#2563eb"
+                    }
+                  />
+                  <Text
+                    className={`font-poppins-medium text-sm ${attendees.ticket.status === "deposited" ? "text-yellow-600" : attendees.ticket.status === "released" ? "text-green-600" : "text-blue-600"}`}
+                  >
+                    Ticket is {attendees.ticket?.status}
+                  </Text>
+                </View>
+              )}
+            </View>
+            {/* <View className="flex flex-row items-start gap-2">
+              <MaterialCommunityIcons
+                name={
+                  attendees.status === "approved"
+                    ? "checkbox-marked-circle-outline"
+                    : "alert-circle-outline"
+                }
+                size={16}
+                color={attendees.status === "approved" ? "#16a34a" : "#ef4444"}
+              />
+              <Text
+                className={`font-poppins-medium text-sm ${attendees.status === "approved" ? "text-green-600" : "text-red-500"}`}
+              >
+                Application is {attendees.status}
+              </Text>
+            </View> */}
+          </>
         )}
 
         <View className="gap-2">

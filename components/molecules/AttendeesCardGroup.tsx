@@ -1,6 +1,6 @@
 import { TAttendees } from "@/types/event";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { Avatar } from "../common";
 
 interface AttendeesCardGroupProps {
@@ -62,25 +62,35 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({ items }) => {
           </View>
         </View>
 
-        <View className="flex-1 gap-3">
+        <View className="flex-1 gap-3 flex flex-col items-center justify-center">
           {status !== "blocked" && ticket && (
-            <View className="flex flex-row items-start gap-2">
+            <View className="w-full flex flex-row items-start justify-center gap-2">
               <MaterialCommunityIcons
                 name={
                   ticket?.status === "deposited"
                     ? "clock-outline"
-                    : "checkbox-marked-circle-outline"
+                    : ticket.status === "released"
+                      ? "checkbox-marked-circle-outline"
+                      : "cash-refund"
                 }
                 size={18}
-                color="#ca8a04"
+                color={
+                  ticket.status === "deposited"
+                    ? "#ca8a04"
+                    : ticket.status === "released"
+                      ? "#16a34a"
+                      : "#2563eb"
+                }
               />
-              <Text className="font-poppins-medium text-yellow-600 text-sm">
+              <Text
+                className={`font-poppins-medium text-sm ${ticket.status === "deposited" ? "text-yellow-600" : ticket.status === "released" ? "text-green-600" : "text-blue-600"}`}
+              >
                 Ticket is {ticket?.status}
               </Text>
             </View>
           )}
 
-          <View className="flex flex-row items-start gap-2">
+          {/* <View className="flex flex-row items-start gap-2">
             <MaterialCommunityIcons
               name={
                 status === "approved"
@@ -95,9 +105,12 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({ items }) => {
             >
               Application is {status}
             </Text>
-          </View>
+          </View> */}
 
-          <Pressable className="p-2 rounded-xl w-full bg-green-600 flex flex-row items-center justify-center gap-2">
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="p-2 rounded-xl w-full bg-green-600 flex flex-row items-center justify-center gap-2"
+          >
             <MaterialCommunityIcons
               name="account-plus-outline"
               size={16}
@@ -106,7 +119,7 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({ items }) => {
             <Text className="font-poppins-medium text-sm text-white">
               Invite
             </Text>
-          </Pressable>
+          </TouchableOpacity>
         </View>
       </View>
     );

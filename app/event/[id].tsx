@@ -1,5 +1,6 @@
 import { fetchBookingByUserIdAndEventId } from "@/api/services/booking";
 import eventServices from "@/api/services/event";
+import userServices from "@/api/services/user";
 import { AttendeesCardGroup } from "@/components";
 import { Button, Spinner, Tabs } from "@/components/common";
 import {
@@ -13,16 +14,18 @@ import {
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useBooking } from "@/components/providers/BookingProvider";
 import { useTicket } from "@/components/providers/TicketProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
 import { EventDates, IEvent, TAttendees } from "@/types/event";
 import { ITicket } from "@/types/ticket";
+import { IUser } from "@/types/user";
 import { formatEventLabel } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 const userTabs: TDropdownItem[] = [
   { label: "Packages", value: "packages" },
@@ -50,12 +53,15 @@ const EventDetailScreen = () => {
   const [services, setServices] = useState<string[]>([]);
   const [ticket, setTicket] = useState<ITicket | null>(null);
   const [attendees, setAttendees] = useState<TAttendees | null>(null);
+  const [releaseLoading, setReleaseLoading] = useState<boolean>(false);
+  const [cancelEntryLoading, setCancelEntryLoading] = useState<boolean>(false);
 
   const { id, callback } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
   const { tickets } = useTicket();
   const { setBookingFlight, setBookingHotel } = useBooking();
+  const toast = useToast();
 
   const getUserLocationAndSave = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -201,6 +207,40 @@ const EventDetailScreen = () => {
     setTicket(myTicket || null);
   }, [attendees]);
 
+  const handleUserTicketRelease = async () => {
+    if (!event?._id || !attendees || !event.hoster?._id) return;
+
+    try {
+      setReleaseLoading(true);
+
+      const updatedAttendees: any[] = event.attendees.map((att) =>
+        att.user._id === user?._id
+          ? { ...att, ticket: { ...att.ticket, status: "released" } }
+          : att,
+      );
+
+      const eventBodyData: IEvent = {
+        ...event,
+        attendees: updatedAttendees,
+      };
+
+      const eventRes = await eventServices.update(event._id, eventBodyData);
+
+      setEvent(eventRes.data || null);
+
+      const hosterBodyData: IUser = {
+        ...event.hoster,
+        tickets: [...event.hoster.tickets, attendees.ticket?.ticketId as any],
+      };
+
+      await userServices.update(hosterBodyData._id as string, hosterBodyData);
+    } catch (error) {
+      toast.error("Release ticket error");
+    } finally {
+      setReleaseLoading(false);
+    }
+  };
+
   return (
     <EventDetailContainer callback={callback as any}>
       <View className="flex-1 gap-6">
@@ -300,28 +340,36 @@ const EventDetailScreen = () => {
         )}
       </View>
 
-      {!loading && user?._id !== event?.hoster?._id && attendees && (
-        <>
-          {attendees.ticket?.status === "deposited" && (
+      {!loading &&
+        user?._id !== event?.hoster?._id &&
+        attendees &&
+        attendees.ticket?.status === "deposited" && (
+          <>
             <TouchableOpacity
               activeOpacity={0.8}
-              className="w-full p-4 rounded-xl bg-green-600 flex flex-row items-center justify-center mt-4"
+              className="w-full p-4 rounded-xl bg-green-600 flex flex-row items-center justify-center gap-2 mt-4"
+              disabled={releaseLoading}
+              onPress={handleUserTicketRelease}
             >
               <Text className="font-poppins-medium text-sm text-white">
                 Release Ticket
               </Text>
+              {releaseLoading && <ActivityIndicator size={16} color="white" />}
             </TouchableOpacity>
-          )}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className="w-full p-4 rounded-xl bg-red-600 flex flex-row items-center justify-center mt-4"
-          >
-            <Text className="font-poppins-medium text-sm text-white">
-              Cancel Entry
-            </Text>
-          </TouchableOpacity>
-        </>
-      )}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="w-full p-4 rounded-xl bg-red-600 flex flex-row items-center justify-center gap-2 mt-4"
+              disabled={cancelEntryLoading}
+            >
+              <Text className="font-poppins-medium text-sm text-white">
+                Cancel Entry
+              </Text>
+              {cancelEntryLoading && (
+                <ActivityIndicator size={16} color="white" />
+              )}
+            </TouchableOpacity>
+          </>
+        )}
     </EventDetailContainer>
   );
 };
