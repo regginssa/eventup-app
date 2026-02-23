@@ -51,7 +51,7 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
       (c) => c.type === "group" && c.event?._id === event._id,
     );
 
-    if (!conv) return;
+    if (!conv) return toast.info("Please create a group chat first");
 
     if (conv?.participants.some((p) => p._id === userId)) {
       return toast.error("The user has already joined the group chat");

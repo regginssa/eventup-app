@@ -1,4 +1,4 @@
-import { fetchUser } from "@/api/services/user";
+import userServices from "@/api/services/user";
 import { Spinner } from "@/components/common";
 import { ProfileHeader, ProfileReviews } from "@/components/organisms";
 import { SimpleContainer } from "@/components/organisms/layout";
@@ -23,7 +23,7 @@ const ProfileScreen = () => {
     if (!userId) return;
 
     setLoading(true);
-    const response = await fetchUser(userId as string);
+    const response = await userServices.get(userId as string);
 
     if (!response.data) {
       setIsNotFound(true);
