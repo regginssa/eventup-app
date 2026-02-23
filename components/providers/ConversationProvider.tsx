@@ -160,6 +160,8 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
   }, [user]);
 
   useEffect(() => {
+    if (!socket) return;
+
     const handleUpdatedConversation = (conversation: IConversation) => {
       setConversations((prev) =>
         prev.map((p) => (p._id === conversation._id ? conversation : p)),
