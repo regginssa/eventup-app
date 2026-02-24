@@ -22,17 +22,6 @@ const tabs: TDropdownItem[] = [
     ),
   },
   {
-    label: "Pending",
-    value: "pending",
-    icon: (
-      <MaterialCommunityIcons
-        name="calendar-clock-outline"
-        size={16}
-        color="#1f2937"
-      />
-    ),
-  },
-  {
     label: "Completed",
     value: "completed",
     icon: (
@@ -80,8 +69,7 @@ const MyEventsScreen = () => {
             setEvents(response.data);
           }
         }
-      } catch (error) {
-      }
+      } catch (error) {}
 
       setLoading(false);
     };
@@ -94,7 +82,7 @@ const MyEventsScreen = () => {
       <Tabs
         tabs={tabs}
         selectedTab={selectedTab}
-        scrolled
+        tabClassName="flex-1"
         onSelct={setSelectedTab}
       />
       <EventsPreviewGroup events={events} loading={loading} />

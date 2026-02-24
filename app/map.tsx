@@ -1,5 +1,5 @@
 import eventRestServices from "@/api/services/event";
-import { Modal } from "@/components/common";
+import { Button, Modal } from "@/components/common";
 import { MapMarker } from "@/components/molecules";
 import { LayoutContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -9,6 +9,7 @@ import { formatDateTime, formatEventLabel } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -30,6 +31,7 @@ const MapScreen = () => {
   const mapRef = useRef<RNMapView | null>(null);
 
   const { user } = useAuth();
+  const router = useRouter();
 
   const handleSelectEvent = (id?: string) => {
     if (pressing) return;
@@ -50,7 +52,7 @@ const MapScreen = () => {
     try {
       setLoading(true);
 
-      const response = await eventRestServices.fetchAll();
+      const response = await eventRestServices.getAll();
 
       if (response.ok) {
         setEvents(response.data);
@@ -81,7 +83,7 @@ const MapScreen = () => {
           </Text>
         </View>
       ) : (
-        <View className="flex-1 rounded-lg overflow-hidden">
+        <View className="flex-1 rounded-lg overflow-hidden mt-4">
           <RNMapView
             ref={mapRef}
             provider="google"
@@ -138,7 +140,7 @@ const MapScreen = () => {
         onClose={() => setIsOpen(false)}
         scrolled={true}
       >
-        <View className="w-full flex flex-row gap-4">
+        <View className="w-full flex flex-row gap-4 mb-4">
           <View className="relative w-[125px] h-[125px] rounded-lg overflow-hidden">
             {selectedEvent?.images && selectedEvent.images.length > 0 ? (
               <Image
@@ -212,6 +214,13 @@ const MapScreen = () => {
             </View>
           </View>
         </View>
+
+        <Button
+          type="primary"
+          label="View"
+          buttonClassName="h-12"
+          onPress={() => router.push(`/event/${selectedEvent?._id}`)}
+        />
       </Modal>
     </LayoutContainer>
   );

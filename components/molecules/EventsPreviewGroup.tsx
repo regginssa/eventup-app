@@ -11,7 +11,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { Button, Spinner } from "../common";
@@ -150,7 +149,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                   </View>
 
                   {/* Favorite */}
-                  <TouchableOpacity
+                  {/* <TouchableOpacity
                     activeOpacity={0.8}
                     className="w-8 h-8 bg-white rounded-full flex items-center justify-center"
                   >
@@ -160,7 +159,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                       size={16}
                       color="#1f2937"
                     />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
 
                 <View className="w-full">
