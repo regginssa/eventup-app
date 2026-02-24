@@ -31,21 +31,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { TFile } from "./dm";
 
 const ChatGroup = () => {
   const [conversation, setConversation] = useState<IConversation | null>(null);
-  const [files, setFiles] = useState<TFile[]>([]);
   const [selectedMessageId, setSelectedMessageId] = useState<string>("");
   const [isMessageActionsOpen, setIsMessageActionsOpen] =
     useState<boolean>(false);
-  const [isUploadOpen, setIsUploadOpen] = useState<boolean>(false);
   const [isViewGroupOpen, setIsViewGroupOpen] = useState<boolean>(false);
   const [text, setText] = useState<string>("");
   const [editText, setEditText] = useState<string>("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [uploadLoading, setUploadLoading] = useState<boolean>(false);
   const flatListRef = useRef<FlatList>(null);
 
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
@@ -116,7 +112,7 @@ const ChatGroup = () => {
         leaveConversation(conversationId as string);
       }
     };
-  }, [conversationId, user?._id, conversations]);
+  }, [conversationId, user?._id]);
 
   const handleSend = () => {
     if (text.trim().length === 0) return;
