@@ -14,7 +14,6 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
-  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -232,7 +231,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
             </TouchableOpacity>
           ))}
 
-          <View className="w-full flex flex-row items-center justify-between py-2">
+          {/* <View className="w-full flex flex-row items-center justify-between py-2">
             <View className="flex flex-row items-center gap-2">
               <FontAwesome
                 name={`${theme === "light" ? "moon" : "sun"}-o`}
@@ -253,7 +252,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
               style={{ padding: 0, margin: 0 }}
               onChange={() => toggleTheme(theme === "light" ? "dark" : "light")}
             />
-          </View>
+          </View> */}
         </View>
       </View>
 

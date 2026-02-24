@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTheme } from "../providers/ThemeProvider";
 
 interface TabsProps {
   tabs: TDropdownItem[];
@@ -23,6 +24,8 @@ const Tabs: React.FC<TabsProps> = ({
   tabClassName,
   scrolled,
 }) => {
+  const { theme } = useTheme();
+
   if (scrolled) {
     return (
       <View className="w-full">
@@ -40,7 +43,9 @@ const Tabs: React.FC<TabsProps> = ({
             >
               <View className="flex flex-row items-center justify-center gap-1 p-2 px-4">
                 {tab.icon}
-                <Text className="font-poppins-semibold text-gray-800 text-center whitespace-nowrap">
+                <Text
+                  className={`font-poppins-semibold ${theme === "light" ? "text-gray-800" : "text-gray-300"} text-center whitespace-nowrap`}
+                >
                   {tab.label}
                 </Text>
               </View>
@@ -73,7 +78,9 @@ const Tabs: React.FC<TabsProps> = ({
         >
           <View className="flex flex-row items-center justify-center gap-1 p-2 px-4">
             {tab.icon}
-            <Text className="font-poppins-semibold text-gray-800 text-center whitespace-nowrap">
+            <Text
+              className={`font-poppins-semibold ${theme === "light" ? "text-gray-800" : "text-gray-300"} text-center whitespace-nowrap`}
+            >
               {tab.label}
             </Text>
           </View>

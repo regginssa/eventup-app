@@ -3,6 +3,7 @@ import { Input, Tabs } from "@/components/common";
 import { EventFilterModal, EventsPreviewGroup } from "@/components/molecules";
 import { LayoutContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import { TDropdownItem, TPagination } from "@/types";
 import { IEvent } from "@/types/event";
 import { Country, RegionType } from "@/types/location.types";
@@ -58,6 +59,7 @@ const HomeScreen = () => {
 
   const router = useRouter();
   const { user } = useAuth();
+  const { theme } = useTheme();
 
   const handleNext = async () => {
     if (!user?._id) return;
@@ -211,18 +213,28 @@ const HomeScreen = () => {
               type="string"
               placeholder="Search"
               className="rounded-full"
-              icon={<Feather name="search" size={16} color="#4b5563" />}
+              icon={
+                <Feather
+                  name="search"
+                  size={16}
+                  color={theme === "light" ? "#4b5563" : "#d1d5db"}
+                />
+              }
               value={search}
               onChange={setSearch}
             />
           </View>
           <TouchableOpacity
             activeOpacity={0.8}
-            className="w-[60px] h-[46px] bg-white rounded-full flex items-center justify-center relative"
+            className={`w-[60px] h-[46px] ${theme === "light" ? "bg-white" : "bg-[#262c2c]"} rounded-full flex items-center justify-center relative`}
             style={styles.tune}
             onPress={() => setIsFilterOpen(true)}
           >
-            <MaterialIcons name="tune" size={20} color="#4b5563" />
+            <MaterialIcons
+              name="tune"
+              size={20}
+              color={theme === "light" ? "#4b5563" : "#d1d5db"}
+            />
 
             {[startDate, country, region, category].filter((f) => f !== null)
               .length > 0 && (
@@ -241,14 +253,22 @@ const HomeScreen = () => {
 
         <View className="w-full flex flex-row items-center justify-between">
           <View className="flex flex-row items-center gap-2">
-            <MaterialIcons name="event-available" size={24} color="#374151" />
-            <Text className="font-poppins-semibold text-sm text-gray-700">
+            <MaterialIcons
+              name="event-available"
+              size={24}
+              color={theme === "light" ? "#374151" : "#d1d5db"}
+            />
+            <Text
+              className={`font-poppins-semibold text-sm ${theme === "light" ? "text-gray-700" : "text-gray-300"}`}
+            >
               {pagination.total.toLocaleString("en-US")} events are available
             </Text>
           </View>
 
           <View className="flex flex-row items-center gap-2">
-            <Text className="font-poppins-semibold text-sm text-gray-700">
+            <Text
+              className={`font-poppins-semibold text-sm ${theme === "light" ? "text-gray-700" : "text-gray-300"}`}
+            >
               Page: {pagination.page}/
               {Math.ceil(pagination.total / pagination.limit)}
             </Text>
