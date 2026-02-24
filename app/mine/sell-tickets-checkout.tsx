@@ -1,6 +1,7 @@
 import { fetchTicketById } from "@/api/services/ticket";
 import { fetchTokenPricesAndFee } from "@/api/services/web3";
-import { Button, CheckoutContainer, CryptoPayout } from "@/components";
+import { Button, CryptoPayout } from "@/components";
+import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { ITicket } from "@/types/ticket";
@@ -265,7 +266,7 @@ const MineSellTicketsCheckout = () => {
   };
 
   return (
-    <CheckoutContainer>
+    <SimpleContainer title="Checkout" scrolled>
       <Header ticket={ticket} loading={loading} />
 
       <Detail
@@ -295,7 +296,7 @@ const MineSellTicketsCheckout = () => {
         loading={sellLoading}
         onPress={handleSell}
       />
-    </CheckoutContainer>
+    </SimpleContainer>
   );
 };
 

@@ -112,7 +112,7 @@ const ChatGroup = () => {
         leaveConversation(conversationId as string);
       }
     };
-  }, [conversationId, user?._id]);
+  }, [conversationId]);
 
   const handleSend = () => {
     if (text.trim().length === 0) return;

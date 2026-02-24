@@ -137,7 +137,7 @@ const ChatDM = () => {
         leaveConversation(conversationId as string);
       }
     };
-  }, [conversationId, user?._id, conversations]);
+  }, [conversationId]);
 
   useEffect(() => {
     if (!messages.length || !otherUserId || !user?._id || !conversationId)

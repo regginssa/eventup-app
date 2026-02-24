@@ -110,18 +110,6 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
       href: "/",
     },
     {
-      label: "Reviews",
-      icon: (
-        <FontAwesome
-          name="star-o"
-          size={20}
-          color={theme === "light" ? "#374151" : "#d1d5db"}
-        />
-      ),
-      badge: 5,
-      href: "/",
-    },
-    {
       label: "Tickets",
       icon: (
         <FontAwesome
