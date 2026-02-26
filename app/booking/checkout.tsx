@@ -502,8 +502,9 @@ const CheckoutScreen = () => {
         billingPayment,
       };
     } catch (error: any) {
-      setBookLabel("Book Now");
       toast.error("Booking failed");
+      setBookLabel("Book Now");
+      setBookLoading(false);
     }
   };
 
