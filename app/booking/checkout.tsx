@@ -16,7 +16,6 @@ import { useToast } from "@/components/providers/ToastProvider";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
 import { TAmadeusFlightOrder, TAmadeusHotelOrder } from "@/types/amadeus";
 import {
-  IBooking,
   TBookingFlight,
   TBookingHotel,
   TBookingTransfer,
@@ -398,6 +397,7 @@ const CheckoutScreen = () => {
     };
     let billingAddress = null;
     let billingPayment = null;
+    let userTicketResult = null;
     let aiTicket = null;
 
     const flightPrice = Number(flight?.offers[0]?.price.total) || 0;
@@ -417,8 +417,31 @@ const CheckoutScreen = () => {
     // }
 
     try {
+      if (event?.type === "user" && userTicket) {
+        setBookLabel("Transferring ticket...");
+        userTicketResult = await handleUserTicket();
+
+        if (!userTicketResult) {
+          toast.error("Transfer ticket error");
+          setBookLabel("Book Now");
+          return setBookLoading(false);
+        }
+      }
+
+      if (event?.type === "ai" && event.tm?.url && user?._id) {
+        setBookLabel("Buying ticket...");
+        const purhcaseUrl = event.tm.url + `?subId=${user._id}`;
+        console.log("[ticket purchase url]: ", purhcaseUrl);
+        await WebBrowser.openBrowserAsync(purhcaseUrl);
+        const response = await eventServices.checkPurhcaseTicket(
+          event._id as string,
+          user._id,
+        );
+        console.log("[check purchase ticket response]: ", response.data);
+      }
+
       if (flight?.request) {
-        setBookLabel("Booking Flight...");
+        setBookLabel("Booking flight...");
         const response = await createFlightOrder(flight.request);
 
         if (response.data) {
@@ -428,7 +451,7 @@ const CheckoutScreen = () => {
       }
 
       if (hotel?.request) {
-        setBookLabel("Booking Hotel...");
+        setBookLabel("Booking hotel...");
         const response = await createHotelOrder(hotel.request);
 
         if (response.data) {
@@ -438,7 +461,7 @@ const CheckoutScreen = () => {
       }
 
       if (transfer?.requests && transfer.requests.length > 0) {
-        setBookLabel("Booking Transfers...");
+        setBookLabel("Booking transfers...");
         for (let i = 0; i < transfer.requests.length; i++) {
           const request = transfer.requests[i];
           const response = await createTransferOrder(request);
@@ -469,17 +492,6 @@ const CheckoutScreen = () => {
             };
           }
         }
-      }
-
-      if (event?.type === "ai" && event.tm?.url && user?._id) {
-        const purhcaseUrl = event.tm.url + `?subId=${user._id}`;
-        console.log("[ticket purchase url]: ", purhcaseUrl);
-        await WebBrowser.openBrowserAsync(purhcaseUrl);
-        const response = await eventServices.checkPurhcaseTicket(
-          event._id as string,
-          user._id,
-        );
-        console.log("[check purchase ticket response]: ", response.data);
       }
 
       return {
@@ -549,43 +561,31 @@ const CheckoutScreen = () => {
     try {
       setBookLoading(true);
 
-      let ticketTransferResult = false;
-
-      if (event?.type === "user" && userTicket) {
-        ticketTransferResult = await handleUserTicket();
-
-        if (!ticketTransferResult) {
-          toast.error("Transfer ticket error");
-          setBookLabel("Book Now");
-          return setBookLoading(false);
-        }
-      }
-
       const basicBookingData = await bookServices();
 
       // setBookLabel("Booking...");
 
-      const bookingData: IBooking = {
-        flight: basicBookingData?.flightOrder as any,
-        hotel: basicBookingData?.hotelOrder as any,
-        transfer: basicBookingData?.transferOrders as any,
-        timezone: event?.dates?.timezone || "",
-        event: event?._id as any,
-        user: user._id as any,
-        price: {
-          total: totalPrice,
-          base: basePrice,
-          comission: commissionPrice,
-          currency: currency.toUpperCase(),
-        },
-        billingAddress: basicBookingData?.billingAddress as any,
-        billingPayment: basicBookingData?.billingPayment as any,
-        package: packageType as any,
-        userTicket:
-          event?.type === "user" && ticketTransferResult
-            ? (userTicket?._id as any)
-            : undefined,
-      };
+      // const bookingData: IBooking = {
+      //   flight: basicBookingData?.flightOrder as any,
+      //   hotel: basicBookingData?.hotelOrder as any,
+      //   transfer: basicBookingData?.transferOrders as any,
+      //   timezone: event?.dates?.timezone || "",
+      //   event: event?._id as any,
+      //   user: user._id as any,
+      //   price: {
+      //     total: totalPrice,
+      //     base: basePrice,
+      //     comission: commissionPrice,
+      //     currency: currency.toUpperCase(),
+      //   },
+      //   billingAddress: basicBookingData?.billingAddress as any,
+      //   billingPayment: basicBookingData?.billingPayment as any,
+      //   package: packageType as any,
+      //   userTicket:
+      //     event?.type === "user" && ticketTransferResult
+      //       ? (userTicket?._id as any)
+      //       : undefined,
+      // };
 
       // const bookingRes = await createBooking(bookingData);
 
