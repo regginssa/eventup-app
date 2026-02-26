@@ -1,5 +1,4 @@
 import {
-  createBooking,
   createFlightOrder,
   createHotelOrder,
   createTransferOrder,
@@ -327,6 +326,11 @@ const CheckoutScreen = () => {
       base += Number(transferPrice);
     }
 
+    if (event?.type === "ai") {
+      const {} = event;
+      services.push("Ticket");
+    }
+
     total = base + base * 0.1;
 
     setBasePrice(Number(base.toFixed(2)));
@@ -468,7 +472,9 @@ const CheckoutScreen = () => {
       }
 
       if (event?.type === "ai" && event.tm?.url && user?._id) {
-        await WebBrowser.openBrowserAsync(event.tm.url + `/subid=${user._id}`);
+        const purhcaseUrl = event.tm.url + `?subId=${user._id}`;
+        console.log("[ticket purchase url]: ", purhcaseUrl);
+        await WebBrowser.openBrowserAsync(purhcaseUrl);
         const response = await eventServices.checkPurhcaseTicket(
           event._id as string,
           user._id,
@@ -557,7 +563,7 @@ const CheckoutScreen = () => {
 
       const basicBookingData = await bookServices();
 
-      setBookLabel("Booking...");
+      // setBookLabel("Booking...");
 
       const bookingData: IBooking = {
         flight: basicBookingData?.flightOrder as any,
@@ -581,23 +587,23 @@ const CheckoutScreen = () => {
             : undefined,
       };
 
-      const bookingRes = await createBooking(bookingData);
+      // const bookingRes = await createBooking(bookingData);
 
-      if (!bookingRes.data) {
-        toast.error("Saving booking error");
-        setBookLabel("Book Now");
-        return setBookLoading(false);
-      }
+      // if (!bookingRes.data) {
+      //   toast.error("Saving booking error");
+      //   setBookLabel("Book Now");
+      //   return setBookLoading(false);
+      // }
 
-      router.push({
-        pathname: "/booking/booked",
-        params: {
-          bookingId: bookingRes.data._id as string,
-          eventId,
-          packageType,
-          ticketId: userTicket?._id,
-        },
-      });
+      // router.push({
+      //   pathname: "/booking/booked",
+      //   params: {
+      //     bookingId: bookingRes.data._id as string,
+      //     eventId,
+      //     packageType,
+      //     ticketId: userTicket?._id,
+      //   },
+      // });
     } catch (error: any) {
       console.log("handle book error: ", error);
       toast.error("Booking failed");
