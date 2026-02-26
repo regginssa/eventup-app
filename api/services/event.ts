@@ -63,6 +63,16 @@ const update = async (
   return await AxiosInstance.patch(EVENT_BASE + id, bodyData);
 };
 
+// --- Check Purchase ticket ---
+const checkPurhcaseTicket = async (
+  eventId: string,
+  userId: string,
+): Promise<ApiResponse<boolean>> => {
+  return await AxiosInstance.get(
+    EVENT_BASE + eventId + "/check-purchase-ticket" + `?userId=${userId}`,
+  );
+};
+
 export default {
   get,
   getAll,
@@ -70,4 +80,5 @@ export default {
   getByUserId,
   create,
   update,
+  checkPurhcaseTicket,
 };

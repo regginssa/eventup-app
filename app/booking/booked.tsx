@@ -2,9 +2,7 @@ import { fetchBooking } from "@/api/services/booking";
 import eventServices from "@/api/services/event";
 import { Button, Spinner, TicketQR, UserTicketItem } from "@/components/common";
 import { BookedContainer } from "@/components/organisms";
-import { useAuth } from "@/components/providers/AuthProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
-import { useTicket } from "@/components/providers/TicketProvider";
 import { TCurrency, TPackageType } from "@/types";
 import {
   IBooking,
@@ -597,8 +595,6 @@ const BookedScreen = () => {
   const lottieRef = useRef<LottieView>(null);
 
   const { bookingId, eventId, packageType } = useLocalSearchParams();
-  const { user } = useAuth();
-  const { tickets } = useTicket();
   const { theme } = useTheme();
 
   const init = useCallback(async () => {
@@ -626,6 +622,7 @@ const BookedScreen = () => {
       setCommissionPrice(booking.price.comission);
       setTotalPrice(booking.price.total);
       setCurrency(booking.price.currency as TCurrency);
+      setUserTicket(booking.userTicket || null);
 
       const selectedServices = [];
       if (booking.flight) selectedServices.push("Flight");
@@ -645,19 +642,6 @@ const BookedScreen = () => {
   useEffect(() => {
     init();
   }, []);
-
-  useEffect(() => {
-    if (
-      !event ||
-      event?.type === "ai" ||
-      !user?._id ||
-      event.attendees.length === 0
-    )
-      return;
-    const myAttend = event.attendees.find((a) => a.user._id === user._id);
-    const myTicket = tickets.find((t) => t._id === myAttend?.ticket?.ticketId);
-    setUserTicket(myTicket || null);
-  }, [event]);
 
   return (
     <BookedContainer>

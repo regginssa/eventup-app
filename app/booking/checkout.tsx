@@ -35,6 +35,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { confirmPayment } from "@stripe/stripe-react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Text, View } from "react-native";
 
@@ -391,9 +392,9 @@ const CheckoutScreen = () => {
       ah: undefined,
       he: undefined,
     };
-
     let billingAddress = null;
     let billingPayment = null;
+    let aiTicket = null;
 
     const flightPrice = Number(flight?.offers[0]?.price.total) || 0;
     const hotelPrice = Number(hotel?.offers[0]?.offers[0]?.price?.total) || 0;
@@ -466,6 +467,15 @@ const CheckoutScreen = () => {
         }
       }
 
+      if (event?.type === "ai" && event.tm?.url && user?._id) {
+        await WebBrowser.openBrowserAsync(event.tm.url + `/subid=${user._id}`);
+        const response = await eventServices.checkPurhcaseTicket(
+          event._id as string,
+          user._id,
+        );
+        console.log("[check purchase ticket response]: ", response.data);
+      }
+
       return {
         flightOrder,
         hotelOrder,
@@ -475,11 +485,7 @@ const CheckoutScreen = () => {
       };
     } catch (error: any) {
       setBookLabel("Book Now");
-      console.error("handle book error: ", error);
-      Alert.alert(
-        "Error",
-        error?.response?.data?.message || error?.message || "Failed to book.",
-      );
+      toast.error("Booking failed");
     }
   };
 
@@ -537,12 +543,10 @@ const CheckoutScreen = () => {
     try {
       setBookLoading(true);
 
-      const basicBookingData = await bookServices();
-
-      setBookLabel("Booking...");
+      let ticketTransferResult = false;
 
       if (event?.type === "user" && userTicket) {
-        const ticketTransferResult = await handleUserTicket();
+        ticketTransferResult = await handleUserTicket();
 
         if (!ticketTransferResult) {
           toast.error("Transfer ticket error");
@@ -550,6 +554,10 @@ const CheckoutScreen = () => {
           return setBookLoading(false);
         }
       }
+
+      const basicBookingData = await bookServices();
+
+      setBookLabel("Booking...");
 
       const bookingData: IBooking = {
         flight: basicBookingData?.flightOrder as any,
@@ -567,6 +575,10 @@ const CheckoutScreen = () => {
         billingAddress: basicBookingData?.billingAddress as any,
         billingPayment: basicBookingData?.billingPayment as any,
         package: packageType as any,
+        userTicket:
+          event?.type === "user" && ticketTransferResult
+            ? (userTicket?._id as any)
+            : undefined,
       };
 
       const bookingRes = await createBooking(bookingData);

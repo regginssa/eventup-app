@@ -1,4 +1,5 @@
 import { IEvent } from "./event";
+import { ITicket } from "./ticket";
 import { IUser } from "./user";
 
 export type TBookingFlight = {
@@ -184,4 +185,5 @@ export interface IBooking {
     cvv: string;
   };
   package: "standard" | "gold";
+  userTicket?: ITicket;
 }
