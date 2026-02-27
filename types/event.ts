@@ -71,14 +71,14 @@ export type TAttendessTicketStatus = "deposited" | "released" | "refunded";
 
 export type TAttendeesStatus = "approved" | "blocked";
 
-export interface TAttendees {
+export type TAttendees = {
   user: IUser;
   ticket?: {
     ticketId: string;
     status: TAttendessTicketStatus;
   };
   status: TAttendeesStatus;
-}
+};
 
 export interface IEvent {
   _id?: string;

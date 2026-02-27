@@ -1,79 +1,84 @@
+import { TPackageType } from ".";
 import { IEvent } from "./event";
 import { ITicket } from "./ticket";
 import { IUser } from "./user";
 
+export type PaymentStatus =
+  | "pending"
+  | "processing"
+  | "confirmed"
+  | "failed"
+  | "cancelled";
+
 export type TBookingFlight = {
-  orderId: string;
-  associatedRecord: {
-    reference: string;
-    originSystemCode: "GDS" | "NON_GDS" | string;
-  };
-  validatingAirline: string;
-  status?: string;
-  price: {
-    total: number;
-    currency: string;
-  };
-  travelers: {
-    id: string;
-    firstName: string;
-    lastName: string;
-  }[];
-  itineraries: {
-    segments: {
-      departure: {
-        airport: string;
-        datetime: string;
-      };
-      arrival: {
-        airport: string;
-        datetime: string;
-      };
-      marketingCarrier: string;
-      operatingCarrier?: string;
-      flightNumber: string;
-      cabin: string;
-      baggage: {
-        quantity?: number;
-        weight?: number;
-        unit?: string;
-      };
-    }[];
-  }[];
+  // --- Identifiers ---
+  orderId: string; // Amadeus Order ID
+  pnr: string; // Record Locator (e.g. “AKIL3X”)
+  status: string; // default "CONFIRMED"
+
+  // --- Itinerary Summary ---
+  originIata: string; // e.g. "JFK"
+  destinationIata: string; // e.g. "LHR"
+  departureDate: Date | string;
+  arrivalDate: Date | string;
+  airlineName?: string;
+  flightNumber?: string;
+  isRoundTrip?: boolean;
+
+  // --- Passenger Summary ---
+  leadPassengerName: string;
+  totalPassengers?: number;
+
+  // --- Financials ---
+  totalPrice?: number;
+  currency?: string;
+
+  // --- Deep Data ---
+  segments?: any[]; // list of flight segments
+  travelers?: any[]; // passenger details
+  rawResponse?: Record<string, any>; // full Amadeus JSON
+
+  // --- Payment ---
+  paymentStatus?: PaymentStatus;
+
+  // --- Timestamps from mongoose ---
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 };
 
 export type TBookingHotel = {
-  orderId: string;
-  status: string;
-  hotel: {
-    id: string;
-    name: string;
-    image?: string;
-  };
-  checkIn: string;
-  checkOut: string;
-  rooms: Array<{
-    bookingId: string;
-    providerCode: string;
-    confirmationNumber: string;
-    roomType: string;
-    rateCode: string;
-  }>;
-  price: {
-    total: number;
-    currency: string;
-  };
-  guests: Array<{
-    id: string | number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-  }>;
-  associatedRecord: {
-    reference: string;
-    originSystemCode: "GDS" | "NON_GDS" | string;
-  };
+  bookingReference: string;
+  hotelConfirmationCode?: string | null;
+
+  status: "CONFIRMED" | "CANCELLED" | "PENDING";
+
+  // Stay details
+  hotelName: string;
+  hotelId?: string;
+  checkInDate: Date | string;
+  checkOutDate: Date | string;
+
+  // Guest
+  leadGuestName: string;
+  guestEmail?: string;
+  guestPhone?: string;
+
+  // Financials
+  totalAmount?: number;
+  currency?: string;
+  paymentPolicy?: "PREPAID" | "GUARANTEE" | "DEPOSIT";
+
+  // Room
+  roomDescription?: string;
+  roomQuantity?: number;
+
+  // Metadata
+  rawResponse?: Record<string, any>;
+  paymentStatus?: PaymentStatus;
+
+  // Timestamps added by mongoose
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 };
 
 export type TBookingTransfer = {
@@ -153,6 +158,38 @@ export type TBookingTransfer = {
   }[];
 };
 
+export type TBillingAddress = {
+  line: string;
+  zip: string;
+  countryCode: string;
+  cityName: string;
+};
+
+export type TBillingDetails = {
+  method?: string; // e.g. "CREDIT_CARD"
+  cardType?: string; // vendorCode: VI, MC, AX
+  cardLastFour?: string; // last 4 digits
+  cardHolder?: string;
+  billingAddress?: TBillingAddress;
+};
+
+export type TOfficialTicket = {
+  orderId?: string;
+
+  paymentStatus: "awaiting_payment" | "pending_sync" | "confirmed" | "failed";
+
+  // Timestamps from mongoose
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+};
+
+export type TBookingPrice = {
+  total: number;
+  base: number;
+  comission: number;
+  currency: string;
+};
+
 export interface IBooking {
   _id?: string;
   flight: TBookingFlight;
@@ -161,29 +198,11 @@ export interface IBooking {
     ah: TBookingTransfer;
     he: TBookingTransfer;
   };
-  timezone: string;
+  billingDetails: TBillingDetails;
+  officialTicket?: TOfficialTicket;
+  communityTicket?: ITicket;
   event: IEvent;
   user: IUser;
-  price: {
-    total: number;
-    base: number;
-    comission: number;
-    currency: string;
-  };
-  billingAddress: {
-    line: string;
-    zip: string;
-    countryCode: string;
-    cityName: string;
-  };
-  billingPayment: {
-    method: string;
-    cardNumber: string;
-    expiryDate: string;
-    holderName: string;
-    vendorCode: string;
-    cvv: string;
-  };
-  package: "standard" | "gold";
-  userTicket?: ITicket;
+  price: TBookingPrice;
+  package: TPackageType;
 }

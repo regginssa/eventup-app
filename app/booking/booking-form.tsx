@@ -30,6 +30,7 @@ import {
   TAmadeusHotelOffer,
   TAmadeusTransferBookingRequest,
 } from "@/types/amadeus";
+import { TBillingDetails } from "@/types/booking";
 import { IEvent } from "@/types/event";
 import { Country } from "@/types/location.types";
 import { ITicket } from "@/types/ticket";
@@ -484,6 +485,7 @@ const BookingScreen = () => {
     setBookingFlightRequest,
     setBookingHotelRequest,
     setBookingTransferRequest,
+    setBillingDetails,
   } = useBooking();
   const { tickets } = useTicket();
   const toast = useToast();
@@ -583,6 +585,8 @@ const BookingScreen = () => {
       setBookingFlightRequest(flightBookingRequest);
     }
 
+    let billingDetails: TBillingDetails | null = null;
+
     const paymentExpiryDateSplit = paymentDetails.expiryDate
       .split("T")[0]
       .split("-");
@@ -612,7 +616,15 @@ const BookingScreen = () => {
           },
         },
       };
+
       setBookingHotelRequest(hotelBookingRequest);
+
+      billingDetails = {
+        method: paymentDetails.method,
+        cardHolder: paymentDetails.holderName,
+        cardLastFour: paymentDetails.cardNumber.slice(-4),
+        cardType: paymentDetails.vendorCode,
+      };
     }
 
     const expiryDate = paymentDetails.expiryDate.split("T")[0];
@@ -758,6 +770,18 @@ const BookingScreen = () => {
       };
 
       transferRequests.push(heTransferBookingRequest);
+    }
+
+    if (transferRequests.length > 0) {
+      setBillingDetails({
+        ...billingDetails,
+        billingAddress: {
+          cityName: billingAddress.cityName,
+          countryCode: billingAddress.country?.cca2 as any,
+          line: billingAddress.line as any,
+          zip: billingAddress.zip,
+        },
+      });
     }
 
     setBookingTransferRequest(transferRequests);

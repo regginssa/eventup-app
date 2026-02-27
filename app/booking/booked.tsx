@@ -26,11 +26,11 @@ const BookedDarkImage = require("@/assets/images/booked_image_dark.png");
 const EventTicket = ({
   event,
   packageType,
-  userTicket,
+  communityTicket,
 }: {
   event: IEvent | null;
   packageType: TPackageType;
-  userTicket: ITicket | null;
+  communityTicket: ITicket | null;
 }) => {
   const [items, setItems] = useState<any[]>([]);
   const { theme } = useTheme();
@@ -88,8 +88,8 @@ const EventTicket = ({
         Event Ticket
       </Text>
 
-      {event?.type === "user" && userTicket ? (
-        <UserTicketItem item={userTicket} />
+      {event?.type === "user" && communityTicket ? (
+        <UserTicketItem item={communityTicket} />
       ) : (
         <View className="w-full flex flex-row gap-3">
           <TicketQR size={120} />
@@ -591,7 +591,7 @@ const BookedScreen = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [hasLoadedSuccessfully, setHasLoadedSuccessfully] =
     useState<boolean>(false);
-  const [userTicket, setUserTicket] = useState<ITicket | null>(null);
+  const [communityTicket, setCommunityTicket] = useState<ITicket | null>(null);
   const lottieRef = useRef<LottieView>(null);
 
   const { bookingId, eventId, packageType } = useLocalSearchParams();
@@ -622,7 +622,7 @@ const BookedScreen = () => {
       setCommissionPrice(booking.price.comission);
       setTotalPrice(booking.price.total);
       setCurrency(booking.price.currency as TCurrency);
-      setUserTicket(booking.userTicket || null);
+      setCommunityTicket(booking.communityTicket || null);
 
       const selectedServices = [];
       if (booking.flight) selectedServices.push("Flight");
@@ -672,7 +672,7 @@ const BookedScreen = () => {
           <EventTicket
             event={event}
             packageType={(packageType as any) || "standard"}
-            userTicket={userTicket}
+            communityTicket={communityTicket}
           />
           <FlightDetails flight={booking?.flight} packageType="standard" />
           <HotelDetails hotel={booking?.hotel} />

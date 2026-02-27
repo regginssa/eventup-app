@@ -1,4 +1,5 @@
 import {
+  createBooking,
   createFlightOrder,
   createHotelOrder,
   createTransferOrder,
@@ -13,9 +14,11 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useBooking } from "@/components/providers/BookingProvider";
 import { useTicket } from "@/components/providers/TicketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import { useAmadeus } from "@/hooks";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
 import { TAmadeusFlightOrder, TAmadeusHotelOrder } from "@/types/amadeus";
 import {
+  IBooking,
   TBookingFlight,
   TBookingHotel,
   TBookingTransfer,
@@ -24,11 +27,6 @@ import { IEvent } from "@/types/event";
 import { ITicket } from "@/types/ticket";
 import { IUser } from "@/types/user";
 import { formatDateTime, formatName, getCurrencySymbol } from "@/utils/format";
-import {
-  mapAmadeusFlightOrderToBookingFlightData,
-  mapAmadeusHotelOrderToBookingHotelData,
-  mapAmadeusTransferOrderToBookingTransferData,
-} from "@/utils/map";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { confirmPayment } from "@stripe/stripe-react-native";
 import { Image } from "expo-image";
@@ -256,9 +254,13 @@ const CheckoutScreen = () => {
 
   const { eventId, packageType, ticketId } = useLocalSearchParams();
   const router = useRouter();
-
   const { user, setAuthUser } = useAuth();
-  const { flight, hotel, transfer } = useBooking();
+  const { flight, hotel, transfer, billingDetails } = useBooking();
+  const {
+    mapAmadeusFlightOrderToBookingFlightData,
+    mapAmadeusHotelOrderToBookingHotelData,
+    mapAmadeusTransferOrderToBookingTransferData,
+  } = useAmadeus();
 
   const { tickets } = useTicket();
   const toast = useToast();
@@ -395,10 +397,8 @@ const CheckoutScreen = () => {
       ah: undefined,
       he: undefined,
     };
-    let billingAddress = null;
-    let billingPayment = null;
-    let userTicketResult = null;
-    let aiTicket = null;
+    let communityTicket = null;
+    let officialTicket = null;
 
     const flightPrice = Number(flight?.offers[0]?.price.total) || 0;
     const hotelPrice = Number(hotel?.offers[0]?.offers[0]?.price?.total) || 0;
@@ -409,22 +409,17 @@ const CheckoutScreen = () => {
 
     // Pay total amount first
     setBookLabel("Processing Payment...");
-    // const paymentResult = await handleStripePayment(totalPrice, currency);
-
-    // if (!paymentResult) {
-    //   setBookLabel("Book Now");
-    //   return toast.error("Failed to make payment.");
-    // }
 
     try {
       if (event?.type === "user" && userTicket) {
         setBookLabel("Transferring ticket...");
-        userTicketResult = await handleUserTicket();
+        communityTicket = await handleCommunityTicket();
 
-        if (!userTicketResult) {
+        if (!communityTicket) {
           toast.error("Transfer ticket error");
           setBookLabel("Book Now");
-          return setBookLoading(false);
+          setBookLoading(false);
+          return {};
         }
       }
 
@@ -480,16 +475,6 @@ const CheckoutScreen = () => {
               transferOrders.he =
                 mapAmadeusTransferOrderToBookingTransferData(data);
             }
-
-            billingAddress = data.passengers[0].billingAddress;
-            billingPayment = {
-              method: transfer.requests[0].payment.methodOfPayment,
-              cardNumber: transfer.requests[0].payment.creditCard.number,
-              expiryDate: transfer.requests[0].payment.creditCard.expiryDate,
-              holderName: transfer.requests[0].payment.creditCard.holderName,
-              vendorCode: transfer.requests[0].payment.creditCard.vendorCode,
-              cvv: transfer.requests[0].payment.creditCard.cvv,
-            };
           }
         }
       }
@@ -498,13 +483,14 @@ const CheckoutScreen = () => {
         flightOrder,
         hotelOrder,
         transferOrders,
-        billingAddress,
-        billingPayment,
+        officialTicket,
+        communityTicket,
       };
     } catch (error: any) {
       toast.error("Booking failed");
       setBookLabel("Book Now");
       setBookLoading(false);
+      return {};
     }
   };
 
@@ -517,9 +503,9 @@ const CheckoutScreen = () => {
     return updated;
   };
 
-  const handleUserTicket = async (): Promise<boolean> => {
+  const handleCommunityTicket = async (): Promise<ITicket | null> => {
     if (!userTicket || !user?._id || !event?._id || !event.hoster?._id)
-      return false;
+      return null;
 
     // Remove user ticket
     const userBodyData: IUser = {
@@ -531,7 +517,7 @@ const CheckoutScreen = () => {
     if (meRes.data) {
       setAuthUser(meRes.data);
     } else {
-      return false;
+      return null;
     }
 
     // Add attendees to the event
@@ -551,9 +537,9 @@ const CheckoutScreen = () => {
     };
 
     const eventRes = await eventServices.update(event._id, eventBodyData);
-    if (!eventRes.data) return false;
+    if (!eventRes.data) return null;
 
-    return true;
+    return userTicket;
   };
 
   const handleBook = async (paymentMethod: TPaymentMethod) => {
@@ -564,37 +550,39 @@ const CheckoutScreen = () => {
 
       const basicBookingData = await bookServices();
 
+      if (Object(basicBookingData).keys.length === 0) {
+        toast.error("Booking failed");
+        setBookLabel("Book Now");
+        setBookLoading(false);
+      }
+
       // setBookLabel("Booking...");
 
-      // const bookingData: IBooking = {
-      //   flight: basicBookingData?.flightOrder as any,
-      //   hotel: basicBookingData?.hotelOrder as any,
-      //   transfer: basicBookingData?.transferOrders as any,
-      //   timezone: event?.dates?.timezone || "",
-      //   event: event?._id as any,
-      //   user: user._id as any,
-      //   price: {
-      //     total: totalPrice,
-      //     base: basePrice,
-      //     comission: commissionPrice,
-      //     currency: currency.toUpperCase(),
-      //   },
-      //   billingAddress: basicBookingData?.billingAddress as any,
-      //   billingPayment: basicBookingData?.billingPayment as any,
-      //   package: packageType as any,
-      //   userTicket:
-      //     event?.type === "user" && ticketTransferResult
-      //       ? (userTicket?._id as any)
-      //       : undefined,
-      // };
+      const bookingData: IBooking = {
+        flight: basicBookingData?.flightOrder as any,
+        hotel: basicBookingData?.hotelOrder as any,
+        transfer: basicBookingData?.transferOrders as any,
+        event: event?._id as any,
+        user: user._id as any,
+        price: {
+          total: totalPrice,
+          base: basePrice,
+          comission: commissionPrice,
+          currency: currency.toUpperCase(),
+        },
+        billingDetails: billingDetails as any,
+        package: packageType as any,
+        officialTicket: basicBookingData?.officialTicket as any,
+        communityTicket: basicBookingData?.communityTicket as any,
+      };
 
-      // const bookingRes = await createBooking(bookingData);
+      const bookingRes = await createBooking(bookingData);
 
-      // if (!bookingRes.data) {
-      //   toast.error("Saving booking error");
-      //   setBookLabel("Book Now");
-      //   return setBookLoading(false);
-      // }
+      if (!bookingRes.data) {
+        toast.error("Saving booking error");
+        setBookLabel("Book Now");
+        return setBookLoading(false);
+      }
 
       // router.push({
       //   pathname: "/booking/booked",

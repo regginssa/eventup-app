@@ -6,6 +6,7 @@ import {
   TAmadeusHotelOffer,
   TAmadeusTransferBookingRequest,
 } from "@/types/amadeus";
+import { TBillingDetails } from "@/types/booking";
 import { createContext, useContext, useState } from "react";
 
 interface BookingContextProps {
@@ -14,6 +15,7 @@ interface BookingContextProps {
   transfer: TTransfer | null;
   travelers: number;
   hotelRooms: number;
+  billingDetails: TBillingDetails | null;
   setBookingFlight: (val: TFlight | null) => void;
   setBookingHotel: (val: THotel | null) => void;
   setBookingTransfer: (val: TTransfer | null) => void;
@@ -22,6 +24,7 @@ interface BookingContextProps {
   setBookingTransferRequest: (val: TAmadeusTransferBookingRequest[]) => void;
   setBookingHotelRooms: (val: number) => void;
   setBookingTravelers: (val: number) => void;
+  setBillingDetails: (val: TBillingDetails | null) => void;
   updateBookingFlightOfferById: (val: {
     id: string;
     offer: TAmadeusFlightOffer;
@@ -54,6 +57,9 @@ const BookingProvider: React.FC<BookingProviderProps> = ({ children }) => {
   const [flight, setFlight] = useState<TFlight | null>(null);
   const [hotel, setHotel] = useState<THotel | null>(null);
   const [transfer, setTransfer] = useState<TTransfer | null>(null);
+  const [billingDetails, setBillingDetails] = useState<TBillingDetails | null>(
+    null,
+  );
   const [travelers, setTransvelers] = useState<number>(0);
   const [hotelRooms, setHotelRooms] = useState<number>(0);
 
@@ -117,12 +123,14 @@ const BookingProvider: React.FC<BookingProviderProps> = ({ children }) => {
         transfer,
         travelers,
         hotelRooms,
+        billingDetails,
         setBookingFlight: setFlight,
         setBookingHotel: setHotel,
         setBookingTransfer: setTransfer,
         setBookingFlightRequest: setFlightRequest,
         setBookingHotelRequest: setHotelRequest,
         setBookingTransferRequest: setTransferRequest,
+        setBillingDetails,
         setBookingHotelRooms: setHotelRooms,
         setBookingTravelers: setTransvelers,
         updateBookingFlightOfferById,

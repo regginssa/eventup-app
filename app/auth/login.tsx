@@ -4,7 +4,7 @@ import { Button, Checkbox, Input, PasswordInput } from "@/components/common";
 import { AuthScreenContainer } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/config/env";
-import useRedirect from "@/hooks/useRedirect";
+import { useRedirect } from "@/hooks";
 import { Feather } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
