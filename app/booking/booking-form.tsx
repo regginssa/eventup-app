@@ -33,7 +33,7 @@ import {
 import { TBillingDetails } from "@/types/booking";
 import { IEvent } from "@/types/event";
 import { Country } from "@/types/location.types";
-import { ITicket } from "@/types/ticket";
+import { ICommunityTicket } from "@/types/ticket";
 import { formatDateTime, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -156,7 +156,7 @@ const TicketDetail = ({
   ticket,
 }: {
   eventType: "user" | "ai";
-  ticket: ITicket | null;
+  ticket: ICommunityTicket | null;
 }) => {
   if (!ticket) return null;
 
@@ -456,7 +456,7 @@ const Summary: React.FC<SummaryProps> = ({ flight, hotel, transfer }) => {
 
 const BookingScreen = () => {
   const [event, setEvent] = useState<IEvent | null>(null);
-  const [ticket, setTicket] = useState<ITicket | null>(null);
+  const [ticket, setTicket] = useState<ICommunityTicket | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [flightTravelers, setFlightTravelers] = useState<TFlightTraveler[]>([]);
   const [hotelTravelers, setHotelTravelers] = useState<THotelTraveler[]>([]);

@@ -1,7 +1,7 @@
 import { Button, Modal, Spinner } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useTicket } from "@/components/providers/TicketProvider";
-import { ITicket } from "@/types/ticket";
+import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -19,8 +19,12 @@ const currencies = [
 ];
 
 const TicketsScreen = () => {
-  const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
-  const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
+  const [filteredTickets, setFilteredTickets] = useState<ICommunityTicket[]>(
+    [],
+  );
+  const [selectedTicket, setSelectedTicket] = useState<ICommunityTicket | null>(
+    null,
+  );
   const [selectedCurrency, setSelectedCurrency] = useState<string>(
     currencies[0].value,
   );
@@ -64,7 +68,7 @@ const TicketsScreen = () => {
     setIsOpen(true);
   }, [amount, currency, from, tickets]);
 
-  const renderItem = ({ item }: { item: ITicket }) => {
+  const renderItem = ({ item }: { item: ICommunityTicket }) => {
     return (
       <View className="relative w-full h-[160px] rounded-xl overflow-hidden">
         <Image

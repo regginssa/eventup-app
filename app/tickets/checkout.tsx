@@ -6,7 +6,7 @@ import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { TPaymentMethod } from "@/types";
 import { IStripePayload } from "@/types/stripe";
-import { ITicket } from "@/types/ticket";
+import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { confirmPayment } from "@stripe/stripe-react-native";
 import { Image } from "expo-image";
@@ -20,7 +20,7 @@ const Header = ({
   ticket,
   loading,
 }: {
-  ticket: ITicket | null;
+  ticket: ICommunityTicket | null;
   loading: boolean;
 }) => {
   if (loading) {
@@ -79,7 +79,7 @@ const Detail = ({
   ticket,
   loading,
 }: {
-  ticket: ITicket | null;
+  ticket: ICommunityTicket | null;
   loading: boolean;
 }) => {
   if (loading) {
@@ -129,7 +129,7 @@ const Detail = ({
 };
 
 const TicketsCheckout = () => {
-  const [ticket, setTicket] = useState<ITicket | null>(null);
+  const [ticket, setTicket] = useState<ICommunityTicket | null>(null);
   const [method, setMethod] = useState<TPaymentMethod>("card");
   const [stripePaymentMethodId, setStripePaymentMethodId] =
     useState<string>("");

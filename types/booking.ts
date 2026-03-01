@@ -1,6 +1,6 @@
 import { TPackageType } from ".";
 import { IEvent } from "./event";
-import { ITicket } from "./ticket";
+import { ICommunityTicket } from "./ticket";
 import { IUser } from "./user";
 
 export type PaymentStatus =
@@ -200,7 +200,7 @@ export interface IBooking {
   };
   billingDetails: TBillingDetails;
   officialTicket?: TOfficialTicket;
-  communityTicket?: ITicket;
+  communityTicket?: ICommunityTicket;
   event: IEvent;
   user: IUser;
   price: TBookingPrice;

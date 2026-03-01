@@ -1,8 +1,10 @@
 import { TAmadeusFlightOffer } from "@/types/amadeus";
 import { ApiResponse } from "@/types/api";
 import { IBooking } from "@/types/booking";
+import { IFlightBookingResponse, IFlightOffer } from "@/types/flight";
 import AxiosInstance from "../client";
 import {
+  BOOK_FLIGHTS,
   BOOKING_BASE,
   CANCEL_FLIGHT_ORDER,
   CREATE_BOOKING,
@@ -13,6 +15,7 @@ import {
   FETCH_BOOKINGS_BY_USERID_AND_EVENTID,
   FETCH_FLIGHT_OFFERS,
   FETCH_FLIGHT_OFFERS_PRICING,
+  FETCH_FLIGHTS,
   FETCH_HOTEL_OFFER_PRICING,
   FETCH_HOTEL_OFFERS,
   FETCH_TRANSFER_OFFERS,
@@ -99,6 +102,16 @@ export const createTransferOrder = async (
   return await AxiosInstance.post(CREATE_TRANSFER_ORDER, params);
 };
 
+const getFlights = async (params: any): Promise<ApiResponse<IFlightOffer>> => {
+  return await AxiosInstance.get(FETCH_FLIGHTS, { params });
+};
+
+const bookFlights = async (
+  bodyData: any,
+): Promise<ApiResponse<IFlightBookingResponse>> => {
+  return await AxiosInstance.post(BOOK_FLIGHTS, bodyData);
+};
+
 // ------------ Booking engine ------------
 
 // Fetch all bookings
@@ -131,3 +144,5 @@ export const createBooking = async (
 ): Promise<ApiResponse<IBooking>> => {
   return await AxiosInstance.post(CREATE_BOOKING, body);
 };
+
+export default { getFlights, bookFlights };

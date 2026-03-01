@@ -1,4 +1,4 @@
-export interface ITicket {
+export interface ICommunityTicket {
   _id?: string;
   name: string;
   image: string;

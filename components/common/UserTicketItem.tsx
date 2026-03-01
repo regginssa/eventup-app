@@ -1,4 +1,4 @@
-import { ITicket } from "@/types/ticket";
+import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { Image } from "expo-image";
 import { Text, View } from "react-native";
@@ -6,7 +6,7 @@ import { Text, View } from "react-native";
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
 
 interface UserTicketItemProps {
-  item: ITicket | null;
+  item: ICommunityTicket | null;
 }
 
 const UserTicketItem: React.FC<UserTicketItemProps> = ({ item }) => {

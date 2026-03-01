@@ -4,7 +4,7 @@ import {
 } from "@/api/services/booking";
 import { TTransfer } from "@/types";
 import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "@/types/amadeus";
-import { ITicket } from "@/types/ticket";
+import { ICommunityTicket } from "@/types/ticket";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -24,7 +24,7 @@ interface PackageConfirmModalProps {
   onClose: () => void;
   packageType: "standard" | "gold";
   eventId: string;
-  ticket?: ITicket;
+  ticket?: ICommunityTicket;
   flight?: TAmadeusFlightOffer;
   hotel?: TAmadeusHotelOffer;
   transfer: TTransfer | null;

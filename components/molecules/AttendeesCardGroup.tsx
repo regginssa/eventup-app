@@ -1,7 +1,7 @@
 import conversationServices from "@/api/services/conversation";
 import notificationServices from "@/api/services/notification";
 import { IConversation } from "@/types/conversation";
-import { IEvent, TAttendees } from "@/types/event";
+import { IAttendees, IEvent } from "@/types/event";
 import { INotification } from "@/types/notification";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
@@ -12,7 +12,7 @@ import { useNotification } from "../providers/NotificationProvider";
 import { useToast } from "../providers/ToastProvider";
 
 interface AttendeesCardGroupProps {
-  items: TAttendees[];
+  items: IAttendees[];
   event?: IEvent;
 }
 
@@ -126,7 +126,7 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
     );
   }
 
-  const renderItem = ({ item }: { item: TAttendees }) => {
+  const renderItem = ({ item }: { item: IAttendees }) => {
     const { user, ticket, status } = item;
 
     const formattedRate = user.rate

@@ -13,7 +13,7 @@ type TM = {
   ticketLimitInfo?: string;
 };
 
-export type EventDates = {
+export type TEventDates = {
   start: {
     date?: string;
     time?: string;
@@ -69,16 +69,16 @@ export type TEventStatus =
 
 export type TAttendessTicketStatus = "deposited" | "released" | "refunded";
 
-export type TAttendeesStatus = "approved" | "blocked";
+export type IAttendeesStatus = "approved" | "blocked";
 
-export type TAttendees = {
+export interface IAttendees {
   user: IUser;
   ticket?: {
     ticketId: string;
     status: TAttendessTicketStatus;
   };
-  status: TAttendeesStatus;
-};
+  status: IAttendeesStatus;
+}
 
 export interface IEvent {
   _id?: string;
@@ -86,7 +86,7 @@ export interface IEvent {
   name?: string;
   description?: string;
   tm?: TM;
-  dates?: EventDates;
+  dates?: TEventDates;
   location?: Location;
   classifications?: Classifications;
   seatmap?: string;
@@ -94,5 +94,5 @@ export interface IEvent {
   fee?: TEventFee;
   hoster?: IUser;
   status?: TEventStatus;
-  attendees: TAttendees[];
+  attendees: IAttendees[];
 }

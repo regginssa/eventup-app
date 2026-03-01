@@ -24,7 +24,7 @@ import {
   TBookingTransfer,
 } from "@/types/booking";
 import { IEvent } from "@/types/event";
-import { ITicket } from "@/types/ticket";
+import { ICommunityTicket } from "@/types/ticket";
 import { IUser } from "@/types/user";
 import { formatDateTime, formatName, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -239,7 +239,7 @@ const PriceDetail = ({
 
 const CheckoutScreen = () => {
   const [event, setEvent] = useState<IEvent | undefined>(undefined);
-  const [userTicket, setUserTicket] = useState<ITicket | null>(null);
+  const [userTicket, setUserTicket] = useState<ICommunityTicket | null>(null);
   const [eventLoading, setEventLoading] = useState<boolean>(false);
   const [basePrice, setBasePrice] = useState<number>(0);
   const [totalPrice, setTotalPrice] = useState<number>(0);
@@ -494,7 +494,7 @@ const CheckoutScreen = () => {
     }
   };
 
-  const removeOneTicket = (tickets: ITicket[], ticketId: string) => {
+  const removeOneTicket = (tickets: ICommunityTicket[], ticketId: string) => {
     const index = tickets.findIndex((t) => t._id === ticketId);
     if (index === -1) return tickets;
     const updated = [...tickets];
@@ -503,7 +503,7 @@ const CheckoutScreen = () => {
     return updated;
   };
 
-  const handleCommunityTicket = async (): Promise<ITicket | null> => {
+  const handleCommunityTicket = async (): Promise<ICommunityTicket | null> => {
     if (!userTicket || !user?._id || !event?._id || !event.hoster?._id)
       return null;
 

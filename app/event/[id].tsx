@@ -21,9 +21,9 @@ import { useToast } from "@/components/providers/ToastProvider";
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
 import { IConversation } from "@/types/conversation";
-import { EventDates, IEvent, TAttendees } from "@/types/event";
+import { IAttendees, IEvent, TEventDates } from "@/types/event";
 import { INotification } from "@/types/notification";
-import { ITicket } from "@/types/ticket";
+import { ICommunityTicket } from "@/types/ticket";
 import { IUser } from "@/types/user";
 import { formatEventLabel } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -56,8 +56,8 @@ const EventDetailScreen = () => {
   );
   const [booking, setBooking] = useState<IBooking | null>(null);
   const [services, setServices] = useState<string[]>([]);
-  const [ticket, setTicket] = useState<ITicket | null>(null);
-  const [attendees, setAttendees] = useState<TAttendees | null>(null);
+  const [ticket, setTicket] = useState<ICommunityTicket | null>(null);
+  const [attendees, seIAttendees] = useState<IAttendees | null>(null);
   const [releaseLoading, setReleaseLoading] = useState<boolean>(false);
   const [groupConversation, setGroupConversation] =
     useState<IConversation | null>(null);
@@ -160,7 +160,7 @@ const EventDetailScreen = () => {
     }
 
     const att = fetchedEvent?.attendees.find((a) => a.user._id === user?._id);
-    setAttendees(att || null);
+    seIAttendees(att || null);
 
     if (att) {
       await fetchBookingData();
@@ -201,7 +201,7 @@ const EventDetailScreen = () => {
   useEffect(() => {
     if (!event || !user?._id) return;
     const att = event.attendees.find((att) => att.user._id === user._id);
-    setAttendees(att || null);
+    seIAttendees(att || null);
   }, [event, user?._id]);
 
   useEffect(() => {
@@ -294,7 +294,7 @@ const EventDetailScreen = () => {
               )}
               city={event.location?.city?.name}
               country={event.location?.country?.name as string}
-              dates={event.dates as EventDates}
+              dates={event.dates as TEventDates}
               fee={event.type === "user" ? event.fee : undefined}
             />
 

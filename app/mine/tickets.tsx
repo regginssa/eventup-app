@@ -1,6 +1,6 @@
 import { Button, MineContainer } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { ITicket } from "@/types/ticket";
+import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -12,7 +12,7 @@ const bannerImage = require("@/assets/images/ticket_banner.png");
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
 
 type TTicketItem = {
-  ticket: ITicket;
+  ticket: ICommunityTicket;
   count: number;
 };
 
@@ -27,7 +27,7 @@ const MineTickets = () => {
 
     const map = new Map<string, TTicketItem>();
 
-    user.tickets.forEach((ticket: ITicket) => {
+    user.tickets.forEach((ticket: ICommunityTicket) => {
       if (!ticket._id) return;
 
       if (map.has(ticket._id)) {

@@ -31,6 +31,9 @@ export const CREATE_FLIGHT_ORDER = "/booking/flight-order";
 export const GET_FLIGHT_ORDER = "/booking/flight-order/";
 export const CANCEL_FLIGHT_ORDER = "/booking/flight-order/";
 
+export const FETCH_FLIGHTS = "/booking/flights";
+export const BOOK_FLIGHTS = "/booking/flights/order";
+
 export const FETCH_HOTEL_OFFERS = "/booking/hotel-offers";
 export const FETCH_HOTEL_OFFER_PRICING = "/booking/hotel-offer-pricing/";
 export const CREATE_HOTEL_ORDER = "/booking/hotel-order";

@@ -4,7 +4,7 @@ import { Button, CryptoPayout } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
-import { ITicket } from "@/types/ticket";
+import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -18,7 +18,7 @@ const Header = ({
   ticket,
   loading,
 }: {
-  ticket: ITicket | null;
+  ticket: ICommunityTicket | null;
   loading: boolean;
 }) => {
   if (loading) {
@@ -82,7 +82,7 @@ const Detail = ({
   count,
   setCount,
 }: {
-  ticket: ITicket | null;
+  ticket: ICommunityTicket | null;
   totalCount: number;
   totalPrice: number;
   fee: number;
@@ -177,7 +177,7 @@ const Detail = ({
 };
 
 const MineSellTicketsCheckout = () => {
-  const [ticket, setTicket] = useState<ITicket | null>(null);
+  const [ticket, setTicket] = useState<ICommunityTicket | null>(null);
   const [count, setCount] = useState<number>(1);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [tokenPrices, setTokenPrices] = useState({ chrle: 0, babyu: 0 });

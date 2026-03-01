@@ -1,10 +1,10 @@
 import { fetchAllTickets } from "@/api/services/ticket";
-import { ITicket } from "@/types/ticket";
+import { ICommunityTicket } from "@/types/ticket";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface TicketContextProps {
-  tickets: ITicket[];
-  setTickets: (val: ITicket[]) => void;
+  tickets: ICommunityTicket[];
+  setTickets: (val: ICommunityTicket[]) => void;
 }
 
 const TicketContext = createContext<TicketContextProps | undefined>(undefined);
@@ -24,7 +24,7 @@ interface TicketProviderProps {
 }
 
 const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
-  const [tickets, setTickets] = useState<ITicket[]>([]);
+  const [tickets, setTickets] = useState<ICommunityTicket[]>([]);
 
   useEffect(() => {
     const getAllTickets = async () => {

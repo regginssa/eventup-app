@@ -11,7 +11,7 @@ import {
   TBookingTransfer,
 } from "@/types/booking";
 import { IEvent } from "@/types/event";
-import { ITicket } from "@/types/ticket";
+import { ICommunityTicket } from "@/types/ticket";
 import { formatDateTime, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -30,7 +30,7 @@ const EventTicket = ({
 }: {
   event: IEvent | null;
   packageType: TPackageType;
-  communityTicket: ITicket | null;
+  communityTicket: ICommunityTicket | null;
 }) => {
   const [items, setItems] = useState<any[]>([]);
   const { theme } = useTheme();
@@ -591,7 +591,8 @@ const BookedScreen = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [hasLoadedSuccessfully, setHasLoadedSuccessfully] =
     useState<boolean>(false);
-  const [communityTicket, setCommunityTicket] = useState<ITicket | null>(null);
+  const [communityTicket, setCommunityTicket] =
+    useState<ICommunityTicket | null>(null);
   const lottieRef = useRef<LottieView>(null);
 
   const { bookingId, eventId, packageType } = useLocalSearchParams();

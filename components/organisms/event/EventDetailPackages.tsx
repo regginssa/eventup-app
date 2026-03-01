@@ -5,8 +5,8 @@ import {
 } from "@/components/molecules";
 import { useBooking } from "@/components/providers/BookingProvider";
 import { TCoordinate } from "@/types";
-import { IEvent, TAttendees, TEventFee } from "@/types/event";
-import { ITicket } from "@/types/ticket";
+import { IAttendees, IEvent, TEventFee } from "@/types/event";
+import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
@@ -21,27 +21,28 @@ const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
 interface EventDetailPackagesProps {
   event: IEvent;
   currentLocationCoords: TCoordinate | null;
-  currentCity: string | null;
-  currentCountryCode: string | null;
+  currentLocation: {
+    city: string | null;
+    countryCode: string | null;
+  };
   isBooked?: boolean;
   services: string[];
   bookedPackageType: "standard" | "gold";
   totalPrice: number;
   fee?: TEventFee;
-  ticket: ITicket | null;
-  attendees?: TAttendees;
+  communityTicket: ICommunityTicket | null;
+  attendees?: IAttendees;
 }
 
 const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   event,
   currentLocationCoords,
-  currentCity,
-  currentCountryCode,
+  currentLocation,
   isBooked,
   services,
   totalPrice,
   fee,
-  ticket,
+  communityTicket,
   attendees,
 }) => {
   const [eventPackage, setEventPackage] = useState<"standard" | "gold">(
@@ -87,7 +88,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
           Standard Package
         </Text>
 
-        {ticket && <UserTicketItem item={ticket} />}
+        {communityTicket && <UserTicketItem item={communityTicket} />}
 
         {attendees && (
           <>
@@ -324,7 +325,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
           </View>
         </View>
 
-        {fee && fee.type === "paid" && !ticket && (
+        {fee && fee.type === "paid" && !communityTicket && (
           <View className="w-full flex flex-row items-start gap-2 rounded-xl border border-blue-500 bg-blue-200 p-4">
             <MaterialCommunityIcons
               name="information-outline"
@@ -367,7 +368,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
           </View>
         )}
 
-        {ticket && <TicketItem ticket={ticket} />}
+        {communityTicket && <TicketItem ticket={communityTicket} />}
 
         {eventPackage === "standard" ? (
           <View className="bg-[#F7F3FF] rounded-xl p-4 gap-3">
@@ -379,8 +380,8 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
               event={event}
               packageType="standard"
               currentLocationCoords={currentLocationCoords}
-              currentCity={currentCity}
-              currentCountryCode={currentCountryCode}
+              currentCity={currentLocation.city}
+              currentCountryCode={currentLocation.countryCode}
             />
           </View>
         ) : (
@@ -393,8 +394,8 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
               event={event}
               packageType="gold"
               currentLocationCoords={currentLocationCoords}
-              currentCity={currentCity}
-              currentCountryCode={currentCountryCode}
+              currentCity={currentLocation.city}
+              currentCountryCode={currentLocation.countryCode}
             />
           </View>
         )}
@@ -413,7 +414,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
       <PackageConfirmModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        ticket={ticket || undefined}
+        ticket={communityTicket || undefined}
         flight={flight?.offers[0]}
         hotel={hotel?.offers[0]}
         transfer={transfer}
@@ -424,7 +425,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   );
 };
 
-const TicketItem = ({ ticket }: { ticket: ITicket }) => {
+const TicketItem = ({ ticket }: { ticket: ICommunityTicket }) => {
   return (
     <View className="relative w-full h-[160px] rounded-xl overflow-hidden">
       <Image
