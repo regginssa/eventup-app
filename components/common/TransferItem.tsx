@@ -1,58 +1,5 @@
 import { TAmadeusTransferOffer } from "@/types/amadeus";
-import { formatDateTime, formatTime, getCurrencySymbol } from "@/utils/format";
-import { mapAmadeusTransferOfferToTransferItemData } from "@/utils/map";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useBooking } from "../providers/BookingProvider";
-
-// TTransferItemData - essential fields from Amadeus Transfer Offer
-export type TTransferItemData = {
-  // Transfer ID
-  id: string;
-  transferType: string;
-
-  // Locations
-  from: string;
-  to: string;
-
-  // Travel date
-  travelDate: string;
-
-  // Passengers
-  adults: number;
-  children: number;
-  infants: number;
-
-  // Vehicle info
-  vehicleType: string;
-  vehicleDescription: string;
-  vehicleImage?: string;
-  seats: number;
-  luggage: string; // Formatted luggage info
-
-  // Service provider
-  transferCompany: string;
-  companyLogo?: string;
-
-  // Transfer details
-  transferTime?: string; // in minutes (estimated or actual)
-
-  // Price
-  price: {
-    total: string;
-    currency: string;
-    base?: string;
-  };
-
-  // Optional fields
-  distance?: {
-    value: number;
-    unit: string;
-  };
-  cancellationPolicy?: string;
-  rating?: number;
-};
+import { StyleSheet } from "react-native";
 
 interface TransferItemProps {
   data?: TAmadeusTransferOffer;
@@ -69,31 +16,9 @@ const TransferItem: React.FC<TransferItemProps> = ({
 }) => {
   if (!data) return null;
 
-  const {
-    from,
-    to,
-    travelDate,
-    vehicleType,
-    vehicleDescription,
-    vehicleImage,
-    luggage,
-    transferCompany,
-    transferTime,
-    price,
-    rating,
-  } = mapAmadeusTransferOfferToTransferItemData(data);
-
-  const { travelers } = useBooking();
-
-  const handleSelect = () => {
-    if (onSelect) {
-      onSelect(data);
-    }
-  };
-
   return (
     <>
-      {!hiddenHeader && (
+      {/* {!hiddenHeader && (
         <View className="flex flex-row items-center gap-2">
           <MaterialCommunityIcons name="car" size={20} color="#374151" />
           <Text className="font-dm-sans-bold text-gray-700">Transfer</Text>
@@ -105,7 +30,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
         className="w-full px-2 overflow-hidden flex flex-col gap-2"
         onPress={handleSelect}
       >
-        {/* FROM */}
         <View className="w-full flex flex-row items-start gap-4 justify-between">
           <View className="flex flex-row items-center gap-2">
             <MaterialCommunityIcons name="airport" size={16} color="#4b5563" />
@@ -118,7 +42,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </Text>
         </View>
 
-        {/* TO */}
         <View className="w-full flex flex-row items-start gap-4 justify-between">
           <View className="flex flex-row items-center gap-2">
             <MaterialCommunityIcons
@@ -135,7 +58,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </Text>
         </View>
 
-        {/* TRAVEL DATE */}
         {travelDate && (
           <View className="w-full flex flex-row items-center justify-between">
             <View className="flex flex-row items-center gap-2">
@@ -155,7 +77,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </View>
         )}
 
-        {/* PASSENGERS */}
         <View className="w-full flex flex-row items-center justify-between">
           <View className="flex flex-row items-center gap-2">
             <MaterialCommunityIcons
@@ -172,7 +93,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </Text>
         </View>
 
-        {/* VEHICLE TYPE */}
         {vehicleType && (
           <View className="w-full flex flex-row items-center justify-between">
             <View className="flex flex-row items-center gap-2">
@@ -187,7 +107,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </View>
         )}
 
-        {/* VEHICLE DESCRIPTION */}
         {vehicleDescription && (
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex flex-row items-center gap-2">
@@ -206,7 +125,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </View>
         )}
 
-        {/* TRANSFER COMPANY */}
         {transferCompany && (
           <View className="w-full flex flex-row items-center justify-between">
             <View className="flex flex-row items-center gap-2">
@@ -225,7 +143,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </View>
         )}
 
-        {/* TRANSFER TIME */}
         {transferTime && (
           <View className="w-full flex flex-row items-center justify-between">
             <View className="flex flex-row items-center gap-2">
@@ -244,7 +161,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </View>
         )}
 
-        {/* LUGGAGE */}
         {luggage && (
           <View className="w-full flex flex-row items-center justify-between">
             <View className="flex flex-row items-center gap-2">
@@ -263,7 +179,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </View>
         )}
 
-        {/* RATING */}
         {rating && rating > 0 && (
           <View className="w-full flex flex-row items-center justify-between">
             <View className="flex flex-row items-center gap-2">
@@ -289,7 +204,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </View>
         )}
 
-        {/* VEHICLE IMAGE */}
         {vehicleImage && (
           <View className="w-full relative overflow-hidden rounded-lg h-[150px]">
             <Image
@@ -301,7 +215,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
           </View>
         )}
 
-        {/* PRICE */}
         <View className="w-full flex flex-row items-center justify-between mt-3">
           <Text className="font-dm-sans-bold text-gray-700 text-lg">
             Total Price:
@@ -315,7 +228,7 @@ const TransferItem: React.FC<TransferItemProps> = ({
             {price.total}
           </Text>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </>
   );
 };

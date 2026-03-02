@@ -1,9 +1,5 @@
 import { Button, UserTicketItem } from "@/components/common";
-import {
-  BookSearchInputGroup,
-  PackageConfirmModal,
-} from "@/components/molecules";
-import { useBooking } from "@/components/providers/BookingProvider";
+import { BookSearchInputGroup } from "@/components/molecules";
 import { TCoordinate } from "@/types";
 import { IAttendees, IEvent, TEventFee } from "@/types/event";
 import { ICommunityTicket } from "@/types/ticket";
@@ -49,7 +45,6 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const { flight, hotel, transfer } = useBooking();
   const router = useRouter();
 
   const standardItems = [
@@ -401,7 +396,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
         />
       </View>
 
-      <PackageConfirmModal
+      {/* <PackageConfirmModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         ticket={communityTicket || undefined}
@@ -409,8 +404,8 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
         hotel={hotel?.offers[0]}
         transfer={transfer}
         packageType={eventPackage}
-        eventId={event._id as string}
-      />
+       eventId={event._id as string}
+      />  */}
     </>
   );
 };

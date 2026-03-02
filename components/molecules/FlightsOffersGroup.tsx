@@ -56,11 +56,6 @@ const FlightsOffersGroup: React.FC<FlightsOffersGroupProps> = ({
     <>
       {selected && (
         <View className="w-full gap-4">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons name="airplane" size={20} color="#374151" />
-            <Text className="font-dm-sans-bold text-gray-700">Flights</Text>
-          </View>
-
           <FlightItem data={selected} hiddenHeader={true} />
 
           {items.length > 1 && (

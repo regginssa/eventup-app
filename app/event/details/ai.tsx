@@ -11,7 +11,6 @@ import {
   Tabs,
 } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { useBooking } from "@/components/providers/BookingProvider";
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
@@ -41,7 +40,6 @@ const AIEventDetail = () => {
 
   const { id, callback } = useLocalSearchParams();
   const { user } = useAuth();
-  const { setBookingFlight, setBookingHotel } = useBooking();
 
   const getUserLocationAndSave = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -124,8 +122,6 @@ const AIEventDetail = () => {
         await fetchUserCurrentLocation();
       }
 
-      setBookingFlight(null);
-      setBookingHotel(null);
       setLoading(false);
     };
 

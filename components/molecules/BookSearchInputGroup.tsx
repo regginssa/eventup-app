@@ -221,7 +221,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       toast.error("Search failed");
     } finally {
       setSearchLoading(false);
-      setSearchBtnLabel("Search");
+      setSearchBtnLabel("");
       setIsSearched(true);
     }
   };
@@ -279,13 +279,13 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       <View className="w-full h-[1px] bg-gray-200"></View>
 
-      <View className="w-full p-4 rounded-xl flex flex-row items-start gap-2 bg-red-200 border border-red-600">
+      <View className="w-full p-4 rounded-xl flex flex-row items-start gap-2 bg-blue-200 border border-blue-600">
         <MaterialCommunityIcons
           name="information-outline"
           size={24}
-          color="#dc2626"
+          color="#2563eb"
         />
-        <Text className="font-dm-sans-semibold text-sm text-red-600">
+        <Text className="font-dm-sans-semibold text-sm text-blue-600">
           All of your bookings will be based on event timezone:{" "}
           <Text className="font-dm-sans-bold">
             {event.dates?.timezone || "UTC"}

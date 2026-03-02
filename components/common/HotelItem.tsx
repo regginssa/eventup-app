@@ -1,63 +1,4 @@
 import { TAmadeusHotelOffer } from "@/types/amadeus";
-import { formatDateTime, getCurrencySymbol } from "@/utils/format";
-import { mapAmadeusHotelOfferToHotelItemData } from "@/utils/map";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { BadgeGroup } from "../molecules";
-
-// THotelItemData - essential fields from Amadeus Hotel Offer
-export type THotelItemData = {
-  // Offer ID (needed for booking)
-  offerId: string;
-
-  // Hotel basic info
-  hotelId: string;
-  hotelName: string;
-  cityCode: string;
-  latitude: number;
-  longitude: number;
-
-  // Booking dates
-  checkInDate: string;
-  checkOutDate: string;
-
-  // Room info
-  roomType: string;
-  roomCategory: string;
-  roomDescription: string;
-  beds: number;
-  bedType: string;
-
-  // Guests
-  adults: number;
-
-  // Price
-  price: {
-    total: string;
-    currency: string;
-    base?: string;
-  };
-
-  // Cancellation/Refund policy
-  cancellationPolicy: string;
-  cancellationType: string;
-  paymentType: string;
-
-  // Optional fields (may not be in Amadeus response but useful if available)
-  city?: string;
-  address: {
-    countryCode: string;
-    postalCode: string;
-    stateCode: string;
-    cityName: string;
-    lines: string[];
-  };
-  hotelRating?: number;
-  distanceValue?: number;
-  distanceUnit?: string;
-  facilities?: string[];
-  thumbNailUrl?: string;
-};
 
 interface HotelItemProps {
   data: TAmadeusHotelOffer;
@@ -75,24 +16,24 @@ const HotelItem: React.FC<HotelItemProps> = ({
   if (!offer) return null;
 
   // Map the offer data, with error handling
-  let data: THotelItemData;
-  try {
-    data = mapAmadeusHotelOfferToHotelItemData(offer);
-  } catch (error) {
-    console.error("Error mapping hotel offer:", error);
-    return (
-      <View className="w-full px-2 py-4">
-        <Text className="font-poppins-semibold text-red-600">
-          Error loading hotel data:{" "}
-          {error instanceof Error ? error.message : "Unknown error"}
-        </Text>
-      </View>
-    );
-  }
+  // let data: THotelItemData;
+  // try {
+  //   data = mapAmadeusHotelOfferToHotelItemData(offer);
+  // } catch (error) {
+  //   console.error("Error mapping hotel offer:", error);
+  //   return (
+  //     <View className="w-full px-2 py-4">
+  //       <Text className="font-poppins-semibold text-red-600">
+  //         Error loading hotel data:{" "}
+  //         {error instanceof Error ? error.message : "Unknown error"}
+  //       </Text>
+  //     </View>
+  //   );
+  // }
 
   return (
     <>
-      {!hiddenHeader && (
+      {/* {!hiddenHeader && (
         <View className="flex flex-row items-center gap-2">
           <MaterialIcons name="hotel" size={20} color="#374151" />
           <Text className="font-dm-sans-bold text-gray-700">Hotel</Text>
@@ -131,7 +72,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </Text>
         </View>
 
-        {/* CHECK-IN DATE */}
         {data.checkInDate && (
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex-row items-center gap-2">
@@ -150,7 +90,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
         )}
 
-        {/* CHECK-OUT DATE */}
         {data.checkOutDate && (
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex-row items-center gap-2">
@@ -169,7 +108,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
         )}
 
-        {/* ROOM DESCRIPTION */}
         {data.roomDescription && (
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex-row items-center gap-2">
@@ -184,7 +122,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
         )}
 
-        {/* ROOM DETAILS */}
         {(data.beds > 0 || data.bedType) && (
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex-row items-center gap-2">
@@ -203,7 +140,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
         )}
 
-        {/* ADULTS */}
         {data.adults > 0 && (
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex-row items-center gap-2">
@@ -222,7 +158,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
         )}
 
-        {/* DISTANCE */}
         {data.distanceValue && data.distanceUnit && (
           <View className="w-full flex flex-row items-start justify-between mt-3">
             <View className="flex-row items-center gap-2">
@@ -241,7 +176,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
         )}
 
-        {/* ADDRESS */}
         {data.address && (
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex-row items-center gap-2">
@@ -256,7 +190,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
         )}
 
-        {/* REFUNDABILITY */}
         {data.cancellationPolicy && (
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex-row items-center gap-2">
@@ -276,7 +209,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
         )}
 
-        {/* PAYMENT TYPE */}
         {data.paymentType && (
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex-row items-center gap-2">
@@ -291,7 +223,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
         )}
 
-        {/* FACILITIES */}
         {data.facilities && data.facilities.length > 0 && (
           <View className="w-full flex flex-col gap-2">
             <View className="flex flex-row items-center gap-2">
@@ -305,7 +236,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
         )}
 
-        {/* data IMAGES */}
         {!hiddenImages && (
           <View className="w-full flex flex-row items-start justify-between mt-3">
             <View className="flex-row items-center gap-2">
@@ -330,7 +260,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
           </View>
         )}
 
-        {/* PRICE */}
         <View className="w-full flex flex-row justify-between mt-3">
           <Text className="font-dm-sans-bold text-gray-800 text-lg">
             Total Price:
@@ -342,23 +271,9 @@ const HotelItem: React.FC<HotelItemProps> = ({
             {data.price.total}
           </Text>
         </View>
-      </View>
+      </View> */}
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  listContainer: {
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 3,
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-});
 
 export default HotelItem;
