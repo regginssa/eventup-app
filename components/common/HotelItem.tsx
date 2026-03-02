@@ -25,7 +25,7 @@ const HotelItem: React.FC<HotelItemProps> = ({ data: offer }) => {
   const starCount = parseInt(category.match(/\d+/)?.[0] || "0");
 
   return (
-    <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+    <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
       {/* HEADER SECTION: Title & Image */}
       <View className="flex flex-row items-start justify-between">
         <View className="flex-1 pr-3">

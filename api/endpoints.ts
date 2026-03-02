@@ -24,11 +24,14 @@ export const FETCH_EVENTS_BY_USER = "/events/user";
 // Airports apis
 export const FETCH_NEAREST_AIRPORTS = "/airports/nearest-multiple";
 
-// Flights apis
+// Flight apis
 export const FLIGHT_BASE = "/flight/";
 
-// Hotels apis
+// Hotel apis
 export const HOTEL_BASE = "/hotel/";
+
+// Transfer apis
+export const TRANSFER_BASE = "/transfer/";
 
 // Booking apis
 export const FETCH_FLIGHT_OFFERS = "/booking/flight-offers";

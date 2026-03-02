@@ -1,9 +1,11 @@
 import { TCoordinate, TPackageType } from "@/types";
 import { IEvent } from "@/types/event";
+import { IFlightOffer } from "@/types/flight";
+import { IHotelOffer } from "@/types/hotel";
 import df from "@/utils/date";
 import { normalizeDateUTC } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import {
   Button,
@@ -11,11 +13,13 @@ import {
   FlightItem,
   HotelItem,
   RadioButton,
+  TransferItem,
 } from "../common";
 import { useAuth } from "../providers/AuthProvider";
-import { useFlights } from "../providers/FlightsProvider";
-import { useHotels } from "../providers/HotelsProvider";
+import { useFlight } from "../providers/FlightProvider";
+import { useHotel } from "../providers/HotelProvider";
 import { useToast } from "../providers/ToastProvider";
+import { useTransfer } from "../providers/TransferProvider";
 
 interface BookSearchInputGroupProps {
   event: IEvent;
@@ -45,9 +49,29 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
 
   const { user } = useAuth();
-  const { offer: flightOffer, search: searchFlight } = useFlights();
-  const { offer: hotelOffer, search: searchHotel } = useHotels();
+  const {
+    offer: flightOffer,
+    search: searchFlight,
+    initialize: initializeFlight,
+  } = useFlight();
+  const {
+    offer: hotelOffer,
+    search: searchHotel,
+    initialize: initializeHotel,
+  } = useHotel();
+  const {
+    airportToHotelOffer,
+    hotelToEventOffer,
+    search: searchTransfer,
+    initialize: initializeTransfer,
+  } = useTransfer();
   const toast = useToast();
+
+  const initialize = () => {
+    initializeFlight();
+    initializeHotel();
+    initializeTransfer();
+  };
 
   const handleFlight = async () => {
     const originGeo =
@@ -65,13 +89,21 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       packageType,
     };
 
-    await searchFlight(params);
+    return await searchFlight(params);
   };
 
-  const handleHotel = async () => {
-    if (!flightOffer) return toast.warn("Airline isn't selected");
+  const handleHotel = async (
+    flightOffer: IFlightOffer | null,
+  ): Promise<IHotelOffer | null> => {
+    if (!flightOffer) {
+      toast.warn("Airline isn't selected");
+      return null;
+    }
     const hotelGeo = event.location?.coordinate;
-    if (!hotelGeo) return;
+    if (!hotelGeo) {
+      toast.warn("Hotel Geo is incorrect");
+      return null;
+    }
 
     const params = {
       lat: hotelGeo.latitude,
@@ -81,7 +113,49 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       packageType,
     };
 
-    await searchHotel(params);
+    return await searchHotel(params);
+  };
+
+  const handleTransfer = async (
+    flightOffer: IFlightOffer | null,
+    hotelOffer: IHotelOffer | null,
+  ) => {
+    const eventGeo = event.location?.coordinate;
+
+    if (!eventGeo) return toast.warn("Event isn't selected");
+
+    let params = {};
+
+    if (flightOffer && hotelOffer) {
+      params = {
+        fromType: "iata",
+        fromCode: flightOffer.originIata,
+        toType: "gps",
+        toLat: hotelOffer.latitude,
+        toLng: hotelOffer.longitude,
+        date: df.toISOString(new Date(flightOffer.arrivalTime)),
+        time: df.toISOString(new Date(flightOffer.arrivalTime)),
+        packageType,
+      };
+
+      await searchTransfer(params, "iata");
+    }
+
+    if (hotelOffer) {
+      params = {
+        fromType: "gps",
+        fromLat: hotelOffer.latitude,
+        fromLng: hotelOffer.longitude,
+        toType: "gps",
+        toLat: eventGeo.latitude,
+        toLng: eventGeo.longitude,
+        date: df.toISOString(hotelDepartureDate),
+        time: df.toISOString(hotelDepartureDate),
+        packageType,
+      };
+
+      await searchTransfer(params, "gps");
+    }
   };
 
   const handleSearch = async () => {
@@ -115,16 +189,16 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     try {
       setSearchLoading(true);
       setIsSearched(false);
+      initialize();
 
       setSearchBtnLabel("Searching flights...");
-      await handleFlight();
+      const flightData = await handleFlight();
 
       setSearchBtnLabel("Searching hotels...");
-      await handleHotel();
-      // if (!hotelData) throw new Error("No hotel found");
+      const hotelData = await handleHotel(flightData);
 
-      // setSearchBtnLabel("Searching transfers...");
-      // await searchTransfers(flightData, hotelData);
+      setSearchBtnLabel("Searching transfers...");
+      await handleTransfer(flightData, hotelData);
     } catch (error) {
       console.log("handleSearch error: ", error);
       toast.error("Search failed");
@@ -134,6 +208,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       setIsSearched(true);
     }
   };
+
+  useEffect(() => {
+    initialize();
+  }, []);
 
   return (
     <View className="w-full flex flex-col gap-3">
@@ -227,33 +305,14 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       <View className="w-full h-[1px] bg-gray-200"></View>
 
-      {isSearched && (
-        <>
-          <View className="w-full h-[1px] bg-gray-300"></View>
-          <FlightItem data={flightOffer} />
-        </>
-      )}
+      <View className="w-full gap-2">
+        <FlightItem data={flightOffer} />
+        <HotelItem data={hotelOffer} />
+        <TransferItem data={airportToHotelOffer} />
+        <TransferItem data={hotelToEventOffer} />
+      </View>
 
-      {isSearched && (
-        <>
-          <View className="w-full h-[1px] bg-gray-300"></View>
-          <HotelItem data={hotelOffer} />
-        </>
-      )}
-
-      {/* {isSearched && (
-        <>
-          <View className="w-full h-[1px] bg-gray-300"></View>
-
-          <TransferAvailabilityGroup
-            transfer={rdTransfer}
-            isSearched={isSearched}
-            available={true}
-          />
-        </>
-      )} */}
-
-      <View className="w-full h-[1px] bg-gray-300"></View>
+      <View className="w-full h-[1px] bg-gray-200"></View>
 
       <Button
         type="primary"

@@ -33,7 +33,7 @@ const FlightItem: React.FC<FlightItemProps> = ({ data }) => {
       : `${stops.length} Stop${stops.length > 1 ? "s" : ""}`;
 
   return (
-    <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+    <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
       {/* TIMELINE SECTION */}
       <View className="flex flex-row items-center justify-between py-2">
         {/* Origin */}

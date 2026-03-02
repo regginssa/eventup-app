@@ -36,4 +36,17 @@ const toShortDateTime = (date: Date | string | null): string => {
   return `${timePart} ${datePart}`;
 };
 
-export default { toISOString, toShortDate, toShortDateTime };
+const to24HourTime = (date: Date | string): string => {
+  if (!date) return "N/A";
+
+  const d = typeof date === "string" ? new Date(date) : date;
+
+  if (isNaN(d.getTime())) return "Invalid Date";
+
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+
+  return `${hours}:${minutes}`;
+};
+
+export default { toISOString, toShortDate, toShortDateTime, to24HourTime };

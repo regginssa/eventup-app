@@ -2,33 +2,35 @@ import hotelsServices from "@/api/services/hotel";
 import { IHotelBookingResponse, IHotelOffer } from "@/types/hotel";
 import { createContext, useContext, useState } from "react";
 
-interface HotelsContextProps {
+interface HotelContextProps {
   offer: IHotelOffer | null;
-  search: (params: any) => Promise<void>;
+  search: (params: any) => Promise<IHotelOffer | null>;
   checkRates: (params: any) => Promise<void>;
   book: (bodyData: any) => Promise<IHotelBookingResponse>;
+  initialize: () => void;
 }
 
-const HotelsContext = createContext<HotelsContextProps | undefined>(undefined);
+const HotelContext = createContext<HotelContextProps | undefined>(undefined);
 
-export const useHotels = () => {
-  const ctx = useContext(HotelsContext);
+export const useHotel = () => {
+  const ctx = useContext(HotelContext);
   if (!ctx) {
-    throw new Error("useHotels must be within HotelsProvider");
+    throw new Error("useHotel must be within HotelsProvider");
   }
   return ctx;
 };
 
-interface HotelsProviderProps {
+interface HotelProviderProps {
   children: React.ReactNode;
 }
 
-const HotelsProvider: React.FC<HotelsProviderProps> = ({ children }) => {
+const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
   const [offer, setOffer] = useState<IHotelOffer | null>(null);
 
-  const search = async (params: any) => {
+  const search = async (params: IHotelOffer | null) => {
     const response = await hotelsServices.get(params);
     setOffer(response.data);
+    return response.data;
   };
 
   const checkRates = async (params: any) => {
@@ -41,11 +43,15 @@ const HotelsProvider: React.FC<HotelsProviderProps> = ({ children }) => {
     return response.data;
   };
 
+  const initialize = () => setOffer(null);
+
   return (
-    <HotelsContext.Provider value={{ offer, search, checkRates, book }}>
+    <HotelContext.Provider
+      value={{ offer, search, checkRates, book, initialize }}
+    >
       {children}
-    </HotelsContext.Provider>
+    </HotelContext.Provider>
   );
 };
 
-export default HotelsProvider;
+export default HotelProvider;

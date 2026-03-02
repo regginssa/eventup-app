@@ -1,0 +1,70 @@
+import services from "@/api/services/transfer";
+import { ITransferBookingResponse, ITransferOffer } from "@/types/transfer";
+import { createContext, useContext, useState } from "react";
+
+interface TransferContextProps {
+  airportToHotelOffer: ITransferOffer | null;
+  hotelToEventOffer: ITransferOffer | null;
+  search: (params: any, fromType: "iata" | "gps") => Promise<void>;
+  book: (bodyData: any) => Promise<ITransferBookingResponse>;
+  initialize: () => void;
+}
+
+const TransferContext = createContext<TransferContextProps | undefined>(
+  undefined,
+);
+
+export const useTransfer = () => {
+  const ctx = useContext(TransferContext);
+  if (!ctx) {
+    throw new Error("useTransfer must be within TransferProvider");
+  }
+  return ctx;
+};
+
+interface TransferProviderProps {
+  children: React.ReactNode;
+}
+
+const TransferProvider: React.FC<TransferProviderProps> = ({ children }) => {
+  const [airportToHotelOffer, setAirportToHotelOffer] =
+    useState<ITransferOffer | null>(null);
+  const [hotelToEventOffer, setHotelToEventOffer] =
+    useState<ITransferOffer | null>(null);
+
+  const search = async (params: any, fromType: "iata" | "gps") => {
+    const response = await services.get(params);
+    console.log("[transfer res]: ", response.data);
+    if (fromType === "iata") {
+      setAirportToHotelOffer(response.data);
+    } else {
+      setHotelToEventOffer(response.data);
+    }
+  };
+
+  const book = async (bodyData: any): Promise<ITransferBookingResponse> => {
+    const response = await services.book(bodyData);
+    return response.data;
+  };
+
+  const initialize = () => {
+    setAirportToHotelOffer(null);
+    setHotelToEventOffer(null);
+  };
+
+  return (
+    <TransferContext.Provider
+      value={{
+        airportToHotelOffer,
+        hotelToEventOffer,
+        search,
+        book,
+        initialize,
+      }}
+    >
+      {children}
+    </TransferContext.Provider>
+  );
+};
+
+export default TransferProvider;

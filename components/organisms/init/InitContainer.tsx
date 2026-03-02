@@ -3,12 +3,14 @@ import {
   CommunityTicketProvider,
   ConversationProvider,
   EventProvider,
-  FlightsProvider,
+  FlightProvider,
+  HotelProvider,
   MessageProvider,
   NotificationProvider,
   SocketProvider,
   ThemeProvider,
   ToastProvider,
+  TransferProvider,
 } from "@/components/providers";
 import AuthProvider from "@/components/providers/AuthProvider";
 import { STRIPE_PUBLISHABLE_KEY } from "@/config/env";
@@ -30,18 +32,22 @@ const InitContainer: React.FC<InitContainerProps> = ({ children }) => {
                 <ConversationProvider>
                   <MessageProvider>
                     <NotificationProvider>
-                      <FlightsProvider>
-                        <ThemeProvider>
-                          <KeyboardAvoidingView
-                            behavior={
-                              Platform.OS === "ios" ? "padding" : undefined
-                            }
-                            style={{ flex: 1 }}
-                          >
-                            <ToastProvider>{children}</ToastProvider>
-                          </KeyboardAvoidingView>
-                        </ThemeProvider>
-                      </FlightsProvider>
+                      <FlightProvider>
+                        <HotelProvider>
+                          <TransferProvider>
+                            <ThemeProvider>
+                              <KeyboardAvoidingView
+                                behavior={
+                                  Platform.OS === "ios" ? "padding" : undefined
+                                }
+                                style={{ flex: 1 }}
+                              >
+                                <ToastProvider>{children}</ToastProvider>
+                              </KeyboardAvoidingView>
+                            </ThemeProvider>
+                          </TransferProvider>
+                        </HotelProvider>
+                      </FlightProvider>
                     </NotificationProvider>
                   </MessageProvider>
                 </ConversationProvider>
