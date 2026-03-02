@@ -24,8 +24,11 @@ export const FETCH_EVENTS_BY_USER = "/events/user";
 // Airports apis
 export const FETCH_NEAREST_AIRPORTS = "/airports/nearest-multiple";
 
-// Flight apis
-export const FLIGHTS_BASE = "/flights/";
+// Flights apis
+export const FLIGHT_BASE = "/flight/";
+
+// Hotels apis
+export const HOTEL_BASE = "/hotel/";
 
 // Booking apis
 export const FETCH_FLIGHT_OFFERS = "/booking/flight-offers";
@@ -34,8 +37,8 @@ export const CREATE_FLIGHT_ORDER = "/booking/flight-order";
 export const GET_FLIGHT_ORDER = "/booking/flight-order/";
 export const CANCEL_FLIGHT_ORDER = "/booking/flight-order/";
 
-export const FETCH_FLIGHTS = "/booking/flights";
-export const BOOK_FLIGHTS = "/booking/flights/order";
+export const FETCH_FLIGHT = "/booking/flight";
+export const BOOK_FLIGHT = "/booking/flight/order";
 
 export const FETCH_HOTEL_OFFERS = "/booking/hotel-offers";
 export const FETCH_HOTEL_OFFER_PRICING = "/booking/hotel-offer-pricing/";

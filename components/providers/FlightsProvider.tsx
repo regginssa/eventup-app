@@ -1,11 +1,11 @@
-import flightsServices from "@/api/services/flights";
+import flightsServices from "@/api/services/flight";
 import { IFlightBookingResponse, IFlightOffer } from "@/types/flight";
 import { createContext, useContext, useState } from "react";
 
 interface FlightsContextProps {
-  offers: IFlightOffer[];
+  offer: IFlightOffer | null;
   search: (params: any) => Promise<void>;
-  book: (params: any) => Promise<IFlightBookingResponse>;
+  book: (bodyData: any) => Promise<IFlightBookingResponse>;
 }
 
 const FlightsContext = createContext<FlightsContextProps | undefined>(
@@ -25,12 +25,12 @@ interface FlightsProviderProps {
 }
 
 const FlightsProvider: React.FC<FlightsProviderProps> = ({ children }) => {
-  const [offers, setOffers] = useState<IFlightOffer[]>([]);
+  const [offer, setOffer] = useState<IFlightOffer | null>(null);
 
   const search = async (params: any) => {
     const response = await flightsServices.get(params);
     if (!response.data) return;
-    setOffers(response.data);
+    setOffer(response.data);
   };
 
   const book = async (params: any): Promise<IFlightBookingResponse> => {
@@ -39,7 +39,7 @@ const FlightsProvider: React.FC<FlightsProviderProps> = ({ children }) => {
   };
 
   return (
-    <FlightsContext.Provider value={{ offers, search, book }}>
+    <FlightsContext.Provider value={{ offer, search, book }}>
       {children}
     </FlightsContext.Provider>
   );

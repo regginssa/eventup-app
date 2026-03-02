@@ -1,14 +1,13 @@
 import { IFlightOffer } from "@/types/flight";
 import df from "@/utils/date";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
 interface FlightItemProps {
-  data: IFlightOffer;
-  hiddenHeader?: boolean;
+  data: IFlightOffer | null;
 }
 
-const FlightItem: React.FC<FlightItemProps> = ({ data, hiddenHeader }) => {
+const FlightItem: React.FC<FlightItemProps> = ({ data }) => {
   if (!data) return null;
 
   const {
@@ -35,24 +34,6 @@ const FlightItem: React.FC<FlightItemProps> = ({ data, hiddenHeader }) => {
 
   return (
     <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
-      {!hiddenHeader && (
-        <View className="flex flex-row items-center justify-between mb-4 pb-2 border-b border-gray-50">
-          <View className="flex flex-row items-center gap-2">
-            <View className="bg-blue-50 p-1.5 rounded-full">
-              <MaterialIcons name="airlines" size={18} color="#2563eb" />
-            </View>
-            <Text className="font-dm-sans-bold text-gray-800 text-sm uppercase tracking-wider">
-              {airlineName}
-            </Text>
-          </View>
-          <View className="bg-gray-100 px-2 py-1 rounded-md">
-            <Text className="font-dm-sans-medium text-xs text-gray-500">
-              {flightDisplay}
-            </Text>
-          </View>
-        </View>
-      )}
-
       {/* TIMELINE SECTION */}
       <View className="flex flex-row items-center justify-between py-2">
         {/* Origin */}

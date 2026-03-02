@@ -8,3 +8,4 @@ export { default as NotificationProvider } from "./NotificationProvider";
 export { default as SocketProvider } from "./SocketProvider";
 export { default as ThemeProvider } from "./ThemeProvider";
 export { default as ToastProvider } from "./ToastProvider";
+export { default as HotelsProvider } from "./HotelsProvider";

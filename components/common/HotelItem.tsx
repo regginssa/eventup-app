@@ -1,278 +1,131 @@
-import { TAmadeusHotelOffer } from "@/types/amadeus";
+import { IHotelOffer } from "@/types/hotel";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import React from "react";
+import { Image, Text, View } from "react-native";
 
 interface HotelItemProps {
-  data: TAmadeusHotelOffer;
-  hiddenHeader?: boolean;
-  hiddenImages?: boolean;
-  onViewImages?: () => Promise<void>;
+  data: IHotelOffer | null;
 }
 
-const HotelItem: React.FC<HotelItemProps> = ({
-  data: offer,
-  hiddenHeader,
-  hiddenImages,
-  onViewImages,
-}) => {
+const HotelItem: React.FC<HotelItemProps> = ({ data: offer }) => {
   if (!offer) return null;
 
-  // Map the offer data, with error handling
-  // let data: THotelItemData;
-  // try {
-  //   data = mapAmadeusHotelOfferToHotelItemData(offer);
-  // } catch (error) {
-  //   console.error("Error mapping hotel offer:", error);
-  //   return (
-  //     <View className="w-full px-2 py-4">
-  //       <Text className="font-poppins-semibold text-red-600">
-  //         Error loading hotel data:{" "}
-  //         {error instanceof Error ? error.message : "Unknown error"}
-  //       </Text>
-  //     </View>
-  //   );
-  // }
+  const {
+    name,
+    category,
+    address,
+    image,
+    totalAmount,
+    currency,
+    roomName,
+    boardName,
+  } = offer;
+
+  // Extract stars (e.g., "4 STARS" -> 4)
+  const starCount = parseInt(category.match(/\d+/)?.[0] || "0");
 
   return (
-    <>
-      {/* {!hiddenHeader && (
-        <View className="flex flex-row items-center gap-2">
-          <MaterialIcons name="hotel" size={20} color="#374151" />
-          <Text className="font-dm-sans-bold text-gray-700">Hotel</Text>
-        </View>
-      )}
-      <View className="w-full px-2 flex flex-col items-start gap-2">
-        <View className="w-full flex flex-row items-start justify-between gap-6">
-          <View className="flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="home-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-gray-600 text-sm line-clamp-2">
-              Hotel Name:
-            </Text>
-          </View>
-          <Text className="font-dm-sans-medium text-gray-600">
-            {data.hotelName}
+    <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+      {/* HEADER SECTION: Title & Image */}
+      <View className="flex flex-row items-start justify-between">
+        <View className="flex-1 pr-3">
+          {starCount > 0 && (
+            <View className="flex flex-row mb-1">
+              {[...Array(starCount)].map((_, i) => (
+                <MaterialCommunityIcons
+                  key={i}
+                  name="star"
+                  size={12}
+                  color="#f59e0b"
+                />
+              ))}
+            </View>
+          )}
+          <Text
+            className="font-poppins-bold text-lg text-gray-800 leading-6"
+            numberOfLines={2}
+          >
+            {name}
           </Text>
-        </View>
-
-        <View className="w-full flex flex-row items-start justify-between">
-          <View className="flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="city-variant-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-gray-600 text-sm">
-              City:
-            </Text>
-          </View>
-          <Text className="font-dm-sans-medium text-gray-600">
-            {data.city || data.cityCode}
-          </Text>
-        </View>
-
-        {data.checkInDate && (
-          <View className="w-full flex flex-row items-start justify-between">
-            <View className="flex-row items-center gap-2">
-              <MaterialCommunityIcons
-                name="calendar-clock-outline"
-                size={16}
-                color="#4b5563"
-              />
-              <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                Check-in:
-              </Text>
-            </View>
-            <Text className="font-poppins-semibold text-gray-600">
-              {formatDateTime(new Date(data.checkInDate).toISOString())}
-            </Text>
-          </View>
-        )}
-
-        {data.checkOutDate && (
-          <View className="w-full flex flex-row items-start justify-between">
-            <View className="flex-row items-center gap-2">
-              <MaterialCommunityIcons
-                name="calendar-check-outline"
-                size={16}
-                color="#4b5563"
-              />
-              <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                Check-out:
-              </Text>
-            </View>
-            <Text className="font-poppins-semibold text-gray-600">
-              {formatDateTime(new Date(data.checkOutDate).toISOString())}
-            </Text>
-          </View>
-        )}
-
-        {data.roomDescription && (
-          <View className="w-full flex flex-row items-start justify-between">
-            <View className="flex-row items-center gap-2">
-              <MaterialIcons name="bed" size={16} color="#4b5563" />
-              <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                Room:
-              </Text>
-            </View>
-            <Text className="font-poppins-semibold text-gray-600 w-1/2 text-right">
-              {data.roomCategory || data.roomType}
-            </Text>
-          </View>
-        )}
-
-        {(data.beds > 0 || data.bedType) && (
-          <View className="w-full flex flex-row items-start justify-between">
-            <View className="flex-row items-center gap-2">
-              <MaterialCommunityIcons
-                name="bed-king-outline"
-                size={16}
-                color="#4b5563"
-              />
-              <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                Bed:
-              </Text>
-            </View>
-            <Text className="font-poppins-semibold text-gray-600">
-              {data.beds} {data.bedType}
-            </Text>
-          </View>
-        )}
-
-        {data.adults > 0 && (
-          <View className="w-full flex flex-row items-start justify-between">
-            <View className="flex-row items-center gap-2">
-              <MaterialCommunityIcons
-                name="account-outline"
-                size={16}
-                color="#4b5563"
-              />
-              <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                Adults:
-              </Text>
-            </View>
-            <Text className="font-poppins-semibold text-gray-600">
-              {data.adults}
-            </Text>
-          </View>
-        )}
-
-        {data.distanceValue && data.distanceUnit && (
-          <View className="w-full flex flex-row items-start justify-between mt-3">
-            <View className="flex-row items-center gap-2">
-              <MaterialCommunityIcons
-                name="map-marker-distance"
-                size={16}
-                color="#4b5563"
-              />
-              <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                Distance From City Center:
-              </Text>
-            </View>
-            <Text className="font-poppins-semibold text-gray-600">
-              {data.distanceValue} {data.distanceUnit}
-            </Text>
-          </View>
-        )}
-
-        {data.address && (
-          <View className="w-full flex flex-row items-start justify-between">
-            <View className="flex-row items-center gap-2">
-              <MaterialIcons name="location-pin" size={16} color="#4b5563" />
-              <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                Address:
-              </Text>
-            </View>
-            <Text className="font-poppins-semibold text-gray-600 w-1/2 text-right">
-              {data.address.lines.join(", ")}
-            </Text>
-          </View>
-        )}
-
-        {data.cancellationPolicy && (
-          <View className="w-full flex flex-row items-start justify-between">
-            <View className="flex-row items-center gap-2">
-              <MaterialCommunityIcons
-                name="credit-card-refund-outline"
-                size={16}
-                color="#4b5563"
-              />
-              <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                Cancellation Policy:
-              </Text>
-            </View>
-
-            <Text className="font-poppins-semibold text-gray-600 w-1/2 text-right">
-              {data.cancellationPolicy}
-            </Text>
-          </View>
-        )}
-
-        {data.paymentType && (
-          <View className="w-full flex flex-row items-start justify-between">
-            <View className="flex-row items-center gap-2">
-              <MaterialIcons name="payment" size={16} color="#4b5563" />
-              <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                Payment:
-              </Text>
-            </View>
-            <Text className="font-poppins-semibold text-gray-600 capitalize">
-              {data.paymentType}
-            </Text>
-          </View>
-        )}
-
-        {data.facilities && data.facilities.length > 0 && (
-          <View className="w-full flex flex-col gap-2">
-            <View className="flex flex-row items-center gap-2">
-              <MaterialIcons name="checkroom" size={16} color="#4b5563" />
-
-              <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                Facilities:
-              </Text>
-            </View>
-            <BadgeGroup badges={data.facilities} showCount={3} />
-          </View>
-        )}
-
-        {!hiddenImages && (
-          <View className="w-full flex flex-row items-start justify-between mt-3">
-            <View className="flex-row items-center gap-2">
-              <MaterialCommunityIcons
-                name="image-search"
-                size={16}
-                color="#4b5563"
-              />
-              <Text className="font-dm-sans-medium text-gray-600 text-sm">
-                Pictures:
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className="flex flex-row items-center just gap-1"
-              onPress={onViewImages}
+          <View className="flex flex-row items-center gap-1 mt-1">
+            <MaterialIcons name="location-pin" size={12} color="#9ca3af" />
+            <Text
+              className="font-dm-sans-medium text-gray-500 text-xs"
+              numberOfLines={1}
             >
-              <Text className="font-poppins-semibold text-gray-600">View</Text>
-              <MaterialIcons name="chevron-right" size={16} color="#4b5563" />
-            </TouchableOpacity>
+              {address}
+            </Text>
           </View>
-        )}
+        </View>
 
-        <View className="w-full flex flex-row justify-between mt-3">
-          <Text className="font-dm-sans-bold text-gray-800 text-lg">
-            Total Price:
+        <Image
+          source={{ uri: image }}
+          className="w-20 h-20 rounded-xl bg-gray-100"
+          resizeMode="cover"
+        />
+      </View>
+
+      {/* MIDDLE SECTION: Visual Line (Matching Flight Style) */}
+      <View className="flex flex-row items-center justify-between py-4 mt-2 border-t border-gray-50">
+        {/* Room Info */}
+        <View className="flex flex-col items-start flex-1">
+          <Text className="font-dm-sans-bold text-gray-800 text-[10px] uppercase tracking-wider">
+            Room Type
           </Text>
-          <Text className="font-poppins-bold text-gray-700 text-xl">
-            {getCurrencySymbol(
-              (data.price.currency.toLowerCase() as any) || "usd"
-            )}
-            {data.price.total}
+          <Text
+            className="font-dm-sans-medium text-gray-500 text-[10px]"
+            numberOfLines={1}
+          >
+            {roomName}
           </Text>
         </View>
-      </View> */}
-    </>
+
+        {/* Visual Line with Icon */}
+        <View className="flex-1 items-center px-4">
+          <View className="w-full h-[1px] bg-gray-200 relative flex items-center justify-center">
+            <View className="absolute bg-white px-2">
+              <MaterialCommunityIcons
+                name="bed-outline"
+                size={14}
+                color="#9ca3af"
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Board Info */}
+        <View className="flex flex-col items-end flex-1">
+          <Text className="font-dm-sans-bold text-gray-800 text-[10px] uppercase tracking-wider text-right">
+            Board Basis
+          </Text>
+          <Text
+            className="font-dm-sans-medium text-gray-500 text-[10px] text-right"
+            numberOfLines={1}
+          >
+            {boardName}
+          </Text>
+        </View>
+      </View>
+
+      {/* FOOTER SECTION: Status & Price */}
+      <View className="pt-3 border-t border-gray-50 flex flex-row items-center justify-between">
+        <View className="flex flex-row items-center gap-1">
+          <View className="w-1.5 h-1.5 rounded-full bg-green-500" />
+          <Text className="font-dm-sans-bold text-[10px] text-green-600 uppercase tracking-tighter">
+            Instant Confirmation
+          </Text>
+        </View>
+
+        <View className="flex flex-row items-start gap-1">
+          <Text className="font-poppins-semibold text-xs text-gray-600">
+            {currency}
+          </Text>
+          <Text className="font-poppins-bold text-xl text-green-700">
+            {totalAmount}
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 };
 
