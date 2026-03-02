@@ -22,3 +22,7 @@ export interface IFlightBookingResponse {
   bookingReference?: string;
   message: string;
 }
+
+export interface IFlight {
+  offers: IFlightOffer[];
+}

@@ -59,12 +59,6 @@ export type TPagination = {
   hasMore: boolean;
 };
 
-export interface TFlight {
-  offers: TAmadeusFlightOffer[];
-  request?: TAmadeusFlightBookingRequest;
-  order?: TAmadeusFlightOrder;
-}
-
 export interface THotel {
   offers: TAmadeusHotelOffer[];
   request?: TAmadeusHotelBookingRequest;

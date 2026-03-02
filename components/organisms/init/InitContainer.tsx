@@ -3,6 +3,7 @@ import {
   CommunityTicketProvider,
   ConversationProvider,
   EventProvider,
+  FlightsProvider,
   MessageProvider,
   NotificationProvider,
   SocketProvider,
@@ -29,16 +30,18 @@ const InitContainer: React.FC<InitContainerProps> = ({ children }) => {
                 <ConversationProvider>
                   <MessageProvider>
                     <NotificationProvider>
-                      <ThemeProvider>
-                        <KeyboardAvoidingView
-                          behavior={
-                            Platform.OS === "ios" ? "padding" : undefined
-                          }
-                          style={{ flex: 1 }}
-                        >
-                          <ToastProvider>{children}</ToastProvider>
-                        </KeyboardAvoidingView>
-                      </ThemeProvider>
+                      <FlightsProvider>
+                        <ThemeProvider>
+                          <KeyboardAvoidingView
+                            behavior={
+                              Platform.OS === "ios" ? "padding" : undefined
+                            }
+                            style={{ flex: 1 }}
+                          >
+                            <ToastProvider>{children}</ToastProvider>
+                          </KeyboardAvoidingView>
+                        </ThemeProvider>
+                      </FlightsProvider>
                     </NotificationProvider>
                   </MessageProvider>
                 </ConversationProvider>

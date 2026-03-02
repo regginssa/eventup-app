@@ -2,6 +2,7 @@ export { default as BookingProvider } from "./BookingProvider";
 export { default as CommunityTicketProvider } from "./CommunityTicketProvider";
 export { default as ConversationProvider } from "./ConversationProvider";
 export { default as EventProvider } from "./EventProvider";
+export { default as FlightsProvider } from "./FlightsProvider";
 export { default as MessageProvider } from "./MessageProvider";
 export { default as NotificationProvider } from "./NotificationProvider";
 export { default as SocketProvider } from "./SocketProvider";

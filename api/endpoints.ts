@@ -24,6 +24,9 @@ export const FETCH_EVENTS_BY_USER = "/events/user";
 // Airports apis
 export const FETCH_NEAREST_AIRPORTS = "/airports/nearest-multiple";
 
+// Flight apis
+export const FLIGHTS_BASE = "/flights/";
+
 // Booking apis
 export const FETCH_FLIGHT_OFFERS = "/booking/flight-offers";
 export const FETCH_FLIGHT_OFFERS_PRICING = "/booking/flight-offers-pricing";

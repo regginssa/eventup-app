@@ -6,15 +6,12 @@ import {
 import { TCoordinate, TPackageType } from "@/types";
 import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "@/types/amadeus";
 import { IEvent } from "@/types/event";
+import df from "@/utils/date";
 import {
   formatBookingDate,
   normalizeDateUTC,
   toLocalISOString,
 } from "@/utils/format";
-import {
-  mapAmadeusFlightOfferToFlightItemData,
-  mapAmadeusHotelOfferToHotelItemData,
-} from "@/utils/map";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
@@ -26,6 +23,7 @@ import { useBooking } from "../providers/BookingProvider";
 import FlightAvailabilityGroup from "./FlightAvailabilityGroup";
 import HotelAvailabilityGroup from "./HotelAvailabilityGroup";
 import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
+import bookingServices from "@/api/services/booking";
 
 interface BookSearchInputGroupProps {
   event: IEvent;
@@ -70,22 +68,22 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   } = useBooking();
 
   const searchFlights = async () => {
+    const originGeo =
+      departureLocation === "current"
+        ? currentLocationCoords
+        : user?.location.coordinate;
+    const destGeo = event.location?.coordinate;
+
     const params = {
-      type: packageType,
-      eventId: event._id,
-      departureDate: formatBookingDate(departureDate),
-      adults: travelers,
-      originLocationCoordsLatitude:
-        departureLocation === "current"
-          ? currentLocationCoords?.latitude
-          : user?.location.coordinate.latitude,
-      originLocationCoordsLongitude:
-        departureLocation === "current"
-          ? currentLocationCoords?.longitude
-          : user?.location.coordinate.longitude,
+      originLat: originGeo?.latitude,
+      originLng: originGeo?.longitude,
+      destLat: destGeo?.latitude,
+      destLng: destGeo?.longitude,
+      departureDate: df.toISOString(departureDate),
+      packageType,
     };
 
-    const response = await fetchFlightOffers(params);
+    const response = await bookingServices.getFlights(params);
 
     if (!response.data) {
       return null;
