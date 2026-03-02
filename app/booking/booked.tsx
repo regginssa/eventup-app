@@ -1,6 +1,11 @@
 import { fetchBooking } from "@/api/services/booking";
 import eventServices from "@/api/services/event";
-import { Button, Spinner, TicketQR, UserTicketItem } from "@/components/common";
+import {
+  Button,
+  CommunityTicketItem,
+  Spinner,
+  TicketQR,
+} from "@/components/common";
 import { BookedContainer } from "@/components/organisms";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { TCurrency, TPackageType } from "@/types";
@@ -89,7 +94,7 @@ const EventTicket = ({
       </Text>
 
       {event?.type === "user" && communityTicket ? (
-        <UserTicketItem item={communityTicket} />
+        <CommunityTicketItem item={communityTicket} />
       ) : (
         <View className="w-full flex flex-row gap-3">
           <TicketQR size={120} />

@@ -151,7 +151,7 @@ const TransferItem: React.FC<TransferItemProps> = ({
           <Text className="font-poppins-semibold text-xs text-gray-600">
             {currency}
           </Text>
-          <Text className="font-poppins-bold text-xl text-green-700">
+          <Text className="font-poppins-bold text-xl text-green-600">
             {totalAmount}
           </Text>
         </View>

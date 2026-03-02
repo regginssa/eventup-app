@@ -5,7 +5,7 @@ import { createContext, useContext, useState } from "react";
 interface HotelContextProps {
   offer: IHotelOffer | null;
   search: (params: any) => Promise<IHotelOffer | null>;
-  checkRates: (params: any) => Promise<void>;
+  checkRates: (params: any) => Promise<IHotelOffer | null>;
   book: (bodyData: any) => Promise<IHotelBookingResponse>;
   initialize: () => void;
 }
@@ -33,9 +33,10 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
     return response.data;
   };
 
-  const checkRates = async (params: any) => {
+  const checkRates = async (params: any): Promise<IHotelOffer | null> => {
     const response = await hotelsServices.checkRates(params);
     setOffer(response.data);
+    return response.data;
   };
 
   const book = async (bodyData: any): Promise<IHotelBookingResponse> => {

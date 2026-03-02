@@ -75,7 +75,6 @@ const Input: React.FC<InputProps> = ({
             maxHeight: maxHeight,
             height: multiline ? inputHeight : 40,
           }}
-          placeholderTextColor={theme === "dark" ? "white" : "black"}
           keyboardType={type === "number" ? "numeric" : "default"}
           editable={!disabled}
           value={value}

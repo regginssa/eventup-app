@@ -10,7 +10,7 @@ const get = async (params: any): Promise<ApiResponse<IHotelOffer | null>> => {
 const checkRates = async (
   params: any,
 ): Promise<ApiResponse<IHotelOffer | null>> => {
-  return await AxiosInstance.get(HOTEL_BASE + "/checkrates", { params });
+  return await AxiosInstance.get(HOTEL_BASE + "checkrates", { params });
 };
 
 const book = async (

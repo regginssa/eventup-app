@@ -60,4 +60,6 @@ export interface IUser {
     startedAt?: string;
   };
   status: TOnlineStatus;
+  birthday: string;
+  gender: "mr" | "ms";
 }

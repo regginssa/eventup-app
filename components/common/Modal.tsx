@@ -74,7 +74,7 @@ const Modal: React.FC<ModalProps> = ({
             contentContainerStyle={{ paddingBottom: 20 }}
             keyboardShouldPersistTaps="handled"
           >
-            {children}
+            <View className="flex-1">{children}</View>
           </ScrollView>
         ) : (
           <View className="flex-1">{children}</View>

@@ -1,5 +1,8 @@
-import { Button, UserTicketItem } from "@/components/common";
-import { BookSearchInputGroup } from "@/components/molecules";
+import { Button, CommunityTicketItem } from "@/components/common";
+import {
+  BookSearchInputGroup,
+  PackageConfirmModal,
+} from "@/components/molecules";
 import { TCoordinate } from "@/types";
 import { IAttendees, IEvent, TEventFee } from "@/types/event";
 import { ICommunityTicket } from "@/types/ticket";
@@ -81,7 +84,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
           Standard Package
         </Text>
 
-        {communityTicket && <UserTicketItem item={communityTicket} />}
+        {communityTicket && <CommunityTicketItem item={communityTicket} />}
 
         {attendees && (
           <>
@@ -396,16 +399,13 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
         />
       </View>
 
-      {/* <PackageConfirmModal
+      <PackageConfirmModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        ticket={communityTicket || undefined}
-        flight={flight?.offers[0]}
-        hotel={hotel?.offers[0]}
-        transfer={transfer}
+        communityTicket={communityTicket || undefined}
         packageType={eventPackage}
-       eventId={event._id as string}
-      />  */}
+        event={event}
+      />
     </>
   );
 };

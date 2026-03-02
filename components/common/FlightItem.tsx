@@ -139,11 +139,11 @@ const FlightItem: React.FC<FlightItemProps> = ({
           </Text>
         </View>
 
-        <View className="flex flex-row items-baseline gap-1">
-          <Text className="font-poppins-semibold text-[10px] text-gray-500">
+        <View className="flex flex-row items-start gap-1">
+          <Text className="font-poppins-semibold text-[10px] text-gray-600">
             {currency}
           </Text>
-          <Text className="font-poppins-bold text-xl text-green-700">
+          <Text className="font-poppins-bold text-xl text-green-600">
             {totalAmount}
           </Text>
         </View>

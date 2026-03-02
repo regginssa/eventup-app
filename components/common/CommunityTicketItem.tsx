@@ -5,11 +5,11 @@ import { Text, View } from "react-native";
 
 const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
 
-interface UserTicketItemProps {
+interface CommunityTicketItemProps {
   item: ICommunityTicket | null;
 }
 
-const UserTicketItem: React.FC<UserTicketItemProps> = ({ item }) => {
+const CommunityTicketItem: React.FC<CommunityTicketItemProps> = ({ item }) => {
   if (!item) return null;
 
   return (
@@ -53,4 +53,4 @@ const UserTicketItem: React.FC<UserTicketItemProps> = ({ item }) => {
   );
 };
 
-export default UserTicketItem;
+export default CommunityTicketItem;
