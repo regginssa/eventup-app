@@ -6,7 +6,7 @@ export { default as CryptoPayout } from "./CryptoPayout";
 export { default as EventFilterModal } from "./EventFilterModal";
 export { default as EventsPreviewGroup } from "./EventsPreviewGroup";
 export { default as FilterItemDropdown } from "./FilterItemDropdown";
-export { default as FlightAvailabilityGroup } from "./FlightAvailabilityGroup";
+export { default as FlightAvailabilityGroup } from "./FlightsOffersGroup";
 export { default as HotelAvailabilityGroup } from "./HotelAvailabilityGroup";
 export { default as HotelGuestGroup } from "./HotelGuestGroup";
 export { default as HotelRoomSelector } from "./HotelRoomSelector";

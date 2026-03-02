@@ -1,35 +1,10 @@
-import { TAmadeusFlightOffer } from "@/types/amadeus";
-import { formatDateTime, getCurrencySymbol } from "@/utils/format";
-import { mapAmadeusFlightOfferToFlightItemData } from "@/utils/map";
+import { IFlightOffer } from "@/types/flight";
+import df from "@/utils/date";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
-export type TFlightItemData = {
-  from: string;
-  to: string;
-
-  departureDate: string;
-  arrivalDate: string;
-
-  stops: number;
-
-  airlineCode: string;
-  airlineName: string;
-
-  flightNumber: string;
-
-  seatsLeft: number;
-
-  refundable: boolean;
-
-  price: {
-    total: string;
-    currency: string;
-  };
-};
-
 interface FlightItemProps {
-  data: TAmadeusFlightOffer;
+  data: IFlightOffer;
   hiddenHeader?: boolean;
 }
 
@@ -37,188 +12,114 @@ const FlightItem: React.FC<FlightItemProps> = ({ data, hiddenHeader }) => {
   if (!data) return null;
 
   const {
-    from,
-    to,
-    departureDate,
-    arrivalDate,
+    originIata,
+    destinationIata,
+    departureTime,
+    arrivalTime,
     stops,
-    airlineCode,
     airlineName,
-    flightNumber,
-    seatsLeft,
-    refundable,
-    price,
-  } = mapAmadeusFlightOfferToFlightItemData(data);
+    duration,
+    totalAmount,
+    currency,
+    flightNumbers, // Assuming this is string[] from our previous discussion
+  } = data;
+
+  // Helper to format the flight number display
+  const flightDisplay = Array.isArray(flightNumbers)
+    ? flightNumbers.join(" • ")
+    : flightNumbers;
+  const stopsLabel =
+    stops.length === 0
+      ? "Direct"
+      : `${stops} Stop${stops.length > 1 ? "s" : ""}`;
 
   return (
-    <>
+    <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
       {!hiddenHeader && (
-        <View className="flex flex-row items-center gap-2">
-          <MaterialCommunityIcons name="airplane" size={20} color="#374151" />
-          <Text className="font-dm-sans-bold text-gray-700">Flight</Text>
+        <View className="flex flex-row items-center justify-between mb-4 pb-2 border-b border-gray-50">
+          <View className="flex flex-row items-center gap-2">
+            <View className="bg-blue-50 p-1.5 rounded-full">
+              <MaterialIcons name="airlines" size={18} color="#2563eb" />
+            </View>
+            <Text className="font-dm-sans-bold text-gray-800 text-sm uppercase tracking-wider">
+              {airlineName}
+            </Text>
+          </View>
+          <View className="bg-gray-100 px-2 py-1 rounded-md">
+            <Text className="font-dm-sans-medium text-xs text-gray-500">
+              {flightDisplay}
+            </Text>
+          </View>
         </View>
       )}
 
-      <View className="w-full px-2 flex flex-col items-start gap-2">
-        {/* FROM */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons name="airport" size={16} color="#4b5563" />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              From:
-            </Text>
-          </View>
-          <Text className="font-poppins-semibold text-gray-600">{from}</Text>
-        </View>
-
-        {/* TO */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="airplane-landing"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              To:
-            </Text>
-          </View>
-          <Text className="font-poppins-semibold text-gray-600">{to}</Text>
-        </View>
-
-        {/* DEPARTURE */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="calendar-clock-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Departure:
-            </Text>
-          </View>
-          <Text className="font-poppins-semibold text-gray-600">
-            {departureDate
-              ? formatDateTime(new Date(departureDate).toISOString())
-              : "-"}
+      {/* TIMELINE SECTION */}
+      <View className="flex flex-row items-center justify-between py-2">
+        {/* Origin */}
+        <View className="flex flex-col items-start flex-1">
+          <Text className="font-poppins-bold text-2xl text-gray-900">
+            {originIata}
+          </Text>
+          <Text className="font-dm-sans-medium text-gray-500 text-xs">
+            {df.toShortUSDate(departureTime)}
           </Text>
         </View>
 
-        {/* ARRIVAL */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="calendar-check-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Arrival:
-            </Text>
+        {/* Visual Line & Stops */}
+        <View className="flex-1 items-center px-2">
+          <Text className="font-dm-sans-medium text-[10px] text-gray-400 mb-1">
+            {duration}
+          </Text>
+          <View className="w-full h-[1px] bg-gray-300 relative flex items-center justify-center">
+            <View className="absolute bg-white px-1">
+              <MaterialCommunityIcons
+                name="airplane"
+                size={14}
+                color="#9ca3af"
+              />
+            </View>
           </View>
-
-          <Text className="font-poppins-semibold text-gray-600">
-            {arrivalDate
-              ? formatDateTime(new Date(arrivalDate).toISOString())
-              : "-"}
+          <Text
+            className={`font-dm-sans-bold text-[10px] mt-1 ${stops.length === 0 ? "text-green-600" : "text-orange-500"}`}
+          >
+            {stopsLabel}
           </Text>
         </View>
 
-        {/* STOPS */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="airplane-landing"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Stops:
-            </Text>
-          </View>
-
-          <Text className="font-poppins-semibold text-gray-600">{stops}</Text>
-        </View>
-
-        {/* AIRLINE */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialIcons name="airlines" size={16} color="#4b5563" />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Airline:
-            </Text>
-          </View>
-
-          <Text className="font-poppins-semibold text-gray-600">
-            {airlineName} ({airlineCode})
+        {/* Destination */}
+        <View className="flex flex-col items-end flex-1">
+          <Text className="font-poppins-bold text-2xl text-gray-900">
+            {destinationIata}
           </Text>
-        </View>
-
-        {/* FLIGHT NUMBER */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons name="airplane" size={16} color="#4b5563" />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Flight No:
-            </Text>
-          </View>
-
-          <Text className="font-poppins-semibold text-gray-600">
-            {flightNumber}
-          </Text>
-        </View>
-
-        {/* SEATS LEFT */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="seat-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Seats Left:
-            </Text>
-          </View>
-
-          <Text className="font-poppins-semibold text-gray-600">
-            {seatsLeft}
-          </Text>
-        </View>
-
-        {/* REFUNDABILITY */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-2">
-            <MaterialCommunityIcons
-              name="credit-card-refund-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans-medium text-sm text-gray-600">
-              Refundability:
-            </Text>
-          </View>
-
-          <Text className="font-poppins-semibold text-gray-600">
-            {refundable ? "Yes" : "No"}
-          </Text>
-        </View>
-
-        {/* PRICE */}
-        <View className="w-full flex flex-row items-center justify-between">
-          <Text className="font-dm-sans-bold text-gray-700 text-lg">
-            Total Price:
-          </Text>
-          <Text className="font-poppins-bold text-gray-600 text-xl">
-            <Text className="text-base">
-              {getCurrencySymbol(price?.currency as any)}
-            </Text>
-            {price?.total}
+          <Text className="font-dm-sans-medium text-gray-500 text-xs">
+            {df.toShortUSDate(arrivalTime)}
           </Text>
         </View>
       </View>
-    </>
+
+      {/* DATE & FOOTER INFO */}
+      <View className="mt-4 pt-3 border-t border-gray-50 flex flex-row items-center justify-between">
+        <View className="flex flex-row items-center gap-1">
+          <MaterialCommunityIcons
+            name="calendar-range"
+            size={14}
+            color="#6b7280"
+          />
+          <Text className="font-dm-sans-medium text-xs text-gray-500">
+            {df.toShortUSDate(departureTime)}
+          </Text>
+        </View>
+
+        <View className="flex flex-row items-baseline gap-1">
+          <Text className="font-dm-sans-medium text-xs text-gray-400">
+            {currency}
+          </Text>
+          <Text className="font-poppins-bold text-xl text-blue-600">
+            {totalAmount}
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 };
 

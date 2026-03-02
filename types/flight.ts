@@ -2,6 +2,13 @@ import { TPackageType } from ".";
 
 export type TFlightBookStatus = "confirmed" | "processing" | "failed";
 
+export type TStop = {
+  iataCode: string;
+  arrivalTime: string;
+  departureTime: string;
+  duration: string;
+};
+
 export interface IFlightOffer {
   id: string;
   airlineName: string;
@@ -14,6 +21,8 @@ export interface IFlightOffer {
   originIata: string;
   destinationIata: string;
   packageType: TPackageType;
+  flightNumbers: string[];
+  stops: TStop[];
 }
 
 export interface IFlightBookingResponse {

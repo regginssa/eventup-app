@@ -1,29 +1,16 @@
-import {
-  fetchFlightOffers,
-  fetchHotelOffers,
-  fetchTransferOffers,
-} from "@/api/services/booking";
 import { TCoordinate, TPackageType } from "@/types";
-import { TAmadeusFlightOffer, TAmadeusHotelOffer } from "@/types/amadeus";
 import { IEvent } from "@/types/event";
+import { IFlightOffer } from "@/types/flight";
 import df from "@/utils/date";
-import {
-  formatBookingDate,
-  normalizeDateUTC,
-  toLocalISOString,
-} from "@/utils/format";
+import { normalizeDateUTC } from "@/utils/format";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { Button, DateTimePicker, RadioButton } from "../common";
-import { TFlightItemData } from "../common/FlightItem";
-import { THotelItemData } from "../common/HotelItem";
 import { useAuth } from "../providers/AuthProvider";
-import { useBooking } from "../providers/BookingProvider";
-import FlightAvailabilityGroup from "./FlightAvailabilityGroup";
-import HotelAvailabilityGroup from "./HotelAvailabilityGroup";
-import TransferAvailabilityGroup from "./TransferAvailabilityGroup";
-import bookingServices from "@/api/services/booking";
+import { useFlights } from "../providers/FlightsProvider";
+import { useToast } from "../providers/ToastProvider";
+import FlightsOffersGroup from "./FlightsOffersGroup";
 
 interface BookSearchInputGroupProps {
   event: IEvent;
@@ -56,18 +43,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [travelers, setTravelers] = useState<number>(1);
 
   const { user } = useAuth();
-  const {
-    flight,
-    hotel: rdHotel,
-    transfer: rdTransfer,
-    setBookingFlight,
-    setBookingHotel,
-    setBookingTransfer,
-    setBookingTravelers,
-    setBookingHotelRooms,
-  } = useBooking();
+  const { offers, search: searchFlights } = useFlights();
+  const toast = useToast();
 
-  const searchFlights = async () => {
+  const handleFlights = async () => {
     const originGeo =
       departureLocation === "current"
         ? currentLocationCoords
@@ -83,164 +62,143 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       packageType,
     };
 
-    const response = await bookingServices.getFlights(params);
-
-    if (!response.data) {
-      return null;
-    }
-
-    setBookingFlight({ ...flight, offers: response.data });
-    setBookingTravelers(travelers);
-
-    const flightData = mapAmadeusFlightOfferToFlightItemData(response.data[0]);
-    return flightData;
+    await searchFlights(params);
   };
 
-  const searchHotels = async (flight: TFlightItemData) => {
-    if (!flight) {
-      Alert.alert("Flight Not Selected", "Please select a flight first.");
-      return null;
-    }
+  // const searchHotels = async (flight: TFlightItemData) => {
+  //   if (!flight) {
+  //     Alert.alert("Flight Not Selected", "Please select a flight first.");
+  //     return null;
+  //   }
 
-    const flightArrivalDate = flight.arrivalDate;
+  //   const flightArrivalDate = flight.arrivalDate;
 
-    const flightArrival = new Date(flightArrivalDate);
-    const flightArrivalDateTime = normalizeDateUTC(flightArrival);
-    const eventOpeningDateTime = normalizeDateUTC(
-      new Date(event.dates?.start?.date as string),
-    );
+  //   const flightArrival = new Date(flightArrivalDate);
+  //   const flightArrivalDateTime = normalizeDateUTC(flightArrival);
+  //   const eventOpeningDateTime = normalizeDateUTC(
+  //     new Date(event.dates?.start?.date as string),
+  //   );
 
-    if (flightArrivalDateTime > eventOpeningDateTime) {
-      Alert.alert(
-        "Invalid Flight Arrival Date",
-        "The flight arrival date cannot be before the event date.",
-      );
-      return null;
-    }
+  //   if (flightArrivalDateTime > eventOpeningDateTime) {
+  //     Alert.alert(
+  //       "Invalid Flight Arrival Date",
+  //       "The flight arrival date cannot be before the event date.",
+  //     );
+  //     return null;
+  //   }
 
-    const params = {
-      type: packageType,
-      eventId: event._id,
-      checkInDate: formatBookingDate(flightArrival),
-      checkOutDate: formatBookingDate(hotelCheckoutDate),
-      adults: travelers,
-      roomQuantity: hotelRooms,
-    };
+  //   const params = {
+  //     type: packageType,
+  //     eventId: event._id,
+  //     checkInDate: formatBookingDate(flightArrival),
+  //     checkOutDate: formatBookingDate(hotelCheckoutDate),
+  //     adults: travelers,
+  //     roomQuantity: hotelRooms,
+  //   };
 
-    const response = await fetchHotelOffers(params);
+  //   const response = await fetchHotelOffers(params);
 
-    if (!response.data) {
-      return null;
-    }
+  //   if (!response.data) {
+  //     return null;
+  //   }
 
-    setBookingHotel({
-      ...rdHotel,
-      offers: response.data,
-    });
-    setBookingHotelRooms(hotelRooms);
+  //   setBookingHotel({
+  //     ...rdHotel,
+  //     offers: response.data,
+  //   });
+  //   setBookingHotelRooms(hotelRooms);
 
-    const hotelOffer = mapAmadeusHotelOfferToHotelItemData(response.data[0]);
+  //   const hotelOffer = mapAmadeusHotelOfferToHotelItemData(response.data[0]);
 
-    return hotelOffer;
-  };
+  //   return hotelOffer;
+  // };
 
-  const searchTransfers = async (
-    flight: TFlightItemData,
-    hotel: THotelItemData,
-  ) => {
-    if (!flight) {
-      Alert.alert("Flight Not Selected");
-      return;
-    }
-    if (!hotel) {
-      Alert.alert("Hotel Not Selected");
-      return;
-    }
+  // const searchTransfers = async (
+  //   flight: TFlightItemData,
+  //   hotel: THotelItemData,
+  // ) => {
+  //   if (!flight) {
+  //     Alert.alert("Flight Not Selected");
+  //     return;
+  //   }
+  //   if (!hotel) {
+  //     Alert.alert("Hotel Not Selected");
+  //     return;
+  //   }
 
-    const flightArrival = new Date(flight.arrivalDate);
-    const flightArrivalDateTime = normalizeDateUTC(flightArrival);
-    const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
+  //   const flightArrival = new Date(flight.arrivalDate);
+  //   const flightArrivalDateTime = normalizeDateUTC(flightArrival);
+  //   const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
 
-    if (flightArrivalDateTime > hotelDepartureDateTime) {
-      Alert.alert(
-        "Invalid Hotel Departure Date",
-        "The hotel departure date cannot be before the flight arrival date.",
-      );
-      return;
-    }
+  //   if (flightArrivalDateTime > hotelDepartureDateTime) {
+  //     Alert.alert(
+  //       "Invalid Hotel Departure Date",
+  //       "The hotel departure date cannot be before the flight arrival date.",
+  //     );
+  //     return;
+  //   }
 
-    const params = {
-      eventId: event._id,
-      airportCode: flight.to,
-      airportLeaveDateTime: flight.arrivalDate,
-      hotelAddressLine: hotel.address.lines.join(", "),
-      hotelCityName: hotel.address.cityName,
-      hotelZipCode: hotel.address.postalCode,
-      hotelCountryCode: hotel.address.countryCode,
-      hotelName: hotel.hotelName,
-      hotelGeoCode: `${hotel.latitude},${hotel.longitude}`,
-      hotelCode: hotel.hotelId,
-      transferType: packageType === "standard" ? "SHARED" : "PRIVATE",
-      hotelLeaveDateTime: toLocalISOString(hotelDepartureDate),
-      passengers: hotel.adults,
-    };
+  //   const params = {
+  //     eventId: event._id,
+  //     airportCode: flight.to,
+  //     airportLeaveDateTime: flight.arrivalDate,
+  //     hotelAddressLine: hotel.address.lines.join(", "),
+  //     hotelCityName: hotel.address.cityName,
+  //     hotelZipCode: hotel.address.postalCode,
+  //     hotelCountryCode: hotel.address.countryCode,
+  //     hotelName: hotel.hotelName,
+  //     hotelGeoCode: `${hotel.latitude},${hotel.longitude}`,
+  //     hotelCode: hotel.hotelId,
+  //     transferType: packageType === "standard" ? "SHARED" : "PRIVATE",
+  //     hotelLeaveDateTime: toLocalISOString(hotelDepartureDate),
+  //     passengers: hotel.adults,
+  //   };
 
-    const response = await fetchTransferOffers(params);
+  //   const response = await fetchTransferOffers(params);
 
-    if (!response.data) {
-      return null;
-    }
+  //   if (!response.data) {
+  //     return null;
+  //   }
 
-    console.log("[transfer offer data]: ", response.data);
+  //   console.log("[transfer offer data]: ", response.data);
 
-    setBookingTransfer({
-      ...rdTransfer,
-      ah: response.data.airportToHotel,
-      he: response.data.hotelToEvent,
-    });
-  };
+  //   setBookingTransfer({
+  //     ...rdTransfer,
+  //     ah: response.data.airportToHotel,
+  //     he: response.data.hotelToEvent,
+  //   });
+  // };
 
   const handleSearch = async () => {
-    setBookingFlight(null);
-    setBookingHotel(null);
-    if (!event._id) return Alert.alert("Event ID is missing.");
+    if (!event._id) return toast.warn("Event ID is missing.");
 
-    if (!event.dates?.timezone)
-      return Alert.alert("Event timezone is missing.");
+    if (!event.dates?.timezone) return toast.warn("Event timezone is missing.");
 
     const eventDateTime = normalizeDateUTC(
       new Date(event.dates?.start?.date as string),
     );
     const departureDateTime = normalizeDateUTC(departureDate);
-
     const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
-
     const hotelCheckoutDateTime = normalizeDateUTC(hotelCheckoutDate);
 
     if (eventDateTime < departureDateTime) {
-      return Alert.alert(
-        "Invalid Departure Date",
-        "The departure date cannot be after the event date.",
-      );
+      return toast.warn("The departure date cannot be after the event date.");
     }
 
     if (eventDateTime > hotelCheckoutDateTime) {
-      return Alert.alert(
-        "Invalid Hotel Checkout Date",
+      return toast.warn(
         "The hotel checkout date cannot be after the event date.",
       );
     }
 
     if (hotelDepartureDateTime > eventDateTime) {
-      return Alert.alert(
-        "Invalid Hotel Departure Date",
+      return toast.warn(
         "The hotel departure date cannot be after the event date.",
       );
     }
 
     if (travelers < hotelRooms) {
-      return Alert.alert(
-        "Invalid Travelers",
+      return toast.warn(
         "The number of travelers cannot be less than the number of hotel rooms.",
       );
     }
@@ -250,20 +208,20 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       setIsSearched(false);
 
       setSearchBtnLabel("Searching flights...");
-      const flightData = await searchFlights();
-      if (!flightData) throw new Error("No flight found");
+      await handleFlights();
 
-      setSearchBtnLabel("Searching hotels...");
-      const hotelData = await searchHotels(flightData);
-      if (!hotelData) throw new Error("No hotel found");
+      // setSearchBtnLabel("Searching hotels...");
+      // const hotelData = await searchHotels(flightData);
+      // if (!hotelData) throw new Error("No hotel found");
 
-      setSearchBtnLabel("Searching transfers...");
-      await searchTransfers(flightData, hotelData);
+      // setSearchBtnLabel("Searching transfers...");
+      // await searchTransfers(flightData, hotelData);
     } catch (error) {
       console.log("handleSearch error: ", error);
+      toast.error("Search failed");
     } finally {
       setSearchLoading(false);
-      setSearchBtnLabel("");
+      setSearchBtnLabel("Search");
       setIsSearched(true);
     }
   };
@@ -426,25 +384,16 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         <>
           <View className="w-full h-[1px] bg-gray-300"></View>
 
-          <FlightAvailabilityGroup
-            selected={flight?.offers[0]}
-            items={flight?.offers || []}
+          <FlightsOffersGroup
+            selected={offers[0]}
+            items={offers}
             isSearched={isSearched}
-            onSelect={(selected: TAmadeusFlightOffer) => {
-              if (flight) {
-                const reorderedData = [
-                  selected,
-                  ...flight.offers.filter((item) => item.id !== selected.id),
-                ];
-
-                setBookingFlight({ ...flight, offers: reorderedData });
-              }
-            }}
+            onSelect={(selected: IFlightOffer) => {}}
           />
         </>
       )}
 
-      {isSearched && (
+      {/* {isSearched && (
         <>
           <View className="w-full h-[1px] bg-gray-300"></View>
 
@@ -477,7 +426,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             available={true}
           />
         </>
-      )}
+      )} */}
 
       <View className="w-full h-[1px] bg-gray-300"></View>
 

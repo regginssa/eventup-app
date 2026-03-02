@@ -6,4 +6,20 @@ const toISOString = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
-export default { toISOString };
+const toShortUSDate = (date: Date | string | null): string => {
+  if (!date) return "-";
+  const toDate = new Date(date);
+  const datePart = toDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const timePart = toDate.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${datePart}`;
+};
+
+export default { toISOString, toShortUSDate };

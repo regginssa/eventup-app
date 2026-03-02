@@ -1,4 +1,4 @@
-import { TAmadeusFlightOffer } from "@/types/amadeus";
+import { IFlightOffer } from "@/types/flight";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
@@ -10,14 +10,14 @@ import {
 } from "react-native";
 import { Button, FlightItem, Modal } from "../common";
 
-interface FlightAvailabilityGroupProps {
-  selected?: TAmadeusFlightOffer;
-  items: TAmadeusFlightOffer[];
+interface FlightsOffersGroupProps {
+  selected?: IFlightOffer;
+  items: IFlightOffer[];
   isSearched: boolean;
-  onSelect: (availability: TAmadeusFlightOffer) => void;
+  onSelect: (offer: IFlightOffer) => void;
 }
 
-const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
+const FlightsOffersGroup: React.FC<FlightsOffersGroupProps> = ({
   selected,
   items,
   isSearched,
@@ -25,7 +25,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const renderItem = ({ item }: { item: TAmadeusFlightOffer }) => {
+  const renderItem = ({ item }: { item: IFlightOffer }) => {
     return (
       <TouchableOpacity
         activeOpacity={0.8}
@@ -46,7 +46,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
       <View className="w-full flex flex-col items-center justify-center gap-2">
         <MaterialCommunityIcons name="airplane-off" size={24} color="#4b5563" />
         <Text className="font-poppins-semibold text-gray-600">
-          No available airlines
+          No available flight
         </Text>
       </View>
     );
@@ -58,9 +58,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
         <View className="w-full gap-4">
           <View className="flex flex-row items-center gap-2">
             <MaterialCommunityIcons name="airplane" size={20} color="#374151" />
-            <Text className="font-dm-sans-bold text-gray-700">
-              Available Flights
-            </Text>
+            <Text className="font-dm-sans-bold text-gray-700">Flights</Text>
           </View>
 
           <FlightItem data={selected} hiddenHeader={true} />
@@ -77,11 +75,7 @@ const FlightAvailabilityGroup: React.FC<FlightAvailabilityGroupProps> = ({
         </View>
       )}
 
-      <Modal
-        title="Available Flights"
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-      >
+      <Modal title="Flights" isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <FlatList
           data={items}
           keyExtractor={(_, index) => index.toString()}
@@ -103,4 +97,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FlightAvailabilityGroup;
+export default FlightsOffersGroup;
