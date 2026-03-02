@@ -19,7 +19,7 @@ import TravelerDetailInputGroup, {
 } from "@/components/molecules/TravelerDetailInputGroup";
 import { BookingContainer } from "@/components/organisms";
 import { useBooking } from "@/components/providers/BookingProvider";
-import { useTicket } from "@/components/providers/TicketProvider";
+import { useCommunityTicket } from "@/components/providers/CommunityTicketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 
 import { TDropdownItem, TLocation, TTransfer } from "@/types";
@@ -487,7 +487,7 @@ const BookingScreen = () => {
     setBookingTransferRequest,
     setBillingDetails,
   } = useBooking();
-  const { tickets } = useTicket();
+  const { tickets } = useCommunityTicket();
   const toast = useToast();
 
   const [isConfirmed, setIsConfirmed] = useState<boolean[]>(

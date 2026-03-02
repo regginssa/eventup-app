@@ -128,8 +128,8 @@ export const fetchBooking = async (
   return await AxiosInstance.get(BOOKING_BASE + id);
 };
 
-// Fetch booking by userId & eventId
-export const fetchBookingByUserIdAndEventId = async (
+// Get booking by userId & eventId
+const getBookingByUserIdAndEventId = async (
   userId: string,
   eventId: string,
 ): Promise<ApiResponse<IBooking>> => {
@@ -145,4 +145,4 @@ export const createBooking = async (
   return await AxiosInstance.post(CREATE_BOOKING, body);
 };
 
-export default { getFlights, bookFlights };
+export default { getFlights, bookFlights, getBookingByUserIdAndEventId };

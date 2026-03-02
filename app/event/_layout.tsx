@@ -5,9 +5,7 @@ const EventLayout = () => {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="create" />
       <Stack.Screen name="mine" />
-      <Stack.Screen name="[id]" />
-      <Stack.Screen name="ai" />
-      <Stack.Screen name="user" />
+      <Stack.Screen name="details" />
     </Stack>
   );
 };

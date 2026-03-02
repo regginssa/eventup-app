@@ -215,7 +215,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                       textClassName="text-sm"
                       onPress={() =>
                         router.push({
-                          pathname: `/event/${event.type}` as any,
+                          pathname: `/event/details/${event.type}` as any,
                           params: { id: event._id },
                         })
                       }

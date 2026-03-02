@@ -26,7 +26,6 @@ interface EventDetailPackagesProps {
     countryCode: string | null;
   };
   isBooked?: boolean;
-  services: string[];
   bookedPackageType: "standard" | "gold";
   totalPrice: number;
   fee?: TEventFee;
@@ -39,7 +38,6 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   currentLocationCoords,
   currentLocation,
   isBooked,
-  services,
   totalPrice,
   fee,
   communityTicket,
@@ -138,14 +136,6 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
             </View> */}
           </>
         )}
-
-        <View className="gap-2">
-          {services.map((s) => (
-            <Text className="font-dm-sans-bold text-sm text-gray-700">
-              • {s}
-            </Text>
-          ))}
-        </View>
 
         <View className="w-full h-[1px] bg-gray-200 mt-2 mb-2"></View>
         <View className="w-full flex flex-row items-center justify-between">

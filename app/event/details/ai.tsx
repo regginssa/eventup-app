@@ -1,3 +1,5 @@
+import bookingServices from "@/api/services/booking";
+import eventServices from "@/api/services/event";
 import {
   EventDetailContainer,
   EventDetailEmpty,
@@ -8,16 +10,19 @@ import {
   Spinner,
   Tabs,
 } from "@/components";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useBooking } from "@/components/providers/BookingProvider";
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
-import { IAttendees, IEvent } from "@/types/event";
+import { IEvent } from "@/types/event";
 import { ICommunityTicket } from "@/types/ticket";
 import { formatEventLabel } from "@/utils/format";
+import * as Location from "expo-location";
 import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View } from "react-native";
 
-const UserEventDetail = () => {
+const AIEventDetail = () => {
   const [event, setEvent] = useState<IEvent | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<TDropdownItem>({
@@ -31,12 +36,101 @@ const UserEventDetail = () => {
     countryCode: string | null;
   }>({ city: null, countryCode: null });
   const [booking, setBooking] = useState<IBooking | null>(null);
-  const [services, setServices] = useState<string[]>([]);
   const [communityTicket, setCommunityTicket] =
     useState<ICommunityTicket | null>(null);
-  const [attendees, setAttendees] = useState<IAttendees | null>(null);
 
   const { id, callback } = useLocalSearchParams();
+  const { user } = useAuth();
+  const { setBookingFlight, setBookingHotel } = useBooking();
+
+  const getUserLocationAndSave = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      throw new Error("Location permission not granted");
+    }
+
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Highest,
+    });
+
+    return {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    };
+  };
+
+  const fetchEventData = async () => {
+    if (!id || typeof id !== "string") return;
+    try {
+      const response = await eventServices.get(id);
+
+      setEvent(response.data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  };
+
+  const fetchUserCurrentLocation = async () => {
+    if (!user?.location.coordinate) return;
+    const coords = await getUserLocationAndSave();
+
+    setCurrentLocationCoords(coords);
+    try {
+      const reverseGeocode = await Location.reverseGeocodeAsync({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      });
+
+      if (reverseGeocode && reverseGeocode.length > 0) {
+        const address = reverseGeocode[0];
+        setCurrentLocation({
+          city: address.city || address.region || null,
+          countryCode: address.isoCountryCode || null,
+        });
+      }
+    } catch (error) {
+      console.error("Error reverse geocoding:", error);
+    }
+  };
+
+  const fetchBookingData = async () => {
+    if (!user?._id || !id) return;
+
+    try {
+      const response = await bookingServices.getBookingByUserIdAndEventId(
+        user._id,
+        id as string,
+      );
+
+      if (response.data) {
+        setBooking(response.data);
+        return response.data;
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      if (!id) return;
+      setLoading(true);
+      await fetchEventData();
+      const bookingData = await fetchBookingData();
+
+      if (!bookingData) {
+        await fetchUserCurrentLocation();
+      }
+
+      setBookingFlight(null);
+      setBookingHotel(null);
+      setLoading(false);
+    };
+
+    init();
+  }, [id]);
 
   const renderContent = () => {
     if (loading) {
@@ -87,12 +181,11 @@ const UserEventDetail = () => {
             currentLocationCoords={currentLocationCoords}
             currentLocation={currentLocation}
             isBooked={!!booking}
-            services={services}
             bookedPackageType={booking?.package || "standard"}
             totalPrice={booking?.price.total || 0}
             fee={event.type === "user" ? event.fee : undefined}
             communityTicket={communityTicket}
-            attendees={attendees || undefined}
+            attendees={undefined}
           />
         );
       case "overview":
@@ -126,4 +219,4 @@ const UserEventDetail = () => {
   );
 };
 
-export default UserEventDetail;
+export default AIEventDetail;

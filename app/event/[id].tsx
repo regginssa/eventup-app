@@ -14,9 +14,9 @@ import {
 } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useBooking } from "@/components/providers/BookingProvider";
+import { useCommunityTicket } from "@/components/providers/CommunityTicketProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
 import { useNotification } from "@/components/providers/NotificationProvider";
-import { useTicket } from "@/components/providers/TicketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
@@ -64,7 +64,7 @@ const EventDetailScreen = () => {
   const { id, callback } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { tickets } = useTicket();
+  const { tickets } = useCommunityTicket();
   const { setBookingFlight, setBookingHotel } = useBooking();
   const { send: sendNotification } = useNotification();
   const { conversations } = useConversation();

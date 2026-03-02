@@ -1,6 +1,6 @@
 import { Button, Modal, Spinner } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
-import { useTicket } from "@/components/providers/TicketProvider";
+import { useCommunityTicket } from "@/components/providers/CommunityTicketProvider";
 import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -34,7 +34,7 @@ const TicketsScreen = () => {
   const { amount, currency, from, callback } = useLocalSearchParams();
   const router = useRouter();
 
-  const { tickets } = useTicket();
+  const { tickets } = useCommunityTicket();
 
   useEffect(() => {
     switch (selectedCurrency) {

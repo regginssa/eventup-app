@@ -1,12 +1,12 @@
 import {
   BookingProvider,
+  CommunityTicketProvider,
   ConversationProvider,
   EventProvider,
   MessageProvider,
   NotificationProvider,
   SocketProvider,
   ThemeProvider,
-  TicketProvider,
   ToastProvider,
 } from "@/components/providers";
 import AuthProvider from "@/components/providers/AuthProvider";
@@ -22,7 +22,7 @@ const InitContainer: React.FC<InitContainerProps> = ({ children }) => {
   return (
     <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
       <AuthProvider>
-        <TicketProvider>
+        <CommunityTicketProvider>
           <SocketProvider>
             <EventProvider>
               <BookingProvider>
@@ -45,7 +45,7 @@ const InitContainer: React.FC<InitContainerProps> = ({ children }) => {
               </BookingProvider>
             </EventProvider>
           </SocketProvider>
-        </TicketProvider>
+        </CommunityTicketProvider>
       </AuthProvider>
     </StripeProvider>
   );

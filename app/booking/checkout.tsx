@@ -12,7 +12,7 @@ import { PaymentMethodGroup } from "@/components/molecules";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useBooking } from "@/components/providers/BookingProvider";
-import { useTicket } from "@/components/providers/TicketProvider";
+import { useCommunityTicket } from "@/components/providers/CommunityTicketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useAmadeus } from "@/hooks";
 import { TCurrency, TPackageType, TPaymentMethod } from "@/types";
@@ -262,7 +262,7 @@ const CheckoutScreen = () => {
     mapAmadeusTransferOrderToBookingTransferData,
   } = useAmadeus();
 
-  const { tickets } = useTicket();
+  const { tickets } = useCommunityTicket();
   const toast = useToast();
 
   const getEvent = useCallback(async () => {
