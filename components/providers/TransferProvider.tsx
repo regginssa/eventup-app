@@ -34,7 +34,6 @@ const TransferProvider: React.FC<TransferProviderProps> = ({ children }) => {
 
   const search = async (params: any, fromType: "iata" | "gps") => {
     const response = await services.get(params);
-    console.log("[transfer res]: ", response.data);
     if (fromType === "iata") {
       setAirportToHotelOffer(response.data);
     } else {

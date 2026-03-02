@@ -47,6 +47,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [searchBtnLabel, setSearchBtnLabel] = useState<string>("Search");
   const [isSearched, setIsSearched] = useState<boolean>(false);
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
+  const [refreshLoading, setRefreshLoading] = useState<Map<string, boolean>>(
+    new Map(),
+  );
 
   const { user } = useAuth();
   const {
@@ -73,7 +76,16 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     initializeTransfer();
   };
 
+  const setLoading = (key: string, value: boolean) => {
+    setRefreshLoading((prev) => {
+      const next = new Map(prev);
+      next.set(key, value);
+      return next;
+    });
+  };
+
   const handleFlight = async () => {
+    setLoading("flight", true);
     const originGeo =
       departureLocation === "current"
         ? currentLocationCoords
@@ -89,7 +101,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       packageType,
     };
 
-    return await searchFlight(params);
+    const data = await searchFlight(params);
+    setLoading("flight", false);
+    return data;
   };
 
   const handleHotel = async (
@@ -105,6 +119,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       return null;
     }
 
+    setLoading("hotel", true);
+
     const params = {
       lat: hotelGeo.latitude,
       lng: hotelGeo.longitude,
@@ -113,21 +129,18 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       packageType,
     };
 
-    return await searchHotel(params);
+    const data = await searchHotel(params);
+    setLoading("hotel", false);
+    return data;
   };
 
-  const handleTransfer = async (
+  const handleAirportToHotel = async (
     flightOffer: IFlightOffer | null,
     hotelOffer: IHotelOffer | null,
   ) => {
-    const eventGeo = event.location?.coordinate;
-
-    if (!eventGeo) return toast.warn("Event isn't selected");
-
-    let params = {};
-
     if (flightOffer && hotelOffer) {
-      params = {
+      setLoading("airportToHotel", true);
+      const params = {
         fromType: "iata",
         fromCode: flightOffer.originIata,
         toType: "gps",
@@ -139,23 +152,32 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       };
 
       await searchTransfer(params, "iata");
+      setLoading("airportToHotel", false);
     }
+  };
 
-    if (hotelOffer) {
-      params = {
-        fromType: "gps",
-        fromLat: hotelOffer.latitude,
-        fromLng: hotelOffer.longitude,
-        toType: "gps",
-        toLat: eventGeo.latitude,
-        toLng: eventGeo.longitude,
-        date: df.toISOString(hotelDepartureDate),
-        time: df.toISOString(hotelDepartureDate),
-        packageType,
-      };
+  const handleHotelToEvent = async (hotelOffer: IHotelOffer | null) => {
+    const eventGeo = event.location?.coordinate;
 
-      await searchTransfer(params, "gps");
-    }
+    if (!eventGeo) return toast.warn("Event isn't selected");
+
+    if (!hotelOffer) return toast.warn("Hotel isn't selected");
+
+    setLoading("hotelToEvent", true);
+    const params = {
+      fromType: "gps",
+      fromLat: hotelOffer.latitude,
+      fromLng: hotelOffer.longitude,
+      toType: "gps",
+      toLat: eventGeo.latitude,
+      toLng: eventGeo.longitude,
+      date: df.toISOString(hotelDepartureDate),
+      time: df.toISOString(hotelDepartureDate),
+      packageType,
+    };
+
+    await searchTransfer(params, "gps");
+    setLoading("hotelToEvent", false);
   };
 
   const handleSearch = async () => {
@@ -198,7 +220,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       const hotelData = await handleHotel(flightData);
 
       setSearchBtnLabel("Searching transfers...");
-      await handleTransfer(flightData, hotelData);
+      await handleAirportToHotel(flightData, hotelData);
+      await handleHotelToEvent(hotelData);
     } catch (error) {
       console.log("handleSearch error: ", error);
       toast.error("Search failed");
@@ -306,10 +329,34 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       <View className="w-full h-[1px] bg-gray-200"></View>
 
       <View className="w-full gap-2">
-        <FlightItem data={flightOffer} />
-        <HotelItem data={hotelOffer} />
-        <TransferItem data={airportToHotelOffer} />
-        <TransferItem data={hotelToEventOffer} />
+        <FlightItem
+          data={flightOffer}
+          refreshLoading={refreshLoading.get("flight")}
+          onRefresh={async () => {
+            await handleFlight();
+          }}
+        />
+        <HotelItem
+          data={hotelOffer}
+          refreshLoading={refreshLoading.get("hotel")}
+          onRefresh={async () => {
+            await handleHotel(flightOffer);
+          }}
+        />
+        <TransferItem
+          data={airportToHotelOffer}
+          refreshLoading={refreshLoading.get("airportToHotel")}
+          onRefresh={async () => {
+            await handleAirportToHotel(flightOffer, hotelOffer);
+          }}
+        />
+        <TransferItem
+          data={hotelToEventOffer}
+          refreshLoading={refreshLoading.get("hotelToEvent")}
+          onRefresh={async () => {
+            await handleHotelToEvent(hotelOffer);
+          }}
+        />
       </View>
 
       <View className="w-full h-[1px] bg-gray-200"></View>

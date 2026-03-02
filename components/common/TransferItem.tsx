@@ -1,13 +1,25 @@
 import { ITransferOffer } from "@/types/transfer";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import React from "react";
-import { Image, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface TransferItemProps {
   data: ITransferOffer | null;
+  refreshLoading?: boolean;
+  onRefresh?: () => Promise<void>;
 }
 
-const TransferItem: React.FC<TransferItemProps> = ({ data: offer }) => {
+const TransferItem: React.FC<TransferItemProps> = ({
+  data: offer,
+  refreshLoading,
+  onRefresh,
+}) => {
   if (!offer) return null;
 
   const {
@@ -60,11 +72,31 @@ const TransferItem: React.FC<TransferItemProps> = ({ data: offer }) => {
           </View>
         </View>
 
-        <Image
-          source={{ uri: image }}
-          className="w-16 h-16 rounded-xl bg-gray-50"
-          resizeMode="contain"
-        />
+        <View className="relative">
+          <Image
+            source={{ uri: image }}
+            className="w-16 h-16 rounded-xl bg-gray-50"
+            resizeMode="contain"
+          />
+          {/* REFRESH BUTTON */}
+          {onRefresh && (
+            <TouchableOpacity
+              onPress={onRefresh}
+              activeOpacity={0.6}
+              className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-sm border border-gray-100"
+            >
+              {refreshLoading ? (
+                <ActivityIndicator size={14} color="#9ca3af" />
+              ) : (
+                <MaterialCommunityIcons
+                  name="cached"
+                  size={16}
+                  color="#9ca3af"
+                />
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* ROUTE SECTION (Matching Flight Style) */}

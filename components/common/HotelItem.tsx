@@ -1,13 +1,25 @@
 import { IHotelOffer } from "@/types/hotel";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import React from "react";
-import { Image, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface HotelItemProps {
   data: IHotelOffer | null;
+  refreshLoading?: boolean;
+  onRefresh?: () => Promise<void>;
 }
 
-const HotelItem: React.FC<HotelItemProps> = ({ data: offer }) => {
+const HotelItem: React.FC<HotelItemProps> = ({
+  data: offer,
+  refreshLoading,
+  onRefresh,
+}) => {
   if (!offer) return null;
 
   const {
@@ -25,7 +37,7 @@ const HotelItem: React.FC<HotelItemProps> = ({ data: offer }) => {
   const starCount = parseInt(category.match(/\d+/)?.[0] || "0");
 
   return (
-    <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+    <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
       {/* HEADER SECTION: Title & Image */}
       <View className="flex flex-row items-start justify-between">
         <View className="flex-1 pr-3">
@@ -58,11 +70,31 @@ const HotelItem: React.FC<HotelItemProps> = ({ data: offer }) => {
           </View>
         </View>
 
-        <Image
-          source={{ uri: image }}
-          className="w-20 h-20 rounded-xl bg-gray-100"
-          resizeMode="cover"
-        />
+        <View className="relative">
+          <Image
+            source={{ uri: image }}
+            className="w-20 h-20 rounded-xl bg-gray-100"
+            resizeMode="cover"
+          />
+          {/* REFRESH BUTTON - Positioned over or next to image */}
+          {onRefresh && (
+            <TouchableOpacity
+              onPress={onRefresh}
+              activeOpacity={0.6}
+              className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-gray-100"
+            >
+              {refreshLoading ? (
+                <ActivityIndicator size={14} color="#9ca3af" />
+              ) : (
+                <MaterialCommunityIcons
+                  name="cached"
+                  size={16}
+                  color="#9ca3af"
+                />
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* MIDDLE SECTION: Visual Line (Matching Flight Style) */}
