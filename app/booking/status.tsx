@@ -3,6 +3,7 @@ import { BookingStatusItem, Spinner } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useFlight } from "@/components/providers/FlightProvider";
+import { useHotel } from "@/components/providers/HotelProvider";
 import { useSocket } from "@/components/providers/SocketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { IBooking } from "@/types/booking";
@@ -18,6 +19,7 @@ const BookingStatus = () => {
   const { socket } = useSocket();
   const { user } = useAuth();
   const { book: bookFlight } = useFlight();
+  const { book: bookHotel } = useHotel();
   const toast = useToast();
 
   useEffect(() => {
@@ -89,9 +91,7 @@ const BookingStatus = () => {
 
       const result = await bookFlight(bodyData);
 
-      if (!result.orderId) {
-        return toast.error(result.message);
-      }
+      if (!result.orderId) return toast.error(result.message);
 
       const bookingBodyData: IBooking = {
         ...booking,
@@ -103,7 +103,48 @@ const BookingStatus = () => {
       };
       await updateBooking(bookingBodyData);
     };
+
+    const handleHotel = async () => {
+      if (
+        !booking ||
+        !booking?.hotel ||
+        !booking?.hotel?.offer ||
+        !user ||
+        booking?.hotel?.status === "confirmed"
+      )
+        return;
+
+      const { offer } = booking.hotel;
+
+      const bodyData = {
+        rateId: offer.rateId,
+        guestDetails: [
+          {
+            given_name: "Amelia", // user.firstName
+            family_name: "Earhart", // user.lastName
+            born_on: "1997-07-24", // user.birthday
+          },
+        ],
+        email: user.email,
+        phone: "+442080160509", // user.phone
+      };
+
+      const result = await bookHotel(bodyData);
+      if (result.status !== "confirmed") return toast.error(result.message);
+
+      const bookingBodyData: IBooking = {
+        ...booking,
+        hotel: {
+          ...booking.hotel,
+          booking: result,
+          status: result.status,
+        },
+      };
+      await updateBooking(bookingBodyData);
+    };
+
     handleFlight();
+    handleHotel();
   }, [booking]);
 
   if (!booking) return null;
@@ -117,7 +158,7 @@ const BookingStatus = () => {
   };
 
   return (
-    <SimpleContainer title="Booking Status" scrolled>
+    <SimpleContainer title="Booking Status" scrolled hiddenBack>
       {initLoading ? (
         <Spinner size="md" text="Loading Booking..." />
       ) : (

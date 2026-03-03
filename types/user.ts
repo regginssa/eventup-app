@@ -63,5 +63,6 @@ export interface IUser {
   };
   status: TOnlineStatus;
   birthday: string;
+  phone: string;
   gender: "mr" | "ms";
 }
