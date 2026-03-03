@@ -141,13 +141,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (flightOffer && hotelOffer) {
       setLoading("airportToHotel", true);
       const params = {
-        fromType: "iata",
-        fromCode: flightOffer.originIata,
-        toType: "gps",
-        toLat: hotelOffer.latitude,
-        toLng: hotelOffer.longitude,
+        fromType: "IATA",
+        fromCode: flightOffer.destinationIata,
+        toType: "ATLAS",
+        toCode: hotelOffer.id,
         date: df.toISOString(new Date(flightOffer.arrivalTime)),
-        time: df.toISOString(new Date(flightOffer.arrivalTime)),
+        time: df.to24HourTime(new Date(flightOffer.arrivalTime)),
         packageType,
       };
 
@@ -172,7 +171,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       toLat: eventGeo.latitude,
       toLng: eventGeo.longitude,
       date: df.toISOString(hotelDepartureDate),
-      time: df.toISOString(hotelDepartureDate),
+      time: df.to24HourTime(hotelDepartureDate),
       packageType,
     };
 
@@ -221,7 +220,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       setSearchBtnLabel("Searching transfers...");
       await handleAirportToHotel(flightData, hotelData);
-      await handleHotelToEvent(hotelData);
+      // await handleHotelToEvent(hotelData);
     } catch (error) {
       console.log("handleSearch error: ", error);
       toast.error("Search failed");
