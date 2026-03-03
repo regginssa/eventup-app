@@ -44,7 +44,7 @@ const BookingStatusItem: React.FC<BookingStatusItemProps> = ({
       </View>
 
       {/* Text Content */}
-      <View className="flex-1">
+      <View className="flex-1 -mt-6">
         <Text className="font-dm-sans-bold text-gray-400 text-[10px] uppercase tracking-widest">
           {label}
         </Text>
@@ -52,7 +52,7 @@ const BookingStatusItem: React.FC<BookingStatusItemProps> = ({
           className={`font-poppins-semibold text-sm ${isConfirmed ? "text-gray-800" : "text-gray-400"}`}
         >
           {isConfirmed
-            ? "Booking Confirmed"
+            ? "Confirmed"
             : isProcessing
               ? "Securing your spot..."
               : "Waiting..."}

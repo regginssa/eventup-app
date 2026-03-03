@@ -13,7 +13,6 @@ export interface IStripe {
 }
 
 export interface IStripePayload {
-  customerId: string;
   paymentMethodId: string;
   amount: number;
   currency: string;

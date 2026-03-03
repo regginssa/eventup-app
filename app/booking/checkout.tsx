@@ -8,9 +8,11 @@ import { useFlight } from "@/components/providers/FlightProvider";
 import { useHotel } from "@/components/providers/HotelProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useTransfer } from "@/components/providers/TransferProvider";
+import { useStripe } from "@/hooks";
+import { TPaymentMethod } from "@/types";
 import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
-import { IFlightBookingResponse } from "@/types/flight";
+import { IStripePayload } from "@/types/stripe";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -20,9 +22,8 @@ import { Text, View } from "react-native";
 // --- REDESIGNED SUB-COMPONENTS ---
 
 const SectionHeader = ({ title, icon }: { title: string; icon: string }) => (
-  <View className="flex-row items-center mb-3 px-1">
-    <MaterialCommunityIcons name={icon as any} size={18} color="#4B5563" />
-    <Text className="font-poppins-semibold text-gray-800 ml-2 text-sm uppercase tracking-wider">
+  <View className="flex-row items-center mb-3">
+    <Text className="font-poppins-semibold text-gray-800 text-sm uppercase tracking-wider">
       {title}
     </Text>
   </View>
@@ -72,7 +73,7 @@ const EventHeroCard = ({ event, packageType, loading }: any) => {
 };
 
 const HighEndReceipt = ({ services, total, base, commission }: any) => (
-  <View className="bg-white rounded-xl p-6 border border-slate-200">
+  <View className="bg-white rounded-xl p-4 border border-slate-200">
     <SectionHeader title="Booking Summary" icon="receipt-outline" />
     <View className="gap-3 mt-2">
       {services.map((service: string, i: number) => (
@@ -87,20 +88,35 @@ const HighEndReceipt = ({ services, total, base, commission }: any) => (
 
       <View className="flex-row justify-between">
         <Text className="text-slate-600 font-dm-sans-medium">Subtotal</Text>
-        <Text className="text-slate-900 font-dm-sans-bold">${base}</Text>
+        <View className="flex flex-row items-start">
+          <Text className="font-poppins-semibold text-gray-600 text-sm">$</Text>
+          <Text className="text-slate-900 font-dm-sans-bold text-lg">
+            {base}
+          </Text>
+        </View>
       </View>
       <View className="flex-row justify-between">
         <Text className="text-slate-600 font-dm-sans-medium">Charlie Fee</Text>
-        <Text className="text-slate-900 font-dm-sans-bold">${commission}</Text>
+        <View className="flex flex-row items-start">
+          <Text className="font-poppins-semibold text-gray-600 text-sm">$</Text>
+          <Text className="text-slate-900 font-dm-sans-bold text-lg">
+            {commission}
+          </Text>
+        </View>
       </View>
 
       <View className="flex-row justify-between items-center mt-4">
         <Text className="font-poppins-bold text-slate-900 text-base">
           Total Amount
         </Text>
-        <Text className="font-poppins-bold text-green-600 text-2xl">
-          ${total}
-        </Text>
+        <View className="flex flex-row items-start">
+          <Text className="font-poppins-semibold text-green-600 text-sm">
+            $
+          </Text>
+          <Text className="font-poppins-bold text-green-600 text-2xl">
+            {total}
+          </Text>
+        </View>
       </View>
     </View>
   </View>
@@ -117,6 +133,7 @@ const CheckoutScreen = () => {
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [baseAmount, setBaseAmount] = useState<number>(0);
   const [commissionAmount, setCommissionAmount] = useState<number>(0);
+  const [paymentMethod, setPaymentMethod] = useState<TPaymentMethod>("credit");
 
   const router = useRouter();
   const { eventId, packageType, ticketId } = useLocalSearchParams();
@@ -124,6 +141,7 @@ const CheckoutScreen = () => {
   const { offer: flightOffer, book: bookFlight } = useFlight();
   const { offer: hotelOffer } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
+  const { pay: payStripe } = useStripe();
   const toast = useToast();
 
   useEffect(() => {
@@ -175,78 +193,92 @@ const CheckoutScreen = () => {
     setServices(services);
   }, [flightOffer, hotelOffer, airportToHotelOffer, hotelToEventOffer]);
 
-  const handleFlight = async (): Promise<
-    IFlightBookingResponse | undefined
-  > => {
-    if (!flightOffer || flightOffer.passengerIds.length === 0 || !user) return;
+  const handlePayment = async (
+    bookingId: string,
+  ): Promise<string | undefined> => {
+    let transactionId = undefined;
 
-    const bodyData = {
-      offerId: flightOffer.id,
-      passengers: [
-        {
-          id: flightOffer.passengerIds[0],
-          type: "adult",
-          given_name: "Amelia", // user.firstName
-          family_name: "Earhart", // user.lastName
-          gender: "f", // user.gener (mr or ms)
-          born_on: "1997-07-24", // user.birthday
-          email: user.email,
-          phone_number: "+442080160509", // user.phone
-          title: "ms", // user.gender
+    switch (paymentMethod) {
+      case "credit":
+        const payload: IStripePayload = {
+          paymentMethodId: stripePaymentId,
+          amount: totalAmount,
+          currency: "USD",
+          metadata: {
+            type: "booking",
+            bookingId,
+          },
+        };
+        const response = await payStripe(payload);
+        transactionId = response.paymentIntentId;
+        break;
+    }
+
+    return transactionId;
+  };
+
+  const createBooking = async (): Promise<IBooking | undefined> => {
+    const bodyData: IBooking = {
+      user: user?._id as any,
+      event: event?._id as any,
+      flight: {
+        offer: flightOffer as any,
+        status: "processing",
+        booking: {},
+      },
+      hotel: {
+        offer: hotelOffer as any,
+        status: "pending",
+        booking: {},
+      },
+      transfer: {
+        airportToHotel: {
+          offer: airportToHotelOffer as any,
+          status: "pending",
+          booking: {},
         },
-      ],
-      totalAmount: Number(flightOffer.totalAmount),
+        hotelToEvent: {
+          offer: hotelToEventOffer as any,
+          status: "pending",
+          booking: {},
+        },
+      },
+      price: {
+        totalAmount,
+        currency: "USD",
+      },
+      paymentStatus: "created",
+      packageType: packageType as any,
+      status: "pending",
     };
 
-    return await bookFlight(bodyData);
+    const response = await bookingServices.create(bodyData);
+    return response.data;
   };
 
   const onBook = async () => {
     try {
       setBookLoading(true);
+      const bookingData = await createBooking();
 
-      const bodyData: IBooking = {
-        user: user?._id as any,
-        event: event?._id as any,
-        flight: {
-          offer: flightOffer as any,
-          status: "processing",
-          booking: undefined,
-        },
-        hotel: {
-          offer: hotelOffer as any,
-          status: "pending",
-          booking: undefined,
-        },
-        transfer: {
-          airportToHotel: {
-            offer: airportToHotelOffer as any,
-            status: "pending",
-            booking: undefined,
-          },
-          hotelToEvent: {
-            offer: hotelToEventOffer as any,
-            status: "pending",
-            booking: undefined,
-          },
-        },
-        price: {
-          totalAmount,
-          currency: "USD",
-        },
-        packageType: packageType as any,
-        status: "pending",
-      };
+      if (!bookingData?._id) {
+        toast.error("Booking failed");
+        return setBookLoading(false);
+      }
 
-      const response = await bookingServices.create(bodyData);
-      router.push({
+      const txHash = await handlePayment(bookingData._id);
+      if (!txHash) {
+        toast.error("Payment failed");
+        return setBookLoading(false);
+      }
+
+      router.replace({
         pathname: "/booking/status",
-        params: { id: response.data._id },
+        params: { id: bookingData?._id },
       });
       toast.success("Booking created");
-    } catch (e) {
+    } catch (err) {
       toast.error("Booking failed");
-    } finally {
       setBookLoading(false);
     }
   };
@@ -268,10 +300,10 @@ const CheckoutScreen = () => {
         />
 
         <PaymentMethodGroup
-          method="card"
+          method="credit"
           stripePaymentMethodId={stripePaymentId}
-          onSelectMethod={() => {}}
-          onSelectStripePaymentMethod={() => {}}
+          onSelectMethod={setPaymentMethod}
+          onSelectStripePaymentMethod={setStripePaymentId}
         />
       </View>
 

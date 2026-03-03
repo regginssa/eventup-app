@@ -1,5 +1,5 @@
 import { getMe } from "@/api/services/auth";
-import { createStripePaymentIntent } from "@/api/services/stripe";
+import stripeServices from "@/api/services/stripe";
 import { fetchTicketById } from "@/api/services/ticket";
 import { Button, PaymentMethodGroup } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
@@ -130,7 +130,7 @@ const Detail = ({
 
 const TicketsCheckout = () => {
   const [ticket, setTicket] = useState<ICommunityTicket | null>(null);
-  const [method, setMethod] = useState<TPaymentMethod>("card");
+  const [method, setMethod] = useState<TPaymentMethod>("credit");
   const [stripePaymentMethodId, setStripePaymentMethodId] =
     useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -175,7 +175,6 @@ const TicketsCheckout = () => {
     }
 
     const stripePayload: IStripePayload = {
-      customerId: user?.stripe?.customerId as string,
       paymentMethodId: stripePaymentMethodId,
       amount,
       currency,
@@ -186,7 +185,7 @@ const TicketsCheckout = () => {
       },
     };
 
-    const clientSecretResponse = await createStripePaymentIntent(
+    const clientSecretResponse = await stripeServices.createPaymentIntent(
       stripePayload as any,
     );
 
@@ -225,7 +224,7 @@ const TicketsCheckout = () => {
       let paymentResult = false;
 
       switch (method) {
-        case "card":
+        case "credit":
           paymentResult = await handleStripePayment(
             ticket.price,
             ticket.currency,

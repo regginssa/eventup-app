@@ -34,10 +34,10 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
         <TouchableOpacity
           activeOpacity={0.8}
           className="w-[82px] h-[82px] rounded-md relative"
-          onPress={() => onSelectMethod("card")}
+          onPress={() => onSelectMethod("credit")}
         >
           <View className="absolute inset-[1px] bg-gray-300 rounded-md z-10"></View>
-          {method === "card" && (
+          {method === "credit" && (
             <LinearGradient
               colors={["#C427E0", "#844AFF", "#12A9FF"]}
               start={{ x: 0, y: 0 }}
@@ -47,7 +47,7 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
           )}
 
           <View className="absolute inset-[2px] bg-[#F2F4F3] z-30 rounded-md flex flex-col items-center justify-center gap-2">
-            {method === "card" ? (
+            {method === "credit" ? (
               <MaskedView
                 style={{ width: 40, height: 40 }}
                 maskElement={
@@ -78,7 +78,7 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
             </Text>
           </View>
 
-          {method === "card" && (
+          {method === "credit" && (
             <View className="absolute w-8 h-8 flex items-center justify-center bg-green-500 z-40 -right-3 -top-1 rounded-sm">
               <MaterialCommunityIcons
                 name="check-bold"
@@ -208,7 +208,7 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
 
       <View className="w-full h-[1px] bg-gray-200"></View>
 
-      {method === "card" ? (
+      {method === "credit" ? (
         <CardPayment
           methodId={stripePaymentMethodId}
           onSelectMethod={onSelectStripePaymentMethod}

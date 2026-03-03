@@ -1,8 +1,4 @@
-import {
-  fetchStripeClientSecret,
-  fetchStripeCustomerId,
-  saveStripePaymentMethod,
-} from "@/api/services/stripe";
+import stripeServices from "@/api/services/stripe";
 import {
   initPaymentSheet,
   presentPaymentSheet,
@@ -39,10 +35,10 @@ const CardPayment: React.FC<CardPaymentProps> = ({
       setLoading(true);
 
       if (!user?.stripe?.customerId) {
-        await fetchStripeCustomerId();
+        await stripeServices.getCustomerId();
       }
 
-      const clientSecretRes = await fetchStripeClientSecret();
+      const clientSecretRes = await stripeServices.getClientSecret();
       if (!clientSecretRes.data) {
         setLoading(false);
         return Alert.alert("Error", "No Stripe client secret found.");
@@ -66,7 +62,9 @@ const CardPayment: React.FC<CardPaymentProps> = ({
         return Alert.alert("Error", "Payment sheet failed.");
       }
 
-      const response = await saveStripePaymentMethod(clientSecretRes.data);
+      const response = await stripeServices.savePaymentMethod(
+        clientSecretRes.data,
+      );
 
       setAuthUser(response.data);
       Alert.alert("Success", "Card is successfully saved");

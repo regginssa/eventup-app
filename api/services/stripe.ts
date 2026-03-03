@@ -9,17 +9,15 @@ import {
   SAVE_STRIPE_PAYMENT_METHOD,
 } from "../endpoints";
 
-export const fetchStripeCustomerId = async (): Promise<ApiResponse<string>> => {
+const getCustomerId = async (): Promise<ApiResponse<string>> => {
   return await AxiosInstance.get(FETCH_STRIPE_CUSTOMER_ID);
 };
 
-export const fetchStripeClientSecret = async (): Promise<
-  ApiResponse<string>
-> => {
+const getClientSecret = async (): Promise<ApiResponse<string>> => {
   return await AxiosInstance.get(FETCH_STRIPE_CLIENT_SECRET);
 };
 
-export const saveStripePaymentMethod = async (
+const savePaymentMethod = async (
   setupIntentClientSecret: string,
 ): Promise<ApiResponse<IUser>> => {
   return await AxiosInstance.post(SAVE_STRIPE_PAYMENT_METHOD, {
@@ -27,14 +25,20 @@ export const saveStripePaymentMethod = async (
   });
 };
 
-export const createStripePaymentIntent = async (
+const createPaymentIntent = async (
   bodyData: any,
 ): Promise<ApiResponse<{ id: string; clientSecret: string }>> => {
   return await AxiosInstance.post(CREATE_STRIPE_PAYMENT_INTENT, bodyData);
 };
 
-export const refundStripePayment = async (
-  paymentIntentId: string,
-): Promise<ApiResponse<null>> => {
+const refund = async (paymentIntentId: string): Promise<ApiResponse<null>> => {
   return await AxiosInstance.post(REFUND_STRIPE_PAYMENT, { paymentIntentId });
+};
+
+export default {
+  getCustomerId,
+  getClientSecret,
+  savePaymentMethod,
+  createPaymentIntent,
+  refund,
 };

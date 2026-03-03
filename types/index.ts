@@ -1,7 +1,4 @@
 import {
-  TAmadeusFlightBookingRequest,
-  TAmadeusFlightOffer,
-  TAmadeusFlightOrder,
   TAmadeusHotelBookingRequest,
   TAmadeusHotelOffer,
   TAmadeusHotelOrder,
@@ -46,7 +43,7 @@ export type TCurrency = "usd" | "eur" | "pln";
 
 export type TEventLocation = "nearby" | "city" | "country" | "worldwide";
 
-export type TPaymentMethod = "card" | "crypto" | "token";
+export type TPaymentMethod = "credit" | "crypto" | "token";
 
 export type TPackageType = "standard" | "gold";
 
