@@ -117,12 +117,13 @@ const BookingStatus = () => {
       const { offer } = booking.hotel;
 
       const bodyData = {
-        rateId: offer.rateId,
-        guestDetails: [
+        rateKey: offer.rateKey,
+        paxes: [
           {
-            given_name: "Amelia", // user.firstName
-            family_name: "Earhart", // user.lastName
-            born_on: "1997-07-24", // user.birthday
+            roomId: 1,
+            type: "AD",
+            name: "John", // user.firstName
+            surname: "Doe", // user.lastName
           },
         ],
         email: user.email,
