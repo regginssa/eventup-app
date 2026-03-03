@@ -34,25 +34,8 @@ export const HOTEL_BASE = "/hotel/";
 export const TRANSFER_BASE = "/transfer/";
 
 // Booking apis
-export const FETCH_FLIGHT_OFFERS = "/booking/flight-offers";
-export const FETCH_FLIGHT_OFFERS_PRICING = "/booking/flight-offers-pricing";
-export const CREATE_FLIGHT_ORDER = "/booking/flight-order";
-export const GET_FLIGHT_ORDER = "/booking/flight-order/";
-export const CANCEL_FLIGHT_ORDER = "/booking/flight-order/";
-
-export const FETCH_FLIGHT = "/booking/flight";
-export const BOOK_FLIGHT = "/booking/flight/order";
-
-export const FETCH_HOTEL_OFFERS = "/booking/hotel-offers";
-export const FETCH_HOTEL_OFFER_PRICING = "/booking/hotel-offer-pricing/";
-export const CREATE_HOTEL_ORDER = "/booking/hotel-order";
-
-export const FETCH_TRANSFER_OFFERS = "/booking/transfer-offers";
-export const CREATE_TRANSFER_ORDER = "/booking/transfer-order";
-
 export const BOOKING_BASE = "/booking/";
 export const FETCH_ALL_BOOKINGS = "/booking/all/";
-export const CREATE_BOOKING = "/booking/create";
 export const FETCH_BOOKINGS_BY_USERID_AND_EVENTID = "/booking/user-event/";
 
 // Stripe

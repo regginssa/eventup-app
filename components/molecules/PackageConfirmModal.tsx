@@ -37,7 +37,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
 
   const router = useRouter();
   const { offer: flightOffer } = useFlight();
-  const { offer: hotelOffer, checkRates: checkHotelRates } = useHotel();
+  const { offer: hotelOffer } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
   const toast = useToast();
 
@@ -81,27 +81,14 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
     try {
       setLoading(true);
 
-      if (hotelOffer) {
-        const params = {
-          rateKey: hotelOffer.rateKey,
+      router.push({
+        pathname: "/booking/checkout",
+        params: {
+          eventId: event._id,
           packageType,
-        };
-
-        const data = await checkHotelRates(params);
-        if (!data) {
-          toast.error("Checking hotel rates failed");
-        } else {
-          setLoading(false);
-          router.push({
-            pathname: "/booking/checkout",
-            params: {
-              eventId: event._id,
-              packageType,
-              ticketId: communityTicket?._id,
-            },
-          });
-        }
-      }
+          ticketId: communityTicket?._id,
+        },
+      });
     } catch (err) {
       setLoading(false);
       toast.error("Checkout failed");

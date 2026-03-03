@@ -6,7 +6,6 @@ import { useFlight } from "@/components/providers/FlightProvider";
 import { useSocket } from "@/components/providers/SocketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { IBooking } from "@/types/booking";
-import { IFlightBookingResponse } from "@/types/flight";
 import { TTransactionStatus } from "@/types/transaction";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -55,9 +54,7 @@ const BookingStatus = () => {
   }, [bookingId]);
 
   useEffect(() => {
-    const handleFlight = async (): Promise<
-      IFlightBookingResponse | undefined
-    > => {
+    const handleFlight = async () => {
       if (
         !booking ||
         !booking.flight.offer ||
@@ -90,16 +87,21 @@ const BookingStatus = () => {
         currency: offer.currency,
       };
 
-      const bookingData = await bookFlight(bodyData);
-      setBooking({
+      const result = await bookFlight(bodyData);
+
+      if (!result.orderId) {
+        return toast.error(result.message);
+      }
+
+      const bookingBodyData: IBooking = {
         ...booking,
         flight: {
           ...booking.flight,
-          booking: bookingData,
-          status: bookingData.status,
+          booking: result,
+          status: result.status,
         },
-      });
-      console.log("[flight booking response data]: ", bookingData);
+      };
+      await updateBooking(bookingBodyData);
     };
     handleFlight();
   }, [booking]);
@@ -108,76 +110,86 @@ const BookingStatus = () => {
 
   const { flight, hotel, transfer, price } = booking;
 
+  const updateBooking = async (body: IBooking) => {
+    const response = await bookingServices.update(body._id as string, body);
+    if (!response.data) return;
+    setBooking(response.data);
+  };
+
   return (
     <SimpleContainer title="Booking Status" scrolled>
       {initLoading ? (
         <Spinner size="md" text="Loading Booking..." />
       ) : (
         <>
-          {/* Total Card */}
-          <View className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex-row justify-between items-center">
-            <View>
-              <Text className="font-dm-sans-medium text-gray-400 text-xs">
-                Total Amount Paid
-              </Text>
-              <View className="flex-row items-start">
-                <Text className="font-poppins-bold text-sm text-gray-600"></Text>
-                <Text className="font-poppins-bold text-3xl text-green-600 ml-1">
-                  {price.totalAmount}
+          <View className="flex-1 gap-6">
+            {/* Total Card */}
+            <View className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm flex-row justify-between items-center">
+              <View className="gap-2">
+                <Text className="font-dm-sans-medium text-gray-400 text-xs">
+                  Total Amount Paid
+                </Text>
+                <View className="flex-row items-start">
+                  <Text className="font-poppins-bold text-base text-green-600">
+                    $
+                  </Text>
+                  <Text className="font-poppins-bold text-3xl text-green-600 ml-1">
+                    {price.totalAmount}
+                  </Text>
+                </View>
+              </View>
+              <View className="bg-green-100 px-3 py-1 rounded-full">
+                <Text className="text-green-700 font-dm-sans-bold text-[10px]">
+                  SECURE
                 </Text>
               </View>
             </View>
-            <View className="bg-green-100 px-3 py-1 rounded-full">
-              <Text className="text-green-700 font-dm-sans-bold text-[10px]">
-                SECURE
+
+            {/* Progress List */}
+            <View className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+              <Text className="font-poppins-semibold text-gray-800 mb-6">
+                Reservation Progress
               </Text>
+
+              <BookingStatusItem
+                label="Payment"
+                icon="credit-card-outline"
+                status={
+                  booking.paymentStatus === "completed"
+                    ? "confirmed"
+                    : "processing"
+                }
+                value={booking._id}
+              />
+
+              <BookingStatusItem
+                label="Flight"
+                icon="airplane"
+                status={flight?.status}
+                value={flight?.offer?.id}
+              />
+
+              <BookingStatusItem
+                label="Hotel"
+                icon="office-building"
+                status={hotel?.status}
+                value={hotel?.offer?.id}
+              />
+
+              <BookingStatusItem
+                label="Airport Transfer"
+                icon="car"
+                status={transfer?.airportToHotel?.status}
+                value={transfer?.airportToHotel?.offer?.id}
+              />
+
+              <BookingStatusItem
+                label="Event Transfer"
+                icon="bus-clock"
+                status={transfer?.hotelToEvent.status}
+                value={transfer?.airportToHotel?.offer?.id}
+              />
             </View>
-          </View>
-
-          {/* Progress List */}
-          <View className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-            <Text className="font-poppins-semibold text-gray-800 mb-6">
-              Reservation Progress
-            </Text>
-
-            <BookingStatusItem
-              label="Payment"
-              icon="credit-card-outline"
-              status={
-                booking.paymentStatus === "completed"
-                  ? "confirmed"
-                  : "processing"
-              }
-              value={booking._id}
-            />
-
-            <BookingStatusItem
-              label="Flight"
-              icon="airplane"
-              status={flight?.status}
-              value={flight?.offer?.id}
-            />
-
-            <BookingStatusItem
-              label="Hotel"
-              icon="office-building"
-              status={hotel?.status}
-              value={hotel?.offer?.id}
-            />
-
-            <BookingStatusItem
-              label="Airport Transfer"
-              icon="car"
-              status={transfer?.airportToHotel?.status}
-              value={transfer?.airportToHotel?.offer?.id}
-            />
-
-            <BookingStatusItem
-              label="Event Transfer"
-              icon="bus-clock"
-              status={transfer?.hotelToEvent.status}
-              value={transfer?.airportToHotel?.offer?.id}
-            />
           </View>
 
           {/* Support Footer */}

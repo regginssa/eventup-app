@@ -3,7 +3,6 @@ import { IBooking } from "@/types/booking";
 import AxiosInstance from "../client";
 import {
   BOOKING_BASE,
-  CREATE_BOOKING,
   FETCH_ALL_BOOKINGS,
   FETCH_BOOKINGS_BY_USERID_AND_EVENTID,
 } from "../endpoints";
@@ -28,7 +27,14 @@ const getByUserIdAndEventId = async (
 };
 
 const create = async (body: IBooking): Promise<ApiResponse<IBooking>> => {
-  return await AxiosInstance.post(CREATE_BOOKING, body);
+  return await AxiosInstance.post(BOOKING_BASE, body);
 };
 
-export default { get, getAllByUserId, getByUserIdAndEventId, create };
+const update = async (
+  id: string,
+  body: IBooking,
+): Promise<ApiResponse<IBooking>> => {
+  return await AxiosInstance.patch(BOOKING_BASE + id, body);
+};
+
+export default { get, getAllByUserId, getByUserIdAndEventId, create, update };

@@ -23,14 +23,14 @@ export interface IBooking {
   // Flight Section
   flight: {
     offer: IFlightOffer;
-    booking?: IFlightBookingResponse | {};
+    booking?: IFlightBookingResponse | any;
     status: TFlightBookStatus;
   };
 
   // Hotel Section
   hotel: {
     offer: IHotelOffer;
-    booking?: IHotelBookingResponse | {};
+    booking?: IHotelBookingResponse | any;
     status: THotelBookStatus;
   };
 
@@ -38,12 +38,12 @@ export interface IBooking {
   transfer: {
     airportToHotel: {
       offer: ITransferOffer;
-      booking?: ITransferBookingResponse | {};
+      booking?: ITransferBookingResponse | any;
       status: TTransferBookStatus;
     };
     hotelToEvent: {
       offer: ITransferOffer;
-      booking?: ITransferBookingResponse | {};
+      booking?: ITransferBookingResponse | any;
       status: TTransferBookStatus;
     };
   };

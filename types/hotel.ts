@@ -24,7 +24,7 @@ export interface IHotelOffer {
   currency: string;
   totalAmount: number;
   netAmount: number; // Original price for your records
-  rateKey: string;
+  rateId: string;
   roomName: string;
   boardName: string;
   cancellationPolicy: {
