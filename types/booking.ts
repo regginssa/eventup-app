@@ -1,6 +1,16 @@
 import { TPackageType } from ".";
 import { IEvent } from "./event";
-import { ICommunityTicket } from "./ticket";
+import {
+  IFlightBookingResponse,
+  IFlightOffer,
+  TFlightBookStatus,
+} from "./flight";
+import { IHotelBookingResponse, IHotelOffer, THotelBookStatus } from "./hotel";
+import {
+  ITransferBookingResponse,
+  ITransferOffer,
+  TTransferBookStatus,
+} from "./transfer";
 import { IUser } from "./user";
 
 export type PaymentStatus =
@@ -192,17 +202,43 @@ export type TBookingPrice = {
 
 export interface IBooking {
   _id?: string;
-  flight: TBookingFlight;
-  hotel: TBookingHotel;
-  transfer: {
-    ah: TBookingTransfer;
-    he: TBookingTransfer;
-  };
-  billingDetails: TBillingDetails;
-  officialTicket?: TOfficialTicket;
-  communityTicket?: ICommunityTicket;
-  event: IEvent;
   user: IUser;
-  price: TBookingPrice;
-  package: TPackageType;
+  event: IEvent;
+  status: "pending" | "confirmed" | "failed" | "partially_confirmed";
+
+  // Flight Section
+  flight: {
+    offer: IFlightOffer;
+    booking?: IFlightBookingResponse;
+    status: TFlightBookStatus;
+  };
+
+  // Hotel Section
+  hotel: {
+    offer: IHotelOffer;
+    booking?: IHotelBookingResponse;
+    status: THotelBookStatus;
+  };
+
+  // Transfers (Always Two)
+  transfer: {
+    airportToHotel: {
+      offer: ITransferOffer;
+      booking?: ITransferBookingResponse;
+      status: TTransferBookStatus;
+    };
+    hotelToEvent: {
+      offer: ITransferOffer;
+      booking?: ITransferBookingResponse;
+      status: TTransferBookStatus;
+    };
+  };
+
+  price: {
+    totalAmount: number;
+    currency: string;
+  };
+  packageType: TPackageType;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

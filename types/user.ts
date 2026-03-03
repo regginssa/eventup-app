@@ -33,6 +33,8 @@ export type TOnlineStatus = "online" | "offline";
 export interface IUser {
   _id?: string;
   name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   avatar?: string;
   title?: string;

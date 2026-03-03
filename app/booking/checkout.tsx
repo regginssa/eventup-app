@@ -1,3 +1,4 @@
+import bookingServices from "@/api/services/booking";
 import eventServices from "@/api/services/event";
 import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
@@ -7,7 +8,9 @@ import { useFlight } from "@/components/providers/FlightProvider";
 import { useHotel } from "@/components/providers/HotelProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useTransfer } from "@/components/providers/TransferProvider";
+import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
+import { IFlightBookingResponse } from "@/types/flight";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -109,7 +112,6 @@ const CheckoutScreen = () => {
   const [event, setEvent] = useState<IEvent | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [bookLoading, setBookLoading] = useState(false);
-  const [bookLabel, setBookLabel] = useState("Book Now");
   const [stripePaymentId, setStripePaymentId] = useState<string>("");
   const [services, setServices] = useState<string[]>([]);
   const [totalAmount, setTotalAmount] = useState<number>(0);
@@ -119,7 +121,7 @@ const CheckoutScreen = () => {
   const router = useRouter();
   const { eventId, packageType, ticketId } = useLocalSearchParams();
   const { user } = useAuth();
-  const { offer: flightOffer } = useFlight();
+  const { offer: flightOffer, book: bookFlight } = useFlight();
   const { offer: hotelOffer } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
   const toast = useToast();
@@ -167,26 +169,85 @@ const CheckoutScreen = () => {
     const commission = Number((base * 0.1).toFixed(2));
     const total = Number((base + commission).toFixed(2));
 
-    setBaseAmount(base);
+    setBaseAmount(Number(base.toFixed(2)));
     setCommissionAmount(commission);
     setTotalAmount(total);
     setServices(services);
   }, [flightOffer, hotelOffer, airportToHotelOffer, hotelToEventOffer]);
 
+  const handleFlight = async (): Promise<
+    IFlightBookingResponse | undefined
+  > => {
+    if (!flightOffer || flightOffer.passengerIds.length === 0 || !user) return;
+
+    const bodyData = {
+      offerId: flightOffer.id,
+      passengers: [
+        {
+          id: flightOffer.passengerIds[0],
+          type: "adult",
+          given_name: "Amelia", // user.firstName
+          family_name: "Earhart", // user.lastName
+          gender: "f", // user.gener (mr or ms)
+          born_on: "1997-07-24", // user.birthday
+          email: user.email,
+          phone_number: "+442080160509", // user.phone
+          title: "ms", // user.gender
+        },
+      ],
+      totalAmount: Number(flightOffer.totalAmount),
+    };
+
+    return await bookFlight(bodyData);
+  };
+
   const onBook = async () => {
     try {
       setBookLoading(true);
-      setBookLabel("Securing your spot...");
 
-      // Add your handleStripePayment and handleCommunityTicket logic here
+      const bodyData: IBooking = {
+        user: user?._id as any,
+        event: event?._id as any,
+        flight: {
+          offer: flightOffer as any,
+          status: "processing",
+          booking: undefined,
+        },
+        hotel: {
+          offer: hotelOffer as any,
+          status: "pending",
+          booking: undefined,
+        },
+        transfer: {
+          airportToHotel: {
+            offer: airportToHotelOffer as any,
+            status: "pending",
+            booking: undefined,
+          },
+          hotelToEvent: {
+            offer: hotelToEventOffer as any,
+            status: "pending",
+            booking: undefined,
+          },
+        },
+        price: {
+          totalAmount,
+          currency: "USD",
+        },
+        packageType: packageType as any,
+        status: "pending",
+      };
 
-      toast.success("Order Confirmed!");
-      // router.replace("/booking/success");
+      const response = await bookingServices.create(bodyData);
+      router.push({
+        pathname: "/booking/status",
+        params: { id: response.data._id },
+      });
+      toast.success("Booking created");
     } catch (e) {
-      toast.error("Process failed");
+      toast.error("Booking failed");
     } finally {
       setBookLoading(false);
-      setBookLabel("Book Now");
     }
   };
 
@@ -217,7 +278,7 @@ const CheckoutScreen = () => {
       <View className="gap-4">
         <Button
           type="primary"
-          label={bookLabel}
+          label={bookLoading ? "Loading..." : "Book Now"}
           buttonClassName="h-12"
           textClassName="text-xl font-poppins-bold"
           loading={bookLoading}

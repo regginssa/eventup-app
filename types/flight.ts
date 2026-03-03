@@ -13,6 +13,7 @@ export interface IFlightOffer {
   airlineLogo: string;
   totalAmount: string;
   currency: string;
+  passengerIds: string[];
   departureTime: string;
   arrivalTime: string;
   duration: string; // e.g., "02h 30m"

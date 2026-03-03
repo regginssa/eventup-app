@@ -1,4 +1,5 @@
 export { default as Avatar } from "./Avatar";
+export { default as BookingStatusItem } from "./BookingStatusItem";
 export { default as Button } from "./Button";
 export { default as CardPayment } from "./CardPayment";
 export { default as Checkbox } from "./Checkbox";
