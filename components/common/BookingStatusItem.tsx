@@ -5,57 +5,65 @@ interface BookingStatusItemProps {
   label: string;
   icon: keyof typeof MaterialCommunityIcons.glyphMap;
   status: string;
-  value?: string | number | null;
+  isLast?: boolean;
 }
 
 const BookingStatusItem: React.FC<BookingStatusItemProps> = ({
   label,
   icon,
   status,
-  value,
+  isLast = false,
 }) => {
-  if (value === null || value === undefined) return null;
-
+  const isCompleted = status === "confirmed" || status === "completed";
   const isProcessing = status === "processing" || status === "pending";
-  const isConfirmed = status === "confirmed";
-  const isFailed = status === "failed";
 
   return (
-    <View className="flex flex-row items-center mb-6">
-      {/* Timeline Indicator */}
-      <View className="items-center mr-4">
+    <View className="flex-row items-start">
+      <View className="items-center w-10 mr-4">
+        {/* Circle Indicator */}
         <View
-          className={`w-10 h-10 rounded-full items-center justify-center border-2 
-          ${isConfirmed ? "bg-green-50 border-green-500" : isProcessing ? "bg-blue-50 border-blue-500" : "bg-gray-50 border-gray-200"}`}
+          className={`w-9 h-9 rounded-full items-center justify-center border-2 
+          ${
+            isCompleted
+              ? "bg-emerald-500 border-emerald-500"
+              : isProcessing
+                ? "bg-white border-[#844AFF]"
+                : "bg-slate-50 border-slate-200"
+          }`}
         >
           {isProcessing ? (
-            <ActivityIndicator size="small" color="#2563eb" />
+            <ActivityIndicator size="small" color="#844AFF" />
           ) : (
             <MaterialCommunityIcons
-              name={
-                isConfirmed ? "check-circle" : isFailed ? "alert-circle" : icon
-              }
-              size={20}
-              color={isConfirmed ? "#16a34a" : isFailed ? "#dc2626" : "#9ca3af"}
+              name={isCompleted ? "check" : icon}
+              size={18}
+              color={isCompleted ? "white" : "#94a3b8"}
             />
           )}
         </View>
-        <View className="w-[2px] h-6 bg-gray-100 mt-1" />
+
+        {/* Vertical Line */}
+        {!isLast && (
+          <View
+            className={`w-[2px] h-12 my-1 ${isCompleted ? "bg-emerald-500" : "bg-slate-100"}`}
+          />
+        )}
       </View>
 
-      {/* Text Content */}
-      <View className="flex-1 -mt-6">
-        <Text className="font-dm-sans-bold text-gray-400 text-[10px] uppercase tracking-widest">
+      <View className="flex-1 pb-8">
+        <Text
+          className={`font-dm-sans-bold text-[10px] uppercase tracking-widest ${isProcessing ? "text-[#844AFF]" : "text-slate-400"}`}
+        >
           {label}
         </Text>
         <Text
-          className={`font-poppins-semibold text-sm ${isConfirmed ? "text-gray-800" : "text-gray-400"}`}
+          className={`font-poppins-semibold text-base mt-0.5 ${isCompleted ? "text-slate-900" : isProcessing ? "text-slate-800" : "text-slate-300"}`}
         >
-          {isConfirmed
+          {isCompleted
             ? "Confirmed"
             : isProcessing
-              ? "Securing your spot..."
-              : "Waiting..."}
+              ? "In Progress..."
+              : "Pending"}
         </Text>
       </View>
     </View>

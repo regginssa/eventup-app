@@ -1,5 +1,5 @@
 import bookingServices from "@/api/services/booking";
-import { BookingStatusItem, Spinner } from "@/components";
+import { BookingStatusItem, Button, Spinner } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useFlight } from "@/components/providers/FlightProvider";
@@ -8,14 +8,20 @@ import { useSocket } from "@/components/providers/SocketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { IBooking } from "@/types/booking";
 import { TTransactionStatus } from "@/types/transaction";
-import { useLocalSearchParams } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 const BookingStatus = () => {
   const [booking, setBooking] = useState<IBooking | null>(null);
   const [initLoading, setInitLoading] = useState<boolean>(false);
+  const [completed, setCompleted] = useState<boolean>(false);
+  const [viewLoading, setViewLoading] = useState<boolean>(false);
+
   const { id: bookingId } = useLocalSearchParams();
+  const router = useRouter();
   const { socket } = useSocket();
   const { user } = useAuth();
   const { book: bookFlight } = useFlight();
@@ -144,8 +150,26 @@ const BookingStatus = () => {
       await updateBooking(bookingBodyData);
     };
 
+    if (booking?.paymentStatus !== "completed") return;
     handleFlight();
     handleHotel();
+  }, [booking]);
+
+  useEffect(() => {
+    if (!booking) return;
+
+    const check = (service?: { offer?: any; status?: string }) => {
+      if (!service?.offer) return true;
+      return service.status === "confirmed";
+    };
+
+    const allConfirmed =
+      check(booking.flight) &&
+      check(booking.hotel) &&
+      check(booking.transfer?.airportToHotel) &&
+      check(booking.transfer?.hotelToEvent);
+
+    setCompleted(allConfirmed);
   }, [booking]);
 
   if (!booking) return null;
@@ -158,88 +182,186 @@ const BookingStatus = () => {
     setBooking(response.data);
   };
 
+  const handleView = async () => {
+    setViewLoading(true);
+    await updateBooking({ ...booking, status: "confirmed" });
+    setViewLoading(false);
+    router.replace({
+      pathname: "/booking/booked",
+      params: { id: booking._id },
+    });
+  };
+
   return (
     <SimpleContainer title="Booking Status" scrolled hiddenBack>
       {initLoading ? (
-        <Spinner size="md" text="Loading Booking..." />
+        <Spinner size="lg" text="Syncing..." />
       ) : (
         <>
-          <View className="flex-1 gap-6">
-            {/* Total Card */}
-            <View className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm flex-row justify-between items-center">
-              <View className="gap-2">
-                <Text className="font-dm-sans-medium text-gray-400 text-xs">
-                  Total Amount Paid
+          <View className="flex-1">
+            {/* Header Summary Card */}
+            <View className="shadow-xl shadow-purple-200">
+              <LinearGradient
+                colors={["#C427E0", "#844AFF", "#12A9FF"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ borderRadius: 24, padding: 24 }}
+              >
+                <View className="flex-row justify-between items-start">
+                  <View>
+                    <Text className="text-white/60 font-dm-sans-medium text-[10px] uppercase tracking-[2px]">
+                      Booking Reference
+                    </Text>
+                    <Text className="text-white font-poppins-bold text-2xl mt-1">
+                      #BOK_{booking._id?.slice(0, 8).toUpperCase()}
+                    </Text>
+                  </View>
+                  <View className="bg-white/20 px-3 py-1 rounded-full border border-white/30">
+                    <Text className="text-white font-dm-sans-bold text-[10px]">
+                      {booking.paymentStatus?.toUpperCase()}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Glassmorphism Divider */}
+                <View className="h-[1px] bg-white/20 my-6" />
+
+                <View className="flex-row justify-between items-center">
+                  <View>
+                    <Text className="text-white/60 font-dm-sans-medium text-xs">
+                      Total Investment
+                    </Text>
+                    <View className="flex-row items-baseline mt-1">
+                      <Text className="text-white font-poppins-bold text-3xl">
+                        ${price.totalAmount}
+                      </Text>
+                      <Text className="text-white/80 font-dm-sans-regular text-sm ml-1">
+                        USD
+                      </Text>
+                    </View>
+                  </View>
+                  <View className="bg-white rounded-2xl p-3">
+                    <MaterialCommunityIcons
+                      name="shield-check"
+                      size={24}
+                      color="#844AFF"
+                    />
+                  </View>
+                </View>
+              </LinearGradient>
+            </View>
+
+            {/* Timeline Section */}
+            <View className="mt-8 bg-white rounded-[32px] p-8 border border-slate-50 shadow-sm shadow-slate-200">
+              <View className="flex-row justify-between items-center mb-8">
+                <Text className="font-poppins-bold text-slate-900 text-lg">
+                  Timeline
                 </Text>
-                <View className="flex-row items-start">
-                  <Text className="font-poppins-bold text-base text-green-600">
-                    $
-                  </Text>
-                  <Text className="font-poppins-bold text-3xl text-green-600 ml-1">
-                    {price.totalAmount}
+                <View className="bg-slate-50 px-3 py-1 rounded-lg">
+                  <Text className="text-slate-500 font-dm-sans-medium text-[10px]">
+                    LIVE UPDATES
                   </Text>
                 </View>
               </View>
-              <View className="bg-green-100 px-3 py-1 rounded-full">
-                <Text className="text-green-700 font-dm-sans-bold text-[10px]">
-                  SECURE
-                </Text>
-              </View>
-            </View>
-
-            {/* Progress List */}
-            <View className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-              <Text className="font-poppins-semibold text-gray-800 mb-6">
-                Reservation Progress
-              </Text>
 
               <BookingStatusItem
                 label="Payment"
-                icon="credit-card-outline"
+                icon="credit-card-check-outline"
                 status={
                   booking.paymentStatus === "completed"
                     ? "confirmed"
                     : "processing"
                 }
-                value={booking._id}
               />
 
               <BookingStatusItem
                 label="Flight"
-                icon="airplane"
+                icon="airplane-takeoff"
                 status={flight?.status}
-                value={flight?.offer?.id}
               />
 
               <BookingStatusItem
                 label="Hotel"
                 icon="office-building"
                 status={hotel?.status}
-                value={hotel?.offer?.id}
+                isLast={
+                  !transfer?.airportToHotel?.offer &&
+                  !transfer?.hotelToEvent?.offer
+                }
               />
 
-              <BookingStatusItem
-                label="Airport Transfer"
-                icon="car"
-                status={transfer?.airportToHotel?.status}
-                value={transfer?.airportToHotel?.offer?.id}
-              />
+              {transfer?.airportToHotel?.offer && (
+                <BookingStatusItem
+                  label="Arrival Transfer"
+                  icon="car-wash"
+                  status={transfer?.airportToHotel?.status}
+                  isLast={!transfer?.hotelToEvent?.offer}
+                />
+              )}
 
-              <BookingStatusItem
-                label="Event Transfer"
-                icon="bus-clock"
-                status={transfer?.hotelToEvent.status}
-                value={transfer?.airportToHotel?.offer?.id}
-              />
+              {transfer?.hotelToEvent?.offer && (
+                <BookingStatusItem
+                  label="Event Transfer"
+                  icon="bus-side"
+                  status={transfer?.hotelToEvent?.status}
+                  isLast
+                />
+              )}
             </View>
+
+            {/* Concierge Support Card */}
+            <LinearGradient
+              colors={["#844AFF15", "#12A9FF15"]}
+              start={{ x: 0, y: 0 }}
+              style={{
+                marginTop: 24,
+                borderRadius: 20,
+                padding: 20,
+                borderWidth: 1,
+                borderColor: "#844AFF20",
+              }}
+            >
+              <View className="flex-row items-center">
+                <View className="bg-[#844AFF] w-12 h-12 rounded-xl items-center justify-center mr-4 shadow-lg shadow-purple-300">
+                  <MaterialCommunityIcons
+                    name="chat-question"
+                    size={24}
+                    color="white"
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className="font-poppins-semibold text-slate-900 text-sm">
+                    Concierge Support
+                  </Text>
+                  <Text className="font-dm-sans-regular text-slate-500 text-xs">
+                    Need help with your booking?
+                  </Text>
+                </View>
+                <MaterialCommunityIcons
+                  name="chevron-right"
+                  size={20}
+                  color="#844AFF"
+                />
+              </View>
+            </LinearGradient>
           </View>
 
-          {/* Support Footer */}
-          <View className="mt-8 items-center">
-            <Text className="font-dm-sans-medium text-gray-400 text-xs">
-              Ref ID: #BOK_{booking._id?.slice(0, 8).toUpperCase()}
-            </Text>
-          </View>
+          {completed && (
+            <Button
+              type="primary"
+              label="View Itinerary"
+              icon={
+                <MaterialCommunityIcons
+                  name="arrow-right"
+                  size={16}
+                  color="white"
+                />
+              }
+              iconPosition="right"
+              buttonClassName="h-12"
+              onPress={handleView}
+            />
+          )}
         </>
       )}
     </SimpleContainer>

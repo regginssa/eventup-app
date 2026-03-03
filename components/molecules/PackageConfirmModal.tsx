@@ -98,8 +98,9 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
         },
       });
     } catch (err) {
-      setLoading(false);
       toast.error("Checkout failed");
+    } finally {
+      setLoading(false);
     }
   };
 
