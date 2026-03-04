@@ -3,20 +3,15 @@ import {
   Button,
   FlightItem,
   HotelItem,
+  OfficialTicketItem,
   Spinner,
-  TicketQR,
   TransferItem,
 } from "@/components/common";
 import { SimpleContainer } from "@/components/organisms/layout";
-import { useTheme } from "@/components/providers/ThemeProvider";
-import { TPackageType } from "@/types";
 import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
-import { ICommunityTicket } from "@/types/ticket";
-import { formatDateTime } from "@/utils/format";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 import { useEffect, useState } from "react";
@@ -24,88 +19,16 @@ import { StyleSheet, Text, View } from "react-native";
 
 const BookedLightImage = require("@/assets/images/booked_image.png");
 
-const EventTicket = ({
-  event,
-  packageType,
-  communityTicket,
-}: {
-  event: IEvent | null;
-  packageType: TPackageType;
-  communityTicket: ICommunityTicket | null;
-}) => {
-  const { theme } = useTheme();
-  const isLight = theme === "light";
-
-  return (
-    <View
-      className={`w-full ${isLight ? "bg-white" : "bg-slate-900"} rounded-[24px] overflow-hidden border border-slate-100 shadow-sm`}
-    >
-      <LinearGradient
-        colors={
-          packageType === "gold"
-            ? ["#FACC1520", "transparent"]
-            : ["#844AFF10", "transparent"]
-        }
-        className="p-5"
-      >
-        <View className="flex-row justify-between items-center mb-4">
-          <View className="bg-slate-100 px-3 py-1 rounded-full">
-            <Text className="text-[10px] font-poppins-bold text-slate-500 uppercase tracking-tighter">
-              Confirmed Admission
-            </Text>
-          </View>
-          {packageType === "gold" && (
-            <View className="flex-row items-center bg-yellow-400 px-2 py-1 rounded-md">
-              <MaterialCommunityIcons name="crown" size={12} color="white" />
-              <Text className="text-[10px] font-poppins-bold text-white ml-1">
-                GOLD VIP
-              </Text>
-            </View>
-          )}
-        </View>
-
-        <View className="flex-row gap-4">
-          <View className="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
-            <TicketQR size={90} />
-          </View>
-
-          <View className="flex-1 justify-center">
-            <Text
-              className="font-poppins-bold text-slate-800 text-lg leading-6 mb-1"
-              numberOfLines={2}
-            >
-              {event?.name}
-            </Text>
-            <View className="flex-row items-center mb-1">
-              <Feather name="calendar" size={12} color="#844AFF" />
-              <Text className="font-dm-sans-medium text-slate-500 text-xs ml-1">
-                {formatDateTime(event?.dates?.start.date as string)}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Feather name="map-pin" size={12} color="#844AFF" />
-              <Text
-                className="font-dm-sans-medium text-slate-500 text-xs ml-1"
-                numberOfLines={1}
-              >
-                {event?.location?.city?.name || event?.location?.country?.name}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </LinearGradient>
-    </View>
-  );
-};
-
 const TripSummary = ({
   services,
   totalPrice,
   currency,
+  ticketStatus,
 }: {
   services: string[];
   totalPrice: number;
   currency: string;
+  ticketStatus: "pending" | "failed" | "completed";
 }) => {
   return (
     <View className="w-full mt-4">
@@ -116,6 +39,21 @@ const TripSummary = ({
         </Text>
 
         <View className="gap-3">
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center gap-2">
+              <View className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+              <Text className="text-slate-600 font-dm-sans-medium text-sm">
+                Ticket
+              </Text>
+            </View>
+            <Text
+              className={`font-dm-sans-bold text-[10px] px-2 py-0.5 rounded ${ticketStatus === "pending" ? "text-yellow-600 bg-yellow-50" : "text-emerald-600 bg-emerald-50"}`}
+            >
+              {ticketStatus === "pending"
+                ? "Price estimated, confirmed on purchase"
+                : "INCLUDED"}
+            </Text>
+          </View>
           {services.map((service, i) => (
             <View key={i} className="flex-row justify-between items-center">
               <View className="flex-row items-center gap-2">
@@ -129,17 +67,6 @@ const TripSummary = ({
               </Text>
             </View>
           ))}
-          <View className="flex-row justify-between items-center">
-            <View className="flex-row items-center gap-2">
-              <View className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-              <Text className="text-slate-600 font-dm-sans-medium text-sm">
-                Event Admission
-              </Text>
-            </View>
-            <Text className="text-emerald-600 font-dm-sans-bold text-[10px] bg-emerald-50 px-2 py-0.5 rounded">
-              INCLUDED
-            </Text>
-          </View>
         </View>
       </View>
 
@@ -201,9 +128,12 @@ const BookedScreen = () => {
 
         const selectedServices = [];
         if (booking.flight.offer) selectedServices.push("Round-trip Flight");
-        if (booking.hotel.offer) selectedServices.push("Luxury Hotel Stay");
+        if (booking.hotel.offer) selectedServices.push("Hotel Stay");
         if (booking.transfer.airportToHotel?.offer)
-          selectedServices.push("Airport Transfer");
+          selectedServices.push("Hotel Transfer");
+        if (booking.transfer.hotelToEvent?.offer) {
+          selectedServices.push("Event Transfer");
+        }
 
         setServices(selectedServices);
         setHasLoadedSuccessfully(true);
@@ -217,7 +147,7 @@ const BookedScreen = () => {
   }, [bookingId]);
 
   return (
-    <SimpleContainer title="Confirmation" scrolled>
+    <SimpleContainer title="Confirmation" scrolled hiddenBack>
       {loading ? (
         <Spinner size="md" />
       ) : (
@@ -250,11 +180,7 @@ const BookedScreen = () => {
           </View>
 
           {/* Ticket Section */}
-          <EventTicket
-            event={event}
-            packageType={booking?.packageType || "standard"}
-            communityTicket={null}
-          />
+          {event?.type === "ai" ? <OfficialTicketItem event={event} /> : null}
 
           {/* Itinerary Details */}
           <View className="mt-8 gap-4">
@@ -276,6 +202,7 @@ const BookedScreen = () => {
             totalPrice={booking?.price.totalAmount || 0}
             currency={booking?.price.currency || "USD"}
             services={services}
+            ticketStatus={booking?.ticketStatus || "pending"}
           />
 
           {/* Actions */}

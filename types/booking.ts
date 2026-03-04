@@ -54,6 +54,7 @@ export interface IBooking {
   };
   packageType: TPackageType;
   paymentStatus: TTransactionStatus;
+  ticketStatus: "pending" | "completed" | "failed";
   createdAt?: Date;
   updatedAt?: Date;
 }

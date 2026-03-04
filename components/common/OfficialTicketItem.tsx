@@ -31,7 +31,7 @@ const OfficialTicketItem: React.FC<OfficialTicketItemProps> = ({ event }) => {
   const eventImage = event?.images?.[0];
 
   return (
-    <View className=" shadow-xl shadow-purple-200">
+    <View className="shadow-xl shadow-purple-200">
       <LinearGradient
         colors={["#844AFF", "#C427E0"]}
         start={{ x: 0, y: 0 }}
@@ -148,13 +148,12 @@ const OfficialTicketItem: React.FC<OfficialTicketItemProps> = ({ event }) => {
             )}
           </View>
 
-          <View className="border-t border-slate-100 my-4" />
+          {/* <View className="border-t border-slate-100 my-4" />
 
-          {/* FOOTER NOTE */}
           <Text className="text-[10px] text-slate-400 leading-4 font-dm-sans-medium">
             Your admission includes full access to the event. Detailed digital
             tickets will be issued after checkout.
-          </Text>
+          </Text> */}
         </View>
       </LinearGradient>
     </View>

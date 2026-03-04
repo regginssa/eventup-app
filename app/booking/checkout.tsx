@@ -1,5 +1,6 @@
 import bookingServices from "@/api/services/booking";
 import eventServices from "@/api/services/event";
+import userServices from "@/api/services/user";
 import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
 import { SimpleContainer } from "@/components/organisms/layout";
@@ -232,7 +233,7 @@ const CheckoutScreen = () => {
 
   const router = useRouter();
   const { eventId, packageType } = useLocalSearchParams();
-  const { user } = useAuth();
+  const { user, setAuthUser } = useAuth();
   const { offer: flightOffer } = useFlight();
   const { offer: hotelOffer } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
@@ -293,6 +294,51 @@ const CheckoutScreen = () => {
   const onBook = async () => {
     try {
       setBookLoading(true);
+
+      if (event?.type === "user") {
+        const ticket = user?.tickets.find(
+          (t) =>
+            t.currency === event.fee?.currency && t.price === event.fee.amount,
+        );
+        if (!ticket) {
+          toast.error("Buy a ticket first");
+          setBookLoading(false);
+          router.push({
+            pathname: "/tickets",
+            params: {
+              amount: event.fee?.amount,
+              currency: event.fee?.currency,
+              from: "/booking/checkout",
+            },
+          });
+          return;
+        }
+
+        if (!user?._id || !event._id) return;
+
+        const response = await userServices.update(user?._id as string, {
+          ...user,
+          tickets: user.tickets.filter((t) => t._id !== ticket._id),
+        });
+        if (!response.data) {
+          setLoading(false);
+          return toast.error("Ticket deposit failed");
+        }
+        setAuthUser(response.data);
+
+        await eventServices.update(event._id, {
+          ...event,
+          attendees: [
+            ...event.attendees,
+            {
+              status: "approved",
+              user: user._id as any,
+              ticket: ticket._id as any,
+            },
+          ],
+        });
+      }
+
       const bookingId = await createBooking();
       if (!bookingId) throw new Error("Booking Failed");
 
@@ -366,6 +412,7 @@ const CheckoutScreen = () => {
         totalAmount,
         currency: "USD",
       },
+      ticketStatus: event?.type === "ai" ? "pending" : "completed",
       status: "pending",
     };
 

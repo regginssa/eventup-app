@@ -1,4 +1,9 @@
-import { FlightItem, HotelItem, TransferItem } from "@/components/common";
+import {
+  FlightItem,
+  HotelItem,
+  OfficialTicketItem,
+  TransferItem,
+} from "@/components/common";
 import { IBooking } from "@/types/booking";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -31,7 +36,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
     );
   }
 
-  const { flight, hotel, transfer } = booking;
+  const { flight, hotel, transfer, ticketStatus, event } = booking;
 
   // Helper to render the timeline dot/line
   const TimelineConnector = () => (
@@ -47,6 +52,44 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
 
   return (
     <View className="flex-1">
+      <View className="mb-6 gap-4">
+        <View className="flex-row items-center justify-between px-1">
+          <View>
+            <Text className="font-poppins-bold text-slate-800 text-xl">
+              My Ticket
+            </Text>
+          </View>
+          <View
+            className={`${ticketStatus === "pending" ? "bg-yellow-100" : ticketStatus === "failed" ? "bg-red-100" : "bg-green-100"} px-3 py-1 rounded-full flex-row items-center`}
+          >
+            <MaterialCommunityIcons
+              name={
+                ticketStatus === "pending"
+                  ? "clock-outline"
+                  : ticketStatus === "failed"
+                    ? "cross-outline"
+                    : "check-decagram"
+              }
+              size={14}
+              color={
+                ticketStatus === "pending"
+                  ? "#a16207"
+                  : ticketStatus === "failed"
+                    ? "#b91c1c"
+                    : "#16a34a"
+              }
+            />
+            <Text
+              className={`${ticketStatus === "pending" ? "text-yellow-700" : ticketStatus === "failed" ? "text-red-700" : "text-green-700"} font-dm-sans-bold text-[10px] ml-1 uppercase`}
+            >
+              {ticketStatus === "completed" ? "Confirmed" : ticketStatus}
+            </Text>
+          </View>
+        </View>
+
+        {event.type === "ai" ? <OfficialTicketItem event={event} /> : null}
+      </View>
+
       {/* HEADER STATUS */}
       <View className="flex-row items-center justify-between mb-6 px-1">
         <View>

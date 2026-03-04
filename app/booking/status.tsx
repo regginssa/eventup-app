@@ -12,9 +12,10 @@ import { IEvent } from "@/types/event";
 import { TTransactionStatus } from "@/types/transaction";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { BackHandler, Text, View } from "react-native";
 
 const BookingStatus = () => {
   const [booking, setBooking] = useState<IBooking | null>(null);
@@ -25,6 +26,7 @@ const BookingStatus = () => {
 
   const { id: bookingId } = useLocalSearchParams();
   const router = useRouter();
+  const navigation = useNavigation();
   const { socket } = useSocket();
   const { user } = useAuth();
   const { book: bookFlight } = useFlight();
@@ -285,10 +287,37 @@ const BookingStatus = () => {
       check(booking.flight) &&
       check(booking.hotel) &&
       check(booking.transfer?.airportToHotel) &&
-      check(booking.transfer?.hotelToEvent);
+      check(booking.transfer?.hotelToEvent) &&
+      booking.paymentStatus === "completed";
 
     setCompleted(allConfirmed);
   }, [booking]);
+
+  useEffect(() => {
+    const onBackPress = () => {
+      if (!booking) return true;
+      if (!completed) {
+        toast.info(
+          "You cannot leave this screen until your booking is complete.",
+        );
+        return true; // prevent default back action
+      }
+      return false; // allow back
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress,
+    );
+
+    return () => backHandler.remove();
+  }, [completed]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      gestureEnabled: completed,
+    });
+  }, [completed]);
 
   if (!booking) return null;
 
@@ -310,6 +339,47 @@ const BookingStatus = () => {
     });
   };
 
+  const handleBuyTicket = async () => {
+    if (!event?.tm?.url || !user?._id) return;
+
+    const url = event.tm.url + `?subId=${user._id}`;
+    await WebBrowser.openBrowserAsync(url);
+  };
+
+  const bookingItems = [
+    {
+      label: "Payment",
+      icon: "credit-card-check-outline",
+      status:
+        booking.paymentStatus === "completed" ? "confirmed" : "processing",
+    },
+    {
+      label: "Ticket",
+      icon: "ticket-outline",
+      status: booking.ticketStatus,
+    },
+    flight.offer && {
+      label: "Flight",
+      icon: "airplane-takeoff",
+      status: flight.status,
+    },
+    hotel?.offer && {
+      label: "Hotel",
+      icon: "office-building",
+      status: hotel.status,
+    },
+    transfer?.airportToHotel?.offer && {
+      label: "Arrival Transfer",
+      icon: "car-wash",
+      status: transfer.airportToHotel.status,
+    },
+    transfer?.hotelToEvent?.offer && {
+      label: "Event Transfer",
+      icon: "bus-side",
+      status: transfer.hotelToEvent.status,
+    },
+  ].filter(Boolean);
+
   return (
     <SimpleContainer title="Booking Status" scrolled hiddenBack>
       {initLoading ? (
@@ -323,7 +393,7 @@ const BookingStatus = () => {
                 colors={["#C427E0", "#844AFF", "#12A9FF"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={{ borderRadius: 24, padding: 24 }}
+                style={{ borderRadius: 32, padding: 24 }}
               >
                 <View className="flex-row justify-between items-start">
                   <View>
@@ -382,55 +452,17 @@ const BookingStatus = () => {
                 </View>
               </View>
 
-              <BookingStatusItem
-                label="Payment"
-                icon="credit-card-check-outline"
-                status={
-                  booking.paymentStatus === "completed"
-                    ? "confirmed"
-                    : "processing"
-                }
-              />
-
-              <BookingStatusItem
-                label="Flight"
-                icon="airplane-takeoff"
-                status={flight?.status}
-                isLast={!hotel?.offer}
-              />
-
-              {hotel?.offer && (
+              {bookingItems.map((item, index) => (
                 <BookingStatusItem
-                  label="Hotel"
-                  icon="office-building"
-                  status={hotel?.status}
-                  isLast={
-                    !transfer?.airportToHotel?.offer &&
-                    !transfer?.hotelToEvent?.offer
-                  }
+                  key={item.label}
+                  label={item.label}
+                  icon={item.icon as any}
+                  status={item.status}
+                  isLast={index === bookingItems.length - 1}
                 />
-              )}
-
-              {transfer?.airportToHotel?.offer && (
-                <BookingStatusItem
-                  label="Arrival Transfer"
-                  icon="car-wash"
-                  status={transfer?.airportToHotel?.status}
-                  isLast={!transfer?.hotelToEvent?.offer}
-                />
-              )}
-
-              {transfer?.hotelToEvent?.offer && (
-                <BookingStatusItem
-                  label="Event Transfer"
-                  icon="bus-side"
-                  status={transfer?.hotelToEvent?.status}
-                  isLast
-                />
-              )}
+              ))}
             </View>
 
-            {/* Concierge Support Card */}
             <LinearGradient
               colors={["#844AFF15", "#12A9FF15"]}
               start={{ x: 0, y: 0 }}
@@ -454,7 +486,7 @@ const BookingStatus = () => {
                   <Text className="font-poppins-semibold uppercase text-slate-900 text-sm">
                     Important Notice
                   </Text>
-                  <Text className="font-dm-sans-regular text-slate-500 text-xs">
+                  <Text className="font-dm-sans-bold text-slate-500 text-xs">
                     Stay here until all bookings are confirmed
                   </Text>
                 </View>
@@ -465,7 +497,61 @@ const BookingStatus = () => {
                 /> */}
               </View>
             </LinearGradient>
+
+            {completed && booking.ticketStatus === "pending" && (
+              <LinearGradient
+                colors={["#844AFF15", "#12A9FF15"]}
+                start={{ x: 0, y: 0 }}
+                style={{
+                  marginTop: 24,
+                  borderRadius: 20,
+                  padding: 20,
+                  borderWidth: 1,
+                  borderColor: "#844AFF20",
+                }}
+              >
+                <View className="flex-row items-center">
+                  <View className="bg-[#844AFF] w-12 h-12 rounded-xl items-center justify-center mr-4 shadow-lg shadow-purple-300">
+                    <MaterialCommunityIcons
+                      name="ticket-outline"
+                      size={24}
+                      color="white"
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="font-poppins-semibold uppercase text-slate-900 text-sm">
+                      TICKET PURCHASE NOTICE
+                    </Text>
+                    <Text className="font-dm-sans-bold text-slate-500 text-xs">
+                      You can still purchase the ticket in event details
+                    </Text>
+                  </View>
+                  {/* <MaterialCommunityIcons
+                  name="chevron-right"
+                  size={20}
+                  color="#844AFF"
+                /> */}
+                </View>
+              </LinearGradient>
+            )}
           </View>
+
+          {booking.ticketStatus === "pending" && (
+            <Button
+              type="gradient-glass"
+              label="Buy Ticket"
+              icon={
+                <MaterialCommunityIcons
+                  name="arrow-right"
+                  size={16}
+                  color="white"
+                />
+              }
+              iconPosition="right"
+              buttonClassName="h-12"
+              onPress={handleBuyTicket}
+            />
+          )}
 
           {completed && (
             <Button
