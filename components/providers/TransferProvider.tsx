@@ -5,7 +5,7 @@ import { createContext, useContext, useState } from "react";
 interface TransferContextProps {
   airportToHotelOffer: ITransferOffer | null;
   hotelToEventOffer: ITransferOffer | null;
-  search: (params: any, fromType: "iata" | "gps") => Promise<void>;
+  search: (params: any, transferType: "ah" | "he") => Promise<void>;
   book: (bodyData: any) => Promise<ITransferBookingResponse>;
   initialize: () => void;
 }
@@ -32,9 +32,9 @@ const TransferProvider: React.FC<TransferProviderProps> = ({ children }) => {
   const [hotelToEventOffer, setHotelToEventOffer] =
     useState<ITransferOffer | null>(null);
 
-  const search = async (params: any, fromType: "iata" | "gps") => {
+  const search = async (params: any, transferType: "ah" | "he") => {
     const response = await services.get(params);
-    if (fromType === "iata") {
+    if (transferType === "ah") {
       setAirportToHotelOffer(response.data);
     } else {
       setHotelToEventOffer(response.data);

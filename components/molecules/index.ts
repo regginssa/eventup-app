@@ -14,7 +14,6 @@ export { default as ImageGroup } from "./ImageGroup";
 export { default as MapMarker } from "./MapMarker";
 export { default as OnboardingStepper } from "./OnboardingStepper";
 export { default as PackageConfirmModal } from "./PackageConfirmModal";
-export { default as PassengerInputGroup } from "./PassengerInputGroup";
 export { default as PaymentMethodGroup } from "./PaymentMethodGroup";
 export { default as ProfileDrawer } from "./ProfileDrawer";
 export { default as ReviewCardGroup } from "./ReviewCardGroup";

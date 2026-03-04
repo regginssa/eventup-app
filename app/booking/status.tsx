@@ -477,6 +477,7 @@ const BookingStatus = () => {
               }
               iconPosition="right"
               buttonClassName="h-12"
+              loading={viewLoading}
               onPress={handleView}
             />
           )}

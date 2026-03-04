@@ -5,8 +5,9 @@ import { IHotelOffer } from "@/types/hotel";
 import df from "@/utils/date";
 import { normalizeDateUTC } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import {
   Button,
   DateTimePicker,
@@ -36,6 +37,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   currentCity,
   currentCountryCode,
 }) => {
+  const [includes, setIncludes] = useState({
+    flight: true,
+    hotel: true,
+    transferAirport: true,
+    transferEvent: true,
+  });
   const [departureLocation, setDepartureLocation] = useState<
     "current" | "home"
   >("current");
@@ -43,8 +50,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [hotelDepartureDate, setHotelDepartureDate] = useState<Date>(
     new Date(),
   );
+  const [hotelCheckInDate, setHotelCheckInDate] = useState<Date>(new Date());
   const [hotelCheckoutDate, setHotelCheckoutDate] = useState<Date>(new Date());
-  const [searchBtnLabel, setSearchBtnLabel] = useState<string>("Search");
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
   const [refreshLoading, setRefreshLoading] = useState<Map<string, boolean>>(
     new Map(),
@@ -84,6 +91,18 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   };
 
   const handleFlight = async () => {
+    if (!includes.flight) return null;
+
+    const eventDateTime = normalizeDateUTC(
+      new Date(event.dates?.start?.date as string),
+    );
+    const departureDateTime = normalizeDateUTC(departureDate);
+
+    if (eventDateTime < departureDateTime) {
+      toast.info("The departure date cannot be after the event date.");
+      return null;
+    }
+
     setLoading("flight", true);
     const originGeo =
       departureLocation === "current"
@@ -108,28 +127,55 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const handleHotel = async (
     flightOffer: IFlightOffer | null,
   ): Promise<IHotelOffer | null> => {
-    if (!flightOffer) {
-      toast.warn("Airline isn't selected");
-      return null;
-    }
+    if (!includes.hotel) return null;
+
+    const eventDate = normalizeDateUTC(
+      new Date(event.dates?.start?.date as string),
+    );
+    const checkOut = normalizeDateUTC(hotelCheckoutDate);
+
+    // Shared coordinates
     const hotelGeo = event.location?.coordinate;
-    if (!hotelGeo) {
-      toast.warn("Hotel Geo is incorrect");
+
+    // Validate checkout vs event date
+    if (eventDate > checkOut) {
+      toast.info("The hotel checkout date cannot be after the event date.");
       return null;
     }
 
-    setLoading("hotel", true);
+    let checkIn: any;
 
+    // If flights are included, ensure flight is selected and use its arrival time
+    if (includes.flight) {
+      if (!flightOffer) {
+        toast.info("Airline isn't selected");
+        return null;
+      }
+      checkIn = new Date(flightOffer.arrivalTime);
+    } else {
+      // When no flight: validate check-in vs event
+      const checkInDate = normalizeDateUTC(hotelCheckInDate);
+      if (eventDate < checkInDate) {
+        toast.info("The hotel checkIn date cannot be after the event date.");
+        return null;
+      }
+      checkIn = hotelCheckInDate;
+    }
+
+    // Build params
     const params = {
-      lat: hotelGeo.latitude,
-      lng: hotelGeo.longitude,
-      checkIn: df.toISOString(new Date(flightOffer.arrivalTime)),
+      lat: hotelGeo?.latitude,
+      lng: hotelGeo?.longitude,
+      checkIn: df.toISOString(checkIn),
       checkOut: df.toISOString(hotelCheckoutDate),
       packageType,
     };
 
+    // Execute search
+    setLoading("hotel", true);
     const data = await searchHotel(params);
     setLoading("hotel", false);
+
     return data;
   };
 
@@ -137,6 +183,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     flightOffer: IFlightOffer | null,
     hotelOffer: IHotelOffer | null,
   ) => {
+    if (!includes.transferAirport) return;
+
     if (flightOffer && hotelOffer) {
       setLoading("airportToHotel", true);
       const params = {
@@ -149,31 +197,57 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         packageType,
       };
 
-      await searchTransfer(params, "iata");
+      await searchTransfer(params, "ah");
       setLoading("airportToHotel", false);
     }
   };
 
   const handleHotelToEvent = async (hotelOffer: IHotelOffer | null) => {
-    const eventGeo = event.location?.coordinate;
+    if (!includes.transferEvent) return;
 
+    const eventGeo = event.location?.coordinate;
     if (!eventGeo) return toast.warn("Event isn't selected");
 
-    if (!hotelOffer) return toast.warn("Hotel isn't selected");
+    let fromParams: any = {};
 
-    setLoading("hotelToEvent", true);
-    const params = {
-      fromType: "ATLAS",
-      fromCode: hotelOffer.id,
+    // Determine the "from" location
+    if (includes.hotel) {
+      if (!hotelOffer) return toast.warn("Hotel isn't selected");
+
+      fromParams = {
+        fromType: "ATLAS",
+        fromCode: hotelOffer.id,
+      };
+    } else {
+      if (!currentLocationCoords) return;
+
+      fromParams = {
+        fromType: "GPS",
+        fromLat: currentLocationCoords.latitude,
+        fromLng: currentLocationCoords.longitude,
+      };
+    }
+
+    const toParams = {
       toType: "GPS",
       toLat: eventGeo.latitude,
       toLng: eventGeo.longitude,
+    };
+
+    const timeParams = {
       date: df.toISOString(hotelDepartureDate),
       time: df.to24HourTime(hotelDepartureDate),
       packageType,
     };
 
-    await searchTransfer(params, "gps");
+    const params = {
+      ...fromParams,
+      ...toParams,
+      ...timeParams,
+    };
+
+    setLoading("hotelToEvent", true);
+    await searchTransfer(params, "he");
     setLoading("hotelToEvent", false);
   };
 
@@ -182,48 +256,33 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     if (!event.dates?.timezone) return toast.warn("Event timezone is missing.");
 
-    const eventDateTime = normalizeDateUTC(
-      new Date(event.dates?.start?.date as string),
-    );
-    const departureDateTime = normalizeDateUTC(departureDate);
-    const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
-    const hotelCheckoutDateTime = normalizeDateUTC(hotelCheckoutDate);
-
-    if (eventDateTime < departureDateTime) {
-      return toast.warn("The departure date cannot be after the event date.");
-    }
-
-    if (eventDateTime > hotelCheckoutDateTime) {
-      return toast.warn(
-        "The hotel checkout date cannot be after the event date.",
-      );
-    }
-
-    if (hotelDepartureDateTime > eventDateTime) {
-      return toast.warn(
-        "The hotel departure date cannot be after the event date.",
-      );
-    }
-
     try {
       setSearchLoading(true);
       initialize();
 
-      setSearchBtnLabel("Searching flights...");
       const flightData = await handleFlight();
 
-      setSearchBtnLabel("Searching hotels...");
       const hotelData = await handleHotel(flightData);
 
-      setSearchBtnLabel("Searching transfers...");
-      await handleAirportToHotel(flightData, hotelData);
-      await handleHotelToEvent(hotelData);
+      if (includes.transferAirport || includes.transferEvent) {
+        const eventDateTime = normalizeDateUTC(
+          new Date(event.dates?.start?.date as string),
+        );
+        const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
+
+        if (hotelDepartureDateTime > eventDateTime) {
+          return toast.warn(
+            "The hotel departure date cannot be after the event date.",
+          );
+        }
+        await handleAirportToHotel(flightData, hotelData);
+        await handleHotelToEvent(hotelData);
+      }
     } catch (error) {
       console.log("handleSearch error: ", error);
       toast.error("Search failed");
     } finally {
       setSearchLoading(false);
-      setSearchBtnLabel("Search");
     }
   };
 
@@ -231,24 +290,190 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     initialize();
   }, []);
 
-  return (
-    <View className="w-full flex flex-col gap-3">
-      <View className="">
-        <Text className="font-poppins-medium text-sm text-gray-700">
-          Where will you be departing from?
-        </Text>
+  useEffect(() => {
+    const canHaveTransfer = includes.flight || includes.hotel;
 
-        <View className="w-full flex flex-col gap-2 mt-2">
-          <View>
-            <View className="w-full flex flex-row items-center gap-2">
-              <View className="flex flex-row items-start gap-1 flex-1">
+    if (!canHaveTransfer && includes.transferAirport) {
+      setIncludes((prev) => ({ ...prev, transferAirport: false }));
+    }
+  }, [includes.flight, includes.hotel]);
+
+  const toggleInclude = (key: keyof typeof includes) => {
+    const canHaveTransfer = includes.flight || includes.hotel;
+
+    if (key === "transferAirport" && !canHaveTransfer) return;
+
+    setIncludes((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const getCardStyle = (isActive: boolean) => [
+    {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      padding: 12,
+      borderRadius: 16,
+      borderWidth: 1,
+      backgroundColor: isActive ? "#FFFFFF" : "rgba(241, 245, 249, 0.5)", // bg-slate-100/50
+      borderColor: isActive ? "#844AFF" : "transparent",
+      // Shadow only for active state
+      elevation: isActive ? 2 : 0,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: isActive ? 0.05 : 0,
+      shadowRadius: 4,
+    },
+  ];
+
+  const GradientCheckbox = ({
+    checked,
+    onPress,
+  }: {
+    checked: boolean;
+    onPress: () => void;
+  }) => (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+      {checked ? (
+        <LinearGradient
+          colors={["#C427E0", "#844AFF", "#12A9FF"]}
+          className="w-5 h-5 items-center justify-center"
+          style={{ borderRadius: 6 }}
+        >
+          <MaterialCommunityIcons name="check" size={14} color="white" />
+        </LinearGradient>
+      ) : (
+        <View className="w-5 h-5 rounded-md border-2 border-slate-200 bg-white" />
+      )}
+    </TouchableOpacity>
+  );
+
+  return (
+    <View className="w-full flex flex-col gap-2">
+      {/* SECTION 0: INCLUSIONS */}
+      <View className="bg-slate-50/50 py-4 rounded-2xl border border-slate-100">
+        <View className="flex-row items-center gap-2 mb-4">
+          <View className="w-6 h-6 rounded-full bg-[#844AFF10] items-center justify-center">
+            <MaterialCommunityIcons
+              name="layers-outline"
+              size={14}
+              color="#844AFF"
+            />
+          </View>
+          <Text className="font-poppins-semibold text-sm text-slate-800">
+            What's included?
+          </Text>
+        </View>
+
+        <View className="flex-row flex-wrap gap-2">
+          {[
+            { key: "flight", label: "Flight", icon: "airplane" },
+            { key: "hotel", label: "Hotel", icon: "bed-outline" },
+            {
+              key: "transferAirport",
+              label: "Airport Transfer",
+              icon: "car-back",
+            },
+            {
+              key: "transferEvent",
+              label: "Event Transfer",
+              icon: "map-marker-distance",
+            },
+          ].map((item) => (
+            <TouchableOpacity
+              key={item.key}
+              activeOpacity={0.7}
+              onPress={() => toggleInclude(item.key as any)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "white",
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: includes[item.key as keyof typeof includes]
+                  ? "#844AFF30"
+                  : "#f1f5f9",
+              }}
+            >
+              <GradientCheckbox
+                checked={includes[item.key as keyof typeof includes]}
+                onPress={() => toggleInclude(item.key as any)}
+              />
+              <Text className="ml-2 font-dm-sans-medium text-[12px] text-slate-700">
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* TIMEZONE INFO BOX */}
+      {/* <View className="overflow-hidden rounded-2xl">
+        <LinearGradient
+          colors={["#12A9FF15", "#12A9FF05"]}
+          start={{ x: 0, y: 0 }}
+          className="p-4 flex-row items-center border border-[#12A9FF30]"
+        >
+          <MaterialCommunityIcons
+            name="clock-outline"
+            size={20}
+            color="#12A9FF"
+          />
+          <Text className="font-dm-sans-medium text-[11px] text-blue-600 ml-3 flex-1">
+            Scheduling is synced to event local time:
+            <Text className="font-dm-sans-bold">
+              {" "}
+              {event.dates?.timezone || "UTC"}
+            </Text>
+          </Text>
+        </LinearGradient>
+      </View> */}
+
+      {/* SECTION 1: ORIGIN (Only if Flight is checked) */}
+      {includes.flight && (
+        <View className="bg-slate-50/50 py-4 rounded-2xl border border-slate-100">
+          <View className="flex-row items-center gap-2 mb-4">
+            <View className="w-6 h-6 rounded-full bg-[#844AFF20] items-center justify-center">
+              <MaterialCommunityIcons
+                name="map-marker-outline"
+                size={14}
+                color="#844AFF"
+              />
+            </View>
+            <Text className="font-poppins-semibold text-sm text-slate-800">
+              Departure Point
+            </Text>
+          </View>
+
+          <View className="gap-3">
+            {/* Current Location Option */}
+            <TouchableOpacity
+              style={getCardStyle(departureLocation === "current")}
+              onPress={() => setDepartureLocation("current")}
+              activeOpacity={0.7}
+            >
+              <View className="w-10 h-10 rounded-xl bg-white items-center justify-center shadow-sm">
                 <MaterialCommunityIcons
-                  name="map-marker-radius-outline"
-                  size={16}
-                  color="#4b5563"
+                  name="map-marker-radius"
+                  size={22}
+                  color={
+                    departureLocation === "current" ? "#844AFF" : "#94a3b8"
+                  }
                 />
-                <Text className="font-dm-sans-medium text-gray-600 text-sm line-clamp-2">
-                  Current Location ({currentCity}, {currentCountryCode})
+              </View>
+
+              <View className="flex-1 ml-3">
+                <Text
+                  style={{
+                    color:
+                      departureLocation === "current" ? "#844AFF" : "#94a3b8",
+                  }}
+                  className="font-dm-sans-bold text-[10px] uppercase tracking-[1.5px]"
+                >
+                  Current Location
+                </Text>
+                <Text className="font-dm-sans-medium text-slate-700 text-xs mt-0.5">
+                  {currentCity}, {currentCountryCode}
                 </Text>
               </View>
 
@@ -256,20 +481,33 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 checked={departureLocation === "current"}
                 onPress={() => setDepartureLocation("current")}
               />
-            </View>
-          </View>
+            </TouchableOpacity>
 
-          <View>
-            <View className="w-full flex flex-row items-center gap-2">
-              <View className="flex flex-row items-start gap-1 flex-1">
+            {/* Home Location Option */}
+            <TouchableOpacity
+              style={getCardStyle(departureLocation === "home")}
+              onPress={() => setDepartureLocation("home")}
+              activeOpacity={0.7}
+            >
+              <View className="w-10 h-10 rounded-xl bg-white items-center justify-center shadow-sm">
                 <MaterialCommunityIcons
-                  name="map-marker-account-outline"
-                  size={16}
-                  color="#4b5563"
+                  name="home-map-marker"
+                  size={22}
+                  color={departureLocation === "home" ? "#844AFF" : "#94a3b8"}
                 />
-                <Text className="font-dm-sans-medium text-gray-600 text-sm line-clamp-2">
-                  Home region / Saved location ({user?.location.city.name},{" "}
-                  {user?.location.country.name || ""})
+              </View>
+
+              <View className="flex-1 ml-3">
+                <Text
+                  style={{
+                    color: departureLocation === "home" ? "#844AFF" : "#94a3b8",
+                  }}
+                  className="font-dm-sans-bold text-[10px] uppercase tracking-[1.5px]"
+                >
+                  Saved Home
+                </Text>
+                <Text className="font-dm-sans-medium text-slate-700 text-xs mt-0.5">
+                  {user?.location.city.name}, {user?.location.country.name}
                 </Text>
               </View>
 
@@ -277,91 +515,132 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 checked={departureLocation === "home"}
                 onPress={() => setDepartureLocation("home")}
               />
-            </View>
+            </TouchableOpacity>
           </View>
+        </View>
+      )}
+
+      {/* SECTION 2: SCHEDULE (Dynamic Date Pickers) */}
+      <View className="bg-slate-50/50 py-4 rounded-2xl border border-slate-100">
+        <View className="flex-row items-center gap-2 mb-4">
+          <View className="w-6 h-6 rounded-full bg-[#844AFF20] items-center justify-center">
+            <MaterialCommunityIcons
+              name="calendar-clock-outline"
+              size={14}
+              color="#844AFF"
+            />
+          </View>
+          <Text className="font-poppins-semibold text-sm text-slate-800">
+            Itinerary Schedule
+          </Text>
+        </View>
+
+        <View className="gap-4">
+          {includes.flight && (
+            <DateTimePicker
+              label="Departure from your location"
+              className="rounded-xl"
+              bordered
+              value={departureDate}
+              onPick={setDepartureDate}
+            />
+          )}
+          {!includes.flight && includes.hotel && (
+            <DateTimePicker
+              label="Hotel CheckIn Date"
+              className="rounded-xl"
+              bordered
+              mode="date"
+              value={hotelCheckInDate}
+              onPick={setHotelCheckInDate}
+            />
+          )}
+          {includes.hotel && (
+            <DateTimePicker
+              label="Hotel Checkout Date"
+              className="rounded-xl"
+              bordered
+              mode="date"
+              value={hotelCheckoutDate}
+              onPick={setHotelCheckoutDate}
+            />
+          )}
+          {includes.transferEvent && (
+            <DateTimePicker
+              label="Transfer to Event Time"
+              className="rounded-xl"
+              bordered
+              mode="datetime"
+              value={hotelDepartureDate}
+              onPick={setHotelDepartureDate}
+            />
+          )}
         </View>
       </View>
 
-      <View className="w-full h-[1px] bg-gray-200"></View>
+      {/* SECTION 3: OFFERS (Only show what's checked) */}
+      {(flightOffer ||
+        hotelOffer ||
+        airportToHotelOffer ||
+        hotelToEventOffer) && (
+        <View className="gap-3">
+          <View className="flex-row items-center gap-2 mb-4">
+            <View className="w-6 h-6 rounded-full bg-[#844AFF20] items-center justify-center">
+              <MaterialCommunityIcons
+                name="ticket-outline"
+                size={14}
+                color="#844AFF"
+              />
+            </View>
+            <Text className="font-poppins-semibold text-sm text-slate-800">
+              Selected Itinerary
+            </Text>
+          </View>
 
-      <View className="w-full p-4 rounded-xl flex flex-row items-start gap-2 bg-blue-200 border border-blue-600">
-        <MaterialCommunityIcons
-          name="information-outline"
-          size={24}
-          color="#2563eb"
-        />
-        <Text className="font-dm-sans-semibold text-sm text-blue-600">
-          All of your bookings will be based on event timezone:{" "}
-          <Text className="font-dm-sans-bold">
-            {event.dates?.timezone || "UTC"}
-          </Text>
-        </Text>
-      </View>
+          <View className="gap-2">
+            {includes.flight && (
+              <FlightItem
+                data={flightOffer}
+                refreshLoading={refreshLoading.get("flight")}
+                onRefresh={async () => {
+                  await handleFlight();
+                }}
+              />
+            )}
+            {includes.hotel && (
+              <HotelItem
+                data={hotelOffer}
+                refreshLoading={refreshLoading.get("hotel")}
+                onRefresh={async () => {
+                  await handleHotel(flightOffer);
+                }}
+              />
+            )}
+            {includes.transferAirport && (
+              <TransferItem
+                data={airportToHotelOffer}
+                refreshLoading={refreshLoading.get("airportToHotel")}
+                onRefresh={() => handleAirportToHotel(flightOffer, hotelOffer)}
+              />
+            )}
+            {includes.transferEvent && (
+              <TransferItem
+                data={hotelToEventOffer}
+                refreshLoading={refreshLoading.get("hotelToEvent")}
+                onRefresh={() => handleHotelToEvent(hotelOffer)}
+              />
+            )}
+          </View>
+        </View>
+      )}
 
-      <View className="w-full h-[1px] bg-gray-200"></View>
-
-      <DateTimePicker
-        label="Tell us when you will leave the airport in your location"
-        className="rounded-md"
-        value={departureDate}
-        onPick={setDepartureDate}
-      />
-      <DateTimePicker
-        label="Tell us when you will check out of the hotel"
-        className="rounded-md"
-        mode="date"
-        value={hotelCheckoutDate}
-        onPick={setHotelCheckoutDate}
-      />
-      <DateTimePicker
-        label="Tell us when you will leave the hotel for the event"
-        className="rounded-md"
-        mode="datetime"
-        value={hotelDepartureDate}
-        onPick={setHotelDepartureDate}
-      />
-
-      <View className="w-full h-[1px] bg-gray-200"></View>
-
-      <View className="w-full gap-2">
-        <FlightItem
-          data={flightOffer}
-          refreshLoading={refreshLoading.get("flight")}
-          onRefresh={async () => {
-            await handleFlight();
-          }}
-        />
-        <HotelItem
-          data={hotelOffer}
-          refreshLoading={refreshLoading.get("hotel")}
-          onRefresh={async () => {
-            await handleHotel(flightOffer);
-          }}
-        />
-        <TransferItem
-          data={airportToHotelOffer}
-          refreshLoading={refreshLoading.get("airportToHotel")}
-          onRefresh={async () => {
-            await handleAirportToHotel(flightOffer, hotelOffer);
-          }}
-        />
-        <TransferItem
-          data={hotelToEventOffer}
-          refreshLoading={refreshLoading.get("hotelToEvent")}
-          onRefresh={async () => {
-            await handleHotelToEvent(hotelOffer);
-          }}
-        />
-      </View>
-
-      <View className="w-full h-[1px] bg-gray-200"></View>
-
+      {/* SEARCH BUTTON */}
       <Button
         type="primary"
-        label={searchBtnLabel}
+        label={searchLoading ? "Searching..." : "Search"}
+        buttonClassName="h-12 rounded-2xl"
         loading={searchLoading}
         onPress={handleSearch}
-        buttonClassName="h-12"
       />
     </View>
   );
