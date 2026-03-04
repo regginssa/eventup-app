@@ -1,3 +1,4 @@
+import bookingServices from "@/api/services/booking";
 import eventServices from "@/api/services/event";
 import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
@@ -9,6 +10,7 @@ import { useToast } from "@/components/providers/ToastProvider";
 import { useTransfer } from "@/components/providers/TransferProvider";
 import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
+import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -215,16 +217,19 @@ const CheckoutScreen = () => {
   const onBook = async () => {
     try {
       setBookLoading(true);
-      // ... (Keep existing createBooking and handlePayment logic)
-      const bookingData = await createBooking();
-      if (!bookingData?._id) throw new Error("Booking Failed");
+      const bookingId = await createBooking();
+      if (!bookingId) throw new Error("Booking Failed");
 
-      const txHash = await handlePayment(bookingData._id);
-      if (!txHash) throw new Error("Payment Failed");
+      const txHash = await handlePayment(bookingId);
+      if (!txHash) {
+        await bookingServices.remove(bookingId);
+        setBookLoading(false);
+        return toast.error("Payment failed");
+      }
 
       router.replace({
         pathname: "/booking/status",
-        params: { id: bookingData?._id },
+        params: { id: bookingId },
       });
       toast.success("Experience Booked!");
     } catch (err) {
@@ -233,12 +238,63 @@ const CheckoutScreen = () => {
     }
   };
 
-  // Logic helpers (kept from original)
   const handlePayment = async (bookingId: string) => {
-    /* logic */ return "dummy_tx";
+    let txHash = null;
+
+    switch (paymentMethod) {
+      case "credit":
+        const response = await payStripe({
+          amount: totalAmount,
+          currency: "USD",
+          metadata: {
+            type: "booking",
+            bookingId,
+          },
+          paymentMethodId: stripePaymentId,
+        });
+        txHash = response.paymentIntentId || null;
+    }
+
+    return txHash;
   };
-  const createBooking = async () => {
-    /* logic */ return { _id: "dummy_id" } as any;
+
+  const createBooking = async (): Promise<string | null> => {
+    const bodyData: IBooking = {
+      event: event?._id as any,
+      user: user?._id as any,
+      flight: {
+        offer: flightOffer as any,
+        status: "processing",
+        booking: {},
+      },
+      hotel: {
+        offer: hotelOffer as any,
+        status: "pending",
+        booking: {},
+      },
+      transfer: {
+        airportToHotel: {
+          offer: airportToHotelOffer as any,
+          status: "pending",
+          booking: {},
+        },
+        hotelToEvent: {
+          offer: hotelToEventOffer as any,
+          status: "pending",
+          booking: {},
+        },
+      },
+      packageType: packageType as any,
+      paymentStatus: "created",
+      price: {
+        totalAmount,
+        currency: "USD",
+      },
+      status: "pending",
+    };
+
+    const response = await bookingServices.create(bodyData);
+    return response.data._id || null;
   };
 
   return (

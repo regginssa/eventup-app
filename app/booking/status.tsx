@@ -445,24 +445,24 @@ const BookingStatus = () => {
               <View className="flex-row items-center">
                 <View className="bg-[#844AFF] w-12 h-12 rounded-xl items-center justify-center mr-4 shadow-lg shadow-purple-300">
                   <MaterialCommunityIcons
-                    name="chat-question"
+                    name="information-outline"
                     size={24}
                     color="white"
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="font-poppins-semibold text-slate-900 text-sm">
-                    Concierge Support
+                  <Text className="font-poppins-semibold uppercase text-slate-900 text-sm">
+                    Important Notice
                   </Text>
                   <Text className="font-dm-sans-regular text-slate-500 text-xs">
-                    Need help with your booking?
+                    Stay here until all bookings are confirmed
                   </Text>
                 </View>
-                <MaterialCommunityIcons
+                {/* <MaterialCommunityIcons
                   name="chevron-right"
                   size={20}
                   color="#844AFF"
-                />
+                /> */}
               </View>
             </LinearGradient>
           </View>
@@ -484,6 +484,7 @@ const BookingStatus = () => {
               onPress={handleView}
             />
           )}
+          <View className="h-4"></View>
         </>
       )}
     </SimpleContainer>

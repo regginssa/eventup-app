@@ -37,4 +37,15 @@ const update = async (
   return await AxiosInstance.patch(BOOKING_BASE + id, body);
 };
 
-export default { get, getAllByUserId, getByUserIdAndEventId, create, update };
+const remove = async (id: string): Promise<ApiResponse<boolean>> => {
+  return await AxiosInstance.delete(BOOKING_BASE + id);
+};
+
+export default {
+  get,
+  getAllByUserId,
+  getByUserIdAndEventId,
+  create,
+  update,
+  remove,
+};

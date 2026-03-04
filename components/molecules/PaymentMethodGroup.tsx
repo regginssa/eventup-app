@@ -19,7 +19,7 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
   onSelectStripePaymentMethod,
 }) => {
   return (
-    <View className="w-full bg-white rounded-xl p-4 gap-6">
+    <View className="w-full bg-white  rounded-[24px] p-4 gap-6">
       <View>
         <Text className="font-poppins-semibold text-gray-700">
           Payment methods

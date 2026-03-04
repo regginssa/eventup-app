@@ -33,7 +33,7 @@ const StartScreen = () => {
         </View>
         <View className="w-full flex flex-row gap-4 items-center justify-center">
           <Button
-            type="outline"
+            type="gradient-glass"
             label="Login"
             buttonClassName="w-1/2 h-12"
             onPress={() => router.replace("/auth/login")}

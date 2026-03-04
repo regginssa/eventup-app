@@ -129,7 +129,7 @@ const AIEventDetail = () => {
         await fetchUserCurrentLocation();
       } else {
         setTabs(initialTabs.slice(1, 3));
-        setSelectedTab(initialTabs[1]);
+        setSelectedTab(initialTabs[2]);
       }
 
       setLoading(false);

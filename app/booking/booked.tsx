@@ -280,13 +280,13 @@ const BookedScreen = () => {
 
           {/* Actions */}
           <View className="my-10 gap-4">
-            <Button
+            {/* <Button
               type="primary"
               label="Download Itinerary PDF"
               buttonClassName="h-14 rounded-2xl"
               icon={<Feather name="download" size={18} color="white" />}
               iconPosition="right"
-            />
+            /> */}
             <Button
               type="gradient-soft"
               label="Return to Event"
