@@ -7,34 +7,23 @@ import { useTheme } from "@/components/providers/ThemeProvider";
 import { TDropdownItem, TPagination } from "@/types";
 import { IEvent } from "@/types/event";
 import { Country, RegionType } from "@/types/location.types";
-import {
-  AntDesign,
-  Feather,
-  MaterialCommunityIcons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const tabs: TDropdownItem[] = [
   {
-    label: "AI-Generated",
+    label: "AI Discovery",
     value: "ai",
-    icon: <AntDesign name="open-ai" size={16} color="#374151" />,
+    icon: <AntDesign name="api" size={14} color="#844AFF" />,
   },
   {
-    label: "User-Created",
+    label: "Community",
     value: "user",
-    icon: <AntDesign name="user" size={16} color="#374151" />,
+    icon: <Feather name="users" size={14} color="#C427E0" />,
   },
 ];
 
@@ -60,116 +49,14 @@ const HomeScreen = () => {
   const router = useRouter();
   const { user } = useAuth();
   const { theme } = useTheme();
+  const isLight = theme === "light";
 
-  const handleNext = async () => {
+  const fetchFeed = async (page: number = 1) => {
     if (!user?._id) return;
-
-    const nextPage = pagination.page + 1;
-    if (nextPage > Math.ceil(pagination.total / pagination.limit)) return;
-
     try {
       setLoading(true);
-
       const response = await eventServices.getFeed(
-        user?._id ?? "",
-        selectedTab.value as any,
-        startDate as any,
-        country?.cca2 as any,
-        region?.code as any,
-        category?.value as any,
-        nextPage,
-        pagination.limit,
-      );
-
-      if (response.ok) {
-        setPagination(response.data.pagination);
-        setGoToPage(response.data.pagination.page);
-        setEvents(response.data.events);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePrev = async () => {
-    if (!user?._id) return;
-
-    const prevPage = pagination.page - 1;
-    if (prevPage <= 0) return;
-
-    try {
-      setLoading(true);
-
-      const response = await eventServices.getFeed(
-        user?._id ?? "",
-        selectedTab.value as any,
-        startDate as any,
-        country?.cca2 as any,
-        region?.code as any,
-        category?.value as any,
-        prevPage,
-        pagination.limit,
-      );
-
-      if (response.ok) {
-        setPagination(response.data.pagination);
-        setGoToPage(response.data.pagination.page);
-        setEvents(response.data.events);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchFeed = async () => {
-    try {
-      setLoading(true);
-
-      setPagination({
-        page: 1,
-        limit: 10,
-        total: 0,
-        hasMore: true,
-      });
-
-      const response = await eventServices.getFeed(
-        user?._id ?? "",
-        selectedTab.value as any,
-        startDate as any,
-        country?.cca2 as any,
-        region?.code as any,
-        category?.value as any,
-        1,
-        10,
-      );
-
-      if (response.ok) {
-        const { events, pagination } = response.data;
-
-        setPagination(pagination);
-        setGoToPage(response.data.pagination.page);
-        setEvents(events);
-      }
-    } catch (error: any) {
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchFeed();
-  }, [selectedTab]);
-
-  const handleGoToPage = async (page: number) => {
-    if (isNaN(page)) return;
-    if (page < 1 || page > Math.ceil(pagination.total / pagination.limit))
-      return;
-
-    try {
-      setLoading(true);
-
-      const response = await eventServices.getFeed(
-        user?._id ?? "",
+        user._id,
         selectedTab.value as any,
         startDate as any,
         country?.cca2 as any,
@@ -180,19 +67,43 @@ const HomeScreen = () => {
       );
 
       if (response.ok) {
-        setPagination(response.data.pagination);
         setEvents(response.data.events);
-        setGoToPage(page);
+        setPagination(response.data.pagination);
+        setGoToPage(response.data.pagination.page);
       }
     } catch (error: any) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchFeed(1);
+  }, [selectedTab]);
+
+  const handleNext = () => {
+    if (pagination.page < Math.ceil(pagination.total / pagination.limit)) {
+      fetchFeed(pagination.page + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (pagination.page > 1) {
+      fetchFeed(pagination.page - 1);
+    }
+  };
+
+  const handleGoToPage = (page: number) => {
+    const totalPages = Math.ceil(pagination.total / pagination.limit);
+    if (page >= 1 && page <= totalPages) {
+      fetchFeed(page);
+    }
+  };
+
   const handleFilterApply = async () => {
     setIsFilterOpen(false);
-    await fetchFeed();
+    await fetchFeed(1);
   };
 
   const handleFilterReset = async () => {
@@ -201,23 +112,24 @@ const HomeScreen = () => {
     setRegion(null);
     setCategory(null);
     setIsFilterOpen(false);
-    await fetchFeed();
+    await fetchFeed(1);
   };
 
   return (
     <LayoutContainer title="Events">
-      <View className="w-full gap-5 mb-2">
+      {/* HEADER SECTION */}
+      <View className="w-full gap-5 mb-4">
         <View className="w-full flex flex-row items-center gap-3">
           <View className="flex-1">
             <Input
               type="string"
-              placeholder="Search"
-              className="rounded-full"
+              placeholder="Search events"
+              className="rounded-full h-12"
               icon={
                 <Feather
                   name="search"
                   size={16}
-                  color={theme === "light" ? "#4b5563" : "#d1d5db"}
+                  color={isLight ? "#4b5563" : "#d1d5db"}
                 />
               }
               value={search}
@@ -226,20 +138,19 @@ const HomeScreen = () => {
           </View>
           <TouchableOpacity
             activeOpacity={0.8}
-            className={`w-[60px] h-[46px] ${theme === "light" ? "bg-white" : "bg-[#262c2c]"} rounded-full flex items-center justify-center relative`}
-            style={styles.tune}
+            className={`w-12 h-12 rounded-full flex items-center justify-center ${isLight ? "bg-white" : "bg-[#262c2c]"}`}
+            style={styles.shadow}
             onPress={() => setIsFilterOpen(true)}
           >
             <MaterialIcons
               name="tune"
               size={20}
-              color={theme === "light" ? "#4b5563" : "#d1d5db"}
+              color={isLight ? "#4b5563" : "#d1d5db"}
             />
-
             {[startDate, country, region, category].filter((f) => f !== null)
               .length > 0 && (
-              <View className="absolute top-0 right-2 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
-                <Text className="font-poppins-semibold text-white text-xs">
+              <View className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center border-2 border-white">
+                <Text className="font-poppins-semibold text-white text-[10px]">
                   {
                     [startDate, country, region, category].filter(
                       (f) => f !== null,
@@ -251,38 +162,33 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <View className="w-full flex flex-row items-center justify-between">
+        <View className="w-full flex flex-row items-center justify-between px-1">
           <View className="flex flex-row items-center gap-2">
-            <MaterialIcons
-              name="event-available"
-              size={24}
-              color={theme === "light" ? "#374151" : "#d1d5db"}
-            />
+            <View className="w-2 h-2 rounded-full bg-emerald-500" />
             <Text
-              className={`font-poppins-semibold text-sm ${theme === "light" ? "text-gray-700" : "text-gray-300"}`}
+              className={`font-poppins-semibold text-[11px] uppercase tracking-widest ${isLight ? "text-gray-500" : "text-gray-400"}`}
             >
-              {pagination.total.toLocaleString("en-US")} events are available
+              {pagination.total.toLocaleString()} events available
             </Text>
           </View>
-
-          <View className="flex flex-row items-center gap-2">
-            <Text
-              className={`font-poppins-semibold text-sm ${theme === "light" ? "text-gray-700" : "text-gray-300"}`}
-            >
-              Page: {pagination.page}/
-              {Math.ceil(pagination.total / pagination.limit)}
-            </Text>
-          </View>
+          <Text
+            className={`font-poppins-semibold text-[11px] ${isLight ? "text-gray-500" : "text-gray-400"}`}
+          >
+            Page {pagination.page}/
+            {Math.ceil(pagination.total / pagination.limit) || 1}
+          </Text>
         </View>
       </View>
 
+      {/* TABS */}
       <Tabs
         tabs={tabs}
-        tabClassName="flex-1"
+        tabClassName="flex-1 h-11 rounded-xl"
         selectedTab={selectedTab}
         onSelct={setSelectedTab}
       />
 
+      {/* LIST FEED */}
       <View className="flex-1 mt-4">
         <EventsPreviewGroup
           events={events}
@@ -291,118 +197,80 @@ const HomeScreen = () => {
         />
       </View>
 
-      {/* Navigation buttons */}
+      {/* PAGINATION: PREV & NEXT BUTTONS (Absolute Centered) */}
       {events.length > 0 && (
-        <View className="absolute w-full top-1/2 flex flex-row items-center justify-between">
+        <View
+          pointerEvents="box-none"
+          className="absolute w-full top-1/2 left-0 right-0 flex flex-row items-center justify-between px-2"
+        >
           <TouchableOpacity
             activeOpacity={0.8}
-            className={`w-16 h-16 rounded-full flex items-center justify-center text-gray-400 ${
-              pagination.page === 1 || loading || !pagination.hasMore
-                ? "bg-gray-200"
+            className={`w-14 h-14 rounded-full flex items-center justify-center ${
+              pagination.page === 1 || loading
+                ? "bg-gray-100 opacity-50"
                 : "bg-white"
             }`}
-            disabled={pagination.page === 1 || loading || !pagination.hasMore}
-            style={styles.tune}
+            disabled={pagination.page === 1 || loading}
+            style={styles.shadow}
             onPress={handlePrev}
           >
             <AntDesign
               name="arrow-left"
-              size={24}
-              color={
-                pagination.page === 1 || loading || !pagination.hasMore
-                  ? "#9ca3af"
-                  : "#1f2937"
-              }
+              size={22}
+              color={pagination.page === 1 ? "#9ca3af" : "#844AFF"}
             />
           </TouchableOpacity>
 
           <TouchableOpacity
             activeOpacity={0.8}
-            className={`w-16 h-16 rounded-full flex items-center justify-center text-gray-400 ${
-              loading || !pagination.hasMore ? "bg-gray-200" : "bg-white"
+            className={`w-14 h-14 rounded-full flex items-center justify-center ${
+              !pagination.hasMore || loading
+                ? "bg-gray-100 opacity-50"
+                : "bg-white"
             }`}
-            disabled={loading || !pagination.hasMore}
-            style={styles.tune}
+            disabled={!pagination.hasMore || loading}
+            style={styles.shadow}
             onPress={handleNext}
           >
             <AntDesign
               name="arrow-right"
-              size={24}
-              color={loading || !pagination.hasMore ? "#9ca3af" : "#1f2937"}
+              size={22}
+              color={!pagination.hasMore ? "#9ca3af" : "#C427E0"}
             />
           </TouchableOpacity>
         </View>
       )}
 
-      {/* Page button */}
-      <View
-        className="bg-white absolute bottom-[80px] left-[10px] w-40 h-10 rounded-full flex flex-row items-center justify-center gap-2 px-2 overflow-hidden"
-        style={styles.tune}
-      >
-        <MaskedView
-          style={{ width: 40, height: 18 }}
-          maskElement={<Text className="font-poppins">Go to</Text>}
-        >
-          <LinearGradient
-            colors={["#C427E0", "#844AFF", "#12A9FF"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ flex: 1 }}
-          />
-        </MaskedView>
-
-        <TextInput
-          keyboardType="numeric"
-          className="flex-1 border border-[#BF28E0] text-center rounded-full text-sm"
-          value={goToPage.toString()}
-          onChangeText={(text) =>
-            setGoToPage(isNaN(parseInt(text)) ? 0 : parseInt(text))
-          }
-        />
-
+      {/* BOTTOM CONTROLS (GO TO & MAP) */}
+      <View className="absolute bottom-24 left-0 right-0 flex-row justify-end px-5">
+        {/* MAP BUTTON */}
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => handleGoToPage(goToPage)}
+          className="bg-white h-12 px-6 rounded-full flex flex-row items-center gap-2 border border-slate-100"
+          style={styles.shadow}
+          onPress={() => router.replace("/map")}
         >
-          <MaterialCommunityIcons
-            name="chevron-right"
-            size={18}
-            color="#BF28E0"
-          />
+          <MaskedView
+            style={{ width: 20, height: 20 }}
+            maskElement={<Feather name="map" size={20} color="black" />}
+          >
+            <LinearGradient
+              colors={["#C427E0", "#844AFF", "#12A9FF"]}
+              style={{ flex: 1 }}
+            />
+          </MaskedView>
+
+          <MaskedView
+            style={{ width: 35, height: 20 }}
+            maskElement={<Text className="font-poppins-bold">Map</Text>}
+          >
+            <LinearGradient
+              colors={["#C427E0", "#844AFF", "#12A9FF"]}
+              style={{ flex: 1 }}
+            />
+          </MaskedView>
         </TouchableOpacity>
       </View>
-
-      {/* Map button */}
-      <TouchableOpacity
-        activeOpacity={0.8}
-        className="bg-white absolute bottom-[80px] right-[50px] w-24 h-10 rounded-full flex flex-row items-center justify-center gap-2"
-        style={styles.tune}
-        onPress={() => router.replace("/map")}
-      >
-        <MaskedView
-          style={{ width: 18, height: 18 }}
-          maskElement={<Feather name="map" size={18} color="#374151" />}
-        >
-          <LinearGradient
-            colors={["#C427E0", "#844AFF", "#12A9FF"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ flex: 1 }}
-          />
-        </MaskedView>
-
-        <MaskedView
-          style={{ width: 32, height: 18 }}
-          maskElement={<Text className="font-poppins">Map</Text>}
-        >
-          <LinearGradient
-            colors={["#C427E0", "#844AFF", "#12A9FF"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ flex: 1 }}
-          />
-        </MaskedView>
-      </TouchableOpacity>
 
       <EventFilterModal
         isOpen={isFilterOpen}
@@ -423,12 +291,12 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  tune: {
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
+  shadow: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 5,
   },
 });
 

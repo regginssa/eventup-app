@@ -156,7 +156,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
 
           <View className="mt-6">
             <Button
-              type="primary"
+              type="gradient-soft"
               label="Explore Details"
               buttonClassName="h-14 rounded-2xl"
               textClassName="font-poppins-bold"

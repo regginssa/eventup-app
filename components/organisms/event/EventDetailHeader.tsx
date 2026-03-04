@@ -1,4 +1,4 @@
-import { EventDates, TEventFee } from "@/types/event";
+import { TEventDates, TEventFee } from "@/types/event";
 import { formatDateTime, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -11,7 +11,7 @@ interface EventDetailHeaderProps {
   category: string;
   city?: string;
   country: string;
-  dates: EventDates;
+  dates: TEventDates;
   fee?: TEventFee;
 }
 
