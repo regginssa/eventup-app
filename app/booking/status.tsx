@@ -6,7 +6,9 @@ import { useFlight } from "@/components/providers/FlightProvider";
 import { useHotel } from "@/components/providers/HotelProvider";
 import { useSocket } from "@/components/providers/SocketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import { useTransfer } from "@/components/providers/TransferProvider";
 import { IBooking } from "@/types/booking";
+import { IEvent } from "@/types/event";
 import { TTransactionStatus } from "@/types/transaction";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -16,6 +18,7 @@ import { Text, View } from "react-native";
 
 const BookingStatus = () => {
   const [booking, setBooking] = useState<IBooking | null>(null);
+  const [event, setEvent] = useState<IEvent | null>(null);
   const [initLoading, setInitLoading] = useState<boolean>(false);
   const [completed, setCompleted] = useState<boolean>(false);
   const [viewLoading, setViewLoading] = useState<boolean>(false);
@@ -26,6 +29,7 @@ const BookingStatus = () => {
   const { user } = useAuth();
   const { book: bookFlight } = useFlight();
   const { book: bookHotel } = useHotel();
+  const { book: bookTransfer } = useTransfer();
   const toast = useToast();
 
   useEffect(() => {
@@ -56,6 +60,7 @@ const BookingStatus = () => {
       setInitLoading(true);
       const response = await bookingServices.get(bookingId as string);
       setBooking(response.data);
+      setEvent(response.data?.event || null);
       setInitLoading(false);
     };
     init();
@@ -150,9 +155,122 @@ const BookingStatus = () => {
       await updateBooking(bookingBodyData);
     };
 
+    const handleTransfer = async () => {
+      if (!booking || !booking.transfer || !event?.location || !user) return;
+
+      const { airportToHotel, hotelToEvent } = booking.transfer;
+      const {
+        city: eventCity,
+        address: eventAddress,
+        postalCode: eventPostalCode,
+        country: eventCountry,
+      } = event.location;
+
+      if (
+        airportToHotel.offer &&
+        airportToHotel.status !== "confirmed" &&
+        booking.flight.offer &&
+        booking.hotel.offer
+      ) {
+        const flightOffer = booking.flight.offer;
+        const hotelOffer = booking.hotel.offer;
+        const bodyData = {
+          rateKey: airportToHotel.offer.rateKey,
+          holder: {
+            name: "Jhon", // user.firstName
+            surname: "Doe", // user.lastName
+            email: user.email,
+            phone: "+442080160509", // user.phone
+          },
+          transportInfo: {
+            type: "FLIGHT",
+            direction: "ARRIVAL",
+            code: flightOffer.flightNumbers,
+            companyName: flightOffer.airlineName,
+          },
+          totalAmount: airportToHotel.offer.totalAmount,
+          addresses: {
+            pickupName: `${flightOffer.destinationIata} Airport`,
+            dropoffName: hotelOffer.name,
+            dropoffAddress: hotelOffer.street,
+            dropoffCity: hotelOffer.city,
+            dropoffZip: hotelOffer.postalCode,
+            countryCode: hotelOffer.countryCode,
+          },
+        };
+
+        const result = await bookTransfer(bodyData);
+        if (result.status !== "confirmed") return toast.error(result.message);
+
+        await updateBooking({
+          ...booking,
+          transfer: {
+            ...booking.transfer,
+            airportToHotel: {
+              ...booking.transfer.airportToHotel,
+              booking: result,
+              status: "confirmed",
+            },
+          },
+        });
+      }
+
+      if (
+        hotelToEvent.offer &&
+        hotelToEvent.status !== "confirmed" &&
+        booking.hotel.offer
+      ) {
+        const hotelOffer = booking.hotel.offer;
+
+        const bodyData = {
+          rateKey: airportToHotel.offer.rateKey,
+          holder: {
+            name: "Jhon", // user.firstName
+            surname: "Doe", // user.lastName
+            email: user.email,
+            phone: "+442080160509", // user.phone
+          },
+          transportInfo: {
+            type: "OTHER",
+            direction: "DEPARTURE",
+            code: "EVENT",
+            companyName: event.name,
+          },
+          totalAmount: airportToHotel.offer.totalAmount,
+          addresses: {
+            pickupName: hotelOffer.name,
+            pickupAddress: hotelOffer.street,
+            pickupCity: hotelOffer.city,
+            pickupZip: hotelOffer.postalCode,
+            dropoffName: event.name,
+            dropoffAddress: eventAddress,
+            dropoffCity: eventCity.name,
+            dropoffZip: eventPostalCode,
+            countryCode: eventCountry.code,
+          },
+        };
+
+        const result = await bookTransfer(bodyData);
+        if (result.status !== "confirmed") return toast.error(result.message);
+
+        await updateBooking({
+          ...booking,
+          transfer: {
+            ...booking.transfer,
+            hotelToEvent: {
+              ...booking.transfer.hotelToEvent,
+              booking: result,
+              status: "confirmed",
+            },
+          },
+        });
+      }
+    };
+
     if (booking?.paymentStatus !== "completed") return;
     handleFlight();
     handleHotel();
+    handleTransfer();
   }, [booking]);
 
   useEffect(() => {

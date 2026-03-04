@@ -17,13 +17,19 @@ export interface IHotelOffer {
   id: string;
   name: string;
   category: string;
-  address: string;
+  // Address Breakdown
+  address: string; // Full formatted string
+  street: string; // For Transfer API 'address' field
+  city: string; // For Transfer API 'town' field
+  postalCode: string; // For Transfer API 'zip' field
+  countryCode: string; // For Transfer API 'countryCode' field
+
   latitude: string;
   longitude: string;
   image: string;
   currency: string;
   totalAmount: number;
-  netAmount: number; // Original price for your records
+  netAmount: number;
   rateKey: string;
   roomName: string;
   boardName: string;

@@ -45,7 +45,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   );
   const [hotelCheckoutDate, setHotelCheckoutDate] = useState<Date>(new Date());
   const [searchBtnLabel, setSearchBtnLabel] = useState<string>("Search");
-  const [isSearched, setIsSearched] = useState<boolean>(false);
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
   const [refreshLoading, setRefreshLoading] = useState<Map<string, boolean>>(
     new Map(),
@@ -164,10 +163,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     setLoading("hotelToEvent", true);
     const params = {
-      fromType: "gps",
-      fromLat: hotelOffer.latitude,
-      fromLng: hotelOffer.longitude,
-      toType: "gps",
+      fromType: "ATLAS",
+      fromCode: hotelOffer.id,
+      toType: "GPS",
       toLat: eventGeo.latitude,
       toLng: eventGeo.longitude,
       date: df.toISOString(hotelDepartureDate),
@@ -209,7 +207,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     try {
       setSearchLoading(true);
-      setIsSearched(false);
       initialize();
 
       setSearchBtnLabel("Searching flights...");
@@ -220,14 +217,13 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       setSearchBtnLabel("Searching transfers...");
       await handleAirportToHotel(flightData, hotelData);
-      // await handleHotelToEvent(hotelData);
+      await handleHotelToEvent(hotelData);
     } catch (error) {
       console.log("handleSearch error: ", error);
       toast.error("Search failed");
     } finally {
       setSearchLoading(false);
       setSearchBtnLabel("Search");
-      setIsSearched(true);
     }
   };
 
