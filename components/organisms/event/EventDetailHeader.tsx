@@ -25,8 +25,8 @@ const EventDetailHeader: React.FC<EventDetailHeaderProps> = ({
   fee,
 }) => {
   return (
-    <View className="w-full gap-5 overflow-hidden bg-white rounded-2xl p-4">
-      <View className="relative w-full h-[212px] overflow-hidden bg-[#F3F4F6] rounded-[10px]">
+    <View className="w-full gap-5 overflow-hidden bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
+      <View className="relative w-full h-[212px] overflow-hidden bg-[#F3F4F6] rounded-2xl">
         {!image ? (
           <View className="absolute inset-0 flex flex-col items-center justify-center gap-2">
             <MaterialCommunityIcons

@@ -148,7 +148,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     // If flights are included, ensure flight is selected and use its arrival time
     if (includes.flight) {
       if (!flightOffer) {
-        toast.info("Airline isn't selected");
         return null;
       }
       checkIn = new Date(flightOffer.arrivalTime);

@@ -279,7 +279,7 @@ const UserEventDetail = () => {
             fee={event.type === "user" ? event.fee : undefined}
           />
 
-          <View className="flex-1 bg-white rounded-2xl p-4 gap-6">
+          <View className="flex-1 bg-white rounded-3xl p-4 gap-6 border border-slate-100 shadow-sm">
             <Tabs
               tabs={[
                 { label: "Packages", value: "packages" },

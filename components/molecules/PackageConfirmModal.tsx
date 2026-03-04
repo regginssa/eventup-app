@@ -11,6 +11,7 @@ import {
   FlightItem,
   HotelItem,
   Modal,
+  OfficialTicketItem,
   TransferItem,
 } from "../common";
 import { useFlight } from "../providers/FlightProvider";
@@ -56,7 +57,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
           return toast.error("Checking hotel rates failed");
         }
       }
-
+      onClose();
       router.push({
         pathname: "/booking/checkout",
         params: {
@@ -126,13 +127,21 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             icon="ticket-confirmation-outline"
             color="#844AFF"
           />
-          {communityTicket && <CommunityTicketItem item={communityTicket} />}
+          {event?.type === "ai" ? (
+            <OfficialTicketItem event={event} />
+          ) : (
+            <>
+              {communityTicket && (
+                <CommunityTicketItem item={communityTicket} />
+              )}
+            </>
+          )}
         </View>
 
         {/* 2. LOGISTICS TIMELINE */}
         <View className="px-1">
           <SectionHeader
-            title="Flight & Logistics"
+            title="Flight & Hotel & Logistics"
             icon="map-marker-path"
             color="#C427E0"
           />
@@ -236,12 +245,15 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
                   <Text className="font-dm-sans-bold text-slate-400 text-[10px] uppercase tracking-widest mb-1">
                     Grand Total
                   </Text>
-                  <Text className="font-poppins-bold text-slate-900 text-3xl">
+
+                  <View className="flex flex-row items-end">
                     <Text className="text-sm text-slate-400 font-poppins-semibold">
                       {flightOffer?.currency || "USD"}{" "}
                     </Text>
-                    {total}
-                  </Text>
+                    <Text className="font-poppins-bold text-slate-900 text-3xl">
+                      {total}
+                    </Text>
+                  </View>
                 </View>
                 <View className="bg-emerald-100 px-3 py-1.5 rounded-xl flex-row items-center">
                   <MaterialCommunityIcons

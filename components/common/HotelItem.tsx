@@ -27,7 +27,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
     boardName,
   } = offer;
 
-  const starCount = parseInt(category.match(/\d+/)?.[0] || "0");
+  const starCount = parseInt(category?.match(/\d+/)?.[0] || "0");
 
   return (
     <View className="mb-4 shadow-xl shadow-purple-200">
@@ -38,7 +38,12 @@ const HotelItem: React.FC<HotelItemProps> = ({
         style={{ borderRadius: 24, padding: 1, elevation: 5 }}
       >
         <View className="bg-white/95 rounded-[23px] p-5 overflow-hidden">
-          {/* HEADER SECTION: Title & Rating */}
+          {/* LARGE BACKGROUND ICON */}
+          <View className="absolute -right-12 -top-12 opacity-[0.05]">
+            <MaterialCommunityIcons name="bed-king" size={160} color="#000" />
+          </View>
+
+          {/* HEADER SECTION: Hotel Name & Rating */}
           <View className="flex flex-row justify-between items-start mb-5">
             <View className="flex-1 pr-4">
               {starCount > 0 && (
@@ -89,7 +94,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
             )}
           </View>
 
-          {/* ACCOMMODATION DETAILS SECTION */}
+          {/* ROOM & BOARD SECTION */}
           <View className="flex flex-row items-center justify-between relative mb-6">
             {/* Room Type */}
             <View className="flex-1 items-start">
@@ -104,7 +109,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
               </Text>
             </View>
 
-            {/* Path Graphic / Icon Divider */}
+            {/* Divider Icon */}
             <View className="px-4 items-center">
               <View className="w-8 h-8 rounded-full bg-slate-50 items-center justify-center border border-slate-100">
                 <MaterialCommunityIcons
@@ -129,7 +134,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
             </View>
           </View>
 
-          {/* FOOTER ACTION AREA: Status & Price */}
+          {/* FOOTER: Confirmation & Price */}
           <LinearGradient
             colors={["#F8FAFC", "#FFFFFF"]}
             className="flex-row items-center justify-between p-3 rounded-2xl border border-slate-50"

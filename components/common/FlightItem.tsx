@@ -37,9 +37,9 @@ const FlightItem: React.FC<FlightItemProps> = ({
     : flightNumbers;
 
   const stopsLabel =
-    stops.length === 0
+    stops && stops.length === 0
       ? "Non-stop"
-      : `${stops.length} Stop${stops.length > 1 ? "s" : ""}`;
+      : `${stops?.length} Stop${stops?.length > 1 ? "s" : ""}`;
 
   return (
     <View className="mb-4 shadow-xl shadow-purple-200">

@@ -87,13 +87,17 @@ const HighEndReceipt = ({ services, total, base, commission }: any) => (
 
       <View className="gap-3">
         {services.map((service: string, i: number) => (
-          <View key={i} className="flex-row justify-between items-center">
+          <View key={i} className="flex-row justify-between items-center mb-1">
             <Text className="text-slate-600 font-dm-sans-medium text-sm">
               {service}
             </Text>
+
             <View className="flex-1 h-[1px] border-b border-dotted border-slate-300 mx-4 opacity-50" />
+
             <Text className="text-slate-400 text-xs font-dm-sans-bold">
-              Included
+              {service === "Ticket"
+                ? "Price estimated, confirmed on purchase"
+                : "Included"}
             </Text>
           </View>
         ))}
@@ -145,6 +149,74 @@ const HighEndReceipt = ({ services, total, base, commission }: any) => (
   </View>
 );
 
+const BookingStepper = ({ event }: { event: IEvent | null }) => {
+  if (!event) return null;
+  const steps = [
+    {
+      title: event?.type === "ai" ? "Ticket Purchase" : "Ticket Deposit",
+      description:
+        event?.type === "ai"
+          ? "You'll be redirected to the event page to complete your ticket purchase. Final price confirmed there."
+          : "Your ticket will be deposited to the event.",
+    },
+    {
+      title: "Flight & Hotel",
+      description:
+        "Book your flight and hotel accommodation. Payment is processed in-app.",
+    },
+    {
+      title: "Transfers",
+      description: "Shuttle services will be reserved after your booking.",
+    },
+    {
+      title: "Confirmation",
+      description:
+        "You'll get a summary of all services booked with estimated and confirmed details.",
+    },
+  ];
+
+  return (
+    <View className="bg-slate-50 rounded-[24px] border border-slate-200 shadow-sm p-6">
+      <Text className="text-slate-400 font-poppins-bold text-[10px] uppercase tracking-[2px] mb-4">
+        Booking Steps
+      </Text>
+
+      <View className="relative">
+        {steps.map((step, index) => {
+          const isLast = index === steps.length - 1;
+
+          return (
+            <View
+              key={index}
+              className="flex-row items-start gap-4 mb-6 relative"
+            >
+              {/* Step circle */}
+              <View className="relative z-10">
+                <View className="w-4 h-4 rounded-full bg-purple-600" />
+
+                {/* Vertical line below circle (skip for last step) */}
+                {!isLast && (
+                  <View className="absolute top-4 left-[7px] w-[2px] bg-slate-300 h-[56px]" />
+                )}
+              </View>
+
+              {/* Step content */}
+              <View className="flex-1">
+                <Text className="font-poppins-bold text-purple-600 text-sm">
+                  {step.title}
+                </Text>
+                <Text className="text-slate-400 text-xs mt-1">
+                  {step.description}
+                </Text>
+              </View>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+};
+
 // --- MAIN SCREEN ---
 
 const CheckoutScreen = () => {
@@ -188,6 +260,10 @@ const CheckoutScreen = () => {
     let servicesList: string[] = [];
     let base = 0;
 
+    if (event?.type === "ai") {
+      servicesList.push("Ticket");
+    }
+
     if (flightOffer) {
       servicesList.push("Round-trip Flight");
       base += Number(flightOffer.totalAmount);
@@ -212,7 +288,7 @@ const CheckoutScreen = () => {
     setCommissionAmount(commission);
     setTotalAmount(total);
     setServices(servicesList);
-  }, [flightOffer, hotelOffer, airportToHotelOffer, hotelToEventOffer]);
+  }, [flightOffer, hotelOffer, airportToHotelOffer, hotelToEventOffer, event]);
 
   const onBook = async () => {
     try {
@@ -299,13 +375,16 @@ const CheckoutScreen = () => {
 
   return (
     <SimpleContainer title="Review & Pay" scrolled>
-      <View className="flex-1 gap-8 px-1">
+      <View className="flex-1 gap-4 px-1">
         {/* HERO CARD */}
         <EventHeroCard
           event={event}
           packageType={packageType}
           loading={loading}
         />
+
+        {/* BOOKING EXPLANATION STEPPER */}
+        <BookingStepper event={event || null} />
 
         {/* RECEIPT */}
         <HighEndReceipt
