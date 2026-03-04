@@ -1,13 +1,8 @@
 import { IHotelOffer } from "@/types/hotel";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import {
-  ActivityIndicator,
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 interface HotelItemProps {
   data: IHotelOffer | null;
@@ -26,137 +21,137 @@ const HotelItem: React.FC<HotelItemProps> = ({
     name,
     category,
     address,
-    image,
     totalAmount,
     currency,
     roomName,
     boardName,
   } = offer;
 
-  // Extract stars (e.g., "4 STARS" -> 4)
   const starCount = parseInt(category.match(/\d+/)?.[0] || "0");
 
   return (
-    <View className="bg-slate-200 rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
-      {/* HEADER SECTION: Title & Image */}
-      <View className="flex flex-row items-start justify-between">
-        <View className="flex-1 pr-3">
-          {starCount > 0 && (
-            <View className="flex flex-row mb-1">
-              {[...Array(starCount)].map((_, i) => (
-                <MaterialCommunityIcons
-                  key={i}
-                  name="star"
-                  size={12}
-                  color="#f59e0b"
-                />
-              ))}
-            </View>
-          )}
-          <Text
-            className="font-poppins-bold text-lg text-gray-800 leading-6"
-            numberOfLines={2}
-          >
-            {name}
-          </Text>
-          <View className="flex flex-row items-center gap-1 mt-1">
-            <MaterialIcons name="location-pin" size={12} color="#9ca3af" />
-            <Text
-              className="font-dm-sans-medium text-gray-500 text-xs"
-              numberOfLines={1}
-            >
-              {address}
-            </Text>
-          </View>
-        </View>
-
-        <View className="relative">
-          <Image
-            source={{ uri: image }}
-            className="w-20 h-20 rounded-xl bg-gray-100"
-            resizeMode="cover"
-          />
-          {/* REFRESH BUTTON - Positioned over or next to image */}
-          {onRefresh && (
-            <TouchableOpacity
-              onPress={onRefresh}
-              activeOpacity={0.6}
-              className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-gray-100"
-            >
-              {refreshLoading ? (
-                <ActivityIndicator size={14} color="#9ca3af" />
-              ) : (
-                <MaterialCommunityIcons
-                  name="cached"
-                  size={16}
-                  color="#9ca3af"
-                />
+    <View className="mb-4 shadow-xl shadow-purple-200">
+      <LinearGradient
+        colors={["#844AFF", "#C427E0"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ borderRadius: 24, padding: 1, elevation: 5 }}
+      >
+        <View className="bg-white/95 rounded-[23px] p-5 overflow-hidden">
+          {/* HEADER SECTION: Title & Rating */}
+          <View className="flex flex-row justify-between items-start mb-5">
+            <View className="flex-1 pr-4">
+              {starCount > 0 && (
+                <View className="flex flex-row mb-1.5">
+                  {[...Array(starCount)].map((_, i) => (
+                    <MaterialCommunityIcons
+                      key={i}
+                      name="star"
+                      size={14}
+                      color="#844AFF"
+                    />
+                  ))}
+                </View>
               )}
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+              <Text
+                className="font-poppins-bold text-lg text-slate-900 leading-6"
+                numberOfLines={2}
+              >
+                {name}
+              </Text>
+              <View className="flex flex-row items-center gap-1 mt-1.5">
+                <MaterialIcons name="location-pin" size={14} color="#C427E0" />
+                <Text
+                  className="font-dm-sans-bold text-slate-400 text-[11px] flex-1"
+                  numberOfLines={1}
+                >
+                  {address}
+                </Text>
+              </View>
+            </View>
 
-      {/* MIDDLE SECTION: Visual Line (Matching Flight Style) */}
-      <View className="flex flex-row items-center justify-between py-4 mt-2 border-t border-gray-50">
-        {/* Room Info */}
-        <View className="flex flex-col items-start flex-1">
-          <Text className="font-dm-sans-bold text-gray-800 text-[10px] uppercase tracking-wider">
-            Room Type
-          </Text>
-          <Text
-            className="font-dm-sans-medium text-gray-500 text-[10px]"
-            numberOfLines={1}
-          >
-            {roomName}
-          </Text>
-        </View>
+            {onRefresh && (
+              <TouchableOpacity
+                onPress={onRefresh}
+                disabled={refreshLoading}
+                className="w-8 h-8 items-center justify-center rounded-full bg-slate-50 border border-slate-100"
+              >
+                {refreshLoading ? (
+                  <ActivityIndicator size={12} color="#844AFF" />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="cached"
+                    size={16}
+                    color="#64748b"
+                  />
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
 
-        {/* Visual Line with Icon */}
-        <View className="flex-1 items-center px-4 gap-1">
-          <View className="w-full h-[1px] bg-gray-400 relative flex items-center justify-center">
-            <View className="absolute px-2">
-              <MaterialCommunityIcons
-                name="bed-outline"
-                size={14}
-                color="#6b7280"
-              />
+          {/* ACCOMMODATION DETAILS SECTION */}
+          <View className="flex flex-row items-center justify-between relative mb-6">
+            {/* Room Type */}
+            <View className="flex-1 items-start">
+              <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-1">
+                Room Category
+              </Text>
+              <Text
+                className="font-poppins-bold text-sm text-slate-800 leading-tight"
+                numberOfLines={2}
+              >
+                {roomName}
+              </Text>
+            </View>
+
+            {/* Path Graphic / Icon Divider */}
+            <View className="px-4 items-center">
+              <View className="w-8 h-8 rounded-full bg-slate-50 items-center justify-center border border-slate-100">
+                <MaterialCommunityIcons
+                  name="bed-king-outline"
+                  size={18}
+                  color="#844AFF"
+                />
+              </View>
+            </View>
+
+            {/* Board Basis */}
+            <View className="flex-1 items-end">
+              <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-1 text-right">
+                Inclusions
+              </Text>
+              <Text
+                className="font-poppins-bold text-sm text-slate-800 leading-tight text-right"
+                numberOfLines={2}
+              >
+                {boardName}
+              </Text>
             </View>
           </View>
-        </View>
 
-        {/* Board Info */}
-        <View className="flex flex-col items-end flex-1">
-          <Text className="font-dm-sans-bold text-gray-800 text-[10px] uppercase tracking-wider text-right">
-            Board Basis
-          </Text>
-          <Text
-            className="font-dm-sans-medium text-gray-500 text-[10px] text-right"
-            numberOfLines={1}
+          {/* FOOTER ACTION AREA: Status & Price */}
+          <LinearGradient
+            colors={["#F8FAFC", "#FFFFFF"]}
+            className="flex-row items-center justify-between p-3 rounded-2xl border border-slate-50"
           >
-            {boardName}
-          </Text>
-        </View>
-      </View>
+            <View className="flex-row items-center gap-2">
+              <View className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200" />
+              <Text className="font-dm-sans-bold text-[10px] text-emerald-600 uppercase tracking-wider">
+                Instant Confirmation
+              </Text>
+            </View>
 
-      {/* FOOTER SECTION: Status & Price */}
-      <View className="pt-3 border-t border-gray-50 flex flex-row items-center justify-between">
-        <View className="flex flex-row items-center gap-1">
-          <View className="w-1.5 h-1.5 rounded-full bg-green-500" />
-          <Text className="font-dm-sans-bold text-[10px] text-green-600 uppercase tracking-tighter">
-            Instant Confirmation
-          </Text>
+            <View className="flex-row items-baseline gap-1">
+              <Text className="font-dm-sans-bold text-[10px] text-slate-400 uppercase">
+                {currency}
+              </Text>
+              <Text className="font-poppins-bold text-xl text-slate-900">
+                {totalAmount}
+              </Text>
+            </View>
+          </LinearGradient>
         </View>
-
-        <View className="flex flex-row items-start gap-1">
-          <Text className="font-poppins-semibold text-xs text-gray-600">
-            {currency}
-          </Text>
-          <Text className="font-poppins-bold text-xl text-green-600">
-            {totalAmount}
-          </Text>
-        </View>
-      </View>
+      </LinearGradient>
     </View>
   );
 };

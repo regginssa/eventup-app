@@ -1,6 +1,7 @@
+import { FlightItem, HotelItem, TransferItem } from "@/components/common";
 import { IBooking } from "@/types/booking";
-import { formatDateTime } from "@/utils/format";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { Text, View } from "react-native";
 
 interface EventDetailItineraryProps {
@@ -12,260 +13,117 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
 }) => {
   if (!booking) {
     return (
-      <View className="flex-1 items-center justify-center gap-2">
-        <MaterialCommunityIcons
-          name="calendar-clock-outline"
-          size={48}
-          color="#1f2937"
-        />
-        <Text className="text-gray-800 font-poppins-semibold">
-          No itinerary
+      <View className="flex-1 items-center justify-center py-12 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+        <View className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-sm mb-4">
+          <MaterialCommunityIcons
+            name="calendar-blank-outline"
+            size={32}
+            color="#94a3b8"
+          />
+        </View>
+        <Text className="text-slate-800 font-poppins-semibold text-lg">
+          Empty Itinerary
+        </Text>
+        <Text className="text-slate-400 font-dm-sans-medium text-center px-8 text-sm mt-1">
+          Your confirmed bookings will appear here once your trip is finalized.
         </Text>
       </View>
     );
   }
 
+  const { flight, hotel, transfer } = booking;
+
+  // Helper to render the timeline dot/line
+  const TimelineConnector = () => (
+    <View className="items-center w-6">
+      <LinearGradient
+        colors={["#844AFF", "#12A9FF"]}
+        className="w-4 h-4 border-2 border-white shadow-sm z-10"
+        style={{ borderRadius: 8 }}
+      />
+      <View className="w-[2px] flex-1 bg-slate-100 -my-1" />
+    </View>
+  );
+
   return (
-    <View className="flex-1 gap-4 overflow-hidden">
-      {/* Flight */}
-      {booking?.flight ? (
-        <View className="w-full rounded-lg gap-2">
-          <Text className="text-gray-700 font-poppins-semibold mb-2">
-            Flight Details
+    <View className="flex-1">
+      {/* HEADER STATUS */}
+      <View className="flex-row items-center justify-between mb-6 px-1">
+        <View>
+          <Text className="font-poppins-bold text-slate-800 text-xl">
+            My Journey
           </Text>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialIcons name="airlines" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Airline: {booking.flight.validatingAirline}
-            </Text>
-          </View>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialCommunityIcons
-              name="calendar-clock-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Departure:{" "}
-              {booking.flight.itineraries[0].segments[0].departure.airport} -{" "}
-              {
-                booking.flight.itineraries[0].segments[0].departure.datetime.split(
-                  "T",
-                )[1]
-              }{" "}
-              /{" "}
-              {formatDateTime(
-                booking.flight.itineraries[0].segments[0].departure.datetime.split(
-                  "T",
-                )[0] as string,
-              )}
-            </Text>
-          </View>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialCommunityIcons
-              name="airplane-takeoff"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Arrival:{" "}
-              {
-                booking.flight.itineraries[0].segments[
-                  booking.flight.itineraries[0].segments.length - 1
-                ].arrival.airport
-              }{" "}
-              -{" "}
-              {
-                booking.flight.itineraries[0].segments[
-                  booking.flight.itineraries[0].segments.length - 1
-                ].arrival.datetime.split("T")[1]
-              }{" "}
-              /{" "}
-              {formatDateTime(
-                booking.flight.itineraries[0].segments[
-                  booking.flight.itineraries[0].segments.length - 1
-                ].arrival.datetime as string,
-              )}
-            </Text>
-          </View>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialIcons name="event-seat" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              PNR / Record Locator: {booking.flight.associatedRecord.reference}
-            </Text>
-          </View>
+          <Text className="font-dm-sans-medium text-blue-500 text-xs">
+            Verified Itinerary
+          </Text>
         </View>
-      ) : (
-        <View className="w-full flex flex-col items-center justify-center gap-2">
+        <View className="bg-green-100 px-3 py-1 rounded-full flex-row items-center">
           <MaterialCommunityIcons
-            name="airplane-off"
-            size={24}
-            color="#4b5563"
+            name="check-decagram"
+            size={14}
+            color="#16a34a"
           />
-          <Text className="font-poppins-semibold text-gray-600">No flight</Text>
-        </View>
-      )}
-
-      <View className="w-full h-[1px] bg-gray-200"></View>
-
-      {/* Hotel */}
-      {booking?.hotel ? (
-        <View className="w-full rounded-lg gap-2">
-          <Text className="text-gray-700 font-poppins-semibold mb-2">
-            Hotel Booking
+          <Text className="text-green-700 font-dm-sans-bold text-[10px] ml-1 uppercase">
+            Confirmed
           </Text>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialIcons name="hotel" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              {booking.hotel.hotel.name}
-            </Text>
-          </View>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialCommunityIcons
-              name="clock-check-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Check-in: {formatDateTime(booking.hotel.checkIn)}
-            </Text>
-          </View>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialCommunityIcons
-              name="clock-check-outline"
-              size={16}
-              color="#4b5563"
-            />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Check-out: {formatDateTime(booking.hotel.checkOut)}
-            </Text>
-          </View>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialIcons name="bed" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Room:{" "}
-              {booking.hotel.rooms.map((room) => room.roomType).join(" / ") ||
-                "-"}
-            </Text>
-          </View>
         </View>
-      ) : (
-        <View className="w-full flex flex-col items-center justify-center gap-3">
-          <MaterialCommunityIcons
-            name="bank-off-outline"
-            size={24}
-            color="#4b5563"
-          />
-          <Text className="font-poppins-semibold text-gray-600">No hotel</Text>
-        </View>
-      )}
+      </View>
 
-      <View className="w-full h-[1px] bg-gray-200"></View>
-
-      {/* Chauffeur Pickup Info (Gold Package Only) */}
-      {booking?.transfer?.ah ? (
-        <View className="w-full rounded-lg gap-2">
-          <Text className="text-gray-700 font-poppins-semibold mb-2">
-            Aiport To Hotel Transfer Details
-          </Text>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialCommunityIcons name="account" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Driver: {booking.transfer.ah?.provider.name}
-            </Text>
+      <View className="gap-0">
+        {/* FLIGHT SECTION */}
+        {flight.offer && flight.status === "confirmed" && (
+          <View className="flex-row gap-3 min-h-[100px]">
+            <TimelineConnector />
+            <View className="flex-1 pb-6">
+              <FlightItem data={flight.offer} />
+            </View>
           </View>
+        )}
 
-          <View className="flex flex-row items-start gap-2">
-            <MaterialIcons name="directions-car" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Car: {booking.transfer.ah.vehicle.description}
-            </Text>
-          </View>
+        {/* TRANSFER: AIRPORT -> HOTEL */}
+        {transfer.airportToHotel?.offer &&
+          transfer.airportToHotel.status === "confirmed" && (
+            <View className="flex-row gap-3 min-h-[100px]">
+              <TimelineConnector />
+              <View className="flex-1 pb-6">
+                <TransferItem data={transfer.airportToHotel.offer} />
+              </View>
+            </View>
+          )}
 
-          <View className="flex flex-row items-start gap-2">
-            <MaterialIcons name="luggage" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Pickup: {booking.transfer.ah.start.locationCode}
-            </Text>
+        {/* HOTEL SECTION */}
+        {hotel.offer && hotel.status === "confirmed" && (
+          <View className="flex-row gap-3 min-h-[100px]">
+            <TimelineConnector />
+            <View className="flex-1 pb-6">
+              <HotelItem data={hotel.offer} />
+            </View>
           </View>
+        )}
 
-          <View className="flex flex-row items-start gap-2">
-            <MaterialIcons name="phone-in-talk" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Contact:{" "}
-              {booking.transfer.ah.provider.contacts?.phoneNumber || "N/A"}
-            </Text>
-          </View>
-        </View>
-      ) : (
-        <View
-          className={`w-full bg-white rounded-xl p-4 gap-3 overflow-hidden`}
-        >
-          <View className="w-full flex flex-col items-center justify-center gap-2">
-            <MaterialCommunityIcons name="car-off" size={24} color="#4b5563" />
-            <Text className="font-poppins-semibold text-gray-600">
-              No Aiport To Hotel Transfer Details
-            </Text>
-          </View>
-        </View>
-      )}
-
-      {booking?.transfer?.he ? (
-        <View className="w-full rounded-lg gap-2">
-          <Text className="text-gray-700 font-poppins-semibold mb-2">
-            Hotel To Event Transfer Details
-          </Text>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialCommunityIcons name="account" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Driver: {booking.transfer.he.provider.name}
-            </Text>
-          </View>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialIcons name="directions-car" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Car: {booking.transfer.he.vehicle.description}
-            </Text>
-          </View>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialIcons name="luggage" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Pickup: {booking.transfer.he.start.locationCode}
-            </Text>
-          </View>
-
-          <View className="flex flex-row items-start gap-2">
-            <MaterialIcons name="phone-in-talk" size={16} color="#4b5563" />
-            <Text className="font-dm-sans text-gray-600 line-clamp-2 w-3/4">
-              Contact:{" "}
-              {booking.transfer.he.provider.contacts?.phoneNumber || "N/A"}
-            </Text>
-          </View>
-        </View>
-      ) : (
-        <View
-          className={`w-full bg-white rounded-xl p-4 gap-3 overflow-hidden`}
-        >
-          <View className="w-full flex flex-col items-center justify-center gap-2">
-            <MaterialCommunityIcons name="car-off" size={24} color="#4b5563" />
-            <Text className="font-poppins-semibold text-gray-600">
-              No Hotel To Event Transfer Details
-            </Text>
-          </View>
-        </View>
-      )}
+        {/* TRANSFER: HOTEL -> EVENT */}
+        {transfer.hotelToEvent?.offer &&
+          transfer.hotelToEvent.status === "confirmed" && (
+            <View className="flex-row gap-3 min-h-[100px]">
+              {/* Last dot shouldn't have a trailing line if it's the end */}
+              <View className="items-center w-6">
+                <LinearGradient
+                  colors={["#844AFF", "#C427E0"]}
+                  className="w-4 h-4 rounded-full border-2 border-white shadow-md z-10"
+                />
+                <MaterialCommunityIcons
+                  name="flag-checkered"
+                  size={12}
+                  color="#C427E0"
+                  className="mt-1"
+                />
+              </View>
+              <View className="flex-1 pb-6">
+                <TransferItem data={transfer.hotelToEvent.offer} />
+              </View>
+            </View>
+          )}
+      </View>
     </View>
   );
 };

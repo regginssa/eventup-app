@@ -396,17 +396,20 @@ const BookingStatus = () => {
                 label="Flight"
                 icon="airplane-takeoff"
                 status={flight?.status}
+                isLast={!hotel?.offer}
               />
 
-              <BookingStatusItem
-                label="Hotel"
-                icon="office-building"
-                status={hotel?.status}
-                isLast={
-                  !transfer?.airportToHotel?.offer &&
-                  !transfer?.hotelToEvent?.offer
-                }
-              />
+              {hotel?.offer && (
+                <BookingStatusItem
+                  label="Hotel"
+                  icon="office-building"
+                  status={hotel?.status}
+                  isLast={
+                    !transfer?.airportToHotel?.offer &&
+                    !transfer?.hotelToEvent?.offer
+                  }
+                />
+              )}
 
               {transfer?.airportToHotel?.offer && (
                 <BookingStatusItem

@@ -1,6 +1,7 @@
 import { IEvent } from "@/types/event";
 import { ICommunityTicket } from "@/types/ticket";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -41,39 +42,6 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
   const toast = useToast();
 
-  // Calculate Total (Mock logic - replace with your actual price summing)
-  const total = (
-    (Number(flightOffer?.totalAmount) || 0) +
-    (Number(hotelOffer?.totalAmount) || 0) +
-    (Number(airportToHotelOffer?.totalAmount) || 0) +
-    (Number(hotelToEventOffer?.totalAmount) || 0)
-  ).toFixed(2);
-
-  const SectionHeader = ({
-    title,
-    icon,
-    color,
-  }: {
-    title: string;
-    icon: any;
-    color: string;
-  }) => (
-    <View className="flex flex-row items-center gap-2 mb-3 mt-2">
-      <MaterialCommunityIcons name={icon} size={18} color={color} />
-      <Text className="font-dm-sans-bold text-xs uppercase tracking-[2px] text-gray-400">
-        {title}
-      </Text>
-    </View>
-  );
-
-  const EmptyState = ({ label }: { label: string }) => (
-    <View className="bg-gray-50 rounded-xl p-4 border border-dashed border-gray-200 items-center justify-center">
-      <Text className="font-dm-sans-medium text-gray-400 text-xs italic">
-        {label}
-      </Text>
-    </View>
-  );
-
   const handleCheckout = async () => {
     if (!event?._id) {
       return toast.warn("Event isn't selected");
@@ -104,120 +72,205 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
     }
   };
 
+  const total = (
+    (Number(flightOffer?.totalAmount) || 0) +
+    (Number(hotelOffer?.totalAmount) || 0) +
+    (Number(airportToHotelOffer?.totalAmount) || 0) +
+    (Number(hotelToEventOffer?.totalAmount) || 0)
+  ).toFixed(2);
+
+  const SectionHeader = ({
+    title,
+    icon,
+    color,
+  }: {
+    title: string;
+    icon: any;
+    color: string;
+  }) => (
+    <View className="flex flex-row items-center gap-2 mb-4 mt-2 px-1">
+      <View
+        style={{ backgroundColor: `${color}15` }}
+        className="p-1.5 rounded-lg"
+      >
+        <MaterialCommunityIcons name={icon} size={16} color={color} />
+      </View>
+      <Text className="font-dm-sans-bold text-[11px] uppercase tracking-[1.5px] text-slate-400">
+        {title}
+      </Text>
+    </View>
+  );
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={`${packageType.toUpperCase()} PACKAGE`}
-      scrolled
-    >
-      <View className="flex-1">
-        {/* 1. TICKET INFO (The Base) */}
-        <View className="mb-6">
+    <Modal isOpen={isOpen} onClose={onClose} title="" scrolled>
+      <View className="flex-1 pb-4">
+        {/* PACKAGE BADGE */}
+        <View className="items-center mb-6">
+          <LinearGradient
+            colors={isGold ? ["#FACC15", "#EAB308"] : ["#844AFF", "#C427E0"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            className="px-6 py-2 shadow-md"
+            style={{ borderRadius: 24 }}
+          >
+            <Text className="font-poppins-bold text-white text-xs uppercase tracking-widest">
+              {isGold ? "✨ Gold Package" : "Standard Package"}
+            </Text>
+          </LinearGradient>
+        </View>
+
+        {/* 1. TICKET INFO */}
+        <View className="mb-8">
+          <SectionHeader
+            title="Admission"
+            icon="ticket-confirmation-outline"
+            color="#844AFF"
+          />
           {communityTicket && <CommunityTicketItem item={communityTicket} />}
         </View>
 
+        {/* 2. LOGISTICS TIMELINE */}
         <View className="px-1">
-          {/* 2. FLIGHT SECTION */}
           <SectionHeader
-            title="Outbound Flight"
-            icon="airplane"
-            color="#3b82f6"
+            title="Flight & Logistics"
+            icon="map-marker-path"
+            color="#C427E0"
           />
-          <View className="mb-6">
-            {!flightOffer ? (
-              <EmptyState label="No flight selected" />
-            ) : (
-              <FlightItem data={flightOffer} />
-            )}
-          </View>
 
-          {/* 3. TRANSFERS & HOTEL (The "Stay" Group) */}
           <View className="relative">
-            {/* Vertical Connecting Line */}
-            <View className="absolute left-[18px] top-4 bottom-4 w-[1px] bg-gray-200 border-dashed" />
+            {/* Timeline Vertical Line */}
+            <View className="absolute left-[21px] top-6 bottom-6 w-[2px] bg-slate-100" />
 
-            {/* Airport Transfer */}
-            <View className="flex flex-row gap-4 mb-4">
-              <View className="z-10 bg-blue-500 w-9 h-9 rounded-full items-center justify-center shadow-sm">
-                <MaterialCommunityIcons name="car" size={18} color="white" />
+            {/* Flight */}
+            <View className="flex-row gap-4 mb-4">
+              <View className="z-10 bg-white w-10 h-10 rounded-full items-center justify-center border-2 border-slate-50 shadow-sm">
+                <MaterialCommunityIcons
+                  name="airplane-takeoff"
+                  size={18}
+                  color="#844AFF"
+                />
               </View>
               <View className="flex-1">
-                {!airportToHotelOffer ? (
-                  <EmptyState label="No airport transfer" />
+                {flightOffer ? (
+                  <FlightItem data={flightOffer} />
                 ) : (
+                  <Text className="italic text-slate-400 text-xs py-2">
+                    No flight selected
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            {/* Airport Transfer */}
+            <View className="flex-row gap-4 mb-4">
+              <View className="z-10 bg-white w-10 h-10 rounded-full items-center justify-center border-2 border-slate-50 shadow-sm">
+                <MaterialCommunityIcons
+                  name="car-cog"
+                  size={18}
+                  color="#C427E0"
+                />
+              </View>
+              <View className="flex-1">
+                {airportToHotelOffer ? (
                   <TransferItem data={airportToHotelOffer} />
+                ) : (
+                  <Text className="italic text-slate-400 text-xs py-2">
+                    No airport transfer
+                  </Text>
                 )}
               </View>
             </View>
 
             {/* Hotel */}
-            <View className="flex flex-row gap-4 mb-4">
-              <View className="z-10 bg-indigo-500 w-9 h-9 rounded-full items-center justify-center shadow-sm">
+            <View className="flex-row gap-4 mb-4">
+              <View className="z-10 bg-white w-10 h-10 rounded-full items-center justify-center border-2 border-slate-50 shadow-sm">
                 <MaterialCommunityIcons
-                  name="office-building"
+                  name="bed-king"
                   size={18}
-                  color="white"
+                  color="#844AFF"
                 />
               </View>
               <View className="flex-1">
-                {!hotelOffer ? (
-                  <EmptyState label="No hotel selected" />
-                ) : (
+                {hotelOffer ? (
                   <HotelItem data={hotelOffer} />
+                ) : (
+                  <Text className="italic text-slate-400 text-xs py-2">
+                    No hotel selected
+                  </Text>
                 )}
               </View>
             </View>
 
             {/* Event Transfer */}
-            <View className="flex flex-row gap-4 mb-6">
-              <View className="z-10 bg-orange-500 w-9 h-9 rounded-full items-center justify-center shadow-sm">
+            <View className="flex-row gap-4">
+              <View className="z-10 bg-white w-10 h-10 rounded-full items-center justify-center border-2 border-slate-50 shadow-sm">
                 <MaterialCommunityIcons
-                  name="map-marker-distance"
+                  name="map-check"
                   size={18}
-                  color="white"
+                  color="#C427E0"
                 />
               </View>
               <View className="flex-1">
-                {!hotelToEventOffer ? (
-                  <EmptyState label="No event transfer" />
-                ) : (
+                {hotelToEventOffer ? (
                   <TransferItem data={hotelToEventOffer} />
+                ) : (
+                  <Text className="italic text-slate-400 text-xs py-2">
+                    No event transfer
+                  </Text>
                 )}
               </View>
             </View>
           </View>
         </View>
-      </View>
 
-      {/* 4. TOTAL SUMMARY & PROCEED */}
-      <View className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-        <View className="flex flex-row justify-between items-center mb-4">
-          <Text className="font-dm-sans-bold text-gray-500">
-            Estimated Total
-          </Text>
-          <View className="flex flex-row items-start gap-1">
-            <Text className="font-poppins-semibold text-gray-600 text-xs">
-              {flightOffer?.currency || "USD"}
-            </Text>
-            <Text className="font-poppins-bold text-2xl text-green-600">
-              {total}
-            </Text>
-          </View>
+        {/* 4. TOTAL SUMMARY CARD */}
+        <View className="mt-10">
+          <LinearGradient
+            colors={["#844AFF", "#C427E0"]}
+            className="p-[1.5px]"
+            style={{ borderRadius: 28 }}
+          >
+            <View className="bg-white rounded-[27px] p-6">
+              <View className="flex-row justify-between items-end mb-6">
+                <View className="gap-1">
+                  <Text className="font-dm-sans-bold text-slate-400 text-[10px] uppercase tracking-widest mb-1">
+                    Grand Total
+                  </Text>
+                  <Text className="font-poppins-bold text-slate-900 text-3xl">
+                    <Text className="text-sm text-slate-400 font-poppins-semibold">
+                      {flightOffer?.currency || "USD"}{" "}
+                    </Text>
+                    {total}
+                  </Text>
+                </View>
+                <View className="bg-emerald-100 px-3 py-1.5 rounded-xl flex-row items-center">
+                  <MaterialCommunityIcons
+                    name="shield-check"
+                    size={14}
+                    color="#059669"
+                  />
+                  <Text className="text-emerald-700 font-dm-sans-bold text-[10px] ml-1 uppercase">
+                    Secure
+                  </Text>
+                </View>
+              </View>
+
+              <Button
+                type="primary"
+                label={loading ? "Verifying..." : "Confirm & Checkout"}
+                buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
+                textClassName="text-lg font-poppins-bold"
+                loading={loading}
+                onPress={handleCheckout}
+              />
+
+              <Text className="text-center text-[10px] text-slate-400 mt-4 leading-4 font-dm-sans-medium px-4">
+                By proceeding, you agree to the booking terms. Prices are locked
+                for 15 minutes.
+              </Text>
+            </View>
+          </LinearGradient>
         </View>
-
-        <Button
-          type="primary"
-          label={loading ? "Checking Rates..." : "Checkout"}
-          buttonClassName="h-12 rounded-xl"
-          textClassName="text-lg font-poppins-bold"
-          loading={loading}
-          onPress={handleCheckout}
-        />
-        <Text className="text-center text-xs text-gray-500 mt-3 font-dm-sans-medium">
-          Prices and availability are subject to change until booking is
-          confirmed.
-        </Text>
       </View>
     </Modal>
   );

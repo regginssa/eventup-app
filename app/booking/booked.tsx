@@ -17,7 +17,7 @@ import { ICommunityTicket } from "@/types/ticket";
 import { formatDateTime } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -179,6 +179,7 @@ const BookedScreen = () => {
   const lottieRef = useRef<LottieView>(null);
 
   const { id: bookingId } = useLocalSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     const init = async () => {
@@ -263,11 +264,34 @@ const BookedScreen = () => {
               type="primary"
               label="Download Itinerary"
               buttonClassName="h-12"
+              icon={
+                <MaterialCommunityIcons
+                  name="cloud-download-outline"
+                  size={16}
+                  color="white"
+                />
+              }
+              iconPosition="right"
             />
             <Button
               type="primary"
-              label="Share with Friends"
+              label="View Event"
               buttonClassName="h-12"
+              icon={
+                <MaterialCommunityIcons
+                  name="arrow-right"
+                  size={16}
+                  color="white"
+                />
+              }
+              iconPosition="right"
+              onPress={() => {
+                if (!event?._id && !event?.type) return;
+                router.replace({
+                  pathname: `/event/details/${event.type}` as any,
+                  params: { id: event._id },
+                });
+              }}
             />
           </View>
         </>

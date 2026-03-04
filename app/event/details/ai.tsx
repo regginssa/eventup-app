@@ -21,9 +21,16 @@ import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 
+const initialTabs = [
+  { label: "Packages", value: "packages" },
+  { label: "Overview", value: "overview" },
+  { label: "Itinerary", value: "itinerary" },
+];
+
 const AIEventDetail = () => {
   const [event, setEvent] = useState<IEvent | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [tabs, setTabs] = useState<TDropdownItem[]>(initialTabs);
   const [selectedTab, setSelectedTab] = useState<TDropdownItem>({
     label: "Packages",
     value: "packages",
@@ -120,6 +127,9 @@ const AIEventDetail = () => {
 
       if (!bookingData) {
         await fetchUserCurrentLocation();
+      } else {
+        setTabs(initialTabs.slice(1, 3));
+        setSelectedTab(initialTabs[1]);
       }
 
       setLoading(false);
@@ -150,11 +160,7 @@ const AIEventDetail = () => {
 
           <View className="flex-1 bg-white rounded-2xl p-4 gap-6">
             <Tabs
-              tabs={[
-                { label: "Packages", value: "packages" },
-                { label: "Overview", value: "overview" },
-                { label: "Itinerary", value: "itinerary" },
-              ]}
+              tabs={tabs}
               selectedTab={selectedTab}
               onSelct={setSelectedTab}
               tabClassName="flex-1"

@@ -11,8 +11,23 @@ import {
 
 const GoogleIcon = require("@/assets/images/icons/google.png");
 
+// Define your brand colors
+const BRAND_GRADIENT = ["#C427E0", "#844AFF", "#12A9FF"];
+const STROKE_GRADIENT = ["#BF28E0", "#FFFFFF", "#17A3FE"];
+const GOLD_GRADIENT = ["#FACC15", "#EAB308", "#CA8A04"]; // Shimmering Gold
+const GLASS_GRADIENT = ["#4F46E5", "#7C3AED", "#C026D3"]; // Deep Indigo/Glass
+
 interface ButtonProps {
-  type: "primary" | "outline" | "text" | "white" | "social";
+  type:
+    | "primary"
+    | "outline"
+    | "text"
+    | "white"
+    | "social"
+    | "gradient-soft"
+    | "gradient-outline"
+    | "gradient-gold"
+    | "gradient-glass";
   socialType?: "google" | "apple";
   label: string;
   icon?: React.ReactNode;
@@ -36,95 +51,111 @@ const Button: React.FC<ButtonProps> = ({
   disabled,
   onPress,
 }) => {
-  if (type === "outline") {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.8}
-        className={`border border-[#BF28E0] rounded-md items-center justify-center ${buttonClassName}`}
-        disabled={loading}
-        onPress={onPress}
-      >
-        <Text className="text-white font-poppins-medium text-center">
-          {label}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
+  const renderContent = (textColor: string = "text-white") => (
+    <View className="flex-row items-center justify-center gap-2 px-4">
+      {loading ? (
+        <ActivityIndicator
+          size={16}
+          color={textColor === "text-white" ? "#fff" : "#844AFF"}
+        />
+      ) : (
+        <>
+          {iconPosition === "left" && icon}
+          <Text
+            className={`${textColor} font-poppins-semibold text-center ${textClassName}`}
+          >
+            {label}
+          </Text>
+          {iconPosition === "right" && icon}
+        </>
+      )}
+    </View>
+  );
 
-  if (type === "primary") {
+  // Helper for gradient buttons to reduce repetition
+  const GradientButton = (colors: string[], isSecondary: boolean = false) => (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      className={`h-12 overflow-hidden rounded-xl shadow-md ${buttonClassName}`}
+      disabled={loading || disabled}
+      onPress={onPress}
+    >
+      <LinearGradient
+        colors={disabled ? ["#94a3b8", "#cbd5e1"] : (colors as any)}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        className="flex-1 items-center justify-center"
+      >
+        {renderContent()}
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+
+  // 1. PRIMARY: Your Brand Gradient
+  if (type === "primary") return GradientButton(BRAND_GRADIENT);
+
+  // 2. GRADIENT GOLD: For Premium/VIP actions
+  if (type === "gradient-gold") return GradientButton(GOLD_GRADIENT);
+
+  // 3. GRADIENT GLASS: Deep, vibrant contrast
+  if (type === "gradient-glass") return GradientButton(GLASS_GRADIENT);
+
+  // 4. GRADIENT SOFT: Light Pastel / Glass style
+  if (type === "gradient-soft") {
     return (
       <TouchableOpacity
-        activeOpacity={0.8}
-        className={buttonClassName}
-        disabled={loading || disabled}
+        activeOpacity={0.7}
+        className={`h-12 overflow-hidden rounded-xl border border-purple-100/50 ${buttonClassName}`}
         onPress={onPress}
+        disabled={loading}
       >
-        {disabled ? (
-          <View className="flex-1 flex-row bg-gray-400 items-center justify-center gap-2 rounded-md whitespace-nowrap">
-            <Text
-              className={`text-gray-300 font-poppins-medium text-center ${textClassName}`}
-            >
-              {label}
-            </Text>
-          </View>
-        ) : (
+        <View className="flex-1 bg-purple-50 items-center justify-center">
           <LinearGradient
-            colors={["#BF28E0", "#FFFFFF", "#17A3FE"]}
+            colors={["#844AFF15", "#C427E010"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.primaryGradient}
-          >
-            <LinearGradient
-              colors={["#C427E0", "#844AFF", "#12A9FF"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.primaryInner}
-            >
-              <View className="flex-1 flex-row items-center justify-center gap-2">
-                {iconPosition === "left" && icon && !loading && icon}
-                {iconPosition === "left" && icon && loading && (
-                  <ActivityIndicator size={16} color="#ffffff" />
-                )}
-                <Text
-                  className={`text-white font-poppins-medium text-center ${textClassName}`}
-                >
-                  {label}
-                </Text>
-                {!icon && !iconPosition && loading && (
-                  <ActivityIndicator size={16} color="#ffffff" />
-                )}
-                {iconPosition === "right" && icon && !loading && icon}
-                {iconPosition === "right" && icon && loading && (
-                  <ActivityIndicator size={16} color="#ffffff" />
-                )}
-              </View>
-            </LinearGradient>
-          </LinearGradient>
-        )}
+            className="absolute inset-0"
+          />
+          {renderContent("text-purple-600")}
+        </View>
       </TouchableOpacity>
     );
   }
 
+  // 5. GRADIENT OUTLINE: Transparent with Gradient Border/Text
+  if (type === "gradient-outline") {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.8}
+        className={`h-12 ${buttonClassName}`}
+        onPress={onPress}
+        disabled={loading}
+      >
+        <LinearGradient
+          colors={STROKE_GRADIENT as any}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          className="flex-1 p-[1.5px] rounded-xl"
+        >
+          <View className="flex-1 bg-white rounded-[11px] items-center justify-center">
+            <Text className="text-purple-600 font-poppins-bold">{label}</Text>
+          </View>
+        </LinearGradient>
+      </TouchableOpacity>
+    );
+  }
+
+  // SOCIAL & OTHER TYPES (UNCHANGED)
   if (type === "social" && socialType) {
     return (
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`rounded-md ${buttonClassName} bg-white flex flex-row items-center justify-center gap-2`}
+        className={`h-12 rounded-xl bg-white border border-slate-100 flex-row items-center justify-center gap-3 ${buttonClassName}`}
         disabled={loading}
         onPress={onPress}
       >
-        {loading ? (
-          <ActivityIndicator size={16} color="#6b7280" />
-        ) : (
-          <>
-            <Image source={GoogleIcon} style={styles.socialIcon} />
-            <Text
-              className={`text-gray-500 font-poppins-medium text-sm text-center ${textClassName}`}
-            >
-              {label}
-            </Text>
-          </>
-        )}
+        <Image source={GoogleIcon} style={styles.socialIcon} />
+        <Text className="text-slate-600 font-poppins-medium">{label}</Text>
       </TouchableOpacity>
     );
   }
@@ -133,60 +164,23 @@ const Button: React.FC<ButtonProps> = ({
     return (
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`items-center justify-center ${buttonClassName}`}
-        disabled={loading}
+        className={`py-2 ${buttonClassName}`}
         onPress={onPress}
       >
-        <Text className={`${textClassName} font-poppins-medium text-sm`}>
+        <Text className={`text-slate-400 font-poppins-medium ${textClassName}`}>
           {label}
         </Text>
       </TouchableOpacity>
     );
   }
 
-  if (type === "white") {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.8}
-        className={`rounded-md ${buttonClassName} bg-white flex flex-row items-center justify-center gap-2`}
-        disabled={loading}
-        onPress={onPress}
-      >
-        {loading ? (
-          <ActivityIndicator size={16} color="#6b7280" />
-        ) : (
-          <>
-            {iconPosition === "left" && icon && icon}
-            <Text
-              className={`text-gray-500 font-poppins-medium text-sm text-center ${textClassName}`}
-            >
-              {label}
-            </Text>
-            {iconPosition === "right" && icon && icon}
-          </>
-        )}
-      </TouchableOpacity>
-    );
-  }
   return null;
 };
 
 const styles = StyleSheet.create({
-  primaryGradient: {
-    flex: 1,
-    borderRadius: 6,
-  },
-  primaryInner: {
-    flex: 1,
-    flexDirection: "column",
-    borderRadius: 6,
-    justifyContent: "center",
-    alignItems: "center",
-    margin: 1,
-  },
   socialIcon: {
-    width: 16,
-    height: 16,
+    width: 20,
+    height: 20,
   },
 });
 
