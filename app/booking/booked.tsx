@@ -1,7 +1,6 @@
 import bookingServices from "@/api/services/booking";
 import {
   Button,
-  CommunityTicketItem,
   FlightItem,
   HotelItem,
   Spinner,
@@ -15,11 +14,12 @@ import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
 import { ICommunityTicket } from "@/types/ticket";
 import { formatDateTime } from "@/utils/format";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 const BookedLightImage = require("@/assets/images/booked_image.png");
@@ -33,86 +33,67 @@ const EventTicket = ({
   packageType: TPackageType;
   communityTicket: ICommunityTicket | null;
 }) => {
-  const [items, setItems] = useState<any[]>([]);
   const { theme } = useTheme();
-
-  useEffect(() => {
-    if (!event) return;
-
-    let items = [
-      {
-        label: event.name,
-        icon: "calendar-badge-outline",
-      },
-      {
-        label: `${event.dates?.start.time} / ${formatDateTime(
-          event.dates?.start.date as string,
-        )} (${event.dates?.timezone ?? "--"})`,
-        icon: "calendar-clock-outline",
-      },
-      {
-        label: event.location?.city
-          ? `${event.location.city.name}, ${event.location.country.code}`
-          : event.location?.country.name,
-        icon: "map-marker-outline",
-      },
-      {
-        label:
-          packageType === "standard"
-            ? "Economy (Standard Package)"
-            : "VIP (Gold Package)",
-        icon: "check-decagram-outline",
-      },
-    ];
-
-    if (packageType === "gold") {
-      items.push({
-        label: "VIP Lane - Zone A",
-        icon: "shield-airplane-outline",
-      });
-    }
-
-    setItems(items);
-  }, [event]);
+  const isLight = theme === "light";
 
   return (
     <View
-      className={`w-full ${
-        theme === "light" ? "bg-white" : "bg-[#171C1C]"
-      } rounded-xl p-4 gap-3 overflow-hidden`}
+      className={`w-full ${isLight ? "bg-white" : "bg-slate-900"} rounded-[24px] overflow-hidden border border-slate-100 shadow-sm`}
     >
-      <View className="flex-row items-center mb-3">
-        <Text className="font-poppins-semibold text-gray-800 text-sm uppercase tracking-wider">
-          Event Ticket
-        </Text>
-      </View>
+      <LinearGradient
+        colors={
+          packageType === "gold"
+            ? ["#FACC1520", "transparent"]
+            : ["#844AFF10", "transparent"]
+        }
+        className="p-5"
+      >
+        <View className="flex-row justify-between items-center mb-4">
+          <View className="bg-slate-100 px-3 py-1 rounded-full">
+            <Text className="text-[10px] font-poppins-bold text-slate-500 uppercase tracking-tighter">
+              Confirmed Admission
+            </Text>
+          </View>
+          {packageType === "gold" && (
+            <View className="flex-row items-center bg-yellow-400 px-2 py-1 rounded-md">
+              <MaterialCommunityIcons name="crown" size={12} color="white" />
+              <Text className="text-[10px] font-poppins-bold text-white ml-1">
+                GOLD VIP
+              </Text>
+            </View>
+          )}
+        </View>
 
-      {event?.type === "user" && communityTicket ? (
-        <CommunityTicketItem item={communityTicket} />
-      ) : (
-        <View className="w-full flex flex-row gap-3">
-          <TicketQR size={120} />
+        <View className="flex-row gap-4">
+          <View className="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
+            <TicketQR size={90} />
+          </View>
 
-          <View className="flex-1 items-start justify-between gap-1">
-            {items.map((item, index) => (
-              <View key={index} className="flex flex-row items-start gap-1.5">
-                <MaterialCommunityIcons
-                  name={item.icon as any}
-                  size={16}
-                  color={theme === "light" ? "#4b5563" : "#9ca3af"}
-                />
-                <Text
-                  className={`font-dm-sans text-sm ${
-                    theme === "light" ? "text-gray-600" : "text-gray-400"
-                  } line-clamp-3`}
-                >
-                  {item.label}
-                </Text>
-              </View>
-            ))}
+          <View className="flex-1 justify-center">
+            <Text
+              className="font-poppins-bold text-slate-800 text-lg leading-6 mb-1"
+              numberOfLines={2}
+            >
+              {event?.name}
+            </Text>
+            <View className="flex-row items-center mb-1">
+              <Feather name="calendar" size={12} color="#844AFF" />
+              <Text className="font-dm-sans-medium text-slate-500 text-xs ml-1">
+                {formatDateTime(event?.dates?.start.date as string)}
+              </Text>
+            </View>
+            <View className="flex-row items-center">
+              <Feather name="map-pin" size={12} color="#844AFF" />
+              <Text
+                className="font-dm-sans-medium text-slate-500 text-xs ml-1"
+                numberOfLines={1}
+              >
+                {event?.location?.city?.name || event?.location?.country?.name}
+              </Text>
+            </View>
           </View>
         </View>
-      )}
+      </LinearGradient>
     </View>
   );
 };
@@ -127,38 +108,68 @@ const TripSummary = ({
   currency: string;
 }) => {
   return (
-    <View className="bg-white rounded-xl p-4 border border-slate-200">
-      <View className="flex-row items-center mb-3">
-        <Text className="font-poppins-semibold text-gray-800 text-sm uppercase tracking-wider">
-          Trip Summary
+    <View className="w-full mt-4">
+      {/* Receipt Top */}
+      <View className="bg-slate-50 border-t border-l border-r border-slate-200 rounded-t-[24px] p-6 pb-4">
+        <Text className="font-poppins-bold text-slate-400 text-[10px] uppercase tracking-[2px] mb-4">
+          Cost Breakdown
         </Text>
-      </View>
 
-      <View className="gap-3 mt-2">
-        {services.map((service: string, i: number) => (
-          <View key={i} className="flex-row justify-between items-center">
-            <Text className="text-slate-500 font-dm-sans text-sm">
-              {service}
-            </Text>
-            <View className="h-[1px] flex-1 bg-slate-200 mx-3 italic opacity-50" />
-            <Text className="text-slate-400 text-xs font-dm-sans">
-              Included
+        <View className="gap-3">
+          {services.map((service, i) => (
+            <View key={i} className="flex-row justify-between items-center">
+              <View className="flex-row items-center gap-2">
+                <View className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                <Text className="text-slate-600 font-dm-sans-medium text-sm">
+                  {service}
+                </Text>
+              </View>
+              <Text className="text-emerald-600 font-dm-sans-bold text-[10px] bg-emerald-50 px-2 py-0.5 rounded">
+                INCLUDED
+              </Text>
+            </View>
+          ))}
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center gap-2">
+              <View className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+              <Text className="text-slate-600 font-dm-sans-medium text-sm">
+                Event Admission
+              </Text>
+            </View>
+            <Text className="text-emerald-600 font-dm-sans-bold text-[10px] bg-emerald-50 px-2 py-0.5 rounded">
+              INCLUDED
             </Text>
           </View>
-        ))}
+        </View>
+      </View>
 
-        <View className="h-[1px] bg-slate-200 w-full my-2" />
+      {/* Punched Hole Divider Line */}
+      <View className="flex-row items-center justify-between bg-slate-50 px-[2px]">
+        <View className="w-4 h-8 rounded-r-full bg-white border-r border-t border-b border-slate-200 -ml-[1px]" />
+        <View className="flex-1 h-[1px] border-b border-dashed border-slate-300 mx-2" />
+        <View className="w-4 h-8 rounded-l-full bg-white border-l border-t border-b border-slate-200 -mr-[1px]" />
+      </View>
 
-        <View className="flex-row justify-between items-center mt-4">
-          <Text className="font-poppins-bold text-slate-900 text-base">
-            Total Amount
-          </Text>
-          <View className="flex flex-row items-start">
-            <Text className="font-poppins-semibold text-green-600 text-sm">
-              $
+      {/* Receipt Bottom */}
+      <View className="bg-slate-50 border-b border-l border-r border-slate-200 rounded-b-[24px] p-6 pt-2">
+        <View className="flex-row justify-between items-end mt-2">
+          <View>
+            <Text className="font-dm-sans-bold text-slate-400 text-[10px] uppercase tracking-widest mb-1">
+              Total Paid
             </Text>
-            <Text className="font-poppins-bold text-green-600 text-2xl">
+            <Text className="font-poppins-bold text-slate-900 text-3xl">
+              <Text className="text-lg text-slate-400">$</Text>
               {totalPrice}
+            </Text>
+          </View>
+          <View className="items-end">
+            <MaterialCommunityIcons
+              name="check-decagram"
+              size={24}
+              color="#10b981"
+            />
+            <Text className="text-[10px] font-dm-sans-bold text-emerald-600 mt-1">
+              SECURE PAYMENT
             </Text>
           </View>
         </View>
@@ -174,9 +185,6 @@ const BookedScreen = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [hasLoadedSuccessfully, setHasLoadedSuccessfully] =
     useState<boolean>(false);
-  const [communityTicket, setCommunityTicket] =
-    useState<ICommunityTicket | null>(null);
-  const lottieRef = useRef<LottieView>(null);
 
   const { id: bookingId } = useLocalSearchParams();
   const router = useRouter();
@@ -184,49 +192,46 @@ const BookedScreen = () => {
   useEffect(() => {
     const init = async () => {
       if (!bookingId) return;
-
       try {
         setLoading(true);
-
         const bookingRes = await bookingServices.get(bookingId as string);
-
         const booking = bookingRes.data;
-
         setBooking(booking);
         setEvent(booking.event);
 
         const selectedServices = [];
-        if (booking.flight.offer) selectedServices.push("Flight");
-        if (booking.hotel.offer) selectedServices.push("Hotel");
+        if (booking.flight.offer) selectedServices.push("Round-trip Flight");
+        if (booking.hotel.offer) selectedServices.push("Luxury Hotel Stay");
+        if (booking.transfer.airportToHotel?.offer)
+          selectedServices.push("Airport Transfer");
+
         setServices(selectedServices);
         setHasLoadedSuccessfully(true);
-      } catch (error: any) {
+      } catch (error) {
         setHasLoadedSuccessfully(false);
       } finally {
         setLoading(false);
       }
     };
-
     init();
   }, [bookingId]);
 
   return (
-    <SimpleContainer title="Booking Confirmation" scrolled>
+    <SimpleContainer title="Confirmation" scrolled>
       {loading ? (
         <Spinner size="md" />
       ) : (
-        <>
-          <View className="flex-1 gap-4">
-            <View className="relative w-[381px] h-[221px]">
+        <View className="flex-1 px-1">
+          {/* Header Animation Section */}
+          <View className="items-center justify-center mb-6">
+            <View className="w-full h-48 rounded-[32px] overflow-hidden">
               <Image
                 source={BookedLightImage}
-                alt="Booking "
-                contentFit="cover"
                 style={styles.image}
+                contentFit="cover"
               />
               {hasLoadedSuccessfully && (
                 <LottieView
-                  ref={lottieRef}
                   autoPlay
                   source={require("@/assets/animations/cong.json")}
                   loop={false}
@@ -234,15 +239,28 @@ const BookedScreen = () => {
                 />
               )}
             </View>
+            <View className="bg-white -mt-8 px-8 py-3 rounded-2xl shadow-xl shadow-slate-200 border border-slate-50 items-center">
+              <Text className="font-poppins-bold text-slate-800 text-lg">
+                Booking Confirmed!
+              </Text>
+              <Text className="font-dm-sans-medium text-slate-400 text-xs">
+                Itinerary #BOK_{bookingId?.toString().slice(-6).toUpperCase()}
+              </Text>
+            </View>
+          </View>
 
-            <EventTicket
-              event={event}
-              packageType={booking?.packageType || "standard"}
-              communityTicket={communityTicket}
-            />
+          {/* Ticket Section */}
+          <EventTicket
+            event={event}
+            packageType={booking?.packageType || "standard"}
+            communityTicket={null}
+          />
 
-            <View className="h-1"></View>
-
+          {/* Itinerary Details */}
+          <View className="mt-8 gap-4">
+            <Text className="font-poppins-bold text-slate-800 text-sm ml-1 uppercase tracking-widest">
+              Your Itinerary
+            </Text>
             <FlightItem data={booking?.flight.offer || null} />
             <HotelItem data={booking?.hotel.offer || null} />
             <TransferItem
@@ -251,42 +269,30 @@ const BookedScreen = () => {
             <TransferItem
               data={booking?.transfer.hotelToEvent?.offer || null}
             />
-
-            <TripSummary
-              totalPrice={booking?.price.totalAmount || 0}
-              currency={booking?.price.currency || "USD"}
-              services={services}
-            />
           </View>
 
-          <View className="w-full gap-4">
+          {/* Trip Summary Section */}
+          <TripSummary
+            totalPrice={booking?.price.totalAmount || 0}
+            currency={booking?.price.currency || "USD"}
+            services={services}
+          />
+
+          {/* Actions */}
+          <View className="my-10 gap-4">
             <Button
               type="primary"
-              label="Download Itinerary"
-              buttonClassName="h-12"
-              icon={
-                <MaterialCommunityIcons
-                  name="cloud-download-outline"
-                  size={16}
-                  color="white"
-                />
-              }
+              label="Download Itinerary PDF"
+              buttonClassName="h-14 rounded-2xl"
+              icon={<Feather name="download" size={18} color="white" />}
               iconPosition="right"
             />
             <Button
-              type="primary"
-              label="View Event"
-              buttonClassName="h-12"
-              icon={
-                <MaterialCommunityIcons
-                  name="arrow-right"
-                  size={16}
-                  color="white"
-                />
-              }
-              iconPosition="right"
+              type="gradient-soft"
+              label="Return to Event"
+              buttonClassName="h-14 rounded-2xl"
               onPress={() => {
-                if (!event?._id && !event?.type) return;
+                if (!event?._id) return;
                 router.replace({
                   pathname: `/event/details/${event.type}` as any,
                   params: { id: event._id },
@@ -294,7 +300,7 @@ const BookedScreen = () => {
               }}
             />
           </View>
-        </>
+        </View>
       )}
     </SimpleContainer>
   );
