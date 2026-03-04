@@ -91,7 +91,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         setLoading(true);
 
         let url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
-          input
+          input,
         )}&key=${GOOGLE_API_KEY}&language=en`;
 
         if (country) {
@@ -145,7 +145,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
       (component: any) =>
         component.types.includes("locality") ||
         component.types.includes("postal_town") ||
-        component.types.includes("administrative_area_level_2")
+        component.types.includes("administrative_area_level_2"),
     );
     return cityComponent?.long_name || null;
   };
@@ -153,7 +153,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   const handlePick = async (description: string, placeId: string) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}&language=en`
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}&language=en`,
       );
       const json = await response.json();
 

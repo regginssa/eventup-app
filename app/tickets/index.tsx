@@ -34,39 +34,39 @@ const TicketsScreen = () => {
   const { amount, currency, from, callback } = useLocalSearchParams();
   const router = useRouter();
 
-  const { tickets } = useCommunityTicket();
+  const { communityTickets } = useCommunityTicket();
 
   useEffect(() => {
     switch (selectedCurrency) {
       case "eur":
         setFilteredTickets(
-          tickets.filter((t) => t.currency.toUpperCase() === "EUR"),
+          communityTickets.filter((t) => t.currency.toUpperCase() === "EUR"),
         );
         break;
       case "pln":
         setFilteredTickets(
-          tickets.filter((t) => t.currency.toUpperCase() === "PLN"),
+          communityTickets.filter((t) => t.currency.toUpperCase() === "PLN"),
         );
         break;
       default:
         setFilteredTickets(
-          tickets.filter((t) => t.currency.toUpperCase() === "USD"),
+          communityTickets.filter((t) => t.currency.toUpperCase() === "USD"),
         );
         break;
     }
-  }, [selectedCurrency, tickets]);
+  }, [selectedCurrency, communityTickets]);
 
   useEffect(() => {
-    if (!amount || !currency || !from || tickets.length === 0) return;
+    if (!amount || !currency || !from || communityTickets.length === 0) return;
     setSelectedTicket(
-      tickets.find(
+      communityTickets.find(
         (t) =>
           t.price === Number(amount) &&
           t.currency.toUpperCase() === currency.toString().toUpperCase(),
       ) || null,
     );
     setIsOpen(true);
-  }, [amount, currency, from, tickets]);
+  }, [amount, currency, from, communityTickets]);
 
   const renderItem = ({ item }: { item: ICommunityTicket }) => {
     return (

@@ -15,7 +15,6 @@ import {
   Tabs,
 } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { useBooking } from "@/components/providers/BookingProvider";
 import { useCommunityTicket } from "@/components/providers/CommunityTicketProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
 import { useNotification } from "@/components/providers/NotificationProvider";
@@ -69,7 +68,6 @@ const UserEventDetail = () => {
   const router = useRouter();
   const { id, callback } = useLocalSearchParams();
   const { user } = useAuth();
-  const { setBookingFlight, setBookingHotel } = useBooking();
   const { communityTickets } = useCommunityTicket();
   const { send: sendNotification } = useNotification();
   const { conversations } = useConversation();
@@ -130,7 +128,7 @@ const UserEventDetail = () => {
     if (!user?._id || !id) return;
 
     try {
-      const response = await bookingServices.getBookingByUserIdAndEventId(
+      const response = await bookingServices.getByUserIdAndEventId(
         user._id,
         id as string,
       );
@@ -163,8 +161,6 @@ const UserEventDetail = () => {
         }
       }
 
-      setBookingFlight(null);
-      setBookingHotel(null);
       setLoading(false);
     };
 
@@ -311,12 +307,6 @@ const UserEventDetail = () => {
             event={event}
             currentLocationCoords={currentLocationCoords}
             currentLocation={currentLocation}
-            isBooked={!!booking}
-            bookedPackageType={booking?.package || "standard"}
-            totalPrice={booking?.price.total || 0}
-            fee={event.type === "user" ? event.fee : undefined}
-            communityTicket={communityTicket}
-            attendees={myAttendees || undefined}
           />
         );
       case "overview":

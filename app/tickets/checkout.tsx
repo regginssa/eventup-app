@@ -1,306 +1,291 @@
 import { getMe } from "@/api/services/auth";
-import stripeServices from "@/api/services/stripe";
 import { fetchTicketById } from "@/api/services/ticket";
-import { Button, PaymentMethodGroup } from "@/components";
+import { Button, PaymentMethodGroup, Spinner } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
+import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
-import { IStripePayload } from "@/types/stripe";
 import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
-import { confirmPayment } from "@stripe/stripe-react-native";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 
-const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
+// -----------------------------------------------------------------------------
+// HERO CARD — Redesigned (Matches EventHeroCard style)
+// -----------------------------------------------------------------------------
 
-const Header = ({
-  ticket,
-  loading,
-}: {
-  ticket: ICommunityTicket | null;
-  loading: boolean;
-}) => {
-  if (loading) {
-    <View className="w-full flex flex-col items-center justify-center gap-2 py-6 bg-white rounded-xl">
-      <ActivityIndicator size={24} color="#C427E0" />
-      <Text className="text-[#C427E0] font-poppins-semibold">
-        Fetching Ticket...
-      </Text>
-    </View>;
-  }
+const TicketHeroCard = ({ ticket, loading }: any) => {
+  if (loading) return <Spinner size="md" text="Loading ticket..." />;
 
   if (!ticket) return null;
 
   return (
-    <View className="relative w-full h-[160px] rounded-xl overflow-hidden">
-      <Image
-        source={ticketCardBg}
-        alt="Ticket Card BG"
-        style={{ width: "100%", height: "100%" }}
-      />
+    <View className="w-full rounded-[24px] overflow-hidden bg-white border border-slate-100 shadow-sm">
+      <LinearGradient
+        colors={["rgba(132, 74, 255, 0.05)", "transparent"]}
+        className="p-4 flex-row gap-4"
+      >
+        <View className="relative">
+          <Image
+            source={{ uri: ticket.image }}
+            style={{ width: 100, height: 100, borderRadius: 16 }}
+            contentFit="cover"
+          />
 
-      <View className="absolute inset-0 flex flex-row items-stretch justify-between">
-        <View className="flex flex-col items-center justify-center w-1/2">
-          <View className="w-[148px] h-[120px] rounded-lg overflow-hidden">
-            <Image
-              source={{ uri: ticket.image }}
-              alt={ticket.name}
-              style={{ width: "100%", height: "100%" }}
-              contentFit="cover"
+          <View className="absolute top-1 left-1 bg-white/90 px-2 py-0.5 rounded-full">
+            <Text className="text-[8px] font-poppins-bold text-purple-600 uppercase">
+              Ticket
+            </Text>
+          </View>
+        </View>
+
+        <View className="flex-1 justify-center">
+          <View className="flex-row items-center gap-1 mb-1">
+            <MaterialCommunityIcons
+              name="ticket-confirmation"
+              size={14}
+              color="#844AFF"
             />
+            <Text className="text-purple-600 font-poppins-bold text-[10px] uppercase tracking-widest">
+              E-Ticket
+            </Text>
           </View>
-        </View>
 
-        <View className="flex flex-col items-center justify-center w-1/2">
-          <View className="flex flex-col items-center justify-between gap-6">
-            <View className="flex flex-col items-center justify-center">
-              <View className="flex flex-row items-start">
-                <Text className="font-poppins-semibold text-lg text-gray-500">
-                  {getCurrencySymbol(ticket.currency as any)}
-                </Text>
-                <Text className="font-poppins-semibold text-3xl text-gray-800">
-                  {ticket.price}
-                </Text>
-              </View>
-
-              <Text className="font-poppins text-gray-700">{ticket.name}</Text>
-            </View>
-          </View>
+          <Text
+            className="font-poppins-bold text-slate-800 text-lg leading-6"
+            numberOfLines={2}
+          >
+            {ticket.name}
+          </Text>
         </View>
-      </View>
+      </LinearGradient>
     </View>
   );
 };
 
-const Detail = ({
-  ticket,
-  loading,
-}: {
-  ticket: ICommunityTicket | null;
-  loading: boolean;
-}) => {
-  if (loading) {
-    <View className="flex-1 w-full flex flex-col items-center justify-center gap-2 py-6 bg-white rounded-xl">
-      <ActivityIndicator size={24} color="#C427E0" />
-      <Text className="text-[#C427E0] font-poppins-semibold">
-        Fetching Ticket Details...
-      </Text>
-    </View>;
-  }
+// -----------------------------------------------------------------------------
+// RECEIPT — Redesigned (Matches HighEndReceipt style)
+// -----------------------------------------------------------------------------
+
+const TicketReceipt = ({ ticket }: any) => {
+  if (!ticket) return null;
+
+  const currency = getCurrencySymbol(ticket.currency.toUpperCase());
 
   return (
-    <View className="flex-1 p-4 flex flex-col items-start justify-center gap-6 bg-white rounded-xl">
-      <Text className="font-poppins-bold text-3xl text-gray-800">
-        {ticket?.name || "N/A"}
-      </Text>
-
-      <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-dm-sans-medium text-gray-600">Currency:</Text>
-        <Text className="font-poppins-semibold text-gray-800">
-          {ticket?.currency.toUpperCase() || "-"}
+    <View className="w-full">
+      {/* Upper */}
+      <View className="bg-slate-50 rounded-t-[24px] border-t border-l border-r border-slate-200 p-6 pb-2">
+        <Text className="text-slate-400 font-poppins-bold text-[10px] uppercase tracking-[2px] mb-4">
+          Price Breakdown
         </Text>
+
+        <View className="gap-3">
+          <View className="flex-row justify-between items-center">
+            <Text className="text-slate-600 font-dm-sans-medium text-sm">
+              Ticket Price
+            </Text>
+            <View className="flex-1 h-[1px] border-b border-dotted border-slate-300 mx-4 opacity-50" />
+            <Text className="text-slate-400 text-xs font-dm-sans-bold">
+              {currency}
+              {ticket.price}
+            </Text>
+          </View>
+        </View>
+
+        <View className="flex-row justify-between items-center mt-2">
+          <Text className="text-slate-500 font-dm-sans text-sm">Subtotal</Text>
+          <Text className="text-slate-800 font-dm-sans-bold text-sm">
+            {currency}
+            {ticket.price}
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between items-center">
+          <Text className="text-slate-500 font-dm-sans text-sm">
+            Service Fee
+          </Text>
+          <Text className="text-slate-800 font-dm-sans-bold text-sm">
+            {currency}0
+          </Text>
+        </View>
       </View>
 
-      <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-dm-sans-medium text-gray-600">Price:</Text>
-        <Text className="font-poppins-semibold text-gray-800">
-          {ticket?.price || 0}
-        </Text>
+      {/* Punched Divider */}
+      <View className="flex-row items-center justify-between bg-slate-50">
+        <View className="w-5 h-10 rounded-r-full bg-white border-r border-t border-b border-slate-200 -ml-[1px]" />
+        <View className="flex-1 h-[1px] border-b border-dashed border-slate-300 mx-2" />
+        <View className="w-5 h-10 rounded-l-full bg-white border-l border-t border-b border-slate-200 -mr-[1px]" />
       </View>
 
-      <View className="w-full h-[1px] bg-gray-200"></View>
+      {/* Lower */}
+      <View className="bg-slate-50 rounded-b-[24px] border-b border-l border-r border-slate-200 p-6 pt-2">
+        <View className="flex-row justify-between items-end">
+          <View>
+            <Text className="text-slate-400 font-dm-sans-bold text-[10px] uppercase tracking-widest mb-1">
+              Total Amount
+            </Text>
+            <Text className="font-poppins-bold text-slate-900 text-3xl">
+              <Text className="text-lg text-slate-400">{currency}</Text>
+              {ticket.price}
+            </Text>
+          </View>
 
-      <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-dm-sans-bold text-xl text-gray-600">Total:</Text>
-        <View className="flex flex-row items-start">
-          <Text className="font-poppins-semibold text-green-500 text-lg">
-            {ticket?.currency ? getCurrencySymbol(ticket.currency as any) : "-"}
-          </Text>
-          <Text className="font-poppins-bold text-green-500 text-3xl">
-            {ticket?.price || 0}
-          </Text>
+          <View className="bg-emerald-100 px-3 py-1.5 rounded-xl flex-row items-center gap-1">
+            <Feather name="shield" size={12} color="#10b981" />
+            <Text className="text-[10px] font-poppins-bold text-emerald-600 uppercase">
+              Guaranteed
+            </Text>
+          </View>
         </View>
       </View>
     </View>
   );
 };
+
+// -----------------------------------------------------------------------------
+// MAIN CHECKOUT SCREEN (Fully Redesigned)
+// -----------------------------------------------------------------------------
 
 const TicketsCheckout = () => {
   const [ticket, setTicket] = useState<ICommunityTicket | null>(null);
-  const [method, setMethod] = useState<TPaymentMethod>("credit");
-  const [stripePaymentMethodId, setStripePaymentMethodId] =
-    useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [purchaseLoading, setPurchaseLoading] = useState<boolean>(false);
-  const [btnLabel, setBtnLabel] = useState<string>("Purchase");
+  const [stripePaymentMethodId, setStripePaymentMethodId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<TPaymentMethod>("credit");
 
   const { id: ticketId, from } = useLocalSearchParams();
-  const { user, setAuthUser } = useAuth();
   const router = useRouter();
+  const { user, setAuthUser } = useAuth();
+  const { pay: payStripe } = useStripe();
+  const toast = useToast();
 
   useEffect(() => {
-    const fetchTicket = async () => {
-      if (!ticketId) return;
+    if (!ticketId) return;
 
-      try {
-        setLoading(true);
-
-        const response = await fetchTicketById(ticketId as string);
-        setTicket(response.data || null);
-      } catch (error) {
-      } finally {
-        setLoading(false);
-      }
+    const loadTicket = async () => {
+      setLoading(true);
+      const res = await fetchTicketById(ticketId as string);
+      setTicket(res.data || null);
+      setLoading(false);
     };
 
-    fetchTicket();
+    loadTicket();
   }, [ticketId]);
 
   useEffect(() => {
     if (!user?.stripe) return;
-
-    if (user.stripe.paymentMethods.length === 0) return;
-    setStripePaymentMethodId(user.stripe.paymentMethods[0].id || "");
+    if (!user.stripe.paymentMethods.length) return;
+    setStripePaymentMethodId(user.stripe.paymentMethods[0].id);
   }, [user]);
-
-  const handleStripePayment = async (
-    amount: number,
-    currency: string,
-  ): Promise<boolean> => {
-    if (stripePaymentMethodId === "") {
-      return false;
-    }
-
-    const stripePayload: IStripePayload = {
-      paymentMethodId: stripePaymentMethodId,
-      amount,
-      currency,
-      metadata: {
-        type: "ticket",
-        ticketId: ticket?._id,
-        ticketPrice: ticket?.price,
-      },
-    };
-
-    const clientSecretResponse = await stripeServices.createPaymentIntent(
-      stripePayload as any,
-    );
-
-    if (!clientSecretResponse.ok) {
-      //   Alert.alert(
-      //     "Payment Error",
-      //     clientSecretResponse.message || "Failed to create payment.",
-      //   );
-      return false;
-    }
-
-    const { id: paymentIntentId, clientSecret } = clientSecretResponse.data;
-
-    // Pay with stripe
-    const { error: confirmPaymentError } = await confirmPayment(clientSecret, {
-      paymentMethodType: "Card",
-      paymentMethodData: {
-        paymentMethodId: stripePaymentMethodId,
-      },
-    });
-
-    if (confirmPaymentError) {
-      //   Alert.alert("Payment Confirmation Error", confirmPaymentError.message);
-      return false;
-    }
-
-    return true;
-  };
 
   const handlePurchase = async () => {
     if (!ticket) return;
 
     try {
       setPurchaseLoading(true);
-      setBtnLabel("Processing Payment...");
-      let paymentResult = false;
 
-      switch (method) {
+      let txHash = null;
+
+      switch (paymentMethod) {
         case "credit":
-          paymentResult = await handleStripePayment(
-            ticket.price,
-            ticket.currency,
-          );
-          break;
+          const res = await payStripe({
+            amount: ticket.price,
+            currency: ticket.currency,
+            paymentMethodId: stripePaymentMethodId,
+            metadata: {
+              type: "ticket",
+              ticketId: ticket._id,
+              ticketPrice: ticket.price,
+            },
+          });
+          txHash = res.paymentIntentId;
       }
 
-      if (!paymentResult) {
-        Alert.alert("Error", "Payment Failed");
-        setBtnLabel("Purchase");
+      if (!txHash) {
+        toast.error("Payment failed");
         return setPurchaseLoading(false);
       }
 
-      const waitForUpdate = async (timeout = 20000) => {
-        if (!user) return;
-
-        const intervalTime = 2000;
+      // Wait for user data refresh
+      const updated = await new Promise<boolean>((resolve) => {
         let elapsed = 0;
+        const interval = setInterval(async () => {
+          elapsed += 2000;
+          const me = await getMe();
 
-        return new Promise<boolean>((resolve) => {
-          const interval = setInterval(async () => {
-            elapsed += intervalTime;
+          if (me.data.tickets.length > (user?.tickets.length || 0)) {
+            setAuthUser(me.data);
+            clearInterval(interval);
+            resolve(true);
+          }
 
-            const response = await getMe();
-
-            if (response.data.tickets.length > user?.tickets.length) {
-              setAuthUser(response.data);
-              clearInterval(interval);
-              resolve(true);
-            }
-
-            if (elapsed >= timeout) {
-              clearInterval(interval);
-              resolve(false);
-            }
-          }, intervalTime);
-        });
-      };
-
-      setBtnLabel("Checking Payment...");
-      const updated = await waitForUpdate();
+          if (elapsed >= 20000) {
+            clearInterval(interval);
+            resolve(false);
+          }
+        }, 2000);
+      });
 
       if (updated) {
-        Alert.alert("Success", "Ticket is purchased");
+        Alert.alert("Success", "Ticket purchased successfully!");
         router.replace(from || ("/mine/tickets" as any));
       }
-    } catch (error: any) {
-      Alert.alert("Error", error?.response?.message || "Internal Server Error");
+    } catch (err: any) {
+      Alert.alert("Error", "Unable to complete purchase");
     } finally {
-      setBtnLabel("Purchase");
       setPurchaseLoading(false);
     }
   };
 
   return (
-    <SimpleContainer title="Checkout">
-      <View className="flex-1 gap-6">
-        <Header ticket={ticket} loading={loading} />
+    <SimpleContainer title="Checkout" scrolled>
+      <View className="flex-1 gap-8 px-1">
+        <TicketHeroCard ticket={ticket} loading={loading} />
 
-        <Detail ticket={ticket} loading={loading} />
+        <TicketReceipt ticket={ticket} />
 
         <PaymentMethodGroup
-          method={method}
+          method={paymentMethod}
           stripePaymentMethodId={stripePaymentMethodId}
-          onSelectMethod={setMethod}
+          onSelectMethod={setPaymentMethod}
           onSelectStripePaymentMethod={setStripePaymentMethodId}
         />
+      </View>
 
+      {/* FOOTER ACTION */}
+      <View className="mt-10 gap-4">
         <Button
           type="primary"
-          label={btnLabel}
-          buttonClassName="h-12"
-          disabled={loading || stripePaymentMethodId === ""}
+          label={
+            purchaseLoading
+              ? "Processing..."
+              : `Pay ${getCurrencySymbol((ticket?.currency.toUpperCase() as any) || "USD")}${
+                  ticket?.price || 0
+                }`
+          }
+          buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
+          textClassName="text-lg font-poppins-bold"
           loading={purchaseLoading}
           onPress={handlePurchase}
+          disabled={loading}
         />
+
+        <View className="flex-row items-center justify-center bg-slate-50 py-3 rounded-xl border border-slate-100">
+          <MaterialCommunityIcons
+            name="shield-check"
+            size={16}
+            color="#94a3b8"
+          />
+          <Text className="text-[10px] text-slate-400 font-dm-sans-bold ml-2 uppercase tracking-tight">
+            256-Bit SSL Secure Checkout
+          </Text>
+        </View>
       </View>
     </SimpleContainer>
   );
