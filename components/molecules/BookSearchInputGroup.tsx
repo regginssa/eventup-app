@@ -212,20 +212,29 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     // Determine the "from" location
     if (includes.hotel) {
-      if (!hotelOffer) return toast.warn("Hotel isn't selected");
+      if (!hotelOffer) return;
 
       fromParams = {
         fromType: "ATLAS",
         fromCode: hotelOffer.id,
       };
     } else {
-      if (!currentLocationCoords) return;
+      if (departureLocation === "current" && !currentLocationCoords) return;
+      if (departureLocation === "home" && !user?.location.coordinate) return;
 
-      fromParams = {
-        fromType: "GPS",
-        fromLat: currentLocationCoords.latitude,
-        fromLng: currentLocationCoords.longitude,
-      };
+      if (departureLocation === "current") {
+        fromParams = {
+          fromType: "GPS",
+          fromLat: currentLocationCoords?.latitude,
+          fromLng: currentLocationCoords?.longitude,
+        };
+      } else {
+        fromParams = {
+          fromType: "GPS",
+          fromLat: user?.location.coordinate?.latitude,
+          fromLng: user?.location.coordinate?.longitude,
+        };
+      }
     }
 
     const toParams = {

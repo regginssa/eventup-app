@@ -37,7 +37,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
   const starCount = parseInt(category.match(/\d+/)?.[0] || "0");
 
   return (
-    <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+    <View className="bg-slate-200 rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
       {/* HEADER SECTION: Title & Image */}
       <View className="flex flex-row items-start justify-between">
         <View className="flex-1 pr-3">
@@ -113,13 +113,13 @@ const HotelItem: React.FC<HotelItemProps> = ({
         </View>
 
         {/* Visual Line with Icon */}
-        <View className="flex-1 items-center px-4">
-          <View className="w-full h-[1px] bg-gray-200 relative flex items-center justify-center">
-            <View className="absolute bg-white px-2">
+        <View className="flex-1 items-center px-4 gap-1">
+          <View className="w-full h-[1px] bg-gray-400 relative flex items-center justify-center">
+            <View className="absolute px-2">
               <MaterialCommunityIcons
                 name="bed-outline"
                 size={14}
-                color="#9ca3af"
+                color="#6b7280"
               />
             </View>
           </View>

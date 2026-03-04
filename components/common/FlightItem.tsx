@@ -39,7 +39,7 @@ const FlightItem: React.FC<FlightItemProps> = ({
       : `${stops.length} Stop${stops.length > 1 ? "s" : ""}`;
 
   return (
-    <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+    <View className="bg-slate-200 rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
       {/* VERTICAL HEADER SECTION */}
       <View className="flex flex-row justify-between items-start mb-4 pb-3 border-b border-gray-50">
         <View className="flex-1">
@@ -89,21 +89,21 @@ const FlightItem: React.FC<FlightItemProps> = ({
           <Text className="font-poppins-bold text-2xl text-gray-800">
             {originIata}
           </Text>
-          <Text className="font-dm-sans-medium text-gray-400 text-[10px]">
+          <Text className="font-dm-sans-medium text-gray-500 text-[10px]">
             {df.toShortDateTime(departureTime)}
           </Text>
         </View>
 
-        <View className="flex-1 items-center px-2">
-          <Text className="font-dm-sans-medium text-[9px] text-gray-400 mb-1">
+        <View className="flex-1 items-center px-2 gap-1">
+          <Text className="font-dm-sans-medium text-[9px] text-gray-500 mb-1">
             {duration}
           </Text>
-          <View className="w-full h-[1px] bg-gray-200 relative flex items-center justify-center">
-            <View className="absolute bg-white px-2">
+          <View className="w-full h-[1px] bg-gray-400 relative flex items-center justify-center">
+            <View className="absolute px-2">
               <MaterialCommunityIcons
                 name="airplane"
                 size={14}
-                color="#d1d5db"
+                color="#6b7280"
               />
             </View>
           </View>
@@ -120,7 +120,7 @@ const FlightItem: React.FC<FlightItemProps> = ({
           <Text className="font-poppins-bold text-2xl text-gray-800">
             {destinationIata}
           </Text>
-          <Text className="font-dm-sans-medium text-gray-400 text-[10px]">
+          <Text className="font-dm-sans-medium text-gray-500 text-[10px]">
             {df.toShortDateTime(arrivalTime)}
           </Text>
         </View>
@@ -134,7 +134,7 @@ const FlightItem: React.FC<FlightItemProps> = ({
             size={12}
             color="#9ca3af"
           />
-          <Text className="font-dm-sans-medium text-[10px] text-gray-400">
+          <Text className="font-dm-sans-medium text-[10px] text-gray-500">
             {df.toShortDate(departureTime)}
           </Text>
         </View>
