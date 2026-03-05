@@ -8,6 +8,8 @@ import { CardPayment, CryptoPayment } from "../common";
 interface PaymentMethodGroupProps {
   method: TPaymentMethod;
   stripePaymentMethodId: string;
+  selectedCryptoCurrency?: string;
+  onSelectCryptoCurrency?: (currency: string) => void;
   onSelectMethod: (method: TPaymentMethod) => void;
   onSelectStripePaymentMethod: (id: string) => void;
 }
@@ -15,6 +17,8 @@ interface PaymentMethodGroupProps {
 const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
   method,
   stripePaymentMethodId,
+  selectedCryptoCurrency,
+  onSelectCryptoCurrency,
   onSelectMethod,
   onSelectStripePaymentMethod,
 }) => {
@@ -214,7 +218,10 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
           onSelectMethod={onSelectStripePaymentMethod}
         />
       ) : method === "crypto" ? (
-        <CryptoPayment />
+        <CryptoPayment
+          selectedCryptoCurrency={selectedCryptoCurrency}
+          onSelectCryptoCurrency={onSelectCryptoCurrency}
+        />
       ) : (
         <></>
       )}

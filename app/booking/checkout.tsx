@@ -1,6 +1,7 @@
 import bookingServices from "@/api/services/booking";
 import eventServices from "@/api/services/event";
 import userServices from "@/api/services/user";
+import Web3API from "@/api/services/web3";
 import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
 import { SimpleContainer } from "@/components/organisms/layout";
@@ -9,6 +10,7 @@ import { useFlight } from "@/components/providers/FlightProvider";
 import { useHotel } from "@/components/providers/HotelProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useTransfer } from "@/components/providers/TransferProvider";
+import { SERVER_API_ENDPOINT } from "@/config/env";
 import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { IBooking } from "@/types/booking";
@@ -17,6 +19,7 @@ import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
@@ -230,6 +233,13 @@ const CheckoutScreen = () => {
   const [baseAmount, setBaseAmount] = useState<number>(0);
   const [commissionAmount, setCommissionAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<TPaymentMethod>("credit");
+  const [crypto, setCrypto] = useState<string>("eth");
+  const [cryptoPrices, setCryptoPrices] = useState<{
+    eth: number;
+    sol: number;
+    chrle: number;
+    babyu: number;
+  }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
 
   const router = useRouter();
   const { eventId, packageType } = useLocalSearchParams();
@@ -243,12 +253,19 @@ const CheckoutScreen = () => {
   useEffect(() => {
     const loadEvent = async () => {
       if (!eventId) return;
-      setLoading(true);
       const res = await eventServices.get(eventId as string);
       setEvent(res.data);
-      setLoading(false);
     };
+
+    const loadCryptoPrices = async () => {
+      const res = await Web3API.getPrices();
+      setCryptoPrices(res.data);
+    };
+
+    setLoading(true);
     loadEvent();
+    loadCryptoPrices();
+    setLoading(false);
   }, [eventId]);
 
   useEffect(() => {
@@ -360,6 +377,21 @@ const CheckoutScreen = () => {
     }
   };
 
+  const getTokenAmount = () => {
+    switch (crypto) {
+      case "eth":
+        return (totalAmount / cryptoPrices.eth).toFixed(6);
+      case "sol":
+        return (totalAmount / cryptoPrices.sol).toFixed(6);
+      case "chrle":
+        return (totalAmount / cryptoPrices.chrle).toFixed(6);
+      case "babyu":
+        return (totalAmount / cryptoPrices.babyu).toFixed(6);
+      default:
+        return totalAmount.toFixed(2);
+    }
+  };
+
   const handlePayment = async (bookingId: string) => {
     let txHash = null;
 
@@ -375,6 +407,35 @@ const CheckoutScreen = () => {
           paymentMethodId: stripePaymentId,
         });
         txHash = response.paymentIntentId || null;
+        break;
+      case "crypto":
+      case "token":
+        const amount = getTokenAmount();
+        if (Number(amount) <= 0) {
+          toast.error("Invalid amount for selected cryptocurrency.");
+          return null;
+        }
+
+        const data = {
+          amount: amount,
+          currency: crypto,
+          webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
+          metadata: { type: "booking", bookingId },
+          redirect: "eventup://booking/status?id=" + bookingId,
+        };
+
+        const res = await Web3API.getCheckoutUrl(data);
+
+        if (!res.data) {
+          toast.error("Failed to initiate crypto payment.");
+          return null;
+        }
+
+        const checkoutUrl = res.data;
+        await WebBrowser.openBrowserAsync(checkoutUrl);
+        break;
+      default:
+        break;
     }
 
     return txHash;
@@ -446,6 +507,8 @@ const CheckoutScreen = () => {
         <PaymentMethodGroup
           method={paymentMethod}
           stripePaymentMethodId={stripePaymentId}
+          selectedCryptoCurrency={crypto}
+          onSelectCryptoCurrency={setCrypto}
           onSelectMethod={setPaymentMethod}
           onSelectStripePaymentMethod={setStripePaymentId}
         />
