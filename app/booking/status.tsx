@@ -78,32 +78,7 @@ const BookingStatus = () => {
       )
         return;
 
-      const offer = booking.flight.offer;
-
-      if (!offer || offer.passengerIds.length === 0 || !offer.totalAmount)
-        return;
-
-      const bodyData = {
-        offerId: offer.id,
-        passengers: [
-          {
-            id: offer.passengerIds[0],
-            type: "adult",
-            given_name: "Amelia", // user.firstName
-            family_name: "Earhart", // user.lastName
-            gender: "f", // user.gener (mr or ms)
-            born_on: "1997-07-24", // user.birthday
-            email: user.email,
-            phone_number: "+442080160509", // user.phone
-            title: "ms", // user.gender
-          },
-        ],
-        totalAmount: Number(offer.totalAmount),
-        currency: offer.currency,
-      };
-
-      const result = await bookFlight(bodyData);
-
+      const result = await bookFlight();
       if (!result.orderId) return toast.error(result.message);
 
       const bookingBodyData: IBooking = {
@@ -422,9 +397,6 @@ const BookingStatus = () => {
                     <View className="flex-row items-baseline mt-1">
                       <Text className="text-white font-poppins-bold text-3xl">
                         ${price.totalAmount}
-                      </Text>
-                      <Text className="text-white/80 font-dm-sans-regular text-sm ml-1">
-                        USD
                       </Text>
                     </View>
                   </View>

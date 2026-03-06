@@ -1,8 +1,8 @@
 import { TPaymentMethod } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
 import { CardPayment, CryptoPayment, TokenPayment } from "../common";
 
 interface PaymentMethodGroupProps {
@@ -23,227 +23,197 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
   onSelectStripePaymentMethod,
 }) => {
   return (
-    <View className="w-full bg-white  rounded-[24px] p-4 gap-6">
-      <View>
-        <Text className="font-poppins-semibold text-gray-700">
-          Payment methods
-        </Text>
+    <View
+      style={styles.container}
+      className="bg-slate-50 border border-slate-200 rounded-[24px]"
+    >
+      <View style={styles.inner}>
+        {/* HEADER */}
+        <View style={styles.header}>
+          <Text className="font-poppins-bold text-lg text-slate-800">
+            Payment Method
+          </Text>
 
-        <Text className="font-dm-sans text-sm text-gray-400">
-          Select your payment method
-        </Text>
+          <Text className="font-dm-sans text-xs text-slate-400">
+            Choose how you want to pay
+          </Text>
+        </View>
+
+        {/* PAYMENT METHODS */}
+        <View style={styles.methodsRow}>
+          <PaymentMethodCard
+            icon="credit-card-outline"
+            label="Card"
+            selected={method === "credit"}
+            onPress={() => onSelectMethod("credit")}
+          />
+
+          <PaymentMethodCard
+            icon="bitcoin"
+            label="Crypto"
+            selected={method === "crypto"}
+            onPress={() => onSelectMethod("crypto")}
+          />
+
+          <PaymentMethodCard
+            icon="unicorn-variant"
+            label="Token"
+            selected={method === "token"}
+            onPress={() => onSelectMethod("token")}
+          />
+        </View>
+
+        <View style={styles.divider} />
+
+        {/* PAYMENT CONTENT */}
+        {method === "credit" ? (
+          <CardPayment
+            methodId={stripePaymentMethodId}
+            onSelectMethod={onSelectStripePaymentMethod}
+          />
+        ) : method === "crypto" ? (
+          <CryptoPayment
+            selectedCryptoCurrency={selectedCryptoCurrency}
+            onSelectCryptoCurrency={onSelectCryptoCurrency}
+          />
+        ) : (
+          <TokenPayment
+            token={selectedCryptoCurrency}
+            onSelect={onSelectCryptoCurrency}
+          />
+        )}
       </View>
-
-      <View className="w-full flex flex-row items-center justify-between">
-        <TouchableOpacity
-          activeOpacity={0.8}
-          className="w-[82px] h-[82px] rounded-md relative"
-          onPress={() => onSelectMethod("credit")}
-        >
-          <View className="absolute inset-[1px] bg-gray-300 rounded-md z-10"></View>
-          {method === "credit" && (
-            <LinearGradient
-              colors={["#C427E0", "#844AFF", "#12A9FF"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.paymentMethodGradient}
-            />
-          )}
-
-          <View className="absolute inset-[2px] bg-[#F2F4F3] z-30 rounded-md flex flex-col items-center justify-center gap-2">
-            {method === "credit" ? (
-              <MaskedView
-                style={{ width: 40, height: 40 }}
-                maskElement={
-                  <MaterialCommunityIcons
-                    name="credit-card-check-outline"
-                    size={40}
-                    color="#374151"
-                  />
-                }
-              >
-                <LinearGradient
-                  colors={["#C427E0", "#844AFF", "#12A9FF"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{ flex: 1 }}
-                />
-              </MaskedView>
-            ) : (
-              <MaterialCommunityIcons
-                name="credit-card-check-outline"
-                size={40}
-                color="#374151"
-              />
-            )}
-
-            <Text className="font-poppins-medium text-lg text-gray-700">
-              Card
-            </Text>
-          </View>
-
-          {method === "credit" && (
-            <View className="absolute w-8 h-8 flex items-center justify-center bg-green-500 z-40 -right-3 -top-1 rounded-sm">
-              <MaterialCommunityIcons
-                name="check-bold"
-                size={16}
-                color="white"
-              />
-            </View>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          className="w-[82px] h-[82px] rounded-md relative"
-          onPress={() => onSelectMethod("crypto")}
-        >
-          <View className="absolute inset-[1px] bg-gray-300 rounded-md z-10"></View>
-          {method === "crypto" && (
-            <LinearGradient
-              colors={["#C427E0", "#844AFF", "#12A9FF"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.paymentMethodGradient}
-            />
-          )}
-
-          <View className="absolute inset-[2px] bg-[#F2F4F3] z-30 rounded-md flex flex-col items-center justify-center gap-2">
-            {method === "crypto" ? (
-              <MaskedView
-                style={{ width: 40, height: 40 }}
-                maskElement={
-                  <MaterialCommunityIcons
-                    name="bitcoin"
-                    size={40}
-                    color="#374151"
-                  />
-                }
-              >
-                <LinearGradient
-                  colors={["#C427E0", "#844AFF", "#12A9FF"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{ flex: 1 }}
-                />
-              </MaskedView>
-            ) : (
-              <MaterialCommunityIcons
-                name="bitcoin"
-                size={40}
-                color="#374151"
-              />
-            )}
-
-            <Text className="font-poppins-medium text-lg text-gray-700">
-              Crypto
-            </Text>
-          </View>
-
-          {method === "crypto" && (
-            <View className="absolute w-8 h-8 flex items-center justify-center bg-green-500 z-40 -right-3 -top-1 rounded-sm">
-              <MaterialCommunityIcons
-                name="check-bold"
-                size={16}
-                color="white"
-              />
-            </View>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          className="w-[82px] h-[82px] rounded-md relative"
-          onPress={() => onSelectMethod("token")}
-        >
-          <View className="absolute inset-[1px] bg-gray-300 rounded-md z-10"></View>
-          {method === "token" && (
-            <LinearGradient
-              colors={["#C427E0", "#844AFF", "#12A9FF"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.paymentMethodGradient}
-            />
-          )}
-
-          <View className="absolute inset-[2px] bg-[#F2F4F3] z-30 rounded-md flex flex-col items-center justify-center gap-2">
-            {method === "token" ? (
-              <MaskedView
-                style={{ width: 40, height: 40 }}
-                maskElement={
-                  <MaterialCommunityIcons
-                    name="unicorn-variant"
-                    size={40}
-                    color="#374151"
-                  />
-                }
-              >
-                <LinearGradient
-                  colors={["#C427E0", "#844AFF", "#12A9FF"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{ flex: 1 }}
-                />
-              </MaskedView>
-            ) : (
-              <MaterialCommunityIcons
-                name="unicorn-variant"
-                size={40}
-                color="#374151"
-              />
-            )}
-
-            <Text className="font-poppins-medium text-lg text-gray-700">
-              Token
-            </Text>
-          </View>
-
-          {method === "token" && (
-            <View className="absolute w-8 h-8 flex items-center justify-center bg-green-500 z-40 -right-3 -top-1 rounded-sm">
-              <MaterialCommunityIcons
-                name="check-bold"
-                size={16}
-                color="white"
-              />
-            </View>
-          )}
-        </TouchableOpacity>
-      </View>
-
-      <View className="w-full h-[1px] bg-gray-200"></View>
-
-      {method === "credit" ? (
-        <CardPayment
-          methodId={stripePaymentMethodId}
-          onSelectMethod={onSelectStripePaymentMethod}
-        />
-      ) : method === "crypto" ? (
-        <CryptoPayment
-          selectedCryptoCurrency={selectedCryptoCurrency}
-          onSelectCryptoCurrency={onSelectCryptoCurrency}
-        />
-      ) : (
-        <TokenPayment
-          token={selectedCryptoCurrency}
-          onSelect={onSelectCryptoCurrency}
-        />
-      )}
     </View>
   );
 };
 
+export default PaymentMethodGroup;
+
+interface CardProps {
+  icon: any;
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}
+
+const PaymentMethodCard: React.FC<CardProps> = ({
+  icon,
+  label,
+  selected,
+  onPress,
+}) => {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      style={styles.methodCard}
+      onPress={onPress}
+    >
+      {selected && (
+        <LinearGradient
+          colors={["#C427E0", "#844AFF", "#12A9FF"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.selectedGradient}
+        />
+      )}
+
+      <View
+        style={[styles.methodInner, selected && { borderColor: "transparent" }]}
+      >
+        <MaterialCommunityIcons
+          name={icon}
+          size={30}
+          color={selected ? "#844AFF" : "#64748b"}
+        />
+
+        <Text
+          style={{
+            marginTop: 6,
+            fontSize: 12,
+            fontWeight: "600",
+            color: selected ? "#1e293b" : "#64748b",
+          }}
+        >
+          {label}
+        </Text>
+      </View>
+
+      {selected && (
+        <View style={styles.check}>
+          <MaterialCommunityIcons name="check-bold" size={14} color="white" />
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+};
+
 const styles = StyleSheet.create({
-  paymentMethodGradient: {
-    position: "absolute",
-    inset: 1,
-    borderRadius: 6,
-    zIndex: 10,
+  container: {
+    marginBottom: 16,
+    shadowColor: "#c084fc",
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
   },
 
-  cryptoIcon: {
-    width: 16,
-    height: 16,
+  gradientBorder: {
+    borderRadius: 24,
+    padding: 1,
+  },
+
+  inner: {
+    backgroundColor: "rgba(255,255,255,0.95)",
+    borderRadius: 23,
+    padding: 20,
+  },
+
+  header: {
+    marginBottom: 20,
+  },
+
+  methodsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  methodCard: {
+    width: 90,
+    height: 90,
+    borderRadius: 18,
+    position: "relative",
+  },
+
+  methodInner: {
+    flex: 1,
+    borderRadius: 18,
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  selectedGradient: {
+    position: "absolute",
+    inset: -1,
+    borderRadius: 18,
+    padding: 1,
+  },
+
+  check: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    width: 22,
+    height: 22,
+    borderRadius: 8,
+    backgroundColor: "#10b981",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: "#f1f5f9",
+    marginVertical: 20,
   },
 });
-
-export default PaymentMethodGroup;

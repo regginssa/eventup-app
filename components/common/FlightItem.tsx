@@ -1,4 +1,4 @@
-import { IFlightOffer } from "@/types/flight";
+import { IFlightOffer, TFlightBookStatus } from "@/types/flight";
 import df from "@/utils/date";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -7,12 +7,14 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 interface FlightItemProps {
   data: IFlightOffer | null;
+  status?: TFlightBookStatus;
   refreshLoading?: boolean;
   onRefresh?: () => Promise<void>;
 }
 
 const FlightItem: React.FC<FlightItemProps> = ({
   data,
+  status,
   refreshLoading,
   onRefresh,
 }) => {
@@ -86,6 +88,35 @@ const FlightItem: React.FC<FlightItemProps> = ({
                 </Text>
               </View>
             </View>
+
+            {status && (
+              <View
+                className={`${status === "processing" ? "bg-yellow-100" : status === "failed" ? "bg-red-100" : "bg-green-100"} px-3 py-1 rounded-full flex-row items-center`}
+              >
+                <MaterialCommunityIcons
+                  name={
+                    status === "processing"
+                      ? "clock-outline"
+                      : status === "failed"
+                        ? "cross-outline"
+                        : "check-decagram"
+                  }
+                  size={14}
+                  color={
+                    status === "processing"
+                      ? "#a16207"
+                      : status === "failed"
+                        ? "#b91c1c"
+                        : "#16a34a"
+                  }
+                />
+                <Text
+                  className={`${status === "processing" ? "text-yellow-700" : status === "failed" ? "text-red-700" : "text-green-700"} font-dm-sans-bold text-[10px] ml-1 uppercase`}
+                >
+                  {status === "processing" ? "Pending" : status}
+                </Text>
+              </View>
+            )}
 
             {onRefresh && (
               <TouchableOpacity
@@ -164,32 +195,31 @@ const FlightItem: React.FC<FlightItemProps> = ({
           </View>
 
           {/* FOOTER ACTION AREA */}
-          <LinearGradient
-            colors={["#F8FAFC", "#FFFFFF"]}
-            className="flex-row items-center justify-between p-3 rounded-2xl border border-slate-50"
-          >
-            <View className="flex-row items-center gap-2">
-              <View className="bg-slate-200/50 p-1.5 rounded-lg">
-                <MaterialCommunityIcons
-                  name="calendar-month"
-                  size={14}
-                  color="#64748b"
-                />
+          <View className="rounded-2xl border border-slate-50 gap-2">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <View className="bg-slate-200/50 p-1.5 rounded-lg">
+                  <MaterialCommunityIcons
+                    name="calendar-month"
+                    size={14}
+                    color="#64748b"
+                  />
+                </View>
+                <Text className="font-dm-sans-bold text-[11px] text-slate-500">
+                  {df.toShortDate(departureTime)}
+                </Text>
               </View>
-              <Text className="font-dm-sans-bold text-[11px] text-slate-500">
-                {df.toShortDate(departureTime)}
-              </Text>
-            </View>
 
-            <View className="flex-row items-baseline gap-1">
-              <Text className="font-dm-sans-bold text-[10px] text-slate-400">
-                {currency}
-              </Text>
-              <Text className="font-poppins-bold text-xl text-slate-900">
-                {totalAmount}
-              </Text>
+              <View className="flex-row items-baseline gap-1">
+                <Text className="font-dm-sans-bold text-[10px] text-slate-400">
+                  {currency}
+                </Text>
+                <Text className="font-poppins-bold text-xl text-slate-900">
+                  {totalAmount}
+                </Text>
+              </View>
             </View>
-          </LinearGradient>
+          </View>
         </View>
       </LinearGradient>
     </View>

@@ -1,4 +1,5 @@
 import {
+  Button,
   FlightItem,
   HotelItem,
   OfficialTicketItem,
@@ -7,6 +8,7 @@ import {
 import { IBooking } from "@/types/booking";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { Text, View } from "react-native";
 
 interface EventDetailItineraryProps {
@@ -37,6 +39,17 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
   }
 
   const { flight, hotel, transfer, ticketStatus, event } = booking;
+  const isCompleted =
+    flight.offer &&
+    flight.status === "confirmed" &&
+    hotel.offer &&
+    hotel.status === "confirmed" &&
+    transfer.airportToHotel?.offer &&
+    transfer.airportToHotel.status === "confirmed" &&
+    transfer.hotelToEvent?.offer &&
+    transfer.hotelToEvent.status === "confirmed";
+
+  const router = useRouter();
 
   // Helper to render the timeline dot/line
   const TimelineConnector = () => (
@@ -114,28 +127,27 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
 
       <View className="gap-0">
         {/* FLIGHT SECTION */}
-        {flight.offer && flight.status === "confirmed" && (
+        {flight.offer && (
           <View className="flex-row gap-3 min-h-[100px]">
             <TimelineConnector />
             <View className="flex-1 pb-6">
-              <FlightItem data={flight.offer} />
+              <FlightItem data={flight.offer} status={flight.status} />
             </View>
           </View>
         )}
 
         {/* TRANSFER: AIRPORT -> HOTEL */}
-        {transfer.airportToHotel?.offer &&
-          transfer.airportToHotel.status === "confirmed" && (
-            <View className="flex-row gap-3 min-h-[100px]">
-              <TimelineConnector />
-              <View className="flex-1 pb-6">
-                <TransferItem data={transfer.airportToHotel.offer} />
-              </View>
+        {transfer.airportToHotel?.offer && (
+          <View className="flex-row gap-3 min-h-[100px]">
+            <TimelineConnector />
+            <View className="flex-1 pb-6">
+              <TransferItem data={transfer.airportToHotel.offer} />
             </View>
-          )}
+          </View>
+        )}
 
         {/* HOTEL SECTION */}
-        {hotel.offer && hotel.status === "confirmed" && (
+        {hotel.offer && (
           <View className="flex-row gap-3 min-h-[100px]">
             <TimelineConnector />
             <View className="flex-1 pb-6">
@@ -145,28 +157,42 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
         )}
 
         {/* TRANSFER: HOTEL -> EVENT */}
-        {transfer.hotelToEvent?.offer &&
-          transfer.hotelToEvent.status === "confirmed" && (
-            <View className="flex-row gap-3 min-h-[100px]">
-              {/* Last dot shouldn't have a trailing line if it's the end */}
-              <View className="items-center w-6">
-                <LinearGradient
-                  colors={["#844AFF", "#C427E0"]}
-                  className="w-4 h-4 rounded-full border-2 border-white shadow-md z-10"
-                />
-                <MaterialCommunityIcons
-                  name="flag-checkered"
-                  size={12}
-                  color="#C427E0"
-                  className="mt-1"
-                />
-              </View>
-              <View className="flex-1 pb-6">
-                <TransferItem data={transfer.hotelToEvent.offer} />
-              </View>
+        {transfer.hotelToEvent?.offer && (
+          <View className="flex-row gap-3 min-h-[100px]">
+            {/* Last dot shouldn't have a trailing line if it's the end */}
+            <View className="items-center w-6">
+              <LinearGradient
+                colors={["#844AFF", "#C427E0"]}
+                className="w-4 h-4 rounded-full border-2 border-white shadow-md z-10"
+              />
+              <MaterialCommunityIcons
+                name="flag-checkered"
+                size={12}
+                color="#C427E0"
+                className="mt-1"
+              />
             </View>
-          )}
+            <View className="flex-1 pb-6">
+              <TransferItem data={transfer.hotelToEvent.offer} />
+            </View>
+          </View>
+        )}
       </View>
+
+      {/* If all components are completed, show a celebratory message */}
+      {!isCompleted && (
+        <Button
+          type="gradient-glass"
+          label="Finialize Booking"
+          buttonClassName="h-12"
+          onPress={() =>
+            router.push({
+              pathname: "/booking/status",
+              params: { id: booking._id },
+            })
+          }
+        />
+      )}
     </View>
   );
 };

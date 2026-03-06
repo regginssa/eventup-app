@@ -1,11 +1,12 @@
 import flightServices from "@/api/services/flight";
 import { IFlightBookingResponse, IFlightOffer } from "@/types/flight";
 import { createContext, useContext, useState } from "react";
+import { useAuth } from "./AuthProvider";
 
 interface FlightContextProps {
   offer: IFlightOffer | null;
   search: (params: any) => Promise<IFlightOffer | null>;
-  book: (bodyData: any) => Promise<IFlightBookingResponse>;
+  book: () => Promise<IFlightBookingResponse>;
   initialize: () => void;
 }
 
@@ -26,14 +27,38 @@ interface FlightProviderProps {
 const FlightProvider: React.FC<FlightProviderProps> = ({ children }) => {
   const [offer, setOffer] = useState<IFlightOffer | null>(null);
 
+  const { user } = useAuth();
+
   const search = async (params: any): Promise<IFlightOffer | null> => {
     const response = await flightServices.get(params);
     setOffer(response.data);
     return response.data;
   };
 
-  const book = async (params: any): Promise<IFlightBookingResponse> => {
-    const response = await flightServices.book(params);
+  const book = async (): Promise<IFlightBookingResponse> => {
+    if (!offer || offer.passengerIds.length === 0 || !offer.totalAmount)
+      return { status: "processing", message: "Invalid offer data" };
+
+    const bodyData = {
+      offerId: offer.id,
+      passengers: [
+        {
+          id: offer.passengerIds[0],
+          type: "adult",
+          given_name: "Amelia", // user.firstName
+          family_name: "Earhart", // user.lastName
+          gender: "f", // user.gener (mr or ms)
+          born_on: "1997-07-24", // user.birthday
+          email: user?.email,
+          phone_number: "+442080160509", // user.phone
+          title: "ms", // user.gender
+        },
+      ],
+      totalAmount: Number(offer.totalAmount),
+      currency: offer.currency,
+    };
+
+    const response = await flightServices.book(bodyData);
     return response.data;
   };
 

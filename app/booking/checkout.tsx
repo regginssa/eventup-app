@@ -20,8 +20,8 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import React, { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { AppState, AppStateStatus, Text, View } from "react-native";
 
 // --- REDESIGNED SUB-COMPONENTS ---
 
@@ -240,6 +240,8 @@ const CheckoutScreen = () => {
     chrle: number;
     babyu: number;
   }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
+  const checkoutUrlRef = useRef<string | null>(null);
+  const appState = useRef<AppStateStatus>(AppState.currentState);
 
   const router = useRouter();
   const { eventId, packageType } = useLocalSearchParams();
@@ -249,6 +251,29 @@ const CheckoutScreen = () => {
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
   const { pay: payStripe } = useStripe();
   const toast = useToast();
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextState) => {
+        // Detect when returning from wallet
+        if (
+          appState.current.match(/background|inactive/) &&
+          nextState === "active"
+        ) {
+          if (checkoutUrlRef.current) {
+            await WebBrowser.openBrowserAsync(checkoutUrlRef.current);
+          }
+        }
+
+        appState.current = nextState;
+      },
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -416,8 +441,6 @@ const CheckoutScreen = () => {
       redirect: "eventup://booking/status?id=" + bookingId,
     };
 
-    console.log("Initiating crypto checkout with data:", data);
-
     const res = await Web3API.getCheckoutUrl(data);
 
     if (!res.data) {
@@ -427,8 +450,9 @@ const CheckoutScreen = () => {
     }
 
     const checkoutUrl = res.data;
-    console.log("Redirecting to crypto checkout:", checkoutUrl);
-    await WebBrowser.openBrowserAsync(checkoutUrl);
+    checkoutUrlRef.current = checkoutUrl;
+
+    await WebBrowser.openBrowserAsync(checkoutUrlRef.current!);
     toast.success("Experience Booked!");
   };
 
@@ -509,7 +533,6 @@ const CheckoutScreen = () => {
         />
 
         {/* PAYMENT METHOD */}
-
         <PaymentMethodGroup
           method={paymentMethod}
           stripePaymentMethodId={stripePaymentId}

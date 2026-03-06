@@ -20,11 +20,11 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
 }) => {
   const cryptos = [
     { label: "ETH", icon: ETH, value: "eth" },
-    { label: "USDT-ETH", icon: USDT, value: "usdt-eth" },
-    { label: "USDC-ETH", icon: USDC, value: "usdc-eth" },
+    { label: "USDT", icon: USDT, value: "usdt-eth" },
+    { label: "USDC", icon: USDC, value: "usdc-eth" },
     { label: "SOL", icon: SOL, value: "sol" },
-    { label: "USDT-SOL", icon: USDT, value: "usdt-sol" },
-    { label: "USDC-SOL", icon: USDC, value: "usdc-sol" },
+    { label: "USDT", icon: USDT, value: "usdt-sol" },
+    { label: "USDC", icon: USDC, value: "usdc-sol" },
   ];
 
   return (

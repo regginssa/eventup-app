@@ -13,7 +13,7 @@ interface TokenPaymentProps {
 const TokenPayment: React.FC<TokenPaymentProps> = ({ token, onSelect }) => {
   const cryptos = [
     { label: "CHRLE", icon: CHRLE, value: "chrle" },
-    { label: "", icon: BABYU, value: "babyu" },
+    { label: "BABYU", icon: BABYU, value: "babyu" },
   ];
 
   return (
