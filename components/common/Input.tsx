@@ -43,15 +43,11 @@ const Input: React.FC<InputProps> = ({
   return (
     <View className="w-full gap-2">
       {label && (
-        <Text
-          className={`font-dm-sans text-sm text-gray-700`}
-        >
-          {label}
-        </Text>
+        <Text className={`font-dm-sans text-sm text-gray-700`}>{label}</Text>
       )}
 
       <View
-        className={`py-1 px-3 gap-2 bg-white flex flex-row items-center ${className}`}
+        className={`py-1 px-3 gap-2 bg-white flex flex-row items-center rounded-xl`}
         style={{
           borderWidth: bordered ? 1 : 0,
           borderColor: "#d1d5db",

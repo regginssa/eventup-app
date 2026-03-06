@@ -262,6 +262,10 @@ const CheckoutScreen = () => {
           nextState === "active"
         ) {
           if (checkoutUrlRef.current) {
+            console.log(
+              "Returned to app, reopening checkout URL to refresh state.",
+              checkoutUrlRef.current,
+            );
             await WebBrowser.openBrowserAsync(checkoutUrlRef.current);
           }
         }
