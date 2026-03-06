@@ -14,8 +14,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useEffect, useLayoutEffect, useState } from "react";
-import { BackHandler, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Text, View } from "react-native";
 
 const BookingStatus = () => {
   const [booking, setBooking] = useState<IBooking | null>(null);
@@ -267,32 +267,6 @@ const BookingStatus = () => {
 
     setCompleted(allConfirmed);
   }, [booking]);
-
-  useEffect(() => {
-    const onBackPress = () => {
-      if (!booking) return true;
-      if (!completed) {
-        toast.info(
-          "You cannot leave this screen until your booking is complete.",
-        );
-        return true; // prevent default back action
-      }
-      return false; // allow back
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onBackPress,
-    );
-
-    return () => backHandler.remove();
-  }, [completed]);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      gestureEnabled: completed,
-    });
-  }, [completed]);
 
   if (!booking) return null;
 

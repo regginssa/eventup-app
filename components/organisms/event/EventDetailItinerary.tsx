@@ -113,16 +113,6 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
             Verified Itinerary
           </Text>
         </View>
-        <View className="bg-green-100 px-3 py-1 rounded-full flex-row items-center">
-          <MaterialCommunityIcons
-            name="check-decagram"
-            size={14}
-            color="#16a34a"
-          />
-          <Text className="text-green-700 font-dm-sans-bold text-[10px] ml-1 uppercase">
-            Confirmed
-          </Text>
-        </View>
       </View>
 
       <View className="gap-0">
@@ -151,7 +141,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
           <View className="flex-row gap-3 min-h-[100px]">
             <TimelineConnector />
             <View className="flex-1 pb-6">
-              <HotelItem data={hotel.offer} />
+              <HotelItem data={hotel.offer} status={hotel.status} />
             </View>
           </View>
         )}
@@ -188,7 +178,13 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
           onPress={() => {
             const { paymentStatus } = booking;
             if (paymentStatus !== "completed") {
-              router.push("/booking/checkout");
+              router.push({
+                pathname: "/booking/checkout",
+                params: {
+                  eventId: event._id,
+                  packageType: booking.packageType,
+                },
+              });
             } else {
               router.push({
                 pathname: "/booking/status",

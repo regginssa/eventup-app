@@ -1,4 +1,4 @@
-import { IHotelOffer } from "@/types/hotel";
+import { IHotelOffer, THotelBookStatus } from "@/types/hotel";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
@@ -6,12 +6,14 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 interface HotelItemProps {
   data: IHotelOffer | null;
+  status?: THotelBookStatus;
   refreshLoading?: boolean;
   onRefresh?: () => Promise<void>;
 }
 
 const HotelItem: React.FC<HotelItemProps> = ({
   data: offer,
+  status,
   refreshLoading,
   onRefresh,
 }) => {
@@ -91,6 +93,35 @@ const HotelItem: React.FC<HotelItemProps> = ({
                   />
                 )}
               </TouchableOpacity>
+            )}
+
+            {status && (
+              <View
+                className={`${status === "pending" ? "bg-yellow-100" : status === "failed" ? "bg-red-100" : "bg-green-100"} px-3 py-1 rounded-full flex-row items-center`}
+              >
+                <MaterialCommunityIcons
+                  name={
+                    status === "pending"
+                      ? "clock-outline"
+                      : status === "failed"
+                        ? "cross-outline"
+                        : "check-decagram"
+                  }
+                  size={14}
+                  color={
+                    status === "pending"
+                      ? "#a16207"
+                      : status === "failed"
+                        ? "#b91c1c"
+                        : "#16a34a"
+                  }
+                />
+                <Text
+                  className={`${status === "pending" ? "text-yellow-700" : status === "failed" ? "text-red-700" : "text-green-700"} font-dm-sans-bold text-[10px] ml-1 uppercase`}
+                >
+                  {status === "pending" ? "Pending" : status}
+                </Text>
+              </View>
             )}
           </View>
 

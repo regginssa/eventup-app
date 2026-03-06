@@ -108,7 +108,8 @@ const OfficialTicketItem: React.FC<OfficialTicketItemProps> = ({ event }) => {
                 />
               </View>
               <Text className="text-slate-600 text-xs" numberOfLines={1}>
-                {venue}
+                {venue} | {event.location?.city?.name},{" "}
+                {event.location?.country?.code}
               </Text>
             </View>
 

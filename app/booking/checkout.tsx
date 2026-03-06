@@ -324,6 +324,39 @@ const CheckoutScreen = () => {
       servicesList.push("Ticket");
     }
 
+    if (
+      booking &&
+      !flightOffer &&
+      !hotelOffer &&
+      !airportToHotelOffer &&
+      !hotelToEventOffer
+    ) {
+      const { flight, hotel, transfer } = booking;
+
+      if (flight.offer) {
+        servicesList.push("Round-trip Flight");
+        base += Number(flight.offer.totalAmount);
+      }
+      if (hotel.offer) {
+        servicesList.push("Hotel Accomodation");
+        base += Number(hotel.offer.totalAmount);
+      }
+      if (transfer.airportToHotel.offer) {
+        servicesList.push("Airport Transfer");
+        base += Number(transfer.airportToHotel.offer.totalAmount);
+      }
+      if (transfer.hotelToEvent.offer) {
+        servicesList.push("Event Shuttle");
+        base += Number(transfer.hotelToEvent.offer.totalAmount);
+      }
+      const commission = Number((base * 0.1).toFixed(2));
+      setBaseAmount(Number(base.toFixed(2)));
+      setCommissionAmount(commission);
+      setTotalAmount(booking.price.totalAmount);
+      setServices(servicesList);
+      return;
+    }
+
     if (flightOffer) {
       servicesList.push("Round-trip Flight");
       base += Number(flightOffer.totalAmount);
@@ -348,7 +381,14 @@ const CheckoutScreen = () => {
     setCommissionAmount(commission);
     setTotalAmount(total);
     setServices(servicesList);
-  }, [flightOffer, hotelOffer, airportToHotelOffer, hotelToEventOffer, event]);
+  }, [
+    flightOffer,
+    hotelOffer,
+    airportToHotelOffer,
+    hotelToEventOffer,
+    event,
+    booking,
+  ]);
 
   const onBook = async () => {
     try {
