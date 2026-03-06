@@ -185,12 +185,17 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
           type="gradient-glass"
           label="Finialize Booking"
           buttonClassName="h-12"
-          onPress={() =>
-            router.push({
-              pathname: "/booking/status",
-              params: { id: booking._id },
-            })
-          }
+          onPress={() => {
+            const { paymentStatus } = booking;
+            if (paymentStatus !== "completed") {
+              router.push("/booking/checkout");
+            } else {
+              router.push({
+                pathname: "/booking/status",
+                params: { id: booking._id },
+              });
+            }
+          }}
         />
       )}
     </View>

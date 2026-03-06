@@ -234,54 +234,45 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
 
         {/* 4. TOTAL SUMMARY CARD */}
         <View className="mt-10">
-          <LinearGradient
-            colors={["#844AFF", "#C427E0"]}
-            className="p-[1.5px]"
-            style={{ borderRadius: 28 }}
-          >
-            <View className="bg-white rounded-[27px] p-6">
-              <View className="flex-row justify-between items-end mb-6">
-                <View className="gap-1">
-                  <Text className="font-dm-sans-bold text-slate-400 text-[10px] uppercase tracking-widest mb-1">
-                    Grand Total
-                  </Text>
+          <View className="flex-row justify-between items-end mb-6">
+            <View className="gap-1">
+              <Text className="font-dm-sans-bold text-slate-400 text-[10px] uppercase tracking-widest mb-1">
+                Grand Total
+              </Text>
 
-                  <View className="flex flex-row items-end">
-                    <Text className="text-sm text-slate-400 font-poppins-semibold">
-                      {flightOffer?.currency || "USD"}{" "}
-                    </Text>
-                    <Text className="font-poppins-bold text-slate-900 text-3xl">
-                      {total}
-                    </Text>
-                  </View>
-                </View>
-                <View className="bg-emerald-100 px-3 py-1.5 rounded-xl flex-row items-center">
-                  <MaterialCommunityIcons
-                    name="shield-check"
-                    size={14}
-                    color="#059669"
-                  />
-                  <Text className="text-emerald-700 font-dm-sans-bold text-[10px] ml-1 uppercase">
-                    Secure
-                  </Text>
-                </View>
+              <View className="flex flex-row items-end">
+                <Text className="text-sm text-slate-400 font-poppins-semibold">
+                  {flightOffer?.currency || "USD"}{" "}
+                </Text>
+                <Text className="font-poppins-bold text-slate-900 text-3xl">
+                  {total}
+                </Text>
               </View>
-
-              <Button
-                type="primary"
-                label={loading ? "Verifying..." : "Confirm & Checkout"}
-                buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
-                textClassName="text-lg font-poppins-bold"
-                loading={loading}
-                onPress={handleCheckout}
+            </View>
+            <View className="bg-emerald-100 px-3 py-1.5 rounded-xl flex-row items-center">
+              <MaterialCommunityIcons
+                name="shield-check"
+                size={14}
+                color="#059669"
               />
-
-              <Text className="text-center text-[10px] text-slate-400 mt-4 leading-4 font-dm-sans-medium px-4">
-                By proceeding, you agree to the booking terms. Prices are locked
-                for 15 minutes.
+              <Text className="text-emerald-700 font-dm-sans-bold text-[10px] ml-1 uppercase">
+                Secure
               </Text>
             </View>
-          </LinearGradient>
+          </View>
+
+          <Button
+            type="primary"
+            label={loading ? "Verifying..." : "Confirm & Checkout"}
+            buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
+            textClassName="text-lg font-poppins-bold"
+            loading={loading}
+            onPress={handleCheckout}
+          />
+
+          <Text className="text-center text-[10px] text-slate-400 mt-4 leading-4 font-dm-sans-medium px-4">
+            By proceeding, you agree to the booking terms.
+          </Text>
         </View>
       </View>
     </Modal>
