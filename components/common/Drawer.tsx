@@ -1,7 +1,6 @@
 import Constants from "expo-constants";
 import React, { useEffect, useRef } from "react";
 import { Animated, Dimensions, Pressable, View } from "react-native";
-import { useTheme } from "../providers/ThemeProvider";
 
 const { width } = Dimensions.get("window");
 const statusBarHeight = Constants.statusBarHeight;
@@ -21,8 +20,6 @@ const Drawer: React.FC<DrawerProps> = ({
 }) => {
   const translateX = useRef(new Animated.Value(width)).current;
 
-  const { theme } = useTheme();
-
   useEffect(() => {
     Animated.spring(translateX, {
       toValue: isOpen ? 0 : width,
@@ -39,9 +36,7 @@ const Drawer: React.FC<DrawerProps> = ({
 
       {/* Drawer container */}
       <Animated.View
-        className={`absolute top-0 right-0 h-full ${
-          theme === "light" ? "bg-white" : "bg-[#171C1C]"
-        } rounded-t-2xl p-6 gap-8 z-50 flex-1`}
+        className={`absolute top-0 right-0 h-full bg-white rounded-t-2xl p-6 gap-8 z-50 flex-1`}
         style={[
           {
             top: statusBarHeight + 10,

@@ -1,4 +1,3 @@
-import { useTheme } from "@/components/providers/ThemeProvider";
 import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
@@ -11,16 +10,10 @@ interface MainContainerProps {
 }
 
 const MainContainer: React.FC<MainContainerProps> = ({ children }) => {
-  const { theme } = useTheme();
-
   return (
     <View className="flex-1 relative">
       <StatusBar translucent backgroundColor="transparent" style="dark" />
-      <Image
-        source={theme === "light" ? bgLightImage : bgDarkImage}
-        alt="bg"
-        style={styles.image}
-      />
+      <Image source={bgLightImage} alt="bg" style={styles.image} />
       <View className="flex-1 pt-2">{children}</View>
     </View>
   );

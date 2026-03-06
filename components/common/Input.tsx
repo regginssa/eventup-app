@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Text, TextInput, View } from "react-native";
-import { useTheme } from "../providers/ThemeProvider";
 
 interface InputProps {
   type: "string" | "number";
@@ -34,7 +33,6 @@ const Input: React.FC<InputProps> = ({
   multiline = false,
 }) => {
   const [inputHeight, setInputHeight] = useState(40);
-  const { theme } = useTheme();
 
   useEffect(() => {
     if (!value) {
@@ -46,14 +44,14 @@ const Input: React.FC<InputProps> = ({
     <View className="w-full gap-2">
       {label && (
         <Text
-          className={`font-dm-sans text-sm ${theme === "light" ? "text-gray-700" : "text-gray-400"}`}
+          className={`font-dm-sans text-sm text-gray-700`}
         >
           {label}
         </Text>
       )}
 
       <View
-        className={`py-1 px-3 gap-2 ${theme === "light" ? "bg-white" : "bg-[#262C2C]"} flex flex-row items-center ${className}`}
+        className={`py-1 px-3 gap-2 bg-white flex flex-row items-center ${className}`}
         style={{
           borderWidth: bordered ? 1 : 0,
           borderColor: "#d1d5db",
@@ -79,7 +77,7 @@ const Input: React.FC<InputProps> = ({
           editable={!disabled}
           value={value}
           onChangeText={onChange}
-          className={`bg-none ${theme === "light" ? "text-black" : "text-white"} font-dm-sans text-sm`}
+          className={`bg-none text-black font-dm-sans text-sm`}
         />
       </View>
 

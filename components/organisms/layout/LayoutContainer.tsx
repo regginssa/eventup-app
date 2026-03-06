@@ -1,7 +1,6 @@
 import { ProfileDrawer } from "@/components/molecules";
 import { useConversation } from "@/components/providers/ConversationProvider";
 import { useNotification } from "@/components/providers/NotificationProvider";
-import { useTheme } from "@/components/providers/ThemeProvider";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -24,30 +23,23 @@ const LayoutContainer: React.FC<LayoutContainerProps> = ({
   const router = useRouter();
   const { totalNotificationsUnreads } = useNotification();
   const { totalMessagesUnreads } = useConversation();
-  const { theme } = useTheme();
 
   return (
     <MainContainer>
       <SafeAreaView className="flex-1 px-5 gap-5">
         <View className="w-full flex flex-row items-center justify-between sticky top-0">
-          <Text
-            className={`font-poppins-semibold text-lg ${theme === "light" ? "text-gray-800" : "text-gray-300"}`}
-          >
+          <Text className={`font-poppins-semibold text-lg text-gray-800`}>
             {title}
           </Text>
 
           <View className="flex flex-row items-center gap-2">
             <TouchableOpacity
               activeOpacity={0.8}
-              className={`w-10 h-10 rounded-full ${theme === "light" ? "bg-white" : "bg-[#262C2C]"} text-gray-300 flex items-center justify-center relative`}
+              className={`w-10 h-10 rounded-full bg-white text-gray-300 flex items-center justify-center relative`}
               style={styles.bar}
               onPress={() => router.push("/notification")}
             >
-              <AntDesign
-                name="bell"
-                size={20}
-                color={theme === "light" ? "#1f2937" : "#d1d5db"}
-              />
+              <AntDesign name="bell" size={20} color="#1f2937" />
 
               {totalNotificationsUnreads > 0 && (
                 <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
@@ -55,30 +47,22 @@ const LayoutContainer: React.FC<LayoutContainerProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.8}
-              className={`w-10 h-10 rounded-full ${theme === "light" ? "bg-white" : "bg-[#262C2C]"} flex items-center justify-center relative`}
+              className={`w-10 h-10 rounded-full bg-white flex items-center justify-center relative`}
               style={styles.bar}
               onPress={() => router.push("/conversation" as any)}
             >
-              <AntDesign
-                name="message"
-                size={20}
-                color={theme === "light" ? "#1f2937" : "#d1d5db"}
-              />
+              <AntDesign name="message" size={20} color="#1f2937" />
               {totalMessagesUnreads > 0 && (
                 <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
               )}
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.8}
-              className={`w-10 h-10 rounded-full ${theme === "light" ? "bg-white" : "bg-[#262C2C]"} flex items-center justify-center`}
+              className={`w-10 h-10 rounded-full bg-white flex items-center justify-center`}
               style={styles.bar}
               onPress={() => setIsOpen(true)}
             >
-              <AntDesign
-                name="bars"
-                size={20}
-                color={theme === "light" ? "#1f2937" : "#d1d5db"}
-              />
+              <AntDesign name="bars" size={20} color="#1f2937" />
             </TouchableOpacity>
           </View>
         </View>

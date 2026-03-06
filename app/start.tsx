@@ -1,5 +1,4 @@
 import { Button } from "@/components/common";
-import { useTheme } from "@/components/providers/ThemeProvider";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -10,16 +9,11 @@ const bgDarkImage = require("@/assets/images/start_dark.png");
 
 const StartScreen = () => {
   const router = useRouter();
-  const { theme } = useTheme();
 
   return (
     <View className="flex-1 items-end relative">
       <StatusBar style="light" />
-      <Image
-        source={theme === "light" ? bgLightImage : bgDarkImage}
-        alt="bg"
-        style={styles.image}
-      />
+      <Image source={bgLightImage} alt="bg" style={styles.image} />
 
       {/* Start action section - Bottom of screen */}
       <View className="w-full absolute bottom-0 px-5 pb-14 gap-5">

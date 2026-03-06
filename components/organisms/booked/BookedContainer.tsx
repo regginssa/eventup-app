@@ -1,6 +1,5 @@
 import { ProfileDrawer } from "@/components/molecules";
 import { Footer, MainContainer } from "@/components/organisms/layout";
-import { useTheme } from "@/components/providers/ThemeProvider";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -20,18 +19,13 @@ interface BookedContainerProps {
 const BookedContainer: React.FC<BookedContainerProps> = ({ children }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const { theme } = useTheme();
   const router = useRouter();
 
   return (
     <MainContainer>
       <SafeAreaView className="flex-1 px-5">
         <View className="w-full flex flex-row items-center justify-between pb-5 sticky top-0">
-          <Text
-            className={`font-poppins-semibold text-lg ${
-              theme === "light" ? "text-gray-800" : "text-gray-200"
-            }`}
-          >
+          <Text className={`font-poppins-semibold text-lg text-gray-800`}>
             Booking Confirmation
           </Text>
           <View className="flex flex-row items-center gap-2">

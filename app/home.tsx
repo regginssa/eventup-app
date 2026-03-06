@@ -3,7 +3,6 @@ import { Input, Tabs } from "@/components/common";
 import { EventFilterModal, EventsPreviewGroup } from "@/components/molecules";
 import { LayoutContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { useTheme } from "@/components/providers/ThemeProvider";
 import { TDropdownItem, TPagination } from "@/types";
 import { IEvent } from "@/types/event";
 import { Country, RegionType } from "@/types/location.types";
@@ -48,8 +47,6 @@ const HomeScreen = () => {
 
   const router = useRouter();
   const { user } = useAuth();
-  const { theme } = useTheme();
-  const isLight = theme === "light";
 
   const fetchFeed = async (page: number = 1) => {
     if (!user?._id) return;
@@ -125,28 +122,18 @@ const HomeScreen = () => {
               type="string"
               placeholder="Search events"
               className="rounded-full h-12"
-              icon={
-                <Feather
-                  name="search"
-                  size={16}
-                  color={isLight ? "#4b5563" : "#d1d5db"}
-                />
-              }
+              icon={<Feather name="search" size={16} color="#4b5563" />}
               value={search}
               onChange={setSearch}
             />
           </View>
           <TouchableOpacity
             activeOpacity={0.8}
-            className={`w-12 h-12 rounded-full flex items-center justify-center ${isLight ? "bg-white" : "bg-[#262c2c]"}`}
+            className={`w-12 h-12 rounded-full flex items-center justify-center bg-white`}
             style={styles.shadow}
             onPress={() => setIsFilterOpen(true)}
           >
-            <MaterialIcons
-              name="tune"
-              size={20}
-              color={isLight ? "#4b5563" : "#d1d5db"}
-            />
+            <MaterialIcons name="tune" size={20} color="#4b5563" />
             {[startDate, country, region, category].filter((f) => f !== null)
               .length > 0 && (
               <View className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center border-2 border-white">
@@ -166,14 +153,12 @@ const HomeScreen = () => {
           <View className="flex flex-row items-center gap-2">
             <View className="w-2 h-2 rounded-full bg-emerald-500" />
             <Text
-              className={`font-poppins-semibold text-[11px] uppercase tracking-widest ${isLight ? "text-gray-500" : "text-gray-400"}`}
+              className={`font-poppins-semibold text-[11px] uppercase tracking-widest text-gray-500`}
             >
               {pagination.total.toLocaleString()} events available
             </Text>
           </View>
-          <Text
-            className={`font-poppins-semibold text-[11px] ${isLight ? "text-gray-500" : "text-gray-400"}`}
-          >
+          <Text className={`font-poppins-semibold text-[11px] text-gray-500`}>
             Page {pagination.page}/
             {Math.ceil(pagination.total / pagination.limit) || 1}
           </Text>

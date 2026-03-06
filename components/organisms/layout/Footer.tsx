@@ -1,4 +1,3 @@
-import { useTheme } from "@/components/providers/ThemeProvider";
 import {
   AntDesign,
   MaterialCommunityIcons,
@@ -16,8 +15,6 @@ const bgDarkImage = require("@/assets/images/footer_dark.png");
 const Footer = () => {
   const router = useRouter();
 
-  const { theme } = useTheme();
-
   const navs = [
     {
       label: "Home",
@@ -25,7 +22,7 @@ const Footer = () => {
         <MaterialIcons
           name="home-filled"
           size={24}
-          color={theme === "light" ? "#1f2937" : "#e5e7eb"}
+          color="#1f2937"
         />
       ),
       href: "/home",
@@ -36,7 +33,7 @@ const Footer = () => {
         <MaterialIcons
           name="event-note"
           size={24}
-          color={theme === "light" ? "#1f2937" : "#e5e7eb"}
+          color="#1f2937"
         />
       ),
       href: "/event/mine",
@@ -46,7 +43,7 @@ const Footer = () => {
         <AntDesign
           name="plus"
           size={24}
-          color={theme === "light" ? "#1f2937" : "#e5e7eb"}
+          color="#1f2937"
         />
       ),
     },
@@ -56,7 +53,7 @@ const Footer = () => {
         <MaterialCommunityIcons
           name="cart-plus"
           size={24}
-          color={theme === "light" ? "#1f2937" : "#e5e7eb"}
+          color="#1f2937"
         />
       ),
       href: "/tickets",
@@ -67,7 +64,7 @@ const Footer = () => {
         <MaterialIcons
           name="shopping-bag"
           size={24}
-          color={theme === "light" ? "#1f2937" : "#e5e7eb"}
+          color="#1f2937"
         />
       ),
       href: "/subscription",
@@ -77,7 +74,7 @@ const Footer = () => {
   return (
     <View className="w-full absolute bottom-0 h-[93px]">
       <Image
-        source={theme === "light" ? bgLightImage : bgDarkImage}
+        source={bgLightImage}
         alt="bg"
         style={styles.image}
       />
@@ -88,9 +85,7 @@ const Footer = () => {
             <TouchableOpacity
               key={index}
               activeOpacity={0.8}
-              className={`flex flex-col items-center justify-center mb-28 ${
-                theme === "light" ? "bg-white" : "bg-[#171C1C]"
-              } rounded-full w-16 h-16`}
+              className={`flex flex-col items-center justify-center mb-28 bg-white rounded-full w-16 h-16`}
               style={styles.plus}
               onPress={() => router.push("/event/create/step1")}
             >
@@ -117,9 +112,7 @@ const Footer = () => {
             >
               {nav.icon}
               <Text
-                className={`font-poppins text-sm ${
-                  theme === "light" ? "text-gray-800" : "text-gray-200"
-                }`}
+                className={`font-poppins text-sm text-gray-800`}
               >
                 {nav.label}
               </Text>

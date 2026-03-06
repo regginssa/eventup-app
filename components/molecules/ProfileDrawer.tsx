@@ -20,7 +20,6 @@ import {
 } from "react-native";
 import { Avatar, Drawer } from "../common";
 import { useAuth } from "../providers/AuthProvider";
-import { useTheme } from "../providers/ThemeProvider";
 
 const LogoImage = require("@/assets/images/logo.png");
 const VerifiedBadge = require("@/assets/images/icons/verified_badge.png");
@@ -31,16 +30,13 @@ interface DrawerProps {
 }
 
 const Header = ({ onClose }: { onClose: () => void }) => {
-  const { theme } = useTheme();
 
   return (
     <View className="w-full flex flex-row items-center justify-between">
       <View className="flex flex-row items-center gap-2">
         <Image source={LogoImage} alt="logo" style={styles.logo} />
         <Text
-          className={`font-poppins-semibold ${
-            theme === "light" ? "text-gray-800" : "text-gray-200"
-          }`}
+          className={`font-poppins-semibold text-gray-800`}
         >
           Charlie Unicorn AI
         </Text>
@@ -48,15 +44,13 @@ const Header = ({ onClose }: { onClose: () => void }) => {
 
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`w-8 h-8 rounded-full ${
-          theme === "light" ? "bg-gray-200" : "bg-[#262C2C]"
-        } flex items-center justify-center`}
+        className={`w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center`}
         onPress={onClose}
       >
         <Entypo
           name="cross"
           size={16}
-          color={theme === "light" ? "#1f2937" : "#e5e7eb"}
+          color="#1f2937"
         />
       </TouchableOpacity>
     </View>
@@ -82,7 +76,6 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
   const [signOutLoading, setSignOutLoading] = useState<boolean>(false);
 
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
 
   const items = [
     {
@@ -91,7 +84,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
         <FontAwesome
           name="edit"
           size={20}
-          color={theme === "light" ? "#374151" : "#d1d5db"}
+          color="#374151"
         />
       ),
       href: `/profile/`,
@@ -103,7 +96,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
         <FontAwesome
           name="id-card-o"
           size={20}
-          color={theme === "light" ? "#374151" : "#d1d5db"}
+          color="#374151"
         />
       ),
       href: "/",
@@ -114,7 +107,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
         <FontAwesome
           name="ticket"
           size={20}
-          color={theme === "light" ? "#374151" : "#d1d5db"}
+          color="#374151"
         />
       ),
       badge: user.tickets.length.toString(),
@@ -126,7 +119,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
         <FontAwesome5
           name="question-circle"
           size={20}
-          color={theme === "light" ? "#374151" : "#d1d5db"}
+          color="#374151"
         />
       ),
       href: "/",
@@ -137,7 +130,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
         <AntDesign
           name="info-circle"
           size={20}
-          color={theme === "light" ? "#374151" : "#d1d5db"}
+          color="#374151"
         />
       ),
       href: "/",
@@ -164,9 +157,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
             <View className="">
               <View className="flex flex-row items-center gap-2">
                 <Text
-                  className={`font-poppins-semibold ${
-                    theme === "light" ? "text-gray-800" : "text-gray-200"
-                  }`}
+                  className={`font-poppins-semibold text-gray-800`}
                 >
                   {user.name}
                 </Text>
@@ -177,9 +168,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
                 />
               </View>
               <Text
-                className={`font-dm-sans ${
-                  theme === "light" ? "text-gray-600" : "text-gray-300"
-                } text-sm`}
+                className={`font-dm-sans text-gray-600 text-sm`}
               >
                 {user.title}
               </Text>
@@ -204,19 +193,13 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
               <View className="flex flex-row items-center gap-2">
                 {item.icon}
                 <Text
-                  className={`${
-                    theme === "light" ? "text-gray-700" : "text-gray-300"
-                  } font-poppins`}
+                  className={`text-gray-700 font-poppins`}
                 >
                   {item.label}
                 </Text>
                 {item.badge && (
                   <Text
-                    className={`rounded-full ${
-                      theme === "light"
-                        ? "bg-gray-200 text-gray-700"
-                        : "bg-[#262C2C] text-gray-300"
-                    } font-poppins-medium text-xs px-2 py-1`}
+                    className={`rounded-full bg-gray-200 text-gray-700 font-poppins-medium text-xs px-2 py-1`}
                   >
                     {item.badge}
                   </Text>
@@ -226,7 +209,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
               <Feather
                 name="arrow-up-right"
                 size={20}
-                color={theme === "light" ? "#374151" : "#d1d5db"}
+                color="#374151"
               />
             </TouchableOpacity>
           ))}

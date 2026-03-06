@@ -1,4 +1,3 @@
-import { useTheme } from "@/components/providers/ThemeProvider";
 import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -16,30 +15,18 @@ const AuthScreenContainer: React.FC<AuthScreenContainerProps> = ({
   subtitle,
   children,
 }) => {
-  const { theme } = useTheme();
-
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <StatusBar style="dark" />
       <View
-        className={`flex-1 items-center justify-center gap-6 ${
-          theme === "light" ? "bg-[#EEF0FC]" : "bg-black"
-        } p-5`}
+        className={`flex-1 items-center justify-center gap-6 bg-[#EEF0FC] p-5`}
       >
         <View className="flex flex-col items-center justify-center">
           <Image source={LogoImage} style={styles.logo} />
-          <Text
-            className={`font-poppins-semibold text-2xl ${
-              theme === "light" ? "text-gray-800" : "text-gray-200"
-            }`}
-          >
+          <Text className={`font-poppins-semibold text-2xl text-gray-800`}>
             {title}
           </Text>
-          <Text
-            className={`font-dm-sans-medium ${
-              theme === "light" ? "text-gray-600" : "text-gray-400"
-            }`}
-          >
+          <Text className={`font-dm-sans-medium text-gray-600`}>
             {subtitle}
           </Text>
         </View>
