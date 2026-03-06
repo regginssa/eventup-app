@@ -32,5 +32,6 @@ export { default as Textarea } from "./Textarea";
 export { default as TicketQR } from "./TicketQR";
 export { default as TimezonePicker } from "./TimezonePicker";
 export { default as Toast } from "./Toast";
+export { default as TokenPayment } from "./TokenPayment";
 export { default as TransferItem } from "./TransferItem";
 export { default as VoiceMessage } from "./VoiceMessage";

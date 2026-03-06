@@ -8,7 +8,6 @@ import {
   MessageProvider,
   NotificationProvider,
   SocketProvider,
-  ThemeProvider,
   ToastProvider,
   TransferProvider,
 } from "@/components/providers";
@@ -35,16 +34,14 @@ const InitContainer: React.FC<InitContainerProps> = ({ children }) => {
                       <FlightProvider>
                         <HotelProvider>
                           <TransferProvider>
-                            <ThemeProvider>
-                              <KeyboardAvoidingView
-                                behavior={
-                                  Platform.OS === "ios" ? "padding" : undefined
-                                }
-                                style={{ flex: 1 }}
-                              >
-                                <ToastProvider>{children}</ToastProvider>
-                              </KeyboardAvoidingView>
-                            </ThemeProvider>
+                            <KeyboardAvoidingView
+                              behavior={
+                                Platform.OS === "ios" ? "padding" : undefined
+                              }
+                              style={{ flex: 1 }}
+                            >
+                              <ToastProvider>{children}</ToastProvider>
+                            </KeyboardAvoidingView>
                           </TransferProvider>
                         </HotelProvider>
                       </FlightProvider>

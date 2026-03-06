@@ -3,7 +3,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { CardPayment, CryptoPayment } from "../common";
+import { CardPayment, CryptoPayment, TokenPayment } from "../common";
 
 interface PaymentMethodGroupProps {
   method: TPaymentMethod;
@@ -223,7 +223,10 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
           onSelectCryptoCurrency={onSelectCryptoCurrency}
         />
       ) : (
-        <></>
+        <TokenPayment
+          token={selectedCryptoCurrency}
+          onSelect={onSelectCryptoCurrency}
+        />
       )}
     </View>
   );

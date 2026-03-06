@@ -359,22 +359,77 @@ const CheckoutScreen = () => {
       const bookingId = await createBooking();
       if (!bookingId) throw new Error("Booking Failed");
 
-      const txHash = await handlePayment(bookingId);
-      if (!txHash) {
-        await bookingServices.remove(bookingId);
-        setBookLoading(false);
-        return toast.error("Payment failed");
+      switch (paymentMethod) {
+        case "credit":
+          await handleCreditPayment(bookingId);
+          break;
+        case "crypto":
+        case "token":
+          await handleCryptoPayment(bookingId);
+          break;
+        default:
+          toast.error("Invalid payment method.");
       }
-
-      router.replace({
-        pathname: "/booking/status",
-        params: { id: bookingId },
-      });
-      toast.success("Experience Booked!");
     } catch (err) {
       toast.error("Process failed. Please try again.");
+    } finally {
       setBookLoading(false);
     }
+  };
+
+  const handleCreditPayment = async (bookingId: string) => {
+    const response = await payStripe({
+      amount: totalAmount,
+      currency: "USD",
+      metadata: {
+        type: "booking",
+        bookingId,
+      },
+      paymentMethodId: stripePaymentId,
+    });
+    const txHash = response.paymentIntentId || null;
+
+    if (!txHash) {
+      await bookingServices.remove(bookingId);
+      return toast.error("Payment failed");
+    }
+
+    router.replace({
+      pathname: "/booking/status",
+      params: { id: bookingId },
+    });
+    toast.success("Experience Booked!");
+  };
+
+  const handleCryptoPayment = async (bookingId: string) => {
+    const amount = getTokenAmount();
+    if (Number(amount) <= 0) {
+      toast.error("Invalid amount for selected cryptocurrency.");
+      return null;
+    }
+
+    const data = {
+      amount: amount,
+      currency: crypto,
+      webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
+      metadata: { type: "booking", bookingId },
+      redirect: "eventup://booking/status?id=" + bookingId,
+    };
+
+    console.log("Initiating crypto checkout with data:", data);
+
+    const res = await Web3API.getCheckoutUrl(data);
+
+    if (!res.data) {
+      await bookingServices.remove(bookingId);
+      toast.error("Failed to initiate crypto payment.");
+      return null;
+    }
+
+    const checkoutUrl = res.data;
+    console.log("Redirecting to crypto checkout:", checkoutUrl);
+    await WebBrowser.openBrowserAsync(checkoutUrl);
+    toast.success("Experience Booked!");
   };
 
   const getTokenAmount = () => {
@@ -390,55 +445,6 @@ const CheckoutScreen = () => {
       default:
         return totalAmount.toFixed(2);
     }
-  };
-
-  const handlePayment = async (bookingId: string) => {
-    let txHash = null;
-
-    switch (paymentMethod) {
-      case "credit":
-        const response = await payStripe({
-          amount: totalAmount,
-          currency: "USD",
-          metadata: {
-            type: "booking",
-            bookingId,
-          },
-          paymentMethodId: stripePaymentId,
-        });
-        txHash = response.paymentIntentId || null;
-        break;
-      case "crypto":
-      case "token":
-        const amount = getTokenAmount();
-        if (Number(amount) <= 0) {
-          toast.error("Invalid amount for selected cryptocurrency.");
-          return null;
-        }
-
-        const data = {
-          amount: amount,
-          currency: crypto,
-          webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
-          metadata: { type: "booking", bookingId },
-          redirect: "eventup://booking/status?id=" + bookingId,
-        };
-
-        const res = await Web3API.getCheckoutUrl(data);
-
-        if (!res.data) {
-          toast.error("Failed to initiate crypto payment.");
-          return null;
-        }
-
-        const checkoutUrl = res.data;
-        await WebBrowser.openBrowserAsync(checkoutUrl);
-        break;
-      default:
-        break;
-    }
-
-    return txHash;
   };
 
   const createBooking = async (): Promise<string | null> => {
