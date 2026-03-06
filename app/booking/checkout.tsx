@@ -1,4 +1,4 @@
-import bookingServices from "@/api/services/booking";
+import BookingAPI from "@/api/services/booking";
 import eventServices from "@/api/services/event";
 import userServices from "@/api/services/user";
 import Web3API from "@/api/services/web3";
@@ -19,9 +19,8 @@ import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
-import React, { useEffect, useRef, useState } from "react";
-import { AppState, AppStateStatus, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Linking, Text, View } from "react-native";
 
 // --- REDESIGNED SUB-COMPONENTS ---
 
@@ -240,8 +239,7 @@ const CheckoutScreen = () => {
     chrle: number;
     babyu: number;
   }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
-  const checkoutUrlRef = useRef<string | null>(null);
-  const appState = useRef<AppStateStatus>(AppState.currentState);
+  const [booking, setBooking] = useState<IBooking | null>(null);
 
   const router = useRouter();
   const { eventId, packageType } = useLocalSearchParams();
@@ -252,32 +250,32 @@ const CheckoutScreen = () => {
   const { pay: payStripe } = useStripe();
   const toast = useToast();
 
-  useEffect(() => {
-    const subscription = AppState.addEventListener(
-      "change",
-      async (nextState) => {
-        // Detect when returning from wallet
-        if (
-          appState.current.match(/background|inactive/) &&
-          nextState === "active"
-        ) {
-          if (checkoutUrlRef.current) {
-            console.log(
-              "Returned to app, reopening checkout URL to refresh state.",
-              checkoutUrlRef.current,
-            );
-            await WebBrowser.openBrowserAsync(checkoutUrlRef.current);
-          }
-        }
+  // useEffect(() => {
+  //   const subscription = AppState.addEventListener(
+  //     "change",
+  //     async (nextState) => {
+  //       // Detect when returning from wallet
+  //       if (
+  //         appState.current.match(/background|inactive/) &&
+  //         nextState === "active"
+  //       ) {
+  //         if (checkoutUrlRef.current) {
+  //           console.log(
+  //             "Returned to app, reopening checkout URL to refresh state.",
+  //             checkoutUrlRef.current,
+  //           );
+  //           await WebBrowser.openBrowserAsync(checkoutUrlRef.current);
+  //         }
+  //       }
 
-        appState.current = nextState;
-      },
-    );
+  //       appState.current = nextState;
+  //     },
+  //   );
 
-    return () => {
-      subscription.remove();
-    };
-  }, []);
+  //   return () => {
+  //     subscription.remove();
+  //   };
+  // }, []);
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -291,11 +289,26 @@ const CheckoutScreen = () => {
       setCryptoPrices(res.data);
     };
 
+    const loadBooking = async () => {
+      console.log("Checking for existing booking...");
+      if (!user?._id || !eventId) return;
+      const res = await BookingAPI.getByUserIdAndEventId(
+        user._id,
+        eventId as string,
+      );
+
+      if (res.data && res.data.paymentStatus !== "completed") {
+        console.log("Existing booking found, loading details...");
+        setBooking(res.data);
+      }
+    };
+
     setLoading(true);
     loadEvent();
     loadCryptoPrices();
+    loadBooking();
     setLoading(false);
-  }, [eventId]);
+  }, [eventId, user?._id]);
 
   useEffect(() => {
     if (user?.stripe?.paymentMethods?.length) {
@@ -385,8 +398,13 @@ const CheckoutScreen = () => {
         });
       }
 
-      const bookingId = await createBooking();
-      if (!bookingId) throw new Error("Booking Failed");
+      let bookingId = booking?._id || null;
+
+      if (!bookingId) {
+        console.log("Creating booking before payment...");
+        bookingId = await createBooking();
+        if (!bookingId) throw new Error("Booking Failed");
+      }
 
       switch (paymentMethod) {
         case "credit":
@@ -419,7 +437,7 @@ const CheckoutScreen = () => {
     const txHash = response.paymentIntentId || null;
 
     if (!txHash) {
-      await bookingServices.remove(bookingId);
+      await BookingAPI.remove(bookingId);
       return toast.error("Payment failed");
     }
 
@@ -448,15 +466,13 @@ const CheckoutScreen = () => {
     const res = await Web3API.getCheckoutUrl(data);
 
     if (!res.data) {
-      await bookingServices.remove(bookingId);
+      await BookingAPI.remove(bookingId);
       toast.error("Failed to initiate crypto payment.");
       return null;
     }
 
     const checkoutUrl = res.data;
-    checkoutUrlRef.current = checkoutUrl;
-
-    await WebBrowser.openBrowserAsync(checkoutUrlRef.current!);
+    await Linking.openURL(checkoutUrl);
     toast.success("Experience Booked!");
   };
 
@@ -511,7 +527,11 @@ const CheckoutScreen = () => {
       status: "pending",
     };
 
-    const response = await bookingServices.create(bodyData);
+    const response = await BookingAPI.create(bodyData);
+
+    if (response.data) {
+      setBooking(response.data);
+    }
     return response.data._id || null;
   };
 
