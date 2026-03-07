@@ -63,6 +63,8 @@ const HotelItem: React.FC<HotelItemProps> = ({
     name,
     category,
     address,
+    city,
+    countryCode,
     totalAmount,
     currency,
     roomName,
@@ -146,9 +148,9 @@ const HotelItem: React.FC<HotelItemProps> = ({
                   />
                   <Text
                     className="font-dm-sans-bold text-slate-400 text-[11px] flex-1"
-                    numberOfLines={1}
+                    numberOfLines={2}
                   >
-                    {address}
+                    {address} | {city}, {countryCode}
                   </Text>
                 </View>
               </View>

@@ -78,7 +78,7 @@ const BookingStatus = () => {
       )
         return;
 
-      const result = await bookFlight();
+      const result = await bookFlight(booking.flight.offer.id);
       if (!result.orderId) return toast.error(result.message);
 
       const bookingBodyData: IBooking = {
@@ -102,23 +102,7 @@ const BookingStatus = () => {
       )
         return;
 
-      const { offer } = booking.hotel;
-
-      const bodyData = {
-        rateKey: offer.rateKey,
-        paxes: [
-          {
-            roomId: 1,
-            type: "AD",
-            name: "John", // user.firstName
-            surname: "Doe", // user.lastName
-          },
-        ],
-        email: user.email,
-        phone: "+442080160509", // user.phone
-      };
-
-      const result = await bookHotel(bodyData);
+      const result = await bookHotel(booking.hotel.offer.id);
       if (result.status !== "confirmed") return toast.error(result.message);
 
       const bookingBodyData: IBooking = {
@@ -330,7 +314,7 @@ const BookingStatus = () => {
   ].filter(Boolean);
 
   return (
-    <SimpleContainer title="Booking Status" scrolled hiddenBack>
+    <SimpleContainer title="Booking Status" scrolled>
       {initLoading ? (
         <Spinner size="lg" text="Syncing..." />
       ) : (

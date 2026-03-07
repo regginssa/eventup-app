@@ -6,7 +6,7 @@ import { useAuth } from "./AuthProvider";
 interface FlightContextProps {
   offer: IFlightOffer | null;
   search: (params: any) => Promise<IFlightOffer | null>;
-  book: () => Promise<IFlightBookingResponse>;
+  book: (offerId: string) => Promise<IFlightBookingResponse>;
   initialize: () => void;
 }
 
@@ -35,12 +35,12 @@ const FlightProvider: React.FC<FlightProviderProps> = ({ children }) => {
     return response.data;
   };
 
-  const book = async (): Promise<IFlightBookingResponse> => {
+  const book = async (offerId: string): Promise<IFlightBookingResponse> => {
     if (!offer || offer.passengerIds.length === 0 || !offer.totalAmount)
       return { status: "processing", message: "Invalid offer data" };
 
     const bodyData = {
-      offerId: offer.id,
+      offerId,
       passengers: [
         {
           id: offer.passengerIds[0],

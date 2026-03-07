@@ -363,6 +363,7 @@ const CheckoutScreen = () => {
     }
     if (hotelOffer) {
       servicesList.push("Hotel Accomodation");
+      console.log("Hotel Offer Total Amount:", hotelOffer.totalAmount);
       base += Number(hotelOffer.totalAmount);
     }
     if (airportToHotelOffer) {

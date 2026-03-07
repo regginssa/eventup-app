@@ -1,12 +1,13 @@
 import services from "@/api/services/hotel";
 import { IHotelBookingResponse, IHotelOffer } from "@/types/hotel";
 import { createContext, useContext, useState } from "react";
+import { useAuth } from "./AuthProvider";
 
 interface HotelContextProps {
   offer: IHotelOffer | null;
   search: (params: any) => Promise<IHotelOffer | null>;
   quote: (rateId: string) => Promise<IHotelOffer | null>;
-  book: (bodyData: any) => Promise<IHotelBookingResponse>;
+  book: (quoteId: string) => Promise<IHotelBookingResponse>;
   initialize: () => void;
 }
 
@@ -27,6 +28,8 @@ interface HotelProviderProps {
 const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
   const [offer, setOffer] = useState<IHotelOffer | null>(null);
 
+  const { user } = useAuth();
+
   const search = async (params: IHotelOffer | null) => {
     const response = await services.get(params);
     setOffer(response.data);
@@ -35,12 +38,26 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
 
   const quote = async (rateId: string): Promise<IHotelOffer | null> => {
     const response = await services.quote(rateId);
-    setOffer(response.data);
+    if (response.data) {
+      setOffer(response.data);
+    }
     return response.data;
   };
 
-  const book = async (bodyData: any): Promise<IHotelBookingResponse> => {
-    const response = await services.book(bodyData);
+  const book = async (quoteId: string): Promise<IHotelBookingResponse> => {
+    const body = {
+      quoteId,
+      phoneNumber: "+442080160509",
+      guestInfo: {
+        given_name: "Jhon",
+        family_name: "Doe",
+        born_on: "1990-01-01",
+        email: user?.email,
+      },
+      specialRequests: "123",
+    };
+
+    const response = await services.book(body);
     return response.data;
   };
 
