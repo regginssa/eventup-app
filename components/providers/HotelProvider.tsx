@@ -5,7 +5,7 @@ import { createContext, useContext, useState } from "react";
 interface HotelContextProps {
   offer: IHotelOffer | null;
   search: (params: any) => Promise<IHotelOffer | null>;
-  checkRates: (params: any) => Promise<IHotelOffer | null>;
+  quote: (rateId: string) => Promise<IHotelOffer | null>;
   book: (bodyData: any) => Promise<IHotelBookingResponse>;
   initialize: () => void;
 }
@@ -33,8 +33,8 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
     return response.data;
   };
 
-  const checkRates = async (params: any): Promise<IHotelOffer | null> => {
-    const response = await services.checkRates(params);
+  const quote = async (rateId: string): Promise<IHotelOffer | null> => {
+    const response = await services.quote(rateId);
     setOffer(response.data);
     return response.data;
   };
@@ -47,9 +47,7 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
   const initialize = () => setOffer(null);
 
   return (
-    <HotelContext.Provider
-      value={{ offer, search, checkRates, book, initialize }}
-    >
+    <HotelContext.Provider value={{ offer, search, quote, book, initialize }}>
       {children}
     </HotelContext.Provider>
   );

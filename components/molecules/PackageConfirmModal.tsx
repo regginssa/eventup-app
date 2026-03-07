@@ -39,7 +39,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
 
   const router = useRouter();
   const { offer: flightOffer } = useFlight();
-  const { offer: hotelOffer, checkRates } = useHotel();
+  const { offer: hotelOffer, quote } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
   const toast = useToast();
 
@@ -51,8 +51,8 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
       setLoading(true);
 
       if (hotelOffer) {
-        const checkedOffer = await checkRates({ rateKey: hotelOffer.rateKey });
-        if (!checkedOffer) {
+        const offerQuote = await quote(hotelOffer.id);
+        if (!offerQuote) {
           setLoading(false);
           return toast.error("Checking hotel rates failed");
         }

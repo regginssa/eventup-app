@@ -7,10 +7,10 @@ const get = async (params: any): Promise<ApiResponse<IHotelOffer | null>> => {
   return await AxiosInstance.get(HOTEL_BASE, { params });
 };
 
-const checkRates = async (
-  params: any,
+const quote = async (
+  rateId: string,
 ): Promise<ApiResponse<IHotelOffer | null>> => {
-  return await AxiosInstance.get(HOTEL_BASE + "checkrates", { params });
+  return await AxiosInstance.post(HOTEL_BASE + "quote", { rateId });
 };
 
 const book = async (
@@ -19,4 +19,4 @@ const book = async (
   return await AxiosInstance.post(HOTEL_BASE, bodyData);
 };
 
-export default { get, checkRates, book };
+export default { get, quote, book };

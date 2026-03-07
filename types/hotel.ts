@@ -2,39 +2,38 @@ export type THotelBookStatus = "confirmed" | "pending" | "failed" | "cancelled";
 
 export interface IHotelBookingResponse {
   status: THotelBookStatus;
-  bookingReference: string; // Hotelbeds 'reference' (e.g., 123-456789)
-  clientReference: string; // Your internal ID (e.g., EVENTUP_171075)
-  hotelName: string;
-  checkIn: string;
-  checkOut: string;
-  totalAmount: number;
-  currency: string;
-  vatNumber?: string; // Useful for the "Merchant Model" invoices
+  id?: string;
+  reference?: string;
+  hotelName?: string;
+  checkIn?: string;
+  checkOut?: string;
   message: string;
 }
+
+export type THotelService = {
+  type: string;
+  description: string;
+};
 
 export interface IHotelOffer {
   id: string;
   name: string;
   category: string;
-  // Address Breakdown
-  address: string; // Full formatted string
-  street: string; // For Transfer API 'address' field
-  city: string; // For Transfer API 'town' field
-  postalCode: string; // For Transfer API 'zip' field
-  countryCode: string; // For Transfer API 'countryCode' field
-
+  address: string;
+  street: string;
+  city: string;
+  postalCode: string;
+  countryCode: string;
   latitude: string;
   longitude: string;
   image: string;
   currency: string;
   totalAmount: number;
   netAmount: number;
-  rateKey: string;
   roomName: string;
   boardName: string;
-  cancellationPolicy: {
-    amount: number;
-    from: string;
-  } | null;
+  services: THotelService[];
+  checkIn: string;
+  checkOut: string;
+  checkInInfo: string;
 }
