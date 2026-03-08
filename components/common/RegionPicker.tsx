@@ -83,7 +83,7 @@ const RegionPicker: React.FC<RegionPickerProps> = ({
 
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`py-1 px-4 gap-2 bg-white rounded-md flex flex-row items-center ${className}`}
+        className={`py-1 px-4 gap-2 bg-white rounded-full flex flex-row items-center ${className}`}
         style={[{ borderWidth: bordered ? 1 : 0, borderColor: "#d1d5db" }]}
         onPress={() => setIsOpen(true)}
       >

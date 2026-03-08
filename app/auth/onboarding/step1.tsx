@@ -1,13 +1,15 @@
-import { updateUser } from "@/api/services/user";
+import UserAPI from "@/api/services/user";
 import {
   Button,
   CountryPicker,
+  Dropdown,
   LocationPicker,
+  PhoneInput,
   RegionPicker,
 } from "@/components/common";
 import { OnboardingContainer } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { TCoordinate, TLocation } from "@/types";
+import { TCoordinate, TDropdownItem, TLocation } from "@/types";
 import { Country, RegionType } from "@/types/location.types";
 import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -15,13 +17,23 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 
+const genders = [
+  { label: "Male", value: "mr" },
+  { label: "Female", value: "ms" },
+];
+
 const OnboardingStep1Screen = () => {
+  const [selectedGender, setSelectedGender] = useState<TDropdownItem>(
+    genders[0],
+  );
   const [country, setCountry] = useState<Country | null>(null);
   const [region, setRegion] = useState<RegionType | null>(null);
   const [address, setAddress] = useState<TLocation | null>(null);
+  const [phone, setPhone] = useState<string>("");
   const [invalidCountry, setInvalidCountry] = useState<boolean>(false);
   const [invalidRegion, setInvalidRegion] = useState<boolean>(false);
   const [invalidAddress, setInvalidAddress] = useState<boolean>(false);
+  const [invalidPhone, setInvalidPhone] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const router = useRouter();
@@ -60,7 +72,7 @@ const OnboardingStep1Screen = () => {
         },
       };
 
-      const response = await updateUser(user._id, updates);
+      const response = await UserAPI.update(user._id, updates);
 
       if (response.ok) {
         setAuthUser(response.data);
@@ -90,6 +102,20 @@ const OnboardingStep1Screen = () => {
       subtitle="Tell us a bit about yourself"
       onBack={() => router.replace("/start")}
     >
+      <Dropdown
+        label="Gender"
+        placeholder="Gender"
+        items={genders}
+        icon={
+          <MaterialCommunityIcons
+            name="account-outline"
+            size={16}
+            color="#4b5563"
+          />
+        }
+        selectedItem={selectedGender}
+        onSelect={setSelectedGender}
+      />
       <CountryPicker
         label="Country"
         placeholder="Select your country"
@@ -118,6 +144,15 @@ const OnboardingStep1Screen = () => {
         value={address}
         onPick={setAddress}
       />
+
+      <PhoneInput
+        label="Phone number"
+        placeholder="Select your country first"
+        countryCode={country?.cca2}
+        value={phone}
+        onChange={setPhone}
+      />
+
       <Button
         type="primary"
         label="Continue"

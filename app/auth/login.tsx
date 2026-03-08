@@ -148,7 +148,7 @@ const LoginScreen = () => {
 
         <Button
           type="primary"
-          label="Sign in with email"
+          label="Sign in"
           buttonClassName="h-12"
           textClassName="text-sm"
           loading={emailLoading}

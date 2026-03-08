@@ -52,7 +52,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`py-1 px-4 gap-2 bg-white flex flex-row items-center ${className}`}
+        className={`py-1 px-4 gap-2 bg-white flex flex-row items-center rounded-full ${className}`}
         style={[{ borderWidth: bordered ? 1 : 0, borderColor: "#d1d5db" }]}
         onPress={!disabled ? () => setIsOpen((p) => !p) : undefined}
         disabled={disabled}
@@ -79,12 +79,15 @@ const Dropdown: React.FC<DropdownProps> = ({
           />
 
           <View
-            className={`absolute left-0 right-0 bg-white z-20 ${
+            className={`absolute left-0 right-0 bg-white z-20 rounded-3xl ${
               direction === "up" ? "bottom-full mb-1" : "top-full mt-1"
             }`}
             style={styles.dropdownContainer}
           >
-            <ScrollView keyboardShouldPersistTaps="handled">
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              style={{ borderRadius: 24 }}
+            >
               {items.length === 0 ? (
                 <View className="px-4 py-6">
                   <Text className="font-dm-sans-medium text-sm text-gray-500">
@@ -132,7 +135,6 @@ const Dropdown: React.FC<DropdownProps> = ({
 const styles = StyleSheet.create({
   dropdownContainer: {
     elevation: 8,
-    borderRadius: 5,
     borderWidth: 1,
     borderColor: "#e5e7eb",
     maxHeight: 240,

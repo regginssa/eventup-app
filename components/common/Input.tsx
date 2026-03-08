@@ -47,7 +47,7 @@ const Input: React.FC<InputProps> = ({
       )}
 
       <View
-        className={`py-1 px-3 gap-2 bg-white flex flex-row items-center rounded-xl`}
+        className={`py-1 px-3 gap-2 bg-white flex flex-row items-center rounded-full`}
         style={{
           borderWidth: bordered ? 1 : 0,
           borderColor: "#d1d5db",

@@ -11,13 +11,15 @@ import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 
 const RegisterScreen = () => {
-  const [fullname, setFullName] = useState<string>("");
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmedPassword, setConfirmedPassword] = useState<string>("");
   const [googleLoading, setGoogleLoading] = useState<boolean>(false);
   const [emailLoading, setEmailLoading] = useState<boolean>(false);
-  const [invalidFullName, setInvalidFullName] = useState<boolean>(false);
+  const [invalidFirstName, setInvalidFirstName] = useState<boolean>(false);
+  const [invalidLastName, setInvalidLastName] = useState<boolean>(false);
   const [invalidEmail, setInvalidEmail] = useState<boolean>(false);
   const [invalidPassword, setInvalidPassword] = useState<boolean>(false);
   const [invalidConfirmPassword, setInvalidConfirmPassword] =
@@ -58,7 +60,8 @@ const RegisterScreen = () => {
   };
 
   const validate = () => {
-    const isValidFullName = fullname.trim().length > 0;
+    const isValidFirstName = firstName.trim().length > 0;
+    const isValidLastName = lastName.trim().length > 0;
     const trimmed = email.trim();
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
 
@@ -66,14 +69,16 @@ const RegisterScreen = () => {
     const isValidPassword = passwordError === "";
     const isValidConfirmPassword = password === confirmedPassword;
 
-    setInvalidFullName(!isValidFullName);
+    setInvalidFirstName(!isValidFirstName);
+    setInvalidLastName(!isValidLastName);
     setInvalidEmail(!isValidEmail);
     setInvalidPassword(!isValidPassword);
     setInvalidConfirmPassword(!isValidConfirmPassword);
     setInvalidPasswordTxt(passwordError);
 
     return (
-      isValidFullName &&
+      isValidFirstName &&
+      isValidLastName &&
       isValidEmail &&
       isValidPassword &&
       isValidConfirmPassword
@@ -127,7 +132,12 @@ const RegisterScreen = () => {
       setInvalidPassword(false);
       setEmailLoading(true);
 
-      const response = await emailRegister(fullname, email, password);
+      const response = await emailRegister(
+        firstName,
+        lastName,
+        email,
+        password,
+      );
 
       const { token, user } = response.data;
       await setAuthToken(token);
@@ -152,13 +162,23 @@ const RegisterScreen = () => {
       <View className="w-full gap-5">
         <Input
           type="string"
-          placeholder="Enter your full name"
+          placeholder="Enter your first name"
           icon={<Feather name="user" size={16} color="#4b5563" />}
           className="rounded-md"
-          invalid={invalidFullName}
-          invalidTxt="Full name is invalid"
-          value={fullname}
-          onChange={setFullName}
+          invalid={invalidFirstName}
+          invalidTxt="First name is invalid"
+          value={firstName}
+          onChange={setFirstName}
+        />
+        <Input
+          type="string"
+          placeholder="Enter your last name"
+          icon={<Feather name="user" size={16} color="#4b5563" />}
+          className="rounded-md"
+          invalid={invalidLastName}
+          invalidTxt="Last name is invalid"
+          value={lastName}
+          onChange={setLastName}
         />
         <Input
           type="string"
@@ -206,7 +226,7 @@ const RegisterScreen = () => {
         </View>
         <Button
           type="primary"
-          label="Sign up with email"
+          label="Sign up"
           buttonClassName="h-12"
           textClassName="text-sm"
           loading={emailLoading}

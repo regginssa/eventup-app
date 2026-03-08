@@ -23,6 +23,7 @@ export { default as NationalityPicker } from "./NationalityPicker";
 export { default as NormalModal } from "./NormalModal";
 export { default as OfficialTicketItem } from "./OfficialTicketItem";
 export { default as PasswordInput } from "./PasswordInput";
+export { default as PhoneInput } from "./PhoneInput";
 export { default as RadioButton } from "./RadioButton";
 export { default as RegionPicker } from "./RegionPicker";
 export { default as RoomCard } from "./RoomCard";
