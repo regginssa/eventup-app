@@ -403,7 +403,7 @@ const ChatDM = () => {
         </View>
       )}
 
-      <View className="w-full flex flex-row items-end gap-2 bg-white rounded-xl px-2">
+      <View className="w-full flex flex-row items-end gap-2 bg-white rounded-full px-2">
         <View className="flex-1 flex flex-col gap-2">
           <View className="w-full">
             <Input

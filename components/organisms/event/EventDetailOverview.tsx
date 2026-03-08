@@ -98,13 +98,13 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
       </View>
 
       {/* ABOUT SECTION - Premium Typography */}
-      <View className="bg-white rounded-[32px] border border-slate-50 shadow-sm">
+      <View className="rounded-[32px] border border-slate-50 py-4">
         <View className="flex-row items-center gap-2 mb-4">
           <LinearGradient
             colors={["#844AFF", "#C427E0"]}
             className="w-1 h-5 rounded-full"
           />
-          <Text className="font-poppins-bold text-slate-900 text-lg">
+          <Text className="font-poppins-bold text-slate-900 text-base">
             About this event
           </Text>
         </View>
@@ -112,7 +112,7 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
         {description || notes ? (
           <View className="gap-4">
             {description && (
-              <Text className="font-dm-sans-medium text-[15px] leading-[24px] text-slate-600">
+              <Text className="font-dm-sans-medium text-sm text-slate-600">
                 {description}
               </Text>
             )}

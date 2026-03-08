@@ -88,7 +88,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
               className="absolute inset-0 bg-transparent z-40"
             />
 
-            <View className="absolute top-[88px] right-6 w-[180px] bg-white p-4 rounded-lg z-50 shadow-lg flex flex-col gap-4">
+            <View className="absolute top-[98px] right-6 w-[180px] bg-white p-4 rounded-xl z-50 shadow-lg flex flex-col gap-4">
               {type === "dm" ? (
                 <>
                   <TouchableOpacity

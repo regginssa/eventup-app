@@ -146,9 +146,9 @@ const Avatar: React.FC<AvatarProps> = ({
               className={`text-white font-poppins-semibold ${
                 !size
                   ? "text-7xl"
-                  : size > 40 && size < 160
+                  : size > 60 && size < 160
                     ? "text-4xl"
-                    : size <= 40
+                    : size <= 60
                       ? "text-sm"
                       : ""
               }`}

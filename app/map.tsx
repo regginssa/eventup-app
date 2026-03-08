@@ -70,9 +70,11 @@ const MapScreen = () => {
   return (
     <LayoutContainer title="Map">
       <View className="flex flex-row items-center gap-2">
-        <MaterialIcons name="event-available" size={24} color="#374151" />
-        <Text className="font-poppins-semibold text-sm text-gray-700">
-          {events.length} events are available
+        <View className="w-2 h-2 rounded-full bg-emerald-500" />
+        <Text
+          className={`font-poppins-semibold text-[11px] uppercase tracking-widest text-gray-500`}
+        >
+          {events.length} events available
         </Text>
       </View>
       {loading ? (
@@ -219,7 +221,12 @@ const MapScreen = () => {
           type="primary"
           label="View"
           buttonClassName="h-12"
-          onPress={() => router.push(`/event/${selectedEvent?._id}`)}
+          onPress={() =>
+            router.push({
+              pathname: `/event/details/${selectedEvent?.type}` as any,
+              params: { id: selectedEvent?._id },
+            })
+          }
         />
       </Modal>
     </LayoutContainer>
