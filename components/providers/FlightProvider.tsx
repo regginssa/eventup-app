@@ -45,13 +45,13 @@ const FlightProvider: React.FC<FlightProviderProps> = ({ children }) => {
         {
           id: offer.passengerIds[0],
           type: "adult",
-          given_name: user?.firstName, // user.firstName
-          family_name: user?.lastName, // user.lastName
-          gender: user?.gender === "mr" ? "m" : "f", // user.gener (mr or ms)
-          born_on: "1997-07-24", // user.birthday
+          given_name: user?.firstName,
+          family_name: user?.lastName,
+          gender: user?.gender === "mr" ? "m" : "f",
+          born_on: user?.birthday,
           email: user?.email,
-          phone_number: user?.phone, // user.phone
-          title: user?.gender, // user.gender
+          phone_number: user?.phone,
+          title: user?.gender,
         },
       ],
       totalAmount: Number(offer.totalAmount),

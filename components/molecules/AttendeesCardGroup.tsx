@@ -23,24 +23,33 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
   const [inviteLoading, setInviteLoading] = useState<Map<string, boolean>>(
     new Map(),
   );
+
   const [isValidInvite, setIsValidInvite] = useState<Map<string, boolean>>(
     new Map(),
   );
+
   const { conversations, addNewConversation, updateConversation } =
     useConversation();
+
   const { send: sendNotification } = useNotification();
+
   const toast = useToast();
 
   useEffect(() => {
     const conv = conversations.find(
       (c) => c.type === "group" && c.event?._id === event?._id,
     );
+
     if (!conv) return;
+
     const attendeeIds = new Set(items.map((i) => i.user._id));
+
     const nextMap = new Map<string, boolean>();
+
     for (const p of conv.participants) {
       nextMap.set(p._id as string, attendeeIds.has(p._id));
     }
+
     setIsValidInvite(nextMap);
   }, [conversations, event, items]);
 
@@ -53,7 +62,7 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
 
     if (!conv) return toast.info("Please create a group chat first");
 
-    if (conv?.participants.some((p) => p._id === userId)) {
+    if (conv.participants.some((p) => p._id === userId)) {
       return toast.error("The user has already joined the group chat");
     }
 
@@ -64,7 +73,6 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
         return next;
       });
 
-      // Add the user to the conversation participants
       const convBodyData: IConversation = {
         ...conv,
         participants: [...conv.participants, userId as any],
@@ -80,14 +88,13 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
         addNewConversation(convRes.data);
       }
 
-      // Send an invitation notification to the user
       const newNotification: INotification = {
         type: "receive_invite_group_chat",
         metadata: {
-          conversationId: conv?._id,
+          conversationId: conv._id,
           eventId: event._id,
         },
-        title: `Invitation`,
+        title: "Invitation",
         body: `You have been invited to "${event.name}" group chat`,
         user: userId as any,
         isRead: false,
@@ -98,7 +105,10 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
       const notifyRes = await notificationServices.create(newNotification);
 
       if (notifyRes.ok) {
-        sendNotification({ notificationId: notifyRes.data._id, userId });
+        sendNotification({
+          notificationId: notifyRes.data._id,
+          userId,
+        });
       }
     } catch (err) {
       toast.error("Invitation failed");
@@ -113,136 +123,136 @@ const AttendeesCardGroup: React.FC<AttendeesCardGroupProps> = ({
 
   if (items.length === 0) {
     return (
-      <View className="flex-1">
-        <MaterialCommunityIcons
-          name="file-document-remove-outline"
-          size={48}
-          color="#1f2937"
-        />
-        <Text className="text-gray-800 font-poppins-semibold">
-          No Attendees
+      <View className="flex-1 items-center justify-center py-12 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+        <View className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-sm mb-4">
+          <MaterialCommunityIcons
+            name="file-document-remove-outline"
+            size={32}
+            color="#94a3b8"
+          />
+        </View>
+
+        <Text className="text-slate-800 font-poppins-semibold text-lg">
+          Empty Attendees
+        </Text>
+
+        <Text className="text-slate-400 font-dm-sans-medium text-center px-8 text-sm mt-1">
+          Your attendees will be here.
         </Text>
       </View>
     );
   }
 
-  const renderItem = ({ item }: { item: IAttendees }) => {
+  const renderItem = (item: IAttendees) => {
     const { user, ticket, status } = item;
 
     const formattedRate = user.rate
       ? user.rate.toLocaleString(undefined, {
           minimumFractionDigits: 1,
-          maximumFractionDigits: 20,
+          maximumFractionDigits: 2,
         })
-      : 0;
+      : "0";
+
+    const isInvited = isValidInvite.get(user._id as string);
+    const loading = inviteLoading.get(user._id as string);
+
+    const ticketColor =
+      ticket?.status === "deposited"
+        ? "#ca8a04"
+        : ticket?.status === "released"
+          ? "#16a34a"
+          : "#2563eb";
+
+    const ticketIcon =
+      ticket?.status === "deposited"
+        ? "clock-outline"
+        : ticket?.status === "released"
+          ? "checkbox-marked-circle-outline"
+          : "cash-refund";
 
     return (
       <View
-        key={item.user._id}
-        className="w-full flex flex-row items-center gap-6 px-4 py-2 bg-slate-100 rounded-xl"
+        key={user._id}
+        className="w-full flex-row items-center bg-white px-4 py-4 mb-3 rounded-2xl border border-slate-100"
+        style={{
+          shadowColor: "#000",
+          shadowOpacity: 0.03,
+          shadowRadius: 6,
+          elevation: 2,
+        }}
       >
-        <View className="flex flex-col items-center justify-center gap-2">
-          <Avatar size={40} source={user.avatar} name={user.name} />
-          <View className="flex flex-row items-center gap-2">
-            <Text className="font-poppins-semibold text-sm text-gray-800">
+        <Avatar size={48} source={user.avatar} name={user.name} />
+
+        <View className="flex-1 ml-4">
+          <View className="flex-row items-center gap-2">
+            <Text className="font-poppins-semibold text-sm text-gray-900">
               {user.name}
             </Text>
-            <View className="flex flex-row items-center gap-1">
+
+            <View className="flex-row items-center gap-1">
               <MaterialCommunityIcons
                 name="star"
                 size={14}
                 color={user.rate && user.rate > 0 ? "#eab308" : "#94a3b8"}
               />
-              <Text className="font-dm-sans-medium text-gray-700 text-sm">
+
+              <Text className="font-dm-sans-medium text-xs text-gray-600">
                 {formattedRate}
               </Text>
             </View>
           </View>
-          <View className="flex flex-row items-center gap-2">
-            <Text className="font-dm-sans-medium text-sm text-gray-700">
-              {user.location.city.name}, {user.location.country.code}
-            </Text>
-          </View>
-        </View>
 
-        <View className="flex-1 gap-3 flex flex-col items-center justify-center">
+          <Text className="font-dm-sans-medium text-xs text-gray-500 mt-1">
+            {user.location.city.name}, {user.location.country.code}
+          </Text>
+
           {status !== "blocked" && ticket && (
-            <View className="w-full flex flex-row items-start justify-center gap-2">
+            <View className="flex-row items-center gap-2 mt-2">
               <MaterialCommunityIcons
-                name={
-                  ticket?.status === "deposited"
-                    ? "clock-outline"
-                    : ticket.status === "released"
-                      ? "checkbox-marked-circle-outline"
-                      : "cash-refund"
-                }
-                size={18}
-                color={
-                  ticket.status === "deposited"
-                    ? "#ca8a04"
-                    : ticket.status === "released"
-                      ? "#16a34a"
-                      : "#2563eb"
-                }
+                name={ticketIcon as any}
+                size={16}
+                color={ticketColor}
               />
+
               <Text
-                className={`font-poppins-medium text-sm ${ticket.status === "deposited" ? "text-yellow-600" : ticket.status === "released" ? "text-green-600" : "text-blue-600"}`}
+                className="font-dm-sans-medium text-xs"
+                style={{ color: ticketColor }}
               >
-                Ticket is {ticket?.status}
+                Ticket {ticket.status}
               </Text>
             </View>
           )}
-
-          {/* <View className="flex flex-row items-start gap-2">
-            <MaterialCommunityIcons
-              name={
-                status === "approved"
-                  ? "checkbox-marked-circle-outline"
-                  : "alert-circle-outline"
-              }
-              size={16}
-              color={status === "approved" ? "#16a34a" : "#ef4444"}
-            />
-            <Text
-              className={`font-poppins-medium text-sm ${status === "approved" ? "text-green-600" : "text-red-500"}`}
-            >
-              Application is {status}
-            </Text>
-          </View> */}
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className={`p-2 rounded-xl w-full flex flex-row items-center justify-center gap-2 ${isValidInvite.get(item.user._id as string) ? "bg-gray-400" : "bg-green-600"}`}
-            disabled={
-              inviteLoading.get(item.user._id as string) ||
-              isValidInvite.get(item.user._id as string)
-            }
-            onPress={() => handleInvite(item.user._id as string)}
-          >
-            {inviteLoading.get(item.user._id as string) ? (
-              <ActivityIndicator size={16} color="white" />
-            ) : (
-              <MaterialCommunityIcons
-                name="account-plus-outline"
-                size={16}
-                color="white"
-              />
-            )}
-            <Text className="font-poppins-medium text-sm text-white">
-              {isValidInvite.get(item.user._id as string)
-                ? "Invited"
-                : "Invite"}
-            </Text>
-          </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          disabled={loading || isInvited}
+          onPress={() => handleInvite(user._id as string)}
+          className="px-4 py-2 rounded-xl flex-row items-center gap-2"
+          style={{
+            backgroundColor: isInvited ? "#94a3b8" : "#16a34a",
+          }}
+        >
+          {loading ? (
+            <ActivityIndicator size={14} color="white" />
+          ) : (
+            <MaterialCommunityIcons
+              name="account-plus-outline"
+              size={14}
+              color="white"
+            />
+          )}
+
+          <Text className="text-white text-xs font-poppins-medium">
+            {isInvited ? "Invited" : "Invite"}
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   };
 
   return (
-    <View className="flex-1">
-      {items.map((item, index) => renderItem({ item }))}
-    </View>
+    <View className="flex-1">{items.map((item) => renderItem(item))}</View>
   );
 };
 

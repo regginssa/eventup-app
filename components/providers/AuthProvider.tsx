@@ -85,15 +85,11 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await getMe();
       if (!response.data) return;
       setUser(response.data);
+      redirect(response.data);
     };
 
     fetchMe();
   }, [authChecked]);
-
-  useEffect(() => {
-    if (!user) return;
-    redirect(user);
-  }, [user]);
 
   return (
     <AuthContext.Provider

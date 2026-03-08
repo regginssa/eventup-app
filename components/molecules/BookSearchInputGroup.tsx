@@ -319,7 +319,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       flexDirection: "row" as const,
       alignItems: "center" as const,
       padding: 12,
-      borderRadius: 16,
       borderWidth: 1,
       backgroundColor: isActive ? "#FFFFFF" : "rgba(241, 245, 249, 0.5)", // bg-slate-100/50
       borderColor: isActive ? "#844AFF" : "transparent",
@@ -390,13 +389,13 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               key={item.key}
               activeOpacity={0.7}
               onPress={() => toggleInclude(item.key as any)}
+              className="rounded-full"
               style={{
                 flexDirection: "row",
                 alignItems: "center",
                 backgroundColor: "white",
                 paddingHorizontal: 12,
                 paddingVertical: 8,
-                borderRadius: 12,
                 borderWidth: 1,
                 borderColor: includes[item.key as keyof typeof includes]
                   ? "#844AFF30"
@@ -457,10 +456,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             {/* Current Location Option */}
             <TouchableOpacity
               style={getCardStyle(departureLocation === "current")}
+              className="rounded-full"
               onPress={() => setDepartureLocation("current")}
               activeOpacity={0.7}
             >
-              <View className="w-10 h-10 rounded-xl bg-white items-center justify-center shadow-sm">
+              <View className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm">
                 <MaterialCommunityIcons
                   name="map-marker-radius"
                   size={22}
@@ -494,10 +494,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             {/* Home Location Option */}
             <TouchableOpacity
               style={getCardStyle(departureLocation === "home")}
+              className="rounded-full"
               onPress={() => setDepartureLocation("home")}
               activeOpacity={0.7}
             >
-              <View className="w-10 h-10 rounded-xl bg-white items-center justify-center shadow-sm">
+              <View className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm">
                 <MaterialCommunityIcons
                   name="home-map-marker"
                   size={22}
@@ -515,7 +516,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                   Saved Home
                 </Text>
                 <Text className="font-dm-sans-medium text-slate-700 text-xs mt-0.5">
-                  {user?.location.city.name}, {user?.location.country.name}
+                  {user?.location.city.name}, {user?.location.country.code}
                 </Text>
               </View>
 

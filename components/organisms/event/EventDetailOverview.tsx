@@ -5,7 +5,6 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
-import { FlagButton } from "react-native-country-picker-modal";
 
 const VerifiedBadge = require("@/assets/images/icons/verified_badge.png");
 
@@ -52,7 +51,7 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
           {hoster ? (
             <View className="flex-row items-center gap-3">
               <View className="relative">
-                <Avatar source={hoster.avatar} name={hoster.title} size={52} />
+                <Avatar source={hoster.avatar} name={hoster.title} size={40} />
                 {hoster.is_verified && (
                   <View className="absolute -right-1 -bottom-1 bg-white rounded-full p-0.5">
                     <Image
@@ -67,20 +66,10 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
                 <Text className="font-poppins-bold text-slate-800 text-base">
                   {hoster.title}
                 </Text>
-                <View className="flex-row items-center">
-                  <FlagButton
-                    placeholder=""
-                    countryCode={hoster.countryCode as any}
-                    containerButtonStyle={{
-                      marginLeft: -10,
-                      scaleX: 0.8,
-                      scaleY: 0.8,
-                    }}
-                  />
-                  <Text className="font-dm-sans-bold text-slate-400 text-xs -ml-1">
-                    {hoster.countryName}
-                  </Text>
-                </View>
+
+                <Text className="font-dm-sans-bold text-slate-400 text-xs">
+                  {hoster.countryName}
+                </Text>
               </View>
             </View>
           ) : (

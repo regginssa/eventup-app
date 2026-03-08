@@ -42,7 +42,7 @@ const Textarea: React.FC<TextareaProps> = ({
         <Text className="font-dm-sans text-sm text-gray-700">{label}</Text>
       )}
       <View
-        className={`py-1 px-4 gap-2 bg-white rounded-md flex flex-row items-center ${className}`}
+        className={`py-1 px-4 gap-2 bg-white rounded-3xl flex flex-row items-center`}
         style={{ borderWidth: bordered ? 1 : 0, borderColor: "#d1d5db" }}
       >
         <TextInput

@@ -76,7 +76,7 @@ const Button: React.FC<ButtonProps> = ({
   const GradientButton = (colors: string[], isSecondary: boolean = false) => (
     <TouchableOpacity
       activeOpacity={0.8}
-      className={`h-12 overflow-hidden rounded-xl shadow-md ${buttonClassName}`}
+      className={`h-12 overflow-hidden rounded-full shadow-md ${buttonClassName}`}
       disabled={loading || disabled}
       onPress={onPress}
     >
@@ -105,7 +105,7 @@ const Button: React.FC<ButtonProps> = ({
     return (
       <TouchableOpacity
         activeOpacity={0.7}
-        className={`h-12 overflow-hidden rounded-xl border border-purple-100/50 ${buttonClassName}`}
+        className={`h-12 overflow-hidden rounded-full border border-purple-100/50 ${buttonClassName}`}
         onPress={onPress}
         disabled={loading}
       >
@@ -135,7 +135,7 @@ const Button: React.FC<ButtonProps> = ({
           colors={STROKE_GRADIENT as any}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          className="flex-1 p-[1.5px] rounded-xl"
+          className="flex-1 p-[1.5px] rounded-full"
         >
           <View className="flex-1 bg-white rounded-[11px] items-center justify-center">
             <Text className="text-purple-600 font-poppins-bold">{label}</Text>
@@ -150,7 +150,7 @@ const Button: React.FC<ButtonProps> = ({
     return (
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`h-12 rounded-xl bg-white border border-slate-100 flex-row items-center justify-center gap-3 ${buttonClassName}`}
+        className={`h-12 rounded-full bg-white border border-slate-100 flex-row items-center justify-center gap-3 ${buttonClassName}`}
         disabled={loading}
         onPress={onPress}
       >

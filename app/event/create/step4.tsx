@@ -23,7 +23,7 @@ const CreateEventStep4Screen = () => {
       router.push("/event/create/step1");
     } else {
       router.push({
-        pathname: `/event/${newEvent?._id}` as any,
+        pathname: `/event/details/user`,
         params: { id: newEvent?._id, callback: "/home" },
       });
     }
