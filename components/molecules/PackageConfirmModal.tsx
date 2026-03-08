@@ -102,6 +102,13 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
     </View>
   );
 
+  const isValid: boolean = !!(
+    (event?.type === "user" && event.fee?.type === "paid" && communityTicket) ||
+    (event?.type === "user" && event.fee?.type === "free") ||
+    (event?.type === "ai" &&
+      (flightOffer || hotelOffer || airportToHotelOffer || hotelToEventOffer))
+  );
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="" scrolled>
       <View className="flex-1 pb-4">
@@ -266,6 +273,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             label={loading ? "Verifying..." : "Confirm & Checkout"}
             buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
             textClassName="text-lg font-poppins-bold"
+            disabled={!isValid}
             loading={loading}
             onPress={handleCheckout}
           />

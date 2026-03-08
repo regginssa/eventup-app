@@ -148,7 +148,7 @@ const UserEventDetail = () => {
 
       if (eventData?.type === "user" && eventData.hoster?._id === user?._id) {
         setTabs(ownerTabs);
-        setSelectedTab(ownerTabs[0]);
+        setSelectedTab(ownerTabs[1]);
       } else {
         const att = eventData?.attendees.find((a) => a.user._id === user?._id);
         setMyAttendees(att || null);
@@ -184,10 +184,11 @@ const UserEventDetail = () => {
 
   useEffect(() => {
     if (!myAttendees) return;
-    const myTicket = communityTickets.find(
-      (t) => t._id === myAttendees.ticket?.ticketId,
-    );
-    setCommunityTicket(myTicket || null);
+    setTabs([
+      { label: "Overview", value: "overview" },
+      { label: "Itinerary", value: "itinerary" },
+    ]);
+    setSelectedTab({ label: "Itinerary", value: "itinerary" });
   }, [myAttendees]);
 
   useEffect(() => {
@@ -281,11 +282,7 @@ const UserEventDetail = () => {
 
           <View className="flex-1 bg-white rounded-3xl p-4 gap-6 border border-slate-100 shadow-sm">
             <Tabs
-              tabs={[
-                { label: "Packages", value: "packages" },
-                { label: "Overview", value: "overview" },
-                { label: "Itinerary", value: "itinerary" },
-              ]}
+              tabs={tabs}
               selectedTab={selectedTab}
               onSelct={setSelectedTab}
               tabClassName="flex-1"
@@ -307,6 +304,7 @@ const UserEventDetail = () => {
             event={event}
             currentLocationCoords={currentLocationCoords}
             currentLocation={currentLocation}
+            communityTicket={communityTicket || undefined}
           />
         );
       case "overview":

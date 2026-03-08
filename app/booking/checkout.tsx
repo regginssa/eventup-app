@@ -322,6 +322,16 @@ const CheckoutScreen = () => {
 
     if (event?.type === "ai") {
       servicesList.push("Ticket");
+    } else if (
+      event?.type === "user" &&
+      event.fee?.type === "paid" &&
+      user?.tickets.some(
+        (t) =>
+          t.currency.toLowerCase() === event.fee?.currency?.toLowerCase() &&
+          t.price == event.fee.amount,
+      )
+    ) {
+      servicesList.push("E-Ticket");
     }
 
     if (
@@ -389,54 +399,17 @@ const CheckoutScreen = () => {
     hotelToEventOffer,
     event,
     booking,
+    user,
   ]);
 
   const onBook = async () => {
     try {
       setBookLoading(true);
 
-      if (event?.type === "user") {
-        const ticket = user?.tickets.find(
-          (t) =>
-            t.currency === event.fee?.currency && t.price === event.fee.amount,
-        );
-        if (!ticket) {
-          toast.error("Buy a ticket first");
-          setBookLoading(false);
-          router.push({
-            pathname: "/tickets",
-            params: {
-              amount: event.fee?.amount,
-              currency: event.fee?.currency,
-              from: "/booking/checkout",
-            },
-          });
-          return;
-        }
+      const communityTicketDeposited = await handleCommunityTicket();
 
-        if (!user?._id || !event._id) return;
-
-        const response = await userServices.update(user?._id as string, {
-          ...user,
-          tickets: user.tickets.filter((t) => t._id !== ticket._id),
-        });
-        if (!response.data) {
-          setLoading(false);
-          return toast.error("Ticket deposit failed");
-        }
-        setAuthUser(response.data);
-
-        await eventServices.update(event._id, {
-          ...event,
-          attendees: [
-            ...event.attendees,
-            {
-              status: "approved",
-              user: user._id as any,
-              ticket: ticket._id as any,
-            },
-          ],
-        });
+      if (event?.type === "user" && !communityTicketDeposited) {
+        return;
       }
 
       let bookingId = booking?._id || null;
@@ -444,25 +417,95 @@ const CheckoutScreen = () => {
       if (!bookingId) {
         console.log("Creating booking before payment...");
         bookingId = await createBooking();
-        if (!bookingId) throw new Error("Booking Failed");
+        if (!bookingId) {
+          setBookLoading(false);
+          return toast.error("Booking failed");
+        }
+      } else {
+        if (totalAmount === 0 && event?.type === "user") {
+          router.replace({
+            pathname: "/booking/booked",
+            params: { id: bookingId },
+          });
+          setBookLoading(false);
+          return;
+        }
       }
 
-      switch (paymentMethod) {
-        case "credit":
-          await handleCreditPayment(bookingId);
-          break;
-        case "crypto":
-        case "token":
-          await handleCryptoPayment(bookingId);
-          break;
-        default:
-          toast.error("Invalid payment method.");
+      if (totalAmount > 0) {
+        switch (paymentMethod) {
+          case "credit":
+            await handleCreditPayment(bookingId);
+            break;
+          case "crypto":
+          case "token":
+            await handleCryptoPayment(bookingId);
+            break;
+          default:
+            toast.error("Invalid payment method.");
+        }
       }
     } catch (err) {
       toast.error("Process failed. Please try again.");
     } finally {
       setBookLoading(false);
     }
+  };
+
+  const onJoin = async () => {};
+
+  const handleCommunityTicket = async (): Promise<IEvent | null> => {
+    if (event?.type === "user") {
+      const ticket = user?.tickets.find(
+        (t) =>
+          t.currency === event.fee?.currency && t.price == event.fee.amount,
+      );
+      if (!ticket) {
+        toast.error("Buy a ticket first");
+        setBookLoading(false);
+        router.push({
+          pathname: "/tickets",
+          params: {
+            amount: event.fee?.amount,
+            currency: event.fee?.currency,
+            from: "/booking/checkout",
+          },
+        });
+        return null;
+      }
+
+      if (!user?._id || !event._id) return null;
+
+      const response = await userServices.update(user?._id as string, {
+        ...user,
+        tickets: user.tickets.filter((t) => t._id !== ticket._id),
+      });
+      if (!response.data) {
+        setLoading(false);
+        toast.error("Ticket deposit failed");
+        return null;
+      }
+      setAuthUser(response.data);
+
+      const updatedEvent = await eventServices.update(event._id, {
+        ...event,
+        attendees: [
+          ...event.attendees,
+          {
+            status: "approved",
+            user: user._id as any,
+            ticket: {
+              ticketId: ticket._id as any,
+              status: "released",
+            },
+          },
+        ],
+      });
+
+      return updatedEvent.data;
+    }
+
+    return null;
   };
 
   const handleCreditPayment = async (bookingId: string) => {
@@ -576,6 +619,8 @@ const CheckoutScreen = () => {
     return response.data._id || null;
   };
 
+  const isUserEventPassable = event?.type === "user" && totalAmount === 0;
+
   return (
     <SimpleContainer title="Review & Pay" scrolled>
       <View className="flex-1 gap-4 px-1">
@@ -612,7 +657,13 @@ const CheckoutScreen = () => {
       <View className="mt-10 gap-4">
         <Button
           type="primary"
-          label={bookLoading ? "Processing..." : `Pay $${totalAmount}`}
+          label={
+            bookLoading
+              ? "Processing..."
+              : isUserEventPassable
+                ? "Join Now"
+                : `Pay $${totalAmount}`
+          }
           buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
           textClassName="text-lg font-poppins-bold"
           loading={bookLoading}

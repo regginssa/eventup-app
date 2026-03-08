@@ -1,12 +1,15 @@
-import { Button } from "@/components/common";
+import { Button, CommunityTicketItem } from "@/components/common";
 import {
   BookSearchInputGroup,
   PackageConfirmModal,
 } from "@/components/molecules";
 import { TCoordinate } from "@/types";
 import { IEvent } from "@/types/event";
+import { ICommunityTicket } from "@/types/ticket";
+import { getCurrencySymbol } from "@/utils/format";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -17,17 +20,20 @@ interface EventDetailPackagesProps {
     city: string | null;
     countryCode: string | null;
   };
+  communityTicket?: ICommunityTicket;
 }
 
 const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   event,
   currentLocationCoords,
   currentLocation,
+  communityTicket,
 }) => {
   const [eventPackage, setEventPackage] = useState<"standard" | "gold">(
     "standard",
   );
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const router = useRouter();
 
   const standardItems = [
     "Flights (economy)",
@@ -146,6 +152,65 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
             </View>
           </View>
 
+          {/* E-TICKET */}
+          <View className="bg-slate-50/50 py-4 rounded-2xl border border-slate-100">
+            <View className="flex-row items-center gap-2 mb-4">
+              <View className="w-6 h-6 rounded-full bg-[#844AFF10] items-center justify-center">
+                <MaterialCommunityIcons
+                  name="ticket-outline"
+                  size={14}
+                  color="#844AFF"
+                />
+              </View>
+              <Text className="font-poppins-semibold text-sm text-slate-800">
+                E-Ticket Required
+              </Text>
+            </View>
+
+            {communityTicket ? (
+              <CommunityTicketItem item={communityTicket} />
+            ) : (
+              <View className="w-full flex-row items-start gap-2">
+                <MaterialCommunityIcons
+                  name="information-outline"
+                  size={14}
+                  color="#64748b"
+                />
+
+                <View className="flex-1">
+                  <Text className="font-dm-sans-medium text-sm text-slate-700 leading-5">
+                    An official e-ticket is required for entry. You can purchase
+                    it in the app for{" "}
+                    <Text className="font-dm-sans-bold">
+                      {getCurrencySymbol(event.fee?.currency as any)}
+                      {event.fee?.amount}
+                    </Text>
+                    .
+                  </Text>
+
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    className="mt-2"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/tickets",
+                        params: {
+                          amount: event.fee?.amount,
+                          currency: event.fee?.currency,
+                          from: "/booking/checkout",
+                        },
+                      })
+                    }
+                  >
+                    <Text className="font-poppins-semibold text-sm text-[#844AFF] underline">
+                      Purchase E-Ticket
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          </View>
+
           <BookSearchInputGroup
             event={event}
             packageType={eventPackage}
@@ -171,6 +236,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
         onClose={() => setIsOpen(false)}
         packageType={eventPackage}
         event={event}
+        communityTicket={communityTicket}
       />
     </>
   );
