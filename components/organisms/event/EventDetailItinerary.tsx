@@ -1,11 +1,13 @@
 import {
   Button,
+  CommunityTicketItem,
   FlightItem,
   HotelItem,
   OfficialTicketItem,
   TransferItem,
 } from "@/components/common";
 import { IBooking } from "@/types/booking";
+import { ICommunityTicket } from "@/types/ticket";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -13,10 +15,12 @@ import { Text, View } from "react-native";
 
 interface EventDetailItineraryProps {
   booking: IBooking | null;
+  communityTicket?: ICommunityTicket;
 }
 
 const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
   booking,
+  communityTicket,
 }) => {
   if (!booking) {
     return (
@@ -101,6 +105,9 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
         </View>
 
         {event.type === "ai" ? <OfficialTicketItem event={event} /> : null}
+        {event.type === "user" && event.fee?.type === "paid" && (
+          <CommunityTicketItem item={communityTicket || null} />
+        )}
       </View>
 
       {/* HEADER STATUS */}

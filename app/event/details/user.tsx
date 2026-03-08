@@ -189,6 +189,10 @@ const UserEventDetail = () => {
       { label: "Itinerary", value: "itinerary" },
     ]);
     setSelectedTab({ label: "Itinerary", value: "itinerary" });
+    const ticket = communityTickets.find(
+      (t) => t._id === myAttendees.ticket?.ticketId,
+    );
+    setCommunityTicket(ticket || null);
   }, [myAttendees]);
 
   useEffect(() => {
@@ -329,7 +333,12 @@ const UserEventDetail = () => {
       case "attendees":
         return <AttendeesCardGroup items={event.attendees} event={event} />;
       default:
-        return <EventDetailItinerary booking={booking} />;
+        return (
+          <EventDetailItinerary
+            booking={booking}
+            communityTicket={communityTicket || undefined}
+          />
+        );
     }
   };
 

@@ -13,7 +13,7 @@ const CommunityTicketItem: React.FC<CommunityTicketItemProps> = ({ item }) => {
   if (!item) return null;
 
   return (
-    <View className="relative w-full h-[160px] rounded-xl overflow-hidden">
+    <View className="relative w-full h-[160px] rounded-3xl overflow-hidden">
       <Image
         source={ticketCardBg}
         alt="Ticket Card BG"
@@ -22,7 +22,7 @@ const CommunityTicketItem: React.FC<CommunityTicketItemProps> = ({ item }) => {
 
       <View className="absolute inset-0 flex flex-row items-stretch justify-between">
         <View className="flex flex-col items-center justify-center w-1/2">
-          <View className="w-[148px] h-[120px] rounded-lg overflow-hidden">
+          <View className="w-[148px] h-[120px] rounded-xl overflow-hidden">
             <Image
               source={{ uri: item.image }}
               alt={item.name}
