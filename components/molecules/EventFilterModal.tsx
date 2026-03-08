@@ -83,18 +83,14 @@ const EventFilterModal: React.FC<EventFilterModalProps> = ({
 
       <View className="w-full flex flex-row items-center justify-between mt-6">
         <Button
-          type="white"
+          type="gradient-soft"
           label="Reset"
-          icon={
-            <MaterialCommunityIcons name="restore" size={16} color="#6b7280" />
-          }
-          iconPosition="left"
-          buttonClassName="h-10 border border-gray-300 rounded-lg px-4"
+          buttonClassName="h-10"
           onPress={onReset}
         />
 
         <Button
-          type="primary"
+          type="gradient-glass"
           label="Apply"
           icon={
             <MaterialCommunityIcons
