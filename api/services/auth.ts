@@ -40,12 +40,14 @@ export const emailLogin = async (
 export const emailRegister = async (
   firstName: string,
   lastName: string,
+  name: string,
   email: string,
   password: string,
 ): Promise<ApiResponse<AuthResponse>> => {
   return await AxiosInstance.post(EMAIL_REGISTER, {
     firstName,
     lastName,
+    name,
     email,
     password,
   });

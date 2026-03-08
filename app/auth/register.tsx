@@ -135,6 +135,7 @@ const RegisterScreen = () => {
       const response = await emailRegister(
         firstName,
         lastName,
+        firstName + " " + lastName,
         email,
         password,
       );

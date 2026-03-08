@@ -47,14 +47,14 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
   const book = async (quoteId: string): Promise<IHotelBookingResponse> => {
     const body = {
       quoteId,
-      phoneNumber: "+442080160509",
+      phoneNumber: user?.phone,
       guestInfo: {
-        given_name: "Jhon",
-        family_name: "Doe",
-        born_on: "1990-01-01",
+        given_name: user?.firstName,
+        family_name: user?.lastName,
+        born_on: user?.birthday,
         email: user?.email,
       },
-      specialRequests: "123",
+      specialRequests: "",
     };
 
     const response = await services.book(body);

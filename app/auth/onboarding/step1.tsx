@@ -14,6 +14,7 @@ import { Country, RegionType } from "@/types/location.types";
 import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 
@@ -40,11 +41,27 @@ const OnboardingStep1Screen = () => {
   const { user, setAuthUser } = useAuth();
 
   const validate = () => {
+    const phoneNumber = parsePhoneNumberFromString(
+      phone,
+      (country?.cca2 as any) || "US",
+    );
+
+    if (!phoneNumber || !phoneNumber.isValid()) {
+      setInvalidPhone(true);
+    } else {
+      setInvalidPhone(false);
+    }
     setInvalidCountry(!country);
     setInvalidRegion(!region);
     setInvalidAddress(!address);
 
-    return !(!country || !region || !address);
+    return !(
+      !phoneNumber ||
+      !phoneNumber.isValid() ||
+      !country ||
+      !region ||
+      !address
+    );
   };
 
   const handleSubmit = async () => {
@@ -70,7 +87,11 @@ const OnboardingStep1Screen = () => {
           address: address?.description,
           coordinate: address?.coordinate as TCoordinate,
         },
+        gender: selectedGender.value as any,
+        phone: `+${country?.callingCode[0]}${phone}`,
       };
+
+      console.log(updates.phone);
 
       const response = await UserAPI.update(user._id, updates);
 
@@ -149,6 +170,8 @@ const OnboardingStep1Screen = () => {
         label="Phone number"
         placeholder="Select your country first"
         countryCode={country?.cca2}
+        invalid={invalidPhone}
+        invalidTxt="Invalid phone number"
         value={phone}
         onChange={setPhone}
       />

@@ -1,4 +1,5 @@
 import { getMe } from "@/api/services/auth";
+import { useRedirect } from "@/hooks";
 import { IUser } from "@/types/user";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { usePathname, useRouter } from "expo-router";
@@ -33,6 +34,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const router = useRouter();
   const pathname = usePathname();
+  const { redirect } = useRedirect();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -90,18 +92,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (!user) return;
-
-    if (user.blocked) {
-      router.replace("/auth/login");
-    } else if (!user.location?.country?.name) {
-      router.replace("/auth/onboarding/step1");
-    } else if (!user.title) {
-      router.replace("/auth/onboarding/step2");
-    } else if (!user.preferred?.category) {
-      router.replace("/auth/onboarding/step4");
-    } else {
-      router.replace("/home");
-    }
+    redirect(user);
   }, [user]);
 
   return (

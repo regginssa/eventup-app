@@ -1,4 +1,4 @@
-import { updateUser } from "@/api/services/user";
+import UserAPI from "@/api/services/user";
 import { Button, MultiSelectDropdown } from "@/components/common";
 import Dropdown from "@/components/common/Dropdown";
 import { OnboardingContainer } from "@/components/organisms";
@@ -11,6 +11,7 @@ import {
 } from "@/constants/events";
 
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { TDropdownItem } from "@/types";
 import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -33,6 +34,7 @@ const OnboardingStep4Screen = () => {
 
   const router = useRouter();
   const { user, setAuthUser } = useAuth();
+  const toast = useToast();
 
   const validate = () => {
     setInvalidCategory(!category);
@@ -65,11 +67,10 @@ const OnboardingStep4Screen = () => {
         },
       };
 
-      const response = await updateUser(user._id, updates);
+      const response = await UserAPI.update(user._id, updates);
 
       if (response.ok) {
         setAuthUser(response.data);
-
         router.replace("/auth/onboarding/step5");
       }
     } catch (error: any) {
@@ -95,7 +96,6 @@ const OnboardingStep4Screen = () => {
             <MaterialCommunityIcons name="apps" size={16} color="#4b5563" />
           }
           items={EVENT_CATEGORIES}
-          className="rounded-md"
           selectedItem={category}
           onSelect={setCategory}
         />
@@ -117,7 +117,6 @@ const OnboardingStep4Screen = () => {
                 ]
               : []
           }
-          className="rounded-md"
           selectedItems={subcategories}
           onChange={setSubcategories}
         />
@@ -137,7 +136,6 @@ const OnboardingStep4Screen = () => {
               ? EVENT_VIBE[category.value as keyof typeof EVENT_VIBE]
               : []
           }
-          className="rounded-md"
           selectedItems={vibes}
           onChange={setVibes}
         />
@@ -159,7 +157,6 @@ const OnboardingStep4Screen = () => {
                 ]
               : []
           }
-          className="rounded-md"
           direction="up"
           selectedItems={venueTypes}
           onChange={setVenueTypes}
@@ -176,7 +173,6 @@ const OnboardingStep4Screen = () => {
             />
           }
           items={EVENT_LOCATION_TYPES}
-          className="rounded-md"
           direction="up"
           selectedItem={location}
           onSelect={setLocation}

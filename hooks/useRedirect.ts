@@ -7,14 +7,19 @@ const useRedirect = () => {
   const redirect = (user: IUser) => {
     if (user.blocked) {
       router.replace("/auth/login");
-    } else if (!user.location.country.name) {
+      return;
+    } else if (!user.location.country.name || !user.phone) {
       router.replace("/auth/onboarding/step1");
+      return;
     } else if (!user.title) {
       router.replace("/auth/onboarding/step2");
-    } else if (!user.preferred.category) {
+      return;
+    } else if (!user.preferred?.category) {
       router.replace("/auth/onboarding/step4");
+      return;
     } else {
       router.replace("/home");
+      return;
     }
   };
 

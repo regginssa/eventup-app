@@ -1,15 +1,16 @@
 import { uploadFile } from "@/api/services/upload";
-import { updateUser } from "@/api/services/user";
+import UserAPI from "@/api/services/user";
 import { Avatar, Button, Input, Textarea } from "@/components/common";
 import { TAvatar } from "@/components/common/Avatar";
 import { OnboardingContainer } from "@/components/organisms";
 
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 
 const OnboardingStep2Screen = () => {
   const [avatar, setAvatar] = useState<string>("");
@@ -22,6 +23,7 @@ const OnboardingStep2Screen = () => {
 
   const router = useRouter();
   const { user, setAuthUser } = useAuth();
+  const toast = useToast();
 
   const validate = () => {
     setInvalidTitle(title.trim().length === 0 || title.trim().length > 20);
@@ -69,7 +71,7 @@ const OnboardingStep2Screen = () => {
         description: about,
       };
 
-      const response = await updateUser(user._id, updates);
+      const response = await UserAPI.update(user._id, updates);
 
       if (response.ok) {
         setAuthUser(response.data);
@@ -77,8 +79,7 @@ const OnboardingStep2Screen = () => {
         router.replace("/auth/onboarding/step3");
       }
     } catch (error: any) {
-      const message = error?.response?.data?.message;
-      Alert.alert(message);
+      toast.error("Invalid data");
     } finally {
       setLoading(false);
     }
