@@ -205,6 +205,7 @@ const TicketsCheckout = () => {
             },
           });
           txHash = res.paymentIntentId;
+          break;
       }
 
       if (!txHash) {

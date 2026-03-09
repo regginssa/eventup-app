@@ -1,154 +1,126 @@
-import { createStripePaymentIntent } from "@/api/services/stripe";
 import { fetchSubscriptionById } from "@/api/services/subscription";
-import { fetchUser } from "@/api/services/user";
-import { Button, CheckoutContainer, PaymentMethodGroup } from "@/components";
+import UserAPI from "@/api/services/user";
+import { Button, PaymentMethodGroup } from "@/components";
+import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
+import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
-import { IStripePayload } from "@/types/stripe";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { confirmPayment } from "@stripe/stripe-react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { calculateSave, TSubscriptionItem } from ".";
 
-const Header = ({
-  subscription,
-  loading,
-}: {
-  subscription: TSubscriptionItem | null;
-  loading: boolean;
-}) => {
+const SubscriptionHeroCard = ({ subscription, loading }: any) => {
   if (loading) {
-    <View className="w-full flex flex-col items-center justify-center gap-2 py-6 bg-white rounded-xl">
-      <ActivityIndicator size={24} color="#C427E0" />
-      <Text className="text-[#C427E0] font-poppins-semibold">
-        Fetching Subscription...
-      </Text>
-    </View>;
+    return (
+      <View className="h-32 items-center justify-center">
+        <ActivityIndicator size={24} color="#844AFF" />
+      </View>
+    );
   }
 
   if (!subscription) return null;
 
   return (
-    <View className="p-4 bg-white rounded-xl flex flex-col gap-4 w-full">
-      <View className="w-full flex flex-row items-start justify-between">
-        <View className="flex flex-col items-start gap-1">
-          <View className="flex flex-row items-center gap-2">
-            <View className="flex flex-row items-end gap-1">
-              <Text className="font-poppins-semibold text-2xl text-gray-800">
-                {subscription.month === 0 ? "Free" : subscription.month}
-              </Text>
-              {subscription.month > 0 && (
-                <Text className="font-poppins-semibold text-lg text-gray-600">
-                  Month
-                </Text>
-              )}
-            </View>
+    <View className="w-full rounded-[24px] overflow-hidden bg-white border border-slate-100">
+      <LinearGradient
+        colors={["rgba(132,74,255,0.08)", "transparent"]}
+        className="p-6 flex flex-row items-center justify-between"
+      >
+        <View>
+          <Text className="text-purple-600 font-poppins-bold text-[10px] uppercase tracking-widest">
+            Subscription Plan
+          </Text>
+
+          <Text className="font-poppins-bold text-2xl text-slate-900 mt-1">
+            {`${subscription.month} Months`}
+          </Text>
+
+          <Text className="text-slate-400 text-xs mt-1">
+            Unlock premium travel features
+          </Text>
+        </View>
+
+        <View className="items-end">
+          <Text className="text-slate-400 text-xs uppercase font-poppins-bold">
+            Price
+          </Text>
+
+          <Text className="font-poppins-bold text-3xl text-slate-900">
+            ${subscription.price}
+          </Text>
+        </View>
+      </LinearGradient>
+    </View>
+  );
+};
+
+const FeaturesCard = ({ subscription }: any) => {
+  if (!subscription) return null;
+
+  return (
+    <View className="bg-slate-50 rounded-[24px] border border-slate-200 shadow-sm p-6">
+      <Text className="text-slate-400 font-poppins-bold text-[10px] uppercase tracking-[2px] mb-4">
+        Included Features
+      </Text>
+
+      <View className="gap-4">
+        {subscription.features.map((feature: string, i: number) => (
+          <View key={i} className="flex-row items-center gap-3">
+            <MaterialCommunityIcons
+              name="checkbox-marked-circle"
+              size={18}
+              color="#10b981"
+            />
+
+            <Text className="text-slate-700 font-dm-sans-medium text-sm flex-1">
+              {feature}
+            </Text>
           </View>
-
-          {subscription.save && (
-            <View className="px-3 py-1 rounded-lg bg-[#EFE8FF]">
-              <Text className="font-dm-sans-medium text-[#844AFF] text-xs">
-                Save {subscription.save}%
-              </Text>
-            </View>
-          )}
-        </View>
-      </View>
-
-      <View className="gap-2">
-        <View className="flex flex-row items-center gap-4">
-          {subscription.features
-            .slice(0, 2)
-            .map((feature: any, index: number) => (
-              <View key={index} className="flex flex-row items-center gap-1.5">
-                <MaterialCommunityIcons
-                  name="checkbox-marked-circle-outline"
-                  size={16}
-                  color="#374151"
-                />
-                <Text className="font-dm-sans text-gray-700 text-sm">
-                  {feature}
-                </Text>
-              </View>
-            ))}
-        </View>
-
-        <View className="flex flex-row items-center gap-4">
-          {subscription.features
-            .slice(2, 4)
-            .map((feature: any, index: number) => (
-              <View key={index} className="flex flex-row items-center gap-1.5">
-                <MaterialCommunityIcons
-                  name="checkbox-marked-circle-outline"
-                  size={16}
-                  color="#374151"
-                />
-                <Text className="font-dm-sans text-gray-700 text-sm">
-                  {feature}
-                </Text>
-              </View>
-            ))}
-        </View>
+        ))}
       </View>
     </View>
   );
 };
 
-const Detail = ({
-  subscription,
-  loading,
-}: {
-  subscription: TSubscriptionItem | null;
-  loading: boolean;
-}) => {
-  if (loading) {
-    <View className="flex-1 w-full flex flex-col items-center justify-center gap-2 py-6 bg-white rounded-xl">
-      <ActivityIndicator size={24} color="#C427E0" />
-      <Text className="text-[#C427E0] font-poppins-semibold">
-        Fetching Subscription Detail...
-      </Text>
-    </View>;
-  }
-
-  if (!subscription) return;
+const SubscriptionReceipt = ({ subscription }: any) => {
+  if (!subscription) return null;
 
   return (
-    <View className="flex-1 p-4 flex flex-col items-start justify-center gap-6 bg-white rounded-xl">
-      <View className="flex flex-row items-end gap-1">
-        <Text className="font-poppins-semibold text-2xl text-gray-800">
-          {subscription.month === 0 ? "Free" : subscription.month}
-        </Text>
-        {subscription.month > 0 && (
-          <Text className="font-poppins-semibold text-lg text-gray-600">
-            Month
+    <View className="bg-slate-50 rounded-[24px] border border-slate-200 p-6">
+      <Text className="text-slate-400 font-poppins-bold text-[10px] uppercase tracking-[2px] mb-4">
+        Payment Summary
+      </Text>
+
+      <View className="gap-3">
+        <View className="flex-row justify-between">
+          <Text className="text-slate-500 text-sm">Plan</Text>
+
+          <Text className="font-dm-sans-bold text-slate-800">
+            {subscription.month === 0
+              ? "Free Plan"
+              : `${subscription.month} Month Plan`}
           </Text>
-        )}
-      </View>
+        </View>
 
-      <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-dm-sans-medium text-gray-600">Currency:</Text>
-        <Text className="font-poppins-semibold text-gray-800">USD</Text>
-      </View>
+        <View className="flex-row justify-between">
+          <Text className="text-slate-500 text-sm">Currency</Text>
 
-      <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-dm-sans-medium text-gray-600">Price:</Text>
-        <Text className="font-poppins-semibold text-gray-800">
-          {subscription.price}
-        </Text>
-      </View>
-
-      <View className="w-full h-[1px] bg-gray-200"></View>
-
-      <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-dm-sans-bold text-xl text-gray-600">Total:</Text>
-        <View className="flex flex-row items-start">
-          <Text className="font-poppins-semibold text-green-500 text-lg">
-            $
+          <Text className="font-dm-sans-bold text-slate-800">
+            {subscription.currency}
           </Text>
-          <Text className="font-poppins-bold text-green-500 text-3xl">
-            {subscription.price}
+        </View>
+
+        <View className="h-[1px] bg-slate-200 my-2" />
+
+        <View className="flex-row justify-between items-end">
+          <Text className="text-slate-600 font-dm-sans-bold">Total Amount</Text>
+
+          <Text className="font-poppins-bold text-3xl text-slate-900">
+            ${subscription.price}
           </Text>
         </View>
       </View>
@@ -160,22 +132,35 @@ const SubscriptionCheckout = () => {
   const [subscription, setSubscription] = useState<TSubscriptionItem | null>(
     null,
   );
-  const [method, setMethod] = useState<TPaymentMethod>("card");
+
+  const [method, setMethod] = useState<TPaymentMethod>("credit");
+
   const [stripePaymentMethodId, setStripePaymentMethodId] =
     useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [subLoading, setSubLoading] = useState<boolean>(false);
-  const [btnLabel, setBtnLabel] = useState<string>("Subscribe");
+
+  const [loading, setLoading] = useState(false);
+
+  const [subLoading, setSubLoading] = useState(false);
+
+  const [btnLabel, setBtnLabel] = useState("Subscribe");
 
   const { id: subscriptionId, oneMonthPrice } = useLocalSearchParams();
+
   const { user, setAuthUser } = useAuth();
+
+  const { pay: payStripe } = useStripe();
+
+  const toast = useToast();
+
   const router = useRouter();
 
   useEffect(() => {
     const getSubscription = async () => {
       if (!subscriptionId || !oneMonthPrice) return;
+
       try {
         setLoading(true);
+
         const response = await fetchSubscriptionById(subscriptionId as any);
 
         if (response.data) {
@@ -184,15 +169,16 @@ const SubscriptionCheckout = () => {
             response.data.month,
             Number(oneMonthPrice),
           );
-          const formattedSubscription: TSubscriptionItem = {
+
+          const formatted: TSubscriptionItem = {
             ...response.data,
             isActive: user?.subscription.id === response.data._id,
             isRecommended: response.data.month === 6,
             save: savePercent === 0 ? undefined : savePercent,
           };
-          setSubscription(formattedSubscription);
+
+          setSubscription(formatted);
         }
-      } catch (error) {
       } finally {
         setLoading(false);
       }
@@ -202,23 +188,18 @@ const SubscriptionCheckout = () => {
   }, [subscriptionId]);
 
   useEffect(() => {
-    if (!user?.stripe) return;
+    if (!user?.stripe?.paymentMethods?.length) return;
 
-    if (user.stripe.paymentMethods.length === 0) return;
-    setStripePaymentMethodId(user.stripe.paymentMethods[0].id || "");
+    setStripePaymentMethodId(user.stripe.paymentMethods[0].id);
   }, [user]);
 
   const handleStripePayment = async (
     amount: number,
     currency: string,
-  ): Promise<boolean> => {
-    if (stripePaymentMethodId === "") {
-      return false;
-    }
+  ): Promise<string | null> => {
+    if (!stripePaymentMethodId) return null;
 
-    const stripePayload: IStripePayload = {
-      customerId: user?.stripe?.customerId as string,
-      paymentMethodId: stripePaymentMethodId,
+    const res = await payStripe({
       amount,
       currency,
       metadata: {
@@ -226,34 +207,10 @@ const SubscriptionCheckout = () => {
         userId: user?._id,
         subscriptionId,
       },
-    };
-
-    const clientSecretResponse = await createStripePaymentIntent(stripePayload);
-
-    if (!clientSecretResponse.ok) {
-      //   Alert.alert(
-      //     "Payment Error",
-      //     clientSecretResponse.message || "Failed to create payment.",
-      //   );
-      return false;
-    }
-
-    const { id: paymentIntentId, clientSecret } = clientSecretResponse.data;
-
-    // Pay with stripe
-    const { error: confirmPaymentError } = await confirmPayment(clientSecret, {
-      paymentMethodType: "Card",
-      paymentMethodData: {
-        paymentMethodId: stripePaymentMethodId,
-      },
+      paymentMethodId: stripePaymentMethodId,
     });
 
-    if (confirmPaymentError) {
-      //   Alert.alert("Payment Confirmation Error", confirmPaymentError.message);
-      return false;
-    }
-
-    return true;
+    return res.paymentIntentId || null;
   };
 
   const handleSubscribe = async () => {
@@ -261,63 +218,32 @@ const SubscriptionCheckout = () => {
 
     try {
       setSubLoading(true);
-      setBtnLabel("Processing Payment...");
-      let paymentResult = false;
 
-      switch (method) {
-        case "card":
-          paymentResult = await handleStripePayment(
-            subscription.price,
-            subscription.currency,
-          );
-          break;
-        case "crypto":
-          break;
-        case "token":
-          break;
+      setBtnLabel("Processing Payment...");
+
+      let paymentResult;
+
+      if (method === "credit") {
+        paymentResult = await handleStripePayment(
+          subscription.price,
+          subscription.currency,
+        );
       }
 
       if (!paymentResult) {
-        Alert.alert("Error", "Payment Failed");
-        setBtnLabel("Subscribe");
-        setSubLoading(false);
+        toast.error("Payment failed");
         return;
       }
 
-      const waitForUpdate = async (timeout = 20000) => {
-        if (!user) return;
+      const response = await UserAPI.get(user?._id as string);
 
-        const intervalTime = 2000;
-        let elapsed = 0;
-
-        return new Promise<boolean>((resolve) => {
-          const interval = setInterval(async () => {
-            elapsed += intervalTime;
-
-            const response = await fetchUser(user?._id as string);
-
-            if (response.data.subscription.id === subscriptionId) {
-              setAuthUser(response.data);
-              clearInterval(interval);
-              resolve(true);
-            }
-
-            if (elapsed >= timeout) {
-              clearInterval(interval);
-              resolve(false);
-            }
-          }, intervalTime);
-        });
-      };
-
-      const updated = await waitForUpdate();
-
-      if (updated) {
-        Alert.alert("Success", "Subscribed successfully");
+      if (response.data.subscription.id === subscriptionId) {
+        setAuthUser(response.data);
+        toast.success("Subscribed successfully");
         router.back();
       }
-    } catch (error: any) {
-      console.log("[handle subscription error]: ", error);
+    } catch (error) {
+      toast.error("Subscription failed");
     } finally {
       setBtnLabel("Subscribe");
       setSubLoading(false);
@@ -325,27 +251,46 @@ const SubscriptionCheckout = () => {
   };
 
   return (
-    <CheckoutContainer>
-      <Header subscription={subscription} loading={loading} />
+    <SimpleContainer title="Subscription Checkout" scrolled>
+      <View className="flex-1 gap-4">
+        <SubscriptionHeroCard subscription={subscription} loading={loading} />
 
-      <Detail subscription={subscription} loading={loading} />
+        <FeaturesCard subscription={subscription} />
 
-      <PaymentMethodGroup
-        method={method}
-        stripePaymentMethodId={stripePaymentMethodId}
-        onSelectMethod={setMethod}
-        onSelectStripePaymentMethod={setStripePaymentMethodId}
-      />
+        <SubscriptionReceipt subscription={subscription} />
 
-      <Button
-        type="primary"
-        label={btnLabel}
-        buttonClassName="h-12"
-        disabled={loading || !subscription}
-        loading={subLoading}
-        onPress={handleSubscribe}
-      />
-    </CheckoutContainer>
+        <PaymentMethodGroup
+          method={method}
+          stripePaymentMethodId={stripePaymentMethodId}
+          onSelectMethod={setMethod}
+          onSelectStripePaymentMethod={setStripePaymentMethodId}
+        />
+      </View>
+
+      <View className="mt-10 gap-4">
+        <Button
+          type="primary"
+          label={btnLabel}
+          buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
+          textClassName="text-lg font-poppins-bold"
+          loading={subLoading}
+          disabled={loading || !subscription}
+          onPress={handleSubscribe}
+        />
+
+        <View className="flex-row items-center justify-center bg-slate-50 py-3 rounded-xl border border-slate-100">
+          <MaterialCommunityIcons
+            name="shield-check"
+            size={16}
+            color="#94a3b8"
+          />
+
+          <Text className="text-[10px] text-slate-400 font-dm-sans-bold ml-2 uppercase tracking-tight">
+            Secure Subscription Payment
+          </Text>
+        </View>
+      </View>
+    </SimpleContainer>
   );
 };
 

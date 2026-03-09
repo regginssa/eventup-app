@@ -25,7 +25,7 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
   return (
     <View
       style={styles.container}
-      className="bg-slate-50 border border-slate-200 rounded-[24px]"
+      className="bg-slate-50 rounded-[24px] border border-slate-200"
     >
       <View style={styles.inner}>
         {/* HEADER */}
@@ -161,7 +161,6 @@ const styles = StyleSheet.create({
   },
 
   inner: {
-    backgroundColor: "rgba(255,255,255,0.95)",
     borderRadius: 23,
     padding: 20,
   },
