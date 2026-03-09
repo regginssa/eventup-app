@@ -120,12 +120,6 @@ const BookingStatus = () => {
       if (!booking || !booking.transfer || !event?.location || !user) return;
 
       const { airportToHotel, hotelToEvent } = booking.transfer;
-      const {
-        city: eventCity,
-        address: eventAddress,
-        postalCode: eventPostalCode,
-        country: eventCountry,
-      } = event.location;
 
       if (
         airportToHotel.offer &&
@@ -133,34 +127,8 @@ const BookingStatus = () => {
         booking.flight.offer &&
         booking.hotel.offer
       ) {
-        const flightOffer = booking.flight.offer;
-        const hotelOffer = booking.hotel.offer;
-        const bodyData = {
-          rateKey: airportToHotel.offer.rateKey,
-          holder: {
-            name: "Jhon", // user.firstName
-            surname: "Doe", // user.lastName
-            email: user.email,
-            phone: "+442080160509", // user.phone
-          },
-          transportInfo: {
-            type: "FLIGHT",
-            direction: "ARRIVAL",
-            code: flightOffer.flightNumbers,
-            companyName: flightOffer.airlineName,
-          },
-          totalAmount: airportToHotel.offer.totalAmount,
-          addresses: {
-            pickupName: `${flightOffer.destinationIata} Airport`,
-            dropoffName: hotelOffer.name,
-            dropoffAddress: hotelOffer.street,
-            dropoffCity: hotelOffer.city,
-            dropoffZip: hotelOffer.postalCode,
-            countryCode: hotelOffer.countryCode,
-          },
-        };
-
-        const result = await bookTransfer(bodyData);
+        const result = await bookTransfer(airportToHotel.offer);
+        console.log("[airport transfer booking result]: ", result);
         if (result.status !== "confirmed") return toast.error(result.message);
 
         await updateBooking({
@@ -181,37 +149,8 @@ const BookingStatus = () => {
         hotelToEvent.status !== "confirmed" &&
         booking.hotel.offer
       ) {
-        const hotelOffer = booking.hotel.offer;
-
-        const bodyData = {
-          rateKey: airportToHotel.offer.rateKey,
-          holder: {
-            name: "Jhon", // user.firstName
-            surname: "Doe", // user.lastName
-            email: user.email,
-            phone: "+442080160509", // user.phone
-          },
-          transportInfo: {
-            type: "OTHER",
-            direction: "DEPARTURE",
-            code: "EVENT",
-            companyName: event.name,
-          },
-          totalAmount: airportToHotel.offer.totalAmount,
-          addresses: {
-            pickupName: hotelOffer.name,
-            pickupAddress: hotelOffer.street,
-            pickupCity: hotelOffer.city,
-            pickupZip: hotelOffer.postalCode,
-            dropoffName: event.name,
-            dropoffAddress: eventAddress,
-            dropoffCity: eventCity.name,
-            dropoffZip: eventPostalCode,
-            countryCode: eventCountry.code,
-          },
-        };
-
-        const result = await bookTransfer(bodyData);
+        const result = await bookTransfer(hotelToEvent.offer);
+        console.log("[event transfer booking result]: ", result);
         if (result.status !== "confirmed") return toast.error(result.message);
 
         await updateBooking({
@@ -302,7 +241,7 @@ const BookingStatus = () => {
       status: hotel.status,
     },
     transfer?.airportToHotel?.offer && {
-      label: "Arrival Transfer",
+      label: "Airport Transfer",
       icon: "car-wash",
       status: transfer.airportToHotel.status,
     },

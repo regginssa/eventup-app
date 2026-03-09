@@ -1,12 +1,13 @@
 import services from "@/api/services/transfer";
 import { ITransferBookingResponse, ITransferOffer } from "@/types/transfer";
 import { createContext, useContext, useState } from "react";
+import { useAuth } from "./AuthProvider";
 
 interface TransferContextProps {
   airportToHotelOffer: ITransferOffer | null;
   hotelToEventOffer: ITransferOffer | null;
   search: (params: any, transferType: "ah" | "he") => Promise<void>;
-  book: (bodyData: any) => Promise<ITransferBookingResponse>;
+  book: (offer: ITransferOffer) => Promise<ITransferBookingResponse>;
   initialize: () => void;
 }
 
@@ -32,6 +33,8 @@ const TransferProvider: React.FC<TransferProviderProps> = ({ children }) => {
   const [hotelToEventOffer, setHotelToEventOffer] =
     useState<ITransferOffer | null>(null);
 
+  const { user } = useAuth();
+
   const search = async (params: any, transferType: "ah" | "he") => {
     const response = await services.get(params);
     if (transferType === "ah") {
@@ -41,8 +44,24 @@ const TransferProvider: React.FC<TransferProviderProps> = ({ children }) => {
     }
   };
 
-  const book = async (bodyData: any): Promise<ITransferBookingResponse> => {
-    const response = await services.book(bodyData);
+  const book = async (
+    offer: ITransferOffer,
+  ): Promise<ITransferBookingResponse> => {
+    const body = {
+      quoteId: offer.id,
+      offerHash: offer.offerHash,
+      passenger: {
+        title: user?.gender,
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        countryCode: user?.location.country.code,
+        email: user?.email,
+        phone: user?.phone,
+      },
+      offer: offer,
+      pickupDateTime: offer.pickupDateTime,
+    };
+    const response = await services.book(body);
     return response.data;
   };
 

@@ -1,4 +1,5 @@
-import { ITransferOffer } from "@/types/transfer";
+import { ITransferOffer, TTransferBookStatus } from "@/types/transfer";
+import df from "@/utils/date";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
@@ -6,12 +7,14 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 interface TransferItemProps {
   data: ITransferOffer | null;
+  status?: TTransferBookStatus;
   refreshLoading?: boolean;
   onRefresh?: () => Promise<void>;
 }
 
 const TransferItem: React.FC<TransferItemProps> = ({
   data: offer,
+  status,
   refreshLoading,
   onRefresh,
 }) => {
@@ -26,6 +29,7 @@ const TransferItem: React.FC<TransferItemProps> = ({
     pickupPoint,
     destinationPoint,
     waitingTime,
+    pickupDateTime,
   } = offer;
 
   return (
@@ -68,6 +72,48 @@ const TransferItem: React.FC<TransferItemProps> = ({
               </View>
             </View>
 
+            {/* STATUS */}
+            {status && (
+              <View
+                className={`${
+                  status === "pending"
+                    ? "bg-yellow-100"
+                    : status === "failed"
+                      ? "bg-red-100"
+                      : "bg-green-100"
+                } px-3 py-1 rounded-full flex-row items-center mr-2`}
+              >
+                <MaterialCommunityIcons
+                  name={
+                    status === "pending"
+                      ? "clock-outline"
+                      : status === "failed"
+                        ? "close-circle-outline"
+                        : "check-decagram"
+                  }
+                  size={14}
+                  color={
+                    status === "pending"
+                      ? "#a16207"
+                      : status === "failed"
+                        ? "#b91c1c"
+                        : "#16a34a"
+                  }
+                />
+                <Text
+                  className={`${
+                    status === "pending"
+                      ? "text-yellow-700"
+                      : status === "failed"
+                        ? "text-red-700"
+                        : "text-green-700"
+                  } font-dm-sans-bold text-[10px] ml-1 uppercase`}
+                >
+                  {status === "pending" ? "Pending" : status}
+                </Text>
+              </View>
+            )}
+
             {onRefresh && (
               <TouchableOpacity
                 onPress={onRefresh}
@@ -85,6 +131,18 @@ const TransferItem: React.FC<TransferItemProps> = ({
                 )}
               </TouchableOpacity>
             )}
+          </View>
+
+          {/* PICKUP TIME */}
+          <View className="flex-row items-center gap-2 mb-6">
+            <MaterialCommunityIcons
+              name="clock-outline"
+              size={14}
+              color="#844AFF"
+            />
+            <Text className="font-dm-sans-bold text-[11px] text-purple-500">
+              Pickup {df.toDateTime(pickupDateTime)}
+            </Text>
           </View>
 
           {/* ROUTE SECTION */}

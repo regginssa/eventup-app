@@ -77,6 +77,22 @@ const toTransferDate = (date: Date | string): string => {
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 };
 
+const toDateTime = (date: Date | string): string => {
+  const d = new Date(date);
+
+  const datePart = d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+
+  const timePart = d.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return `${datePart} • ${timePart}`;
+};
+
 export default {
   toISOString,
   toShortDate,
@@ -84,4 +100,5 @@ export default {
   to24HourTime,
   to24Hour,
   toTransferDate,
+  toDateTime,
 };

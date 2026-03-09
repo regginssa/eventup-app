@@ -139,7 +139,10 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
           <View className="flex-row gap-3 min-h-[100px]">
             <TimelineConnector />
             <View className="flex-1 pb-6">
-              <TransferItem data={transfer.airportToHotel.offer} />
+              <TransferItem
+                data={transfer.airportToHotel.offer}
+                status={transfer.airportToHotel.status}
+              />
             </View>
           </View>
         )}
@@ -171,7 +174,10 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
               />
             </View>
             <View className="flex-1 pb-6">
-              <TransferItem data={transfer.hotelToEvent.offer} />
+              <TransferItem
+                data={transfer.hotelToEvent.offer}
+                status={transfer.hotelToEvent.status}
+              />
             </View>
           </View>
         )}

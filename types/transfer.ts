@@ -13,15 +13,14 @@ export interface ITransferOffer {
   waitingTime: string; // e.g. "48 minutes"
   pickupPoint: string; // formatted UX-friendly string
   destinationPoint: string; // formatted UX-friendly string
+  pickupDateTime: string;
 }
+
 export interface ITransferBookingResponse {
   status: TTransferBookStatus;
-  bookingReference: string;
-  clientReference: string;
-  pickupDate: string;
-  pickupTime: string;
-  vehicleName: string;
-  totalAmount: number;
-  currency: string;
+  bookingId?: string;
+  reference?: string;
+  totalAmount?: number;
+  currency?: string;
   message: string;
 }
