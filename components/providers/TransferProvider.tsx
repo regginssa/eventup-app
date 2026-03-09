@@ -7,7 +7,7 @@ interface TransferContextProps {
   airportToHotelOffer: ITransferOffer | null;
   hotelToEventOffer: ITransferOffer | null;
   search: (params: any, transferType: "ah" | "he") => Promise<void>;
-  book: (offer: ITransferOffer) => Promise<ITransferBookingResponse>;
+  book: (body: any) => Promise<ITransferBookingResponse>;
   initialize: () => void;
 }
 
@@ -44,23 +44,7 @@ const TransferProvider: React.FC<TransferProviderProps> = ({ children }) => {
     }
   };
 
-  const book = async (
-    offer: ITransferOffer,
-  ): Promise<ITransferBookingResponse> => {
-    const body = {
-      quoteId: offer.id,
-      offerHash: offer.offerHash,
-      passenger: {
-        title: user?.gender,
-        firstName: user?.firstName,
-        lastName: user?.lastName,
-        countryCode: user?.location.country.code,
-        email: user?.email,
-        phone: user?.phone,
-      },
-      offer: offer,
-      pickupDateTime: offer.pickupDateTime,
-    };
+  const book = async (body: any): Promise<ITransferBookingResponse> => {
     const response = await services.book(body);
     return response.data;
   };

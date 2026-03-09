@@ -78,7 +78,7 @@ const BookingStatus = () => {
       )
         return;
 
-      const result = await bookFlight(booking.flight.offer.id);
+      const result = await bookFlight(booking.flight.offer);
       if (!result.orderId) return toast.error(result.message);
 
       const bookingBodyData: IBooking = {
@@ -86,7 +86,7 @@ const BookingStatus = () => {
         flight: {
           ...booking.flight,
           booking: result,
-          status: result.status,
+          status: "confirmed",
         },
       };
       await updateBooking(bookingBodyData);
@@ -121,12 +121,48 @@ const BookingStatus = () => {
 
       const { airportToHotel, hotelToEvent } = booking.transfer;
 
+      let body = {};
+
       if (
         airportToHotel.offer &&
         airportToHotel.status !== "confirmed" &&
         booking.flight.offer &&
         booking.hotel.offer
       ) {
+        const flightOffer = booking.flight.offer;
+        const hotelOffer = booking.hotel.offer;
+        const transferOffer = airportToHotel.offer;
+
+        body = {
+          quoteId: transferOffer.id,
+          offerHash: transferOffer.offerHash,
+          passenger: {
+            title: user?.gender,
+            firstName: user?.firstName,
+            lastName: user?.lastName,
+            countryCode: user?.location.country.code,
+            email: user?.email,
+            phone: user?.phone,
+          },
+          offer: transferOffer,
+          pickupDateTime: transferOffer.pickupDateTime,
+          outward: {
+            flight: {
+              airline_code: flightOffer.airlineName,
+              flight_number:
+                flightOffer.flightNumbers[flightOffer.flightNumbers.length - 1],
+              airport_code: flightOffer.destinationIata,
+              flight_date_time: flightOffer.arrivalTime,
+            },
+          },
+          destination: {
+            accommodation: {
+              name: hotelOffer.name,
+              address: hotelOffer.address,
+            },
+          },
+        };
+
         const result = await bookTransfer(airportToHotel.offer);
         console.log("[airport transfer booking result]: ", result);
         if (result.status !== "confirmed") return toast.error(result.message);
@@ -147,8 +183,41 @@ const BookingStatus = () => {
       if (
         hotelToEvent.offer &&
         hotelToEvent.status !== "confirmed" &&
-        booking.hotel.offer
+        booking.hotel.offer &&
+        booking.event
       ) {
+        const hotelOffer = booking.hotel.offer;
+        const transferOffer = hotelToEvent.offer;
+        const event = booking.event;
+
+        body = {
+          quoteId: transferOffer.id,
+          offerHash: transferOffer.offerHash,
+          passenger: {
+            title: user?.gender,
+            firstName: user?.firstName,
+            lastName: user?.lastName,
+            countryCode: user?.location.country.code,
+            email: user?.email,
+            phone: user?.phone,
+          },
+          offer: transferOffer,
+          pickupDateTime: transferOffer.pickupDateTime,
+          outward: {
+            accommodation: {
+              name: hotelOffer.name,
+              address: hotelOffer.address,
+              pickup_date_time: transferOffer.pickupDateTime,
+            },
+          },
+          destination: {
+            accommodation: {
+              name: event.name,
+              address: event.location?.address,
+            },
+          },
+        };
+
         const result = await bookTransfer(hotelToEvent.offer);
         console.log("[event transfer booking result]: ", result);
         if (result.status !== "confirmed") return toast.error(result.message);
