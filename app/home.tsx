@@ -1,12 +1,17 @@
 import eventServices from "@/api/services/event";
-import { Input, Tabs } from "@/components/common";
+import { Button, Input, NormalModal, Tabs } from "@/components/common";
 import { EventFilterModal, EventsPreviewGroup } from "@/components/molecules";
 import { LayoutContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { TDropdownItem, TPagination } from "@/types";
 import { IEvent } from "@/types/event";
 import { Country, RegionType } from "@/types/location.types";
-import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Feather,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -44,6 +49,7 @@ const HomeScreen = () => {
   const [country, setCountry] = useState<Country | null>(null);
   const [region, setRegion] = useState<RegionType | null>(null);
   const [category, setCategory] = useState<TDropdownItem | null>(null);
+  const [isPageOpen, setIsPageOpen] = useState<boolean>(false);
 
   const router = useRouter();
   const { user } = useAuth();
@@ -95,6 +101,7 @@ const HomeScreen = () => {
     const totalPages = Math.ceil(pagination.total / pagination.limit);
     if (page >= 1 && page <= totalPages) {
       fetchFeed(page);
+      setIsPageOpen(false);
     }
   };
 
@@ -127,6 +134,14 @@ const HomeScreen = () => {
               onChange={setSearch}
             />
           </View>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className={`w-12 h-12 rounded-full flex items-center justify-center bg-white`}
+            style={styles.shadow}
+            onPress={() => setIsPageOpen(true)}
+          >
+            <MaterialIcons name="pages" size={20} color="#4b5563" />
+          </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.8}
             className={`w-12 h-12 rounded-full flex items-center justify-center bg-white`}
@@ -271,6 +286,40 @@ const HomeScreen = () => {
         onApply={handleFilterApply}
         onReset={handleFilterReset}
       />
+
+      <NormalModal
+        title=""
+        isOpen={isPageOpen}
+        onClose={() => setIsPageOpen(false)}
+      >
+        <View className="gap-4">
+          <Text className={`font-poppins-semibold text-[11px] text-gray-500`}>
+            Page {pagination.page}/
+            {Math.ceil(pagination.total / pagination.limit) || 1}
+          </Text>
+          <Input
+            type="number"
+            placeholder="Page"
+            bordered
+            icon={<MaterialIcons name="pages" size={16} color="#4b5563" />}
+            value={goToPage}
+            onChange={setGoToPage}
+          />
+          <Button
+            type="primary"
+            label="Go"
+            icon={
+              <MaterialCommunityIcons
+                name="arrow-right"
+                color="white"
+                size={16}
+              />
+            }
+            iconPosition="right"
+            onPress={() => handleGoToPage(goToPage)}
+          />
+        </View>
+      </NormalModal>
     </LayoutContainer>
   );
 };

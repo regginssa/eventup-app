@@ -42,16 +42,17 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
     );
   }
 
-  const { flight, hotel, transfer, ticketStatus, event } = booking;
-  const isCompleted =
-    flight.offer &&
-    flight.status === "confirmed" &&
-    hotel.offer &&
-    hotel.status === "confirmed" &&
-    transfer.airportToHotel?.offer &&
-    transfer.airportToHotel.status === "confirmed" &&
-    transfer.hotelToEvent?.offer &&
-    transfer.hotelToEvent.status === "confirmed";
+  const { flight, hotel, transfer, ticketStatus, event, paymentStatus } =
+    booking;
+  const isCompleted = [
+    paymentStatus === "completed",
+    !flight.offer || flight.status === "confirmed",
+    !hotel.offer || hotel.status === "confirmed",
+    !transfer.airportToHotel?.offer ||
+      transfer.airportToHotel.status === "confirmed",
+    !transfer.hotelToEvent?.offer ||
+      transfer.hotelToEvent.status === "confirmed",
+  ].every(Boolean);
 
   const router = useRouter();
 

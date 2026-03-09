@@ -59,7 +59,7 @@ const CreateEventContainer: React.FC<CreateEventContainerProps> = ({
 
             <CreateEventStepper completedStep={step} />
             <View
-              className="w-full p-4 gap-5 bg-[#eef1f7] rounded-lg border"
+              className="w-full p-4 gap-5 bg-[#eef1f7] rounded-3xl border"
               style={{ borderColor: "white" }}
             >
               {children}

@@ -366,7 +366,7 @@ const UserEventDetail = () => {
                 </View>
               )}
 
-              {!groupConversation ? (
+              {!groupConversation && !myAttendees ? (
                 <Button
                   type="primary"
                   label="Create"
@@ -378,7 +378,7 @@ const UserEventDetail = () => {
                     })
                   }
                 />
-              ) : (
+              ) : groupConversation ? (
                 <Button
                   type="primary"
                   label="Go to group chat"
@@ -392,7 +392,7 @@ const UserEventDetail = () => {
                     })
                   }
                 />
-              )}
+              ) : null}
             </View>
           )}
 

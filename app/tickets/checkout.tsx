@@ -159,7 +159,7 @@ const TicketsCheckout = () => {
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<TPaymentMethod>("credit");
 
-  const { id: ticketId, from } = useLocalSearchParams();
+  const { id: ticketId, from, eventId } = useLocalSearchParams();
   const router = useRouter();
   const { user, setAuthUser } = useAuth();
   const { pay: payStripe } = useStripe();
@@ -234,7 +234,14 @@ const TicketsCheckout = () => {
 
       if (updated) {
         Alert.alert("Success", "Ticket purchased successfully!");
-        router.replace(from || ("/mine/tickets" as any));
+        if (from && eventId) {
+          router.replace({
+            pathname: "/event/details/user",
+            params: { id: eventId },
+          });
+        } else {
+          router.replace(from || ("/mine/tickets" as any));
+        }
       }
     } catch (err: any) {
       Alert.alert("Error", "Unable to complete purchase");

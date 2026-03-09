@@ -153,63 +153,64 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
           </View>
 
           {/* E-TICKET */}
-          <View className="bg-slate-50/50 py-4 rounded-2xl border border-slate-100">
-            <View className="flex-row items-center gap-2 mb-4">
-              <View className="w-6 h-6 rounded-full bg-[#844AFF10] items-center justify-center">
-                <MaterialCommunityIcons
-                  name="ticket-outline"
-                  size={14}
-                  color="#844AFF"
-                />
-              </View>
-              <Text className="font-poppins-semibold text-sm text-slate-800">
-                E-Ticket Required
-              </Text>
-            </View>
-
-            {communityTicket ? (
-              <CommunityTicketItem item={communityTicket} />
-            ) : (
-              <View className="w-full flex-row items-start gap-2">
-                <MaterialCommunityIcons
-                  name="information-outline"
-                  size={14}
-                  color="#64748b"
-                />
-
-                <View className="flex-1">
-                  <Text className="font-dm-sans-medium text-sm text-slate-700 leading-5">
-                    An official e-ticket is required for entry. You can purchase
-                    it in the app for{" "}
-                    <Text className="font-dm-sans-bold">
-                      {getCurrencySymbol(event.fee?.currency as any)}
-                      {event.fee?.amount}
-                    </Text>
-                    .
-                  </Text>
-
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    className="mt-2"
-                    onPress={() =>
-                      router.push({
-                        pathname: "/tickets",
-                        params: {
-                          amount: event.fee?.amount,
-                          currency: event.fee?.currency,
-                          from: "/booking/checkout",
-                        },
-                      })
-                    }
-                  >
-                    <Text className="font-poppins-semibold text-sm text-[#844AFF] underline">
-                      Purchase E-Ticket
-                    </Text>
-                  </TouchableOpacity>
+          {event.type === "user" && event.fee?.type === "paid" && (
+            <View className="bg-slate-50/50 py-4 rounded-2xl border border-slate-100">
+              <View className="flex-row items-center gap-2 mb-4">
+                <View className="w-6 h-6 rounded-full bg-[#844AFF10] items-center justify-center">
+                  <MaterialCommunityIcons
+                    name="ticket-outline"
+                    size={14}
+                    color="#844AFF"
+                  />
                 </View>
+                <Text className="font-poppins-semibold text-sm text-slate-800">
+                  E-Ticket Required
+                </Text>
               </View>
-            )}
-          </View>
+
+              {communityTicket ? (
+                <CommunityTicketItem item={communityTicket} />
+              ) : (
+                <View className="w-full flex-row items-start gap-2">
+                  <MaterialCommunityIcons
+                    name="information-outline"
+                    size={14}
+                    color="#64748b"
+                  />
+
+                  <View className="flex-1">
+                    <Text className="font-dm-sans-medium text-sm text-slate-700 leading-5">
+                      An official e-ticket is required for entry. You can
+                      purchase it in the app for{" "}
+                      <Text className="font-dm-sans-bold">
+                        {getCurrencySymbol(event.fee?.currency as any)}
+                        {event.fee?.amount}
+                      </Text>
+                      .
+                    </Text>
+
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      className="mt-2"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/tickets",
+                          params: {
+                            amount: event.fee?.amount,
+                            currency: event.fee?.currency,
+                          },
+                        })
+                      }
+                    >
+                      <Text className="font-poppins-semibold text-sm text-[#844AFF] underline">
+                        Purchase E-Ticket
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
 
           <BookSearchInputGroup
             event={event}

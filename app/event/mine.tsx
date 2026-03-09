@@ -1,4 +1,4 @@
-import { fetchAllBookings } from "@/api/services/booking";
+import BookingAPI from "@/api/services/booking";
 import eventServices from "@/api/services/event";
 import { Tabs } from "@/components/common";
 import { EventsPreviewGroup } from "@/components/molecules";
@@ -55,7 +55,7 @@ const MyEventsScreen = () => {
 
       try {
         if (selectedTab.value === "booked") {
-          const response = await fetchAllBookings(user._id);
+          const response = await BookingAPI.getAllByUserId(user._id);
           if (response.data) {
             const events = response.data.map((booking) => booking.event);
             setEvents(events);
