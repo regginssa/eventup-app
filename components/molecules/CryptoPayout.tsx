@@ -36,7 +36,7 @@ const CryptoPayout: React.FC<CryptoPayoutProps> = ({
   ];
 
   return (
-    <View className="w-full bg-white rounded-xl p-4 gap-6">
+    <View className="bg-slate-50 rounded-[24px] border border-slate-200 gap-6 p-6">
       <View>
         <Text className="font-poppins-semibold text-gray-700">Our Tokens</Text>
 
@@ -50,10 +50,10 @@ const CryptoPayout: React.FC<CryptoPayoutProps> = ({
           <TouchableOpacity
             key={m.value}
             activeOpacity={0.8}
-            className="flex-1 aspect-square rounded-md relative mx-4"
+            className="flex-1 aspect-square rounded-[24px] relative mx-4"
             onPress={() => onSelectMethod(m.value as any)}
           >
-            <View className="absolute inset-[1px] bg-gray-300 rounded-md z-10"></View>
+            <View className="absolute inset-[1px] bg-gray-300 rounded-[24px] z-10"></View>
             {method === m.value && (
               <LinearGradient
                 colors={["#C427E0", "#844AFF", "#12A9FF"]}
@@ -63,7 +63,7 @@ const CryptoPayout: React.FC<CryptoPayoutProps> = ({
               />
             )}
 
-            <View className="absolute inset-[2px] bg-[#F2F4F3] z-30 rounded-md flex flex-col items-center justify-center gap-2">
+            <View className="absolute inset-[2px] bg-[#F2F4F3] z-30 rounded-[24px] flex flex-col items-center justify-center gap-2">
               <Image
                 source={m.img}
                 alt={m.label}
@@ -77,7 +77,7 @@ const CryptoPayout: React.FC<CryptoPayoutProps> = ({
             </View>
 
             {method === m.value && (
-              <View className="absolute w-8 h-8 flex items-center justify-center bg-green-500 z-40 -right-3 -top-1 rounded-sm">
+              <View className="absolute w-8 h-8 flex items-center justify-center bg-green-500 z-40 -right-1 -top-1 rounded-lg">
                 <MaterialCommunityIcons
                   name="check-bold"
                   size={16}
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   paymentMethodGradient: {
     position: "absolute",
     inset: 1,
-    borderRadius: 6,
+    borderRadius: 24,
     zIndex: 10,
   },
 

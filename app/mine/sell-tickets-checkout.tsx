@@ -6,218 +6,196 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 
-const ticketCardBg = require("@/assets/images/ticket_card_bg.png");
-
-const Header = ({
-  ticket,
-  loading,
-}: {
-  ticket: ICommunityTicket | null;
-  loading: boolean;
-}) => {
+const TicketHeroCard = ({ ticket, loading }: any) => {
   if (loading) {
-    <View className="w-full flex flex-col items-center justify-center gap-2">
-      <ActivityIndicator size={24} color="#C427E0" />
-      <Text className="text-[#C427E0] font-poppins-semibold">
-        Fetching Ticket...
-      </Text>
-    </View>;
+    return (
+      <View className="h-32 justify-center">
+        <ActivityIndicator size="large" color="#844AFF" />
+      </View>
+    );
   }
 
   if (!ticket) return null;
 
   return (
-    <View className="relative w-full h-[160px] rounded-xl overflow-hidden">
-      <Image
-        source={ticketCardBg}
-        alt="Ticket Card BG"
-        style={{ width: "100%", height: "100%" }}
-      />
+    <View className="w-full rounded-[24px] overflow-hidden bg-white border border-slate-100 shadow-sm">
+      <LinearGradient
+        colors={["rgba(16,185,129,0.08)", "transparent"]}
+        className="p-4 flex-row gap-4"
+      >
+        <Image
+          source={{ uri: ticket.image }}
+          style={{ width: 100, height: 100, borderRadius: 16 }}
+          contentFit="cover"
+        />
 
-      <View className="absolute inset-0 flex flex-row items-stretch justify-between">
-        <View className="flex flex-col items-center justify-center w-1/2">
-          <View className="w-[148px] h-[120px] rounded-lg overflow-hidden">
-            <Image
-              source={{ uri: ticket.image }}
-              alt={ticket.name}
-              style={{ width: "100%", height: "100%" }}
-              contentFit="cover"
-            />
+        <View className="flex-1 justify-center">
+          <Text className="text-emerald-600 font-bold text-[10px] uppercase tracking-widest mb-1">
+            SELL TICKET
+          </Text>
+
+          <Text className="font-bold text-slate-800 text-lg" numberOfLines={2}>
+            {ticket.name}
+          </Text>
+
+          <View className="flex-row items-center mt-2">
+            <Text className="text-slate-400 text-xs">
+              {ticket.currency.toUpperCase()}
+            </Text>
           </View>
         </View>
-
-        <View className="flex flex-col items-center justify-center w-1/2">
-          <View className="flex flex-col items-center justify-between gap-6">
-            <View className="flex flex-col items-center justify-center">
-              <View className="flex flex-row items-start">
-                <Text className="font-poppins-semibold text-lg text-gray-500">
-                  {getCurrencySymbol(ticket.currency as any)}
-                </Text>
-                <Text className="font-poppins-semibold text-3xl text-gray-800">
-                  {ticket.price}
-                </Text>
-              </View>
-
-              <Text className="font-poppins text-gray-700">{ticket.name}</Text>
-            </View>
-          </View>
-        </View>
-      </View>
+      </LinearGradient>
     </View>
   );
 };
 
-const Detail = ({
-  ticket,
-  totalCount,
-  totalPrice,
-  fee,
-  loading,
-  count,
-  setCount,
-}: {
-  ticket: ICommunityTicket | null;
-  totalCount: number;
-  totalPrice: number;
-  fee: number;
-  count: number;
-  loading: boolean;
-  setCount: (val: number) => void;
-}) => {
-  if (loading) {
-    <View className="flex-1 w-full flex flex-col items-center justify-center gap-2">
-      <ActivityIndicator size={24} color="#C427E0" />
-      <Text className="text-[#C427E0] font-poppins-semibold">
-        Fetching Ticket Details...
-      </Text>
-    </View>;
-  }
+const SellStepper = () => {
+  const steps = [
+    {
+      title: "Select Tickets",
+      description: "Choose how many tickets you want to sell.",
+    },
+    {
+      title: "Choose Payout Method",
+      description: "Select your preferred crypto payout.",
+    },
+    {
+      title: "Enter Wallet",
+      description: "Provide the wallet where funds will be sent.",
+    },
+    {
+      title: "Complete Sale",
+      description: "Once confirmed your payout will be processed.",
+    },
+  ];
 
   return (
-    <View className="flex-1 p-4 flex flex-col items-start justify-center gap-4 bg-white rounded-xl">
-      <View className="w-full gap-2">
-        <View className="w-full flex flex-row items-center justify-between">
-          <Text className="font-dm-sans-medium text-gray-600">
-            Total Tickets:
-          </Text>
-          <Text className="font-poppins-semibold text-gray-800">
-            {totalCount}
-          </Text>
+    <View className="bg-slate-50 rounded-[24px] border border-slate-200 p-6">
+      <Text className="text-slate-400 font-bold text-[10px] uppercase tracking-[2px] mb-4">
+        Selling Process
+      </Text>
+
+      {steps.map((step, i) => (
+        <View key={i} className="flex-row gap-4 mb-6">
+          <View className="w-4 h-4 rounded-full bg-emerald-500 mt-1" />
+
+          <View className="flex-1">
+            <Text className="font-bold text-emerald-600 text-sm">
+              {step.title}
+            </Text>
+
+            <Text className="text-slate-400 text-xs mt-1">
+              {step.description}
+            </Text>
+          </View>
         </View>
+      ))}
+    </View>
+  );
+};
 
-        <View className="w-full flex flex-row items-center justify-between">
-          <Text className="font-dm-sans-medium text-gray-600">Price:</Text>
-          <Text className="font-poppins-semibold text-gray-800">
-            {ticket?.price || 0}
-          </Text>
-        </View>
-
-        <View className="w-full flex flex-row items-center justify-between">
-          <Text className="font-dm-sans-medium text-gray-600">Currency:</Text>
-          <Text className="font-poppins-semibold text-gray-800">
-            {ticket?.currency.toUpperCase() || "-"}
-          </Text>
-        </View>
-
-        <View className="w-full flex flex-row items-center justify-between">
-          <Text className="font-dm-sans-medium text-gray-600">Fee:</Text>
-          <Text className="font-poppins-semibold text-gray-800">{fee}%</Text>
-        </View>
-      </View>
-
-      <View className="w-full h-[1px] bg-gray-200"></View>
-
-      <View className="w-full flex flex-row items-center justify-between gap-4">
-        <Text className="font-dm-sans-medium text-gray-600 text-sm flex-1">
-          How many tickets will you sell?
+const SellTicketReceipt = ({ price, count, fee, total, currency }: any) => {
+  return (
+    <View className="w-full">
+      <View className="bg-slate-50 rounded-t-[24px] border border-slate-200 p-6 pb-2">
+        <Text className="text-slate-400 font-bold text-[10px] uppercase tracking-[2px] mb-4">
+          Sale Breakdown
         </Text>
 
-        <View className="flex flex-row items-center gap-4">
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center"
-            onPress={() => count > 1 && setCount(--count)}
-          >
-            <MaterialCommunityIcons name="minus" size={18} color="#1f2937" />
-          </TouchableOpacity>
-          <Text className="font-poppins-bold text-xl text-gray-800">
-            {count}
-          </Text>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center"
-            onPress={() => count < totalCount && setCount(++count)}
-          >
-            <MaterialCommunityIcons name="plus" size={18} color="#1f2937" />
-          </TouchableOpacity>
+        <View className="gap-3">
+          <Row label="Ticket Price" value={`${currency}${price}`} />
+          <Row label="Tickets" value={count} />
+          <Row label="Platform Fee" value={`${fee}%`} />
+
+          <View className="flex-row justify-between mt-2">
+            <Text className="text-slate-500 text-sm">Estimated Earnings</Text>
+
+            <Text className="text-slate-800 font-bold">
+              {currency}
+              {total}
+            </Text>
+          </View>
         </View>
       </View>
 
-      <View className="w-full h-[1px] bg-gray-200"></View>
+      <View className="flex-row items-center justify-between bg-slate-50">
+        <View className="w-5 h-10 rounded-r-full bg-white border-r border-slate-200 -ml-[1px]" />
+        <View className="flex-1 h-[1px] border-b border-dashed border-slate-300 mx-2" />
+        <View className="w-5 h-10 rounded-l-full bg-white border-l border-slate-200 -mr-[1px]" />
+      </View>
 
-      <View className="w-full flex flex-row items-center justify-between">
-        <Text className="font-dm-sans-bold text-xl text-gray-600">Total:</Text>
-        <View className="flex flex-row items-start">
-          <Text className="font-poppins-semibold text-green-500 text-lg">
-            {ticket?.currency ? getCurrencySymbol(ticket.currency as any) : "-"}
-          </Text>
-          <Text className="font-poppins-bold text-green-500 text-3xl">
-            {totalPrice}
-          </Text>
+      <View className="bg-slate-50 rounded-b-[24px] border border-slate-200 p-6 pt-2">
+        <View className="flex-row justify-between items-end">
+          <View>
+            <Text className="text-slate-400 text-[10px] uppercase tracking-widest">
+              You Receive
+            </Text>
+
+            <Text className="font-bold text-slate-900 text-3xl">
+              <Text className="text-lg text-slate-400">{currency}</Text>
+              {total}
+            </Text>
+          </View>
+
+          <View className="bg-emerald-100 px-3 py-1.5 rounded-xl">
+            <Text className="text-[10px] font-bold text-emerald-600 uppercase">
+              Secure Payout
+            </Text>
+          </View>
         </View>
       </View>
     </View>
   );
 };
+
+const Row = ({ label, value }: any) => (
+  <View className="flex-row justify-between items-center">
+    <Text className="text-slate-600 text-sm">{label}</Text>
+    <Text className="text-slate-800 font-bold text-sm">{value}</Text>
+  </View>
+);
 
 const MineSellTicketsCheckout = () => {
   const [ticket, setTicket] = useState<ICommunityTicket | null>(null);
-  const [count, setCount] = useState<number>(1);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [count, setCount] = useState(1);
+  const [totalPrice, setTotalPrice] = useState(0);
   const [tokenPrices, setTokenPrices] = useState({ chrle: 0, babyu: 0 });
-  const [fee, setFee] = useState<number>(0);
+  const [fee, setFee] = useState(0);
   const [tokenAmounts, setTokenAmounts] = useState({ chrle: 0, babyu: 0 });
   const [method, setMethod] = useState<"chrle" | "babyu">("chrle");
-  const [walletAddress, setWalletAddress] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [sellLoading, setSellLoading] = useState<boolean>(false);
-  const [btnLabel, setBtnLabel] = useState<string>("Sell");
+  const [walletAddress, setWalletAddress] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sellLoading, setSellLoading] = useState(false);
 
   const { id: ticketId } = useLocalSearchParams();
   const { user } = useAuth();
   const router = useRouter();
-
   const toast = useToast();
 
   useEffect(() => {
     const fetchTicket = async () => {
       if (!ticketId) return;
-
-      try {
-        const response = await fetchTicketById(ticketId as string);
-        setTicket(response.data || null);
-      } catch (error) {
-      } finally {
-      }
+      const response = await fetchTicketById(ticketId as string);
+      setTicket(response.data || null);
     };
 
-    const getTokenPricesAndFee = async () => {
+    const getPrices = async () => {
       const response = await fetchTokenPricesAndFee();
       if (response.data) {
-        setTokenPrices({ ...response.data });
+        setTokenPrices(response.data);
         setFee(response.data.fee);
       }
     };
 
     setLoading(true);
     fetchTicket();
-    getTokenPricesAndFee();
+    getPrices();
     setLoading(false);
   }, [ticketId]);
 
@@ -229,6 +207,7 @@ const MineSellTicketsCheckout = () => {
   useEffect(() => {
     const chrleAmount = Number((totalPrice / tokenPrices.chrle).toFixed(2));
     const babyuAmount = Number((totalPrice / tokenPrices.babyu).toFixed(2));
+
     setTokenAmounts({ chrle: chrleAmount, babyu: babyuAmount });
   }, [tokenPrices, totalPrice]);
 
@@ -236,66 +215,55 @@ const MineSellTicketsCheckout = () => {
     try {
       setSellLoading(true);
 
-      const metadata = JSON.stringify({
-        type: "ticket",
-        ticket,
-        payoutFee: fee,
-      });
-
-      const bodyData = {
-        walletAddress,
-        ticketAmount: totalPrice,
-        ticketCurrency: ticket?.currency,
-        metadata,
-      };
-
       toast.success("Sold successfully");
       router.replace("/home");
-
-      // const response = await createSellTicketPayout(bodyData);
-
-      // if (response.data) {
-      //   Alert.alert("Success", "Payout successfully");
-      //   router.back();
-      // }
-    } catch (error: any) {
-      console.log("[handle sell error]: ", error);
+    } catch (error) {
+      console.log(error);
     } finally {
       setSellLoading(false);
     }
   };
 
   return (
-    <SimpleContainer title="Checkout" scrolled>
-      <Header ticket={ticket} loading={loading} />
+    <SimpleContainer title="Sell Tickets" scrolled>
+      <View className="flex-1 gap-4 px-1">
+        <TicketHeroCard ticket={ticket} loading={loading} />
 
-      <Detail
-        ticket={ticket}
-        totalCount={user?.tickets.filter((t) => t._id === ticketId).length || 0}
-        totalPrice={totalPrice}
-        fee={fee}
-        count={count}
-        loading={loading}
-        setCount={setCount}
-      />
+        <SellStepper />
 
-      <CryptoPayout
-        method={method}
-        walletAddress={walletAddress}
-        tokenAmounts={tokenAmounts as any}
-        loading={loading}
-        onSelectMethod={setMethod}
-        onWalletAddressChange={setWalletAddress}
-      />
+        <SellTicketReceipt
+          price={ticket?.price || 0}
+          count={count}
+          fee={fee}
+          total={totalPrice}
+          currency={
+            ticket?.currency
+              ? getCurrencySymbol(ticket.currency.toUpperCase() as any)
+              : "$"
+          }
+        />
 
-      <Button
-        type="primary"
-        label={btnLabel}
-        buttonClassName="h-12"
-        disabled={loading}
-        loading={sellLoading}
-        onPress={handleSell}
-      />
+        <CryptoPayout
+          method={method}
+          walletAddress={walletAddress}
+          tokenAmounts={tokenAmounts as any}
+          loading={loading}
+          onSelectMethod={setMethod}
+          onWalletAddressChange={setWalletAddress}
+        />
+      </View>
+
+      <View className="mt-10 gap-4">
+        <Button
+          type="primary"
+          label="Sell Tickets"
+          buttonClassName="h-14 rounded-2xl shadow-xl shadow-emerald-200"
+          textClassName="text-lg font-bold"
+          loading={sellLoading}
+          disabled={loading}
+          onPress={handleSell}
+        />
+      </View>
     </SimpleContainer>
   );
 };

@@ -12,9 +12,9 @@ import { IEvent } from "@/types/event";
 import { TTransactionStatus } from "@/types/transaction";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 
 const BookingStatus = () => {
@@ -26,13 +26,15 @@ const BookingStatus = () => {
 
   const { id: bookingId } = useLocalSearchParams();
   const router = useRouter();
-  const navigation = useNavigation();
   const { socket } = useSocket();
   const { user } = useAuth();
   const { book: bookFlight } = useFlight();
   const { book: bookHotel } = useHotel();
   const { book: bookTransfer } = useTransfer();
   const toast = useToast();
+  const flightBookingRef = useRef(false);
+  const hotelBookingRef = useRef(false);
+  const transferBookingRef = useRef(false);
 
   useEffect(() => {
     if (!socket) return;
@@ -67,19 +69,29 @@ const BookingStatus = () => {
     };
     init();
   }, [bookingId]);
-
+  //
+  // ✈️ Flight Booking
+  //
   useEffect(() => {
+    if (booking?.paymentStatus !== "completed") return;
+
     const handleFlight = async () => {
       if (
-        !booking ||
-        !booking.flight.offer ||
+        flightBookingRef.current ||
+        !booking?.flight?.offer ||
         !user ||
         booking.flight.status === "confirmed"
       )
         return;
 
+      flightBookingRef.current = true;
+
       const result = await bookFlight(booking.flight.offer);
-      if (!result.orderId) return toast.error(result.message);
+
+      if (!result.orderId) {
+        flightBookingRef.current = false;
+        return toast.error(result.message);
+      }
 
       const bookingBodyData: IBooking = {
         ...booking,
@@ -89,21 +101,36 @@ const BookingStatus = () => {
           status: "confirmed",
         },
       };
+
       await updateBooking(bookingBodyData);
     };
 
+    handleFlight();
+  }, [booking?.flight?.status, booking?.paymentStatus, user]);
+
+  //
+  // 🏨 Hotel Booking
+  //
+  useEffect(() => {
+    if (booking?.paymentStatus !== "completed") return;
+
     const handleHotel = async () => {
       if (
-        !booking ||
-        !booking?.hotel ||
+        hotelBookingRef.current ||
         !booking?.hotel?.offer ||
         !user ||
-        booking?.hotel?.status === "confirmed"
+        booking.hotel.status === "confirmed"
       )
         return;
 
+      hotelBookingRef.current = true;
+
       const result = await bookHotel(booking.hotel.offer.id);
-      if (result.status !== "confirmed") return toast.error(result.message);
+
+      if (result.status !== "confirmed") {
+        hotelBookingRef.current = false;
+        return toast.error(result.message);
+      }
 
       const bookingBodyData: IBooking = {
         ...booking,
@@ -113,39 +140,57 @@ const BookingStatus = () => {
           status: result.status,
         },
       };
+
       await updateBooking(bookingBodyData);
     };
 
+    handleHotel();
+  }, [booking?.hotel?.status, booking?.paymentStatus, user]);
+
+  //
+  // 🚗 Transfer Booking
+  //
+  useEffect(() => {
+    if (booking?.paymentStatus !== "completed") return;
+
     const handleTransfer = async () => {
-      if (!booking || !booking.transfer || !event?.location || !user) return;
+      if (
+        transferBookingRef.current ||
+        !booking?.transfer ||
+        !event?.location ||
+        !user
+      )
+        return;
+
+      transferBookingRef.current = true;
 
       const { airportToHotel, hotelToEvent } = booking.transfer;
 
-      let body = {};
-
+      //
+      // Airport → Hotel
+      //
       if (
-        airportToHotel.offer &&
+        airportToHotel?.offer &&
         airportToHotel.status !== "confirmed" &&
-        booking.flight.offer &&
-        booking.hotel.offer
+        booking.flight?.offer &&
+        booking.hotel?.offer
       ) {
         const flightOffer = booking.flight.offer;
         const hotelOffer = booking.hotel.offer;
         const transferOffer = airportToHotel.offer;
 
-        body = {
+        const body = {
           quoteId: transferOffer.id,
           offerHash: transferOffer.offerHash,
           passenger: {
-            title: user?.gender,
-            firstName: user?.firstName,
-            lastName: user?.lastName,
-            countryCode: user?.location.country.code,
-            email: user?.email,
-            phone: user?.phone,
+            title: user.gender,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            countryCode: user.location.country.code,
+            email: user.email,
+            phone: user.phone,
           },
           offer: transferOffer,
-          pickupDateTime: transferOffer.pickupDateTime,
           outward: {
             flight: {
               airline_code: flightOffer.airlineName,
@@ -163,9 +208,12 @@ const BookingStatus = () => {
           },
         };
 
-        const result = await bookTransfer(airportToHotel.offer);
-        console.log("[airport transfer booking result]: ", result);
-        if (result.status !== "confirmed") return toast.error(result.message);
+        const result = await bookTransfer(body);
+
+        if (result.status !== "confirmed") {
+          transferBookingRef.current = false;
+          return toast.error(result.message);
+        }
 
         await updateBooking({
           ...booking,
@@ -180,29 +228,31 @@ const BookingStatus = () => {
         });
       }
 
+      //
+      // Hotel → Event
+      //
       if (
-        hotelToEvent.offer &&
+        hotelToEvent?.offer &&
         hotelToEvent.status !== "confirmed" &&
-        booking.hotel.offer &&
+        booking.hotel?.offer &&
         booking.event
       ) {
         const hotelOffer = booking.hotel.offer;
         const transferOffer = hotelToEvent.offer;
-        const event = booking.event;
+        const eventData = booking.event;
 
-        body = {
+        const body = {
           quoteId: transferOffer.id,
           offerHash: transferOffer.offerHash,
           passenger: {
-            title: user?.gender,
-            firstName: user?.firstName,
-            lastName: user?.lastName,
-            countryCode: user?.location.country.code,
-            email: user?.email,
-            phone: user?.phone,
+            title: user.gender,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            countryCode: user.location.country.code,
+            email: user.email,
+            phone: user.phone,
           },
           offer: transferOffer,
-          pickupDateTime: transferOffer.pickupDateTime,
           outward: {
             accommodation: {
               name: hotelOffer.name,
@@ -212,15 +262,18 @@ const BookingStatus = () => {
           },
           destination: {
             accommodation: {
-              name: event.name,
-              address: event.location?.address,
+              name: eventData.name,
+              address: eventData.location?.address,
             },
           },
         };
 
-        const result = await bookTransfer(hotelToEvent.offer);
-        console.log("[event transfer booking result]: ", result);
-        if (result.status !== "confirmed") return toast.error(result.message);
+        const result = await bookTransfer(body);
+
+        if (result.status !== "confirmed") {
+          transferBookingRef.current = false;
+          return toast.error(result.message);
+        }
 
         await updateBooking({
           ...booking,
@@ -236,11 +289,8 @@ const BookingStatus = () => {
       }
     };
 
-    if (booking?.paymentStatus !== "completed") return;
-    handleFlight();
-    handleHotel();
     handleTransfer();
-  }, [booking]);
+  }, [booking?.transfer, booking?.paymentStatus, user, event]);
 
   useEffect(() => {
     if (!booking) return;

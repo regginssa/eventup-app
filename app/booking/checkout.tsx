@@ -452,8 +452,6 @@ const CheckoutScreen = () => {
     }
   };
 
-  const onJoin = async () => {};
-
   const handleCommunityTicket = async (): Promise<IEvent | null> => {
     if (event?.type === "user") {
       const ticket = user?.tickets.find(
@@ -474,7 +472,7 @@ const CheckoutScreen = () => {
         return null;
       }
 
-      if (!user?._id || !event._id) return null;
+      if (!user?._id || !event._id || !event.hoster?._id) return null;
 
       const response = await userServices.update(user?._id as string, {
         ...user,
@@ -486,6 +484,11 @@ const CheckoutScreen = () => {
         return null;
       }
       setAuthUser(response.data);
+
+      await userServices.update(event.hoster?._id as string, {
+        ...event.hoster,
+        tickets: [...event.hoster.tickets, ticket],
+      });
 
       const updatedEvent = await eventServices.update(event._id, {
         ...event,
