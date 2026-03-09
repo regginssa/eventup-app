@@ -2,6 +2,7 @@ import UserAPI from "@/api/services/user";
 import {
   Button,
   CountryPicker,
+  DateTimePicker,
   Dropdown,
   LocationPicker,
   PhoneInput,
@@ -31,6 +32,7 @@ const OnboardingStep1Screen = () => {
   const [region, setRegion] = useState<RegionType | null>(null);
   const [address, setAddress] = useState<TLocation | null>(null);
   const [phone, setPhone] = useState<string>("");
+  const [birthday, setBirthday] = useState<Date>(new Date("1990-01-01"));
   const [invalidCountry, setInvalidCountry] = useState<boolean>(false);
   const [invalidRegion, setInvalidRegion] = useState<boolean>(false);
   const [invalidAddress, setInvalidAddress] = useState<boolean>(false);
@@ -89,9 +91,8 @@ const OnboardingStep1Screen = () => {
         },
         gender: selectedGender.value as any,
         phone: `+${country?.callingCode[0]}${phone}`,
+        birthday: birthday.toISOString().split("T")[0],
       };
-
-      console.log(updates.phone);
 
       const response = await UserAPI.update(user._id, updates);
 
@@ -174,6 +175,12 @@ const OnboardingStep1Screen = () => {
         invalidTxt="Invalid phone number"
         value={phone}
         onChange={setPhone}
+      />
+      <DateTimePicker
+        mode="date"
+        label="Birthday"
+        value={birthday}
+        onPick={setBirthday}
       />
 
       <Button
