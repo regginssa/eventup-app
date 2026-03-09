@@ -43,16 +43,6 @@ const SubscriptionHeroCard = ({ subscription, loading }: any) => {
             Unlock premium travel features
           </Text>
         </View>
-
-        <View className="items-end">
-          <Text className="text-slate-400 text-xs uppercase font-poppins-bold">
-            Price
-          </Text>
-
-          <Text className="font-poppins-bold text-3xl text-slate-900">
-            ${subscription.price}
-          </Text>
-        </View>
       </LinearGradient>
     </View>
   );

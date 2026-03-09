@@ -96,6 +96,20 @@ const SubscriptionScreen = () => {
     }
   }, [subscriptions, user]);
 
+  const selectedSubscription = subscriptions.find(
+    (s) => s._id === selectedSubscriptionId,
+  );
+
+  const isFreePlan = selectedSubscription?.month === 0;
+
+  const isCurrentPlan = selectedSubscriptionId === currentSubscription?._id;
+
+  const hasValidSubscription =
+    currentSubscription && currentSubscription.month > 0 && !isExpired;
+
+  const shouldDisableButton =
+    isFreePlan || isCurrentPlan || hasValidSubscription;
+
   const renderItem = ({
     item,
     selected,
@@ -181,7 +195,11 @@ const SubscriptionScreen = () => {
           activeOpacity={0.8}
           className={`p-5 ${item._id !== currentSubscription?._id ? "bg-white" : "bg-gray-200"} rounded-xl flex flex-col gap-4 absolute inset-[1px]`}
           disabled={item._id === currentSubscription?._id}
-          onPress={() => setSelectedSubscriptionId(item._id)}
+          onPress={
+            shouldDisableButton
+              ? undefined
+              : () => setSelectedSubscriptionId(item._id)
+          }
         >
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex flex-col items-start gap-1">
@@ -282,11 +300,6 @@ const SubscriptionScreen = () => {
     );
   };
 
-  const isCurrent = selectedSubscriptionId === currentSubscription?._id;
-
-  const isActiveSubscription =
-    currentSubscription?.month && currentSubscription?.month > 0 && !isExpired;
-
   const price =
     subscriptions.find((s) => s._id === selectedSubscriptionId)?.price || 0;
 
@@ -352,14 +365,14 @@ const SubscriptionScreen = () => {
       <Button
         type="primary"
         label={
-          isCurrent && isActiveSubscription
+          isCurrentPlan && hasValidSubscription
             ? `Ends on ${expiryDate}`
-            : isCurrent
-              ? ""
+            : isFreePlan
+              ? "Free Plan Selected"
               : `Subscribe for $${price}`
         }
         buttonClassName="h-12"
-        disabled={loading}
+        disabled={!!shouldDisableButton}
         onPress={() =>
           router.push({
             pathname: "/subscription/checkout",
