@@ -6,13 +6,13 @@ import { TRANSFER_BASE } from "../endpoints";
 const get = async (
   params: any,
 ): Promise<ApiResponse<ITransferOffer | null>> => {
-  return await AxiosInstance.get(TRANSFER_BASE, { params });
+  return await AxiosInstance.post(TRANSFER_BASE + "search", params);
 };
 
 const book = async (
   bodyData: any,
 ): Promise<ApiResponse<ITransferBookingResponse>> => {
-  return await AxiosInstance.post(TRANSFER_BASE, bodyData);
+  return await AxiosInstance.post(TRANSFER_BASE + "book", bodyData);
 };
 
 export default { get, book };

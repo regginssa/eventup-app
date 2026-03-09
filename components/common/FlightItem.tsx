@@ -145,7 +145,7 @@ const FlightItem: React.FC<FlightItemProps> = ({
                 {originIata}
               </Text>
               <Text className="font-dm-sans-bold text-[11px] text-slate-400 mt-1">
-                {df.to24HourTime(departureTime)}
+                {df.to24Hour(departureTime)}
               </Text>
             </View>
 
@@ -189,7 +189,7 @@ const FlightItem: React.FC<FlightItemProps> = ({
                 {destinationIata}
               </Text>
               <Text className="font-dm-sans-bold text-[11px] text-slate-400 mt-1">
-                {df.to24HourTime(arrivalTime)}
+                {df.to24Hour(arrivalTime)}
               </Text>
             </View>
           </View>

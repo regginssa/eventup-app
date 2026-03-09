@@ -2,13 +2,7 @@ import { ITransferOffer } from "@/types/transfer";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import {
-  ActivityIndicator,
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 interface TransferItemProps {
   data: ITransferOffer | null;
@@ -27,7 +21,6 @@ const TransferItem: React.FC<TransferItemProps> = ({
     vehicleName,
     vehicleType,
     capacity,
-    image,
     totalAmount,
     currency,
     pickupPoint,
@@ -44,107 +37,115 @@ const TransferItem: React.FC<TransferItemProps> = ({
         style={{ borderRadius: 24, padding: 1, elevation: 5 }}
       >
         <View className="bg-white/95 rounded-[23px] p-5 overflow-hidden">
-          {/* HEADER SECTION: Vehicle & Capacity */}
-          <View className="flex flex-row justify-between items-start mb-5">
-            <View className="flex-1 pr-3">
-              <Text className="font-dm-sans-bold text-[10px] text-purple-500 uppercase tracking-[2px] mb-1">
-                {vehicleType} Transfer
-              </Text>
-              <Text
-                className="font-poppins-bold text-lg text-slate-900 leading-6"
-                numberOfLines={1}
-              >
-                {vehicleName}
-              </Text>
-
-              <View className="flex flex-row items-center gap-3 mt-2">
-                <View className="flex flex-row items-center gap-1 bg-slate-100/50 px-2 py-1 rounded-lg">
-                  <MaterialCommunityIcons
-                    name="account-group"
-                    size={14}
-                    color="#844AFF"
-                  />
-                  <Text className="font-dm-sans-bold text-slate-500 text-[10px]">
-                    Max {capacity}
-                  </Text>
-                </View>
-                <View className="flex flex-row items-center gap-1 bg-slate-100/50 px-2 py-1 rounded-lg">
-                  <MaterialCommunityIcons
-                    name="timer-outline"
-                    size={14}
-                    color="#844AFF"
-                  />
-                  <Text className="font-dm-sans-bold text-slate-500 text-[10px]">
-                    {waitingTime} Wait
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View className="items-end">
-              <View className="relative">
-                <View className="w-16 h-16 rounded-2xl bg-slate-50 items-center justify-center border border-slate-100">
-                  <Image
-                    source={{ uri: image }}
-                    className="w-12 h-12"
-                    resizeMode="contain"
-                  />
-                </View>
-                {onRefresh && (
-                  <TouchableOpacity
-                    onPress={onRefresh}
-                    disabled={refreshLoading}
-                    className="absolute -top-2 -right-2 w-7 h-7 items-center justify-center rounded-full bg-white border border-slate-100 shadow-sm"
-                  >
-                    {refreshLoading ? (
-                      <ActivityIndicator size={10} color="#844AFF" />
-                    ) : (
-                      <MaterialCommunityIcons
-                        name="cached"
-                        size={14}
-                        color="#64748b"
-                      />
-                    )}
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
+          {/* BACKGROUND ICON */}
+          <View className="absolute -right-10 -top-10 opacity-5">
+            <MaterialCommunityIcons name="car-side" size={150} color="#000" />
           </View>
 
-          {/* ROUTE SECTION: Matching Itinerary Style */}
-          <View className="flex flex-row items-center justify-between relative mb-6">
-            <View className="flex-1 items-start">
+          {/* HEADER */}
+          <View className="flex-row justify-between items-center mb-5">
+            <View className="flex-row items-center gap-3">
+              <LinearGradient
+                colors={["#844AFF20", "#C427E020"]}
+                className="p-2"
+                style={{ borderRadius: 12 }}
+              >
+                <MaterialCommunityIcons
+                  name={vehicleType === "SHARED" ? "car-multiple" : "car"}
+                  size={18}
+                  color="#844AFF"
+                />
+              </LinearGradient>
+
+              <View>
+                <Text className="font-poppins-bold text-slate-800 text-sm uppercase tracking-tighter">
+                  {vehicleName}
+                </Text>
+
+                <Text className="font-dm-sans-bold text-[10px] text-purple-500/60 uppercase">
+                  {vehicleType} Transfer
+                </Text>
+              </View>
+            </View>
+
+            {onRefresh && (
+              <TouchableOpacity
+                onPress={onRefresh}
+                disabled={refreshLoading}
+                className="w-8 h-8 items-center justify-center rounded-full bg-slate-50 border border-slate-100"
+              >
+                {refreshLoading ? (
+                  <ActivityIndicator size={12} color="#844AFF" />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="cached"
+                    size={16}
+                    color="#64748b"
+                  />
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* ROUTE SECTION */}
+          <View className="flex-row items-center justify-between relative mb-6">
+            {/* Pickup */}
+            <View className="items-start flex-1">
               <Text className="font-dm-sans-bold text-[9px] text-slate-400 uppercase tracking-widest mb-1">
                 Pickup
               </Text>
+
               <Text
-                className="font-poppins-bold text-[13px] text-slate-800"
+                className="font-poppins-bold text-[14px] text-slate-900"
                 numberOfLines={1}
               >
                 {pickupPoint}
               </Text>
             </View>
 
-            <View className="px-4 items-center">
-              <View className="flex-row items-center">
-                <View className="w-1 h-1 rounded-full bg-slate-200" />
-                <View className="w-8 h-[1px] bg-slate-100" />
-                <MaterialCommunityIcons
-                  name="car-side"
-                  size={18}
-                  color="#C427E0"
-                />
-                <View className="w-8 h-[1px] bg-slate-100" />
-                <View className="w-1 h-1 rounded-full bg-slate-200" />
+            {/* Route Graphic */}
+            <View className="flex-1 items-center px-4">
+              <Text className="font-dm-sans-bold text-[9px] text-purple-400 absolute -top-4">
+                {waitingTime}
+              </Text>
+
+              <View className="flex-row items-center justify-center w-full">
+                <View className="h-[1.5px] flex-1 bg-slate-100 rounded-full" />
+
+                <View className="mx-2">
+                  <MaterialCommunityIcons
+                    name="car-side"
+                    size={20}
+                    color="#C427E0"
+                  />
+                </View>
+
+                <View className="h-[1.5px] flex-1 bg-slate-100 rounded-full" />
+              </View>
+
+              <View className="mt-2 flex-row gap-2">
+                <View className="px-2 py-0.5 rounded-full border border-purple-200">
+                  <Text className="text-[8px] font-dm-sans-bold text-purple-500 uppercase tracking-widest">
+                    {vehicleType}
+                  </Text>
+                </View>
+
+                <View className="px-2 py-0.5 rounded-full border border-slate-200">
+                  <Text className="text-[8px] font-dm-sans-bold text-slate-500 uppercase tracking-widest">
+                    Max {capacity}
+                  </Text>
+                </View>
               </View>
             </View>
 
-            <View className="flex-1 items-end">
-              <Text className="font-dm-sans-bold text-[9px] text-slate-400 uppercase tracking-widest mb-1 text-right">
+            {/* Destination */}
+            <View className="items-end flex-1">
+              <Text className="font-dm-sans-bold text-[9px] text-slate-400 uppercase tracking-widest mb-1">
                 Drop-off
               </Text>
+
               <Text
-                className="font-poppins-bold text-[13px] text-slate-800 text-right"
+                className="font-poppins-bold text-[14px] text-slate-900 text-right"
                 numberOfLines={1}
               >
                 {destinationPoint}
@@ -152,30 +153,34 @@ const TransferItem: React.FC<TransferItemProps> = ({
             </View>
           </View>
 
-          {/* FOOTER SECTION */}
-          <LinearGradient
-            colors={["#F8FAFC", "#FFFFFF"]}
-            className="flex-row items-center justify-between p-3 rounded-2xl border border-slate-50"
-          >
-            <View className="flex-row items-center gap-2">
-              <LinearGradient
-                colors={["#10b981", "#059669"]}
-                className="w-2 h-2 rounded-full shadow-sm shadow-emerald-200"
-              />
-              <Text className="font-dm-sans-bold text-[10px] text-emerald-600 uppercase tracking-widest">
-                Door-to-Door Service
-              </Text>
-            </View>
+          {/* FOOTER */}
+          <View className="rounded-2xl border border-slate-50">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <View className="bg-slate-200/50 p-1.5 rounded-lg">
+                  <MaterialCommunityIcons
+                    name="map-marker-path"
+                    size={14}
+                    color="#64748b"
+                  />
+                </View>
 
-            <View className="flex-row items-baseline gap-1">
-              <Text className="font-dm-sans-bold text-[10px] text-slate-400 uppercase">
-                {currency}
-              </Text>
-              <Text className="font-poppins-bold text-xl text-slate-900">
-                {totalAmount}
-              </Text>
+                <Text className="font-dm-sans-bold text-[11px] text-slate-500">
+                  Door-to-Door Transfer
+                </Text>
+              </View>
+
+              <View className="flex-row items-baseline gap-1">
+                <Text className="font-dm-sans-bold text-[10px] text-slate-400 uppercase">
+                  {currency}
+                </Text>
+
+                <Text className="font-poppins-bold text-xl text-slate-900">
+                  {totalAmount}
+                </Text>
+              </View>
             </View>
-          </LinearGradient>
+          </View>
         </View>
       </LinearGradient>
     </View>

@@ -1,20 +1,19 @@
 export type TTransferBookStatus = "confirmed" | "pending" | "failed";
 
 export interface ITransferOffer {
-  id: string; // Transfer code
-  vehicleType: string; // e.g., "PRIVATE" or "SHARED"
-  vehicleName: string; // e.g., "Standard Sedan"
+  id: string; // Quote ID
+  vehicleType: "SHARED" | "PRIVATE";
+  vehicleName: string;
   capacity: number;
   image: string;
   currency: string;
   netAmount: number;
-  totalAmount: number; // Including your markup
-  rateKey: string;
-  waitingTime: string; // e.g., "60 minutes"
-  pickupPoint: string;
-  destinationPoint: string;
+  totalAmount: number;
+  offerHash: string; // required for booking
+  waitingTime: string; // e.g. "48 minutes"
+  pickupPoint: string; // formatted UX-friendly string
+  destinationPoint: string; // formatted UX-friendly string
 }
-
 export interface ITransferBookingResponse {
   status: TTransferBookStatus;
   bookingReference: string;

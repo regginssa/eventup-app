@@ -368,7 +368,7 @@ const CheckoutScreen = () => {
     }
 
     if (flightOffer) {
-      servicesList.push("Round-trip Flight");
+      servicesList.push("One-Way Flight");
       base += Number(flightOffer.totalAmount);
     }
     if (hotelOffer) {

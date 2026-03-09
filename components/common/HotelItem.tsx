@@ -284,7 +284,10 @@ const HotelItem: React.FC<HotelItemProps> = ({
                 <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-1">
                   Room Category
                 </Text>
-                <Text className="font-poppins-bold text-sm text-slate-800">
+                <Text
+                  className="font-poppins-bold text-sm text-slate-800"
+                  numberOfLines={1}
+                >
                   {roomName}
                 </Text>
               </View>

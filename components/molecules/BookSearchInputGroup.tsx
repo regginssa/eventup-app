@@ -185,14 +185,20 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (!includes.transferAirport) return;
 
     if (flightOffer && hotelOffer) {
+      console.log(flightOffer.arrivalTime);
       setLoading("airportToHotel", true);
       const params = {
-        fromType: "IATA",
-        fromCode: flightOffer.destinationIata,
-        toType: "ATLAS",
-        toCode: hotelOffer.id,
-        date: df.toISOString(new Date(flightOffer.arrivalTime)),
-        time: df.to24HourTime(new Date(flightOffer.arrivalTime)),
+        from: {
+          type: "airport",
+          code: flightOffer.destinationIata,
+        },
+        to: {
+          type: "hotel",
+          name: hotelOffer.name,
+          lat: hotelOffer.latitude,
+          lng: hotelOffer.longitude,
+        },
+        departureTime: flightOffer.arrivalTime,
         packageType,
       };
 
@@ -214,8 +220,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       if (!hotelOffer) return;
 
       fromParams = {
-        fromType: "ATLAS",
-        fromCode: hotelOffer.id,
+        type: "hotel",
+        name: hotelOffer.name,
+        lat: hotelOffer.latitude,
+        lng: hotelOffer.longitude,
       };
     } else {
       if (departureLocation === "current" && !currentLocationCoords) return;
@@ -223,36 +231,36 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       if (departureLocation === "current") {
         fromParams = {
-          fromType: "GPS",
-          fromLat: currentLocationCoords?.latitude,
-          fromLng: currentLocationCoords?.longitude,
+          type: "geo",
+          name: `${currentCity}, ${currentCountryCode}`,
+          lat: currentLocationCoords?.latitude,
+          lng: currentLocationCoords?.longitude,
         };
       } else {
         fromParams = {
-          fromType: "GPS",
-          fromLat: user?.location.coordinate?.latitude,
-          fromLng: user?.location.coordinate?.longitude,
+          type: "geo",
+          name: `${user?.location.city.name}, ${user?.location.country.code}`,
+          lat: user?.location.coordinate?.latitude,
+          lng: user?.location.coordinate?.longitude,
         };
       }
     }
 
     const toParams = {
-      toType: "GPS",
-      toLat: eventGeo.latitude,
-      toLng: eventGeo.longitude,
-    };
-
-    const timeParams = {
-      date: df.toISOString(hotelDepartureDate),
-      time: df.to24HourTime(hotelDepartureDate),
-      packageType,
+      type: "geo",
+      name: event.location?.address,
+      lat: eventGeo.latitude,
+      lng: eventGeo.longitude,
     };
 
     const params = {
-      ...fromParams,
-      ...toParams,
-      ...timeParams,
+      from: fromParams,
+      to: toParams,
+      departureTime: df.toTransferDate(hotelDepartureDate),
+      packageType,
     };
+
+    console.log(params);
 
     setLoading("hotelToEvent", true);
     await searchTransfer(params, "he");
