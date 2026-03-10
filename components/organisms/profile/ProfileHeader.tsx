@@ -146,21 +146,23 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 color="#374151"
               />
             </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className="w-8 h-8 rounded-lg bg-white flex items-center justify-center"
-              onPress={handleMessage}
-            >
-              {messageLoading ? (
-                <ActivityIndicator size={18} color="#374151" />
-              ) : (
-                <MaterialCommunityIcons
-                  name="message-outline"
-                  size={18}
-                  color="#374151"
-                />
-              )}
-            </TouchableOpacity>
+            {!isMe && (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                className="w-8 h-8 rounded-lg bg-white flex items-center justify-center"
+                onPress={handleMessage}
+              >
+                {messageLoading ? (
+                  <ActivityIndicator size={18} color="#374151" />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="message-outline"
+                    size={18}
+                    color="#374151"
+                  />
+                )}
+              </TouchableOpacity>
+            )}
 
             {isMe && (
               <TouchableOpacity
@@ -175,17 +177,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               </TouchableOpacity>
             )}
           </View>
-        </View>
-
-        <View className="flex flex-row items-center gap-1">
-          <MaterialCommunityIcons
-            name="star"
-            size={14}
-            color={rate && rate > 0 ? "#eab308" : "#94a3b8"}
-          />
-          <Text className="font-dm-sans-medium text-gray-700 text-sm">
-            {formattedRate}
-          </Text>
         </View>
 
         <Text className="font-dm-sans text-xs text-gray-700 w-full p-2 rounded-lg bg-white">

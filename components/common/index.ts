@@ -13,6 +13,7 @@ export { default as DateTimePicker } from "./DateTimePicker";
 export { default as Drawer } from "./Drawer";
 export { default as Dropdown } from "./Dropdown";
 export { default as FlightItem } from "./FlightItem";
+export { default as GradientCard } from "./GradientCard";
 export { default as HotelItem } from "./HotelItem";
 export { default as Input } from "./Input";
 export { default as LocationPicker } from "./LocationPicker";

@@ -161,9 +161,14 @@ const Avatar: React.FC<AvatarProps> = ({
       </View>
 
       {status && (
-        <View
-          className={`absolute bottom-0 right-1 w-3 h-3 rounded-full ${status === "online" ? "bg-green-500" : "bg-gray-300"}`}
-        ></View>
+        <View className="absolute -bottom-0 -right-0 bg-white p-1 rounded-full shadow-sm">
+          <View
+            className={`w-2 h-2 rounded-full`}
+            style={{
+              backgroundColor: status === "online" ? "#10b981" : "#cbd5e1",
+            }}
+          />
+        </View>
       )}
 
       {onChange && (
