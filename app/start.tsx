@@ -36,7 +36,7 @@ const StartScreen = () => {
             type="primary"
             label="Explore Events"
             buttonClassName="w-1/2 h-12"
-            onPress={() => router.replace("/auth/onboarding/step1")}
+            onPress={() => router.replace("/home")}
           />
         </View>
       </View>

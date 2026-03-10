@@ -1,4 +1,5 @@
 import { ProfileDrawer } from "@/components/molecules";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
 import { useNotification } from "@/components/providers/NotificationProvider";
 import { AntDesign } from "@expo/vector-icons";
@@ -20,6 +21,7 @@ const LayoutContainer: React.FC<LayoutContainerProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
+  const { user } = useAuth();
   const router = useRouter();
   const { totalNotificationsUnreads } = useNotification();
   const { totalMessagesUnreads } = useConversation();
@@ -32,39 +34,41 @@ const LayoutContainer: React.FC<LayoutContainerProps> = ({
             {title}
           </Text>
 
-          <View className="flex flex-row items-center gap-2">
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className={`w-10 h-10 rounded-full bg-white text-gray-300 flex items-center justify-center relative`}
-              style={styles.bar}
-              onPress={() => router.push("/notification")}
-            >
-              <AntDesign name="bell" size={20} color="#1f2937" />
+          {user?._id && (
+            <View className="flex flex-row items-center gap-2">
+              <TouchableOpacity
+                activeOpacity={0.8}
+                className={`w-10 h-10 rounded-full bg-white text-gray-300 flex items-center justify-center relative`}
+                style={styles.bar}
+                onPress={() => router.push("/notification")}
+              >
+                <AntDesign name="bell" size={20} color="#1f2937" />
 
-              {totalNotificationsUnreads > 0 && (
-                <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className={`w-10 h-10 rounded-full bg-white flex items-center justify-center relative`}
-              style={styles.bar}
-              onPress={() => router.push("/conversation" as any)}
-            >
-              <AntDesign name="message" size={20} color="#1f2937" />
-              {totalMessagesUnreads > 0 && (
-                <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className={`w-10 h-10 rounded-full bg-white flex items-center justify-center`}
-              style={styles.bar}
-              onPress={() => setIsOpen(true)}
-            >
-              <AntDesign name="bars" size={20} color="#1f2937" />
-            </TouchableOpacity>
-          </View>
+                {totalNotificationsUnreads > 0 && (
+                  <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                className={`w-10 h-10 rounded-full bg-white flex items-center justify-center relative`}
+                style={styles.bar}
+                onPress={() => router.push("/conversation" as any)}
+              >
+                <AntDesign name="message" size={20} color="#1f2937" />
+                {totalMessagesUnreads > 0 && (
+                  <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                className={`w-10 h-10 rounded-full bg-white flex items-center justify-center`}
+                style={styles.bar}
+                onPress={() => setIsOpen(true)}
+              >
+                <AntDesign name="bars" size={20} color="#1f2937" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
         <View className="flex-1">{children}</View>
       </SafeAreaView>
