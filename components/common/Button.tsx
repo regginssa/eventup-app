@@ -107,7 +107,7 @@ const Button: React.FC<ButtonProps> = ({
         activeOpacity={0.7}
         className={`h-12 overflow-hidden rounded-full border border-purple-100/50 ${buttonClassName}`}
         onPress={onPress}
-        disabled={loading}
+        disabled={loading || disabled}
       >
         <View className="flex-1 bg-purple-50 items-center justify-center">
           <LinearGradient
@@ -129,7 +129,7 @@ const Button: React.FC<ButtonProps> = ({
         activeOpacity={0.8}
         className={`h-12 ${buttonClassName}`}
         onPress={onPress}
-        disabled={loading}
+        disabled={loading || disabled}
       >
         <LinearGradient
           colors={STROKE_GRADIENT as any}
@@ -138,7 +138,9 @@ const Button: React.FC<ButtonProps> = ({
           className="flex-1 p-[1.5px] rounded-full"
         >
           <View className="flex-1 bg-white rounded-[11px] items-center justify-center">
-            <Text className="text-purple-600 font-poppins-bold">{label}</Text>
+            <Text className="text-purple-600 font-poppins-semibold">
+              {label}
+            </Text>
           </View>
         </LinearGradient>
       </TouchableOpacity>
@@ -155,7 +157,9 @@ const Button: React.FC<ButtonProps> = ({
         onPress={onPress}
       >
         <Image source={GoogleIcon} style={styles.socialIcon} />
-        <Text className="text-slate-600 font-poppins-medium">{label}</Text>
+        <Text className="text-slate-600 font-poppins-semibold text-sm">
+          {label}
+        </Text>
       </TouchableOpacity>
     );
   }
@@ -167,7 +171,9 @@ const Button: React.FC<ButtonProps> = ({
         className={`py-2 ${buttonClassName}`}
         onPress={onPress}
       >
-        <Text className={`text-slate-400 font-poppins-medium ${textClassName}`}>
+        <Text
+          className={`text-slate-400 font-poppins-semibold ${textClassName}`}
+        >
           {label}
         </Text>
       </TouchableOpacity>

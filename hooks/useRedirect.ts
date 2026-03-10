@@ -8,6 +8,9 @@ const useRedirect = () => {
     if (user.blocked) {
       router.replace("/auth/login");
       return;
+    } else if (!user.emailVerified) {
+      router.replace("/auth/login");
+      return;
     } else if (!user.location?.country?.name || !user.phone) {
       router.replace("/auth/onboarding/step1");
       return;

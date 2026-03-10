@@ -7,6 +7,7 @@ import {
   GET_ME,
   GOOGLE_LOGIN,
   GOOGLE_REGISTER,
+  VERIFY_OTP,
 } from "../endpoints";
 
 export const googleLogin = async (
@@ -53,6 +54,10 @@ export const emailRegister = async (
     email,
     password,
   });
+};
+
+export const verifyOtp = async (body: any): Promise<ApiResponse<IUser>> => {
+  return await AxiosInstance.post(VERIFY_OTP, body);
 };
 
 export const getMe = async (): Promise<ApiResponse<IUser>> => {

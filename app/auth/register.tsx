@@ -1,6 +1,6 @@
 import { setAuthToken } from "@/api/client";
-import { emailRegister, googleRegister } from "@/api/services/auth";
-import { Button, Input, PasswordInput } from "@/components/common";
+import { emailRegister, googleRegister, verifyOtp } from "@/api/services/auth";
+import { Button, Input, NormalModal, PasswordInput } from "@/components/common";
 import { AuthScreenContainer } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
@@ -28,6 +28,11 @@ const RegisterScreen = () => {
   const [invalidPasswordTxt, setInvalidPasswordTxt] = useState<
     string | undefined
   >(undefined);
+  const [isOtpOpen, setIsOtpOpen] = useState<boolean>(false);
+  const [otp, setOtp] = useState<string>("");
+  const [otpTime, setOtpTime] = useState<number>(3);
+  const [otpLoading, setOtpLoading] = useState<boolean>(false);
+  const [resendLoading, setResendLoading] = useState<boolean>(false);
 
   const router = useRouter();
   const { setAuthUser } = useAuth();
@@ -146,14 +151,50 @@ const RegisterScreen = () => {
       await setAuthToken(token);
       setAuthUser(user);
 
-      toast.success("Welcome !!!");
-      router.replace("/auth/onboarding/step1");
+      setIsOtpOpen(true);
     } catch (error: any) {
       const message = error?.response?.data?.message;
 
       toast.error(message);
     } finally {
       setEmailLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (email.trim().length === 0 || otp.trim().length === 0)
+      return toast.warn("Email or Verification code is incorrect");
+
+    try {
+      setOtpLoading(true);
+
+      const res = await verifyOtp({ email, code: otp });
+
+      if (!res.ok) {
+        toast.error(res.message);
+      } else {
+        setAuthUser(res.data);
+        setIsOtpOpen(false);
+        toast.success("Welcome !!!");
+        router.replace("/auth/onboarding/step1");
+      }
+    } catch (error) {
+      toast.error("Verification failed");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (email.trim().length === 0 || otp.trim().length === 0)
+      return toast.warn("Email or Verification code is incorrect");
+
+    try {
+      setResendLoading(true);
+    } catch (error) {
+      toast.error("Verification failed");
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -267,6 +308,53 @@ const RegisterScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
+
+      <NormalModal
+        title="Email Verification"
+        isOpen={isOtpOpen}
+        onClose={() => setIsOtpOpen(false)}
+      >
+        <View className="gap-6">
+          <View className="gap-2">
+            <Input
+              type="string"
+              label="Verification Code"
+              placeholder=""
+              bordered
+              value={otp}
+              onChange={setOtp}
+            />
+
+            <Text className="font-dm-sans-medium text-xs text-purple-600">
+              Resend verification code in{" "}
+              <Text className="font-poppins-semibold text-sm">{otpTime}</Text>{" "}
+              minutes
+            </Text>
+          </View>
+
+          <View className="flex flex-row items-center gap-4">
+            <View className="flex-1">
+              <Button
+                type="gradient-soft"
+                label="Resend"
+                buttonClassName="h-10"
+                disabled={otpTime > 0}
+                loading={resendLoading}
+                onPress={handleResendOtp}
+              />
+            </View>
+            <View className="flex-1">
+              <Button
+                type="primary"
+                label="Submit"
+                buttonClassName="h-10"
+                loading={otpLoading}
+                onPress={handleVerifyOtp}
+              />
+            </View>
+          </View>
+        </View>
+      </NormalModal>
     </AuthScreenContainer>
   );
 };

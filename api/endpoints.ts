@@ -5,6 +5,7 @@ export const GOOGLE_REGISTER = "/auth/register-google";
 export const EMAIL_LOGIN = "/auth/login-email";
 export const EMAIL_REGISTER = "/auth/register-email";
 export const GET_ME = "/auth/me";
+export const VERIFY_OTP = "/auth/verify/otp";
 
 // User apis
 export const USER_BASE = "/user/";

@@ -65,4 +65,5 @@ export interface IUser {
   birthday: string;
   phone: string;
   gender: "mr" | "ms";
+  emailVerified: boolean;
 }
