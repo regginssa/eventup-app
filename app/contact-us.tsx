@@ -1,5 +1,8 @@
+import SupportAPI from "@/api/services/support";
 import { Button, Input, Textarea } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState } from "react";
@@ -8,9 +11,51 @@ import { Text, View } from "react-native";
 const ContactUs = () => {
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
   const [subject, setSubject] = useState<string>("");
   const [text, setText] = useState<string>("");
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
+
+  const { user, logout } = useAuth();
+  const toast = useToast();
+
+  const handleSubmit = async () => {
+    if (!user?.email) {
+      toast.error("Authentication is expired. Please try to log in");
+      await logout();
+      return;
+    }
+    setSubmitLoading(true);
+
+    try {
+      const res = await SupportAPI.sendMessage({
+        firstName,
+        lastName,
+        email: user.email,
+        subject,
+        text,
+      });
+
+      if (res.ok) {
+        toast.success(
+          "Submitted successfully. We will get back to you very soon",
+        );
+        setFirstName("");
+        setLastName("");
+        setSubject("");
+        setText("");
+      }
+    } catch (error) {
+      toast.error("Failed to submit");
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  const isValid =
+    firstName.trim().length > 0 &&
+    lastName.trim().length > 0 &&
+    subject.trim().length > 0 &&
+    text.trim().length > 0;
 
   return (
     <SimpleContainer title="Support Center" scrolled>
@@ -91,15 +136,6 @@ const ContactUs = () => {
 
             <Input
               type="string"
-              label="Email Address"
-              placeholder="johndoe@example.com"
-              bordered
-              value={email}
-              onChange={setEmail}
-            />
-
-            <Input
-              type="string"
               label="Subject"
               placeholder="What is this regarding?"
               bordered
@@ -128,6 +164,9 @@ const ContactUs = () => {
               <MaterialCommunityIcons name="send" size={18} color="white" />
             }
             iconPosition="right"
+            disabled={!isValid}
+            loading={submitLoading}
+            onPress={handleSubmit}
           />
 
           <View className="flex-row items-center justify-center mt-6">

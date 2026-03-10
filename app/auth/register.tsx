@@ -1,5 +1,10 @@
 import { setAuthToken } from "@/api/client";
-import { emailRegister, googleRegister, verifyOtp } from "@/api/services/auth";
+import {
+  emailRegister,
+  googleRegister,
+  resendOtp,
+  verifyOtp,
+} from "@/api/services/auth";
 import { Button, Input, NormalModal, PasswordInput } from "@/components/common";
 import { AuthScreenContainer } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -8,7 +13,7 @@ import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/config/env";
 import { Feather } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 
 const RegisterScreen = () => {
@@ -30,7 +35,7 @@ const RegisterScreen = () => {
   >(undefined);
   const [isOtpOpen, setIsOtpOpen] = useState<boolean>(false);
   const [otp, setOtp] = useState<string>("");
-  const [otpTime, setOtpTime] = useState<number>(3);
+  const [otpTime, setOtpTime] = useState<number>(180);
   const [otpLoading, setOtpLoading] = useState<boolean>(false);
   const [resendLoading, setResendLoading] = useState<boolean>(false);
 
@@ -45,6 +50,22 @@ const RegisterScreen = () => {
     forceCodeForRefreshToken: false,
     iosClientId: GOOGLE_IOS_CLIENT_ID,
   });
+
+  useEffect(() => {
+    if (!isOtpOpen) return;
+
+    const timer = setInterval(() => {
+      setOtpTime((prev) => {
+        if (prev <= 0) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isOtpOpen]);
 
   const getPasswordError = (password: string): string => {
     if (password.length < 8) {
@@ -186,16 +207,33 @@ const RegisterScreen = () => {
   };
 
   const handleResendOtp = async () => {
-    if (email.trim().length === 0 || otp.trim().length === 0)
-      return toast.warn("Email or Verification code is incorrect");
+    if (otpTime > 0) {
+      return toast.warn("Please wait before requesting another code");
+    }
+
+    if (email.trim().length === 0) {
+      return toast.warn("Email is required");
+    }
 
     try {
       setResendLoading(true);
+
+      await resendOtp(email);
+
+      setOtpTime(180);
+
+      toast.success("Verification code resent");
     } catch (error) {
-      toast.error("Verification failed");
+      toast.error("Failed to resend verification code");
     } finally {
       setResendLoading(false);
     }
+  };
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
   return (
@@ -327,7 +365,9 @@ const RegisterScreen = () => {
 
             <Text className="font-dm-sans-medium text-xs text-purple-600">
               Resend verification code in{" "}
-              <Text className="font-poppins-semibold text-sm">{otpTime}</Text>{" "}
+              <Text className="font-poppins-semibold text-sm">
+                {formatTime(otpTime)}
+              </Text>{" "}
               minutes
             </Text>
           </View>

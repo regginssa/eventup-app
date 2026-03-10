@@ -70,3 +70,6 @@ export const MESSAGE_BASE = "/messages/";
 
 // Notification
 export const NOTIFICATION_BASE = "/notifications/";
+
+// Support
+export const SUPPORT_BASE = "/support";

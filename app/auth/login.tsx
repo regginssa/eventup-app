@@ -1,5 +1,10 @@
 import { setAuthToken } from "@/api/client";
-import { emailLogin, googleLogin, verifyOtp } from "@/api/services/auth";
+import {
+  emailLogin,
+  googleLogin,
+  resendOtp,
+  verifyOtp,
+} from "@/api/services/auth";
 import {
   Button,
   Checkbox,
@@ -15,7 +20,7 @@ import { useRedirect } from "@/hooks";
 import { Feather } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 const LoginScreen = () => {
@@ -28,7 +33,7 @@ const LoginScreen = () => {
   const [invalidPassword, setInvalidPassword] = useState<boolean>(false);
   const [isOtpOpen, setIsOtpOpen] = useState<boolean>(false);
   const [otp, setOtp] = useState<string>("");
-  const [otpTime, setOtpTime] = useState<number>(3);
+  const [otpTime, setOtpTime] = useState<number>(180);
   const [otpLoading, setOtpLoading] = useState<boolean>(false);
   const [resendLoading, setResendLoading] = useState<boolean>(false);
 
@@ -56,6 +61,22 @@ const LoginScreen = () => {
 
     return isValidEmail && isValidPassword;
   };
+
+  useEffect(() => {
+    if (!isOtpOpen) return;
+
+    const timer = setInterval(() => {
+      setOtpTime((prev) => {
+        if (prev <= 0) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isOtpOpen]);
 
   const handleGoogleLogin = async () => {
     try {
@@ -148,16 +169,33 @@ const LoginScreen = () => {
   };
 
   const handleResendOtp = async () => {
-    if (email.trim().length === 0 || otp.trim().length === 0)
-      return toast.warn("Email or Verification code is incorrect");
+    if (otpTime > 0) {
+      return toast.warn("Please wait before requesting another code");
+    }
+
+    if (email.trim().length === 0) {
+      return toast.warn("Email is required");
+    }
 
     try {
       setResendLoading(true);
+
+      await resendOtp(email);
+
+      setOtpTime(180);
+
+      toast.success("Verification code resent");
     } catch (error) {
-      toast.error("Verification failed");
+      toast.error("Failed to resend verification code");
     } finally {
       setResendLoading(false);
     }
+  };
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
   return (
@@ -258,7 +296,9 @@ const LoginScreen = () => {
 
             <Text className="font-dm-sans-medium text-xs text-purple-600">
               Resend verification code in{" "}
-              <Text className="font-poppins-semibold text-sm">{otpTime}</Text>{" "}
+              <Text className="font-poppins-semibold text-sm">
+                {formatTime(otpTime)}
+              </Text>{" "}
               minutes
             </Text>
           </View>

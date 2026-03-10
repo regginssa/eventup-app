@@ -60,7 +60,7 @@ export const verifyOtp = async (body: any): Promise<ApiResponse<IUser>> => {
   return await AxiosInstance.post(VERIFY_OTP, body);
 };
 
-export const ResendOtp = async (
+export const resendOtp = async (
   email: string,
 ): Promise<ApiResponse<boolean>> => {
   return await AxiosInstance.get(VERIFY_OTP + "/resend", { params: { email } });

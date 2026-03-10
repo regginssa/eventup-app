@@ -10,6 +10,7 @@ interface AuthContextProps {
   isAuthenticated: boolean;
   user: IUser | null;
   setAuthUser: (val: IUser | null) => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -91,9 +92,18 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     fetchMe();
   }, [authChecked]);
 
+  const logout = async () => {
+    const token = await AsyncStorage.getItem("Authorization");
+
+    if (token) {
+      await AsyncStorage.removeItem("Authorization");
+    }
+    router.replace("/start");
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, setAuthUser: setUser, isAuthenticated: !!user }}
+      value={{ user, setAuthUser: setUser, isAuthenticated: !!user, logout }}
     >
       {children}
     </AuthContext.Provider>
