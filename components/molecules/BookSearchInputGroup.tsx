@@ -307,7 +307,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   }, []);
 
   useEffect(() => {
-    const canHaveTransfer = includes.flight || includes.hotel;
+    const canHaveTransfer = includes.flight && includes.hotel;
 
     if (!canHaveTransfer && includes.transferAirport) {
       setIncludes((prev) => ({ ...prev, transferAirport: false }));
