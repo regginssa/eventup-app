@@ -1,4 +1,5 @@
 import { markMessagesSeenRest } from "@/api/services/message";
+import { uploadFile } from "@/api/services/upload";
 import {
   Avatar,
   ChatContainer,
@@ -25,6 +26,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   Text,
@@ -42,6 +44,7 @@ const ChatGroup = () => {
   const [editText, setEditText] = useState<string>("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [voiceLoading, setVoiceLoading] = useState<boolean>(false);
   const flatListRef = useRef<FlatList>(null);
 
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
@@ -152,9 +155,51 @@ const ChatGroup = () => {
   };
 
   const stopRecording = async () => {
-    // The recording will be available on `audioRecorder.uri`.
+    setVoiceLoading(true);
     await audioRecorder.stop();
-    console.log("[audio recording uri]: ", audioRecorder.uri);
+    await handleVoice();
+    setVoiceLoading(false);
+  };
+
+  const handleVoice = async () => {
+    if (!audioRecorder.uri) return;
+
+    try {
+      const uriParts = audioRecorder.uri.split("/");
+      const fileName = uriParts[uriParts.length - 1];
+
+      const formData = new FormData();
+      formData.append("file", {
+        uri: audioRecorder.uri,
+        name: fileName,
+        type: "audio/m4a",
+      } as any);
+
+      const response = await uploadFile(formData);
+
+      if (response.data) {
+        sendMessage({
+          conversationId,
+          senderId: user?._id,
+          text: "",
+          files: [
+            {
+              type: "audio",
+              url: response.data,
+              mimeType: "audio/m4a",
+            },
+          ],
+        });
+      } else {
+        toast.error("Upload failed");
+      }
+
+      console.log("[uploaded url]: ", response.data);
+    } catch (error) {
+      console.log("[handle voice error]: ", error);
+      toast.error("Something went wrong");
+    } finally {
+    }
   };
 
   const renderMembers = ({ item }: { item: IUser }) => {
@@ -239,15 +284,19 @@ const ChatGroup = () => {
             activeOpacity={0.8}
             onPress={recorderState.isRecording ? stopRecording : startRecording}
           >
-            <MaterialCommunityIcons
-              name={
-                recorderState.isRecording
-                  ? "stop-circle-outline"
-                  : "microphone-outline"
-              }
-              size={24}
-              color="#4b5563"
-            />
+            {voiceLoading ? (
+              <ActivityIndicator size={24} color="#4b5563" />
+            ) : (
+              <MaterialCommunityIcons
+                name={
+                  recorderState.isRecording
+                    ? "stop-circle-outline"
+                    : "microphone-outline"
+                }
+                size={24}
+                color="#4b5563"
+              />
+            )}
           </TouchableOpacity>
         </View>
       </View>
