@@ -65,6 +65,7 @@ export default function RootLayout() {
         <Stack.Screen name="subscription" />
         <Stack.Screen name="conversation" />
         <Stack.Screen name="notification" />
+        <Stack.Screen name="contact-us" />
       </Stack>
     </InitContainer>
   );

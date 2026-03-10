@@ -30,14 +30,11 @@ interface DrawerProps {
 }
 
 const Header = ({ onClose }: { onClose: () => void }) => {
-
   return (
     <View className="w-full flex flex-row items-center justify-between">
       <View className="flex flex-row items-center gap-2">
         <Image source={LogoImage} alt="logo" style={styles.logo} />
-        <Text
-          className={`font-poppins-semibold text-gray-800`}
-        >
+        <Text className={`font-poppins-semibold text-gray-800`}>
           Charlie Unicorn AI
         </Text>
       </View>
@@ -47,11 +44,7 @@ const Header = ({ onClose }: { onClose: () => void }) => {
         className={`w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center`}
         onPress={onClose}
       >
-        <Entypo
-          name="cross"
-          size={16}
-          color="#1f2937"
-        />
+        <Entypo name="cross" size={16} color="#1f2937" />
       </TouchableOpacity>
     </View>
   );
@@ -80,59 +73,29 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
   const items = [
     {
       label: "Edit profile",
-      icon: (
-        <FontAwesome
-          name="edit"
-          size={20}
-          color="#374151"
-        />
-      ),
+      icon: <FontAwesome name="edit" size={20} color="#374151" />,
       href: `/profile/`,
       params: { id: user._id },
     },
     {
       label: "Verify Identity",
-      icon: (
-        <FontAwesome
-          name="id-card-o"
-          size={20}
-          color="#374151"
-        />
-      ),
+      icon: <FontAwesome name="id-card-o" size={20} color="#374151" />,
       href: "/",
     },
     {
       label: "Tickets",
-      icon: (
-        <FontAwesome
-          name="ticket"
-          size={20}
-          color="#374151"
-        />
-      ),
+      icon: <FontAwesome name="ticket" size={20} color="#374151" />,
       badge: user.tickets.length.toString(),
       href: "/mine/tickets",
     },
     {
-      label: "Contact us",
-      icon: (
-        <FontAwesome5
-          name="question-circle"
-          size={20}
-          color="#374151"
-        />
-      ),
-      href: "/",
+      label: "Support",
+      icon: <FontAwesome5 name="question-circle" size={20} color="#374151" />,
+      href: "/contact-us",
     },
     {
       label: "About us",
-      icon: (
-        <AntDesign
-          name="info-circle"
-          size={20}
-          color="#374151"
-        />
-      ),
+      icon: <AntDesign name="info-circle" size={20} color="#374151" />,
       href: "/",
     },
   ];
@@ -156,20 +119,16 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
             <Avatar name={user.name} source={user.avatar} size={40} />
             <View className="">
               <View className="flex flex-row items-center gap-2">
-                <Text
-                  className={`font-poppins-semibold text-gray-800`}
-                >
+                <Text className={`font-poppins-semibold text-gray-800`}>
                   {user.name}
                 </Text>
-                <Image
-                  source={VerifiedBadge}
-                  alt="verified"
-                  style={{ width: 16, height: 16 }}
+                <MaterialCommunityIcons
+                  name="check-decagram"
+                  size={16}
+                  color={user.idVerified ? "#16a34a" : "#cbd5e1"}
                 />
               </View>
-              <Text
-                className={`font-dm-sans text-gray-600 text-sm`}
-              >
+              <Text className={`font-dm-sans text-gray-600 text-sm`}>
                 {user.title}
               </Text>
             </View>
@@ -192,9 +151,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
             >
               <View className="flex flex-row items-center gap-2">
                 {item.icon}
-                <Text
-                  className={`text-gray-700 font-poppins`}
-                >
+                <Text className={`text-gray-700 font-poppins`}>
                   {item.label}
                 </Text>
                 {item.badge && (
@@ -206,11 +163,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
                 )}
               </View>
 
-              <Feather
-                name="arrow-up-right"
-                size={20}
-                color="#374151"
-              />
+              <Feather name="arrow-up-right" size={20} color="#374151" />
             </TouchableOpacity>
           ))}
 
