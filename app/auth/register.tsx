@@ -3,6 +3,7 @@ import { emailRegister, googleRegister } from "@/api/services/auth";
 import { Button, Input, PasswordInput } from "@/components/common";
 import { AuthScreenContainer } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/config/env";
 import { Feather } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
@@ -30,6 +31,7 @@ const RegisterScreen = () => {
 
   const router = useRouter();
   const { setAuthUser } = useAuth();
+  const toast = useToast();
 
   GoogleSignin.configure({
     webClientId: GOOGLE_WEB_CLIENT_ID,
@@ -100,7 +102,8 @@ const RegisterScreen = () => {
       }
 
       const response = await googleRegister(
-        googleUser.name,
+        googleUser.givenName || "",
+        googleUser.familyName || googleUser.name,
         googleUser.email,
         googleUser.id,
         googleUser.photo ?? "",
@@ -110,14 +113,13 @@ const RegisterScreen = () => {
       await setAuthToken(token);
       setAuthUser(user);
 
-      Alert.alert("Welcome !!!");
+      toast.success("Welcome !!!");
       router.replace("/auth/onboarding/step1");
     } catch (error: any) {
-      const message = error?.response?.data?.message;
-      // console.error(error);
+      const message = error?.message || error?.response?.data?.message;
 
+      toast.error(message);
       if (error?.status === 400) {
-        Alert.alert(message);
         router.replace("/auth/login");
       }
     } finally {
@@ -144,12 +146,12 @@ const RegisterScreen = () => {
       await setAuthToken(token);
       setAuthUser(user);
 
-      Alert.alert("Welcome !!!");
+      toast.success("Welcome !!!");
       router.replace("/auth/onboarding/step1");
     } catch (error: any) {
       const message = error?.response?.data?.message;
 
-      Alert.alert(message);
+      toast.error(message);
     } finally {
       setEmailLoading(false);
     }

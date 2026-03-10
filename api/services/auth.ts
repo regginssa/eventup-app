@@ -17,13 +17,15 @@ export const googleLogin = async (
 };
 
 export const googleRegister = async (
-  name: string,
+  firstName: string,
+  lastName: string,
   email: string,
   google_id: string,
   avatar: string,
 ): Promise<ApiResponse<AuthResponse>> => {
   return await AxiosInstance.post(GOOGLE_REGISTER, {
-    name,
+    firstName,
+    lastName,
     email,
     google_id,
     avatar,

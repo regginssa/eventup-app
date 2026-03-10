@@ -3,13 +3,14 @@ import { emailLogin, googleLogin } from "@/api/services/auth";
 import { Button, Checkbox, Input, PasswordInput } from "@/components/common";
 import { AuthScreenContainer } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/config/env";
 import { useRedirect } from "@/hooks";
 import { Feather } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState<string>("");
@@ -22,6 +23,7 @@ const LoginScreen = () => {
 
   const { redirect } = useRedirect();
   const { setAuthUser } = useAuth();
+  const toast = useToast();
 
   const router = useRouter();
 
@@ -55,7 +57,7 @@ const LoginScreen = () => {
 
       if (!googleUser?.email || !googleUser?.id) {
         setGoogleLoading(false);
-        return Alert.alert("Google sign in error");
+        return toast.error("Google sign in error");
       }
 
       const response = await googleLogin(googleUser.email, googleUser.id);
@@ -63,13 +65,13 @@ const LoginScreen = () => {
       const { token, user } = response.data;
       await setAuthToken(token);
       setAuthUser(user);
-      Alert.alert("Welcome back!!!");
+      toast.success("Welcome back!!!");
 
       redirect(user);
     } catch (error: any) {
-      const message = error?.response?.data?.message;
+      const message = error?.message || error?.response?.data?.message;
 
-      Alert.alert(message);
+      toast.error(message);
       if (error?.status === 404) {
         router.replace("/auth/register");
       }
@@ -91,13 +93,13 @@ const LoginScreen = () => {
       await setAuthToken(token);
       setAuthUser(user);
 
-      Alert.alert("Welcome back!!!");
+      toast.success("Welcome back!!!");
 
       redirect(user);
     } catch (error: any) {
       const message = error?.response?.data?.message;
 
-      Alert.alert(error?.message || "An error occurred");
+      toast.error(error?.message || message || "An error occurred");
 
       if (error?.status === 401) {
         setInvalidPassword(true);
