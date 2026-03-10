@@ -143,15 +143,6 @@ const TicketsScreen = () => {
       </View>
 
       <View className="gap-4 px-5">
-        <View>
-          <Text className="font-poppins-semibold text-xl text-gray-800">
-            Available Tickets
-          </Text>
-          <Text className="font-dm-sans-medium text-sm text-gray-700">
-            Choose your ticket type and secure your entry
-          </Text>
-        </View>
-
         <View className="flex flex-row items-center gap-3">
           {currencies.map((currency) => (
             <TouchableOpacity

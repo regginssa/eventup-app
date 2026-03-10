@@ -1,4 +1,4 @@
-import { fetchUser } from "@/api/services/user";
+import UserAPI from "@/api/services/user";
 import { Button } from "@/components/common";
 import { OnboardingContainer } from "@/components/organisms";
 
@@ -24,7 +24,7 @@ const OnboarindStep5Screen = () => {
     try {
       setLoading(true);
 
-      const response = await fetchUser(user._id);
+      const response = await UserAPI.get(user._id);
 
       if (response.ok) {
         setAuthUser(response.data);

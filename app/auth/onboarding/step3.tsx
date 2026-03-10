@@ -2,11 +2,12 @@ import { fetchIdentityVerificationSession } from "@/api/services/didit";
 import { Button, Modal } from "@/components/common";
 import { OnboardingContainer } from "@/components/organisms";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Linking, StyleSheet, Text, View } from "react-native";
+import { Linking, StyleSheet, Text, View } from "react-native";
 
 const IdImage = require("@/assets/images/id_image.png");
 
@@ -16,6 +17,7 @@ const OnboardingStep3Screen = () => {
 
   const router = useRouter();
   const { user } = useAuth();
+  const toast = useToast();
 
   const handleStart = async () => {
     if (!user?._id) return;
@@ -32,12 +34,11 @@ const OnboardingStep3Screen = () => {
         if (supported) {
           await Linking.openURL(url);
         } else {
-          Alert.alert("Can't open the verification");
+          toast.error("Can't open the verification");
         }
       }
     } catch (error: any) {
-      const message = error?.response?.data?.message;
-      Alert.alert(message);
+      toast.error("Start verification failed");
     } finally {
       setLoading(false);
     }
@@ -129,7 +130,7 @@ const OnboardingStep3Screen = () => {
             onPress={handleStart}
           />
           <Button
-            type="white"
+            type="gradient-soft"
             label="Skip now"
             buttonClassName="h-12"
             onPress={() => router.replace("/auth/onboarding/step4")}
@@ -169,10 +170,9 @@ const OnboardingStep3Screen = () => {
             onPress={() => router.replace("/auth/onboarding/step4")}
           />
           <Button
-            type="text"
+            type="gradient-soft"
             label="Cancel"
             buttonClassName="h-12"
-            textClassName="text-gray-700"
             onPress={() => setIsOpen(false)}
           />
         </View>

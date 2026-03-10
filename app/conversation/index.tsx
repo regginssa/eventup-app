@@ -112,7 +112,7 @@ const Conversation = () => {
 
   return (
     <ConversationContainer>
-      <View className="flex-1 bg-white rounded-xl overflow-hidden p-4 gap-5">
+      <View className="flex-1 bg-white rounded-3xl overflow-hidden p-4 gap-5">
         <Input
           type="string"
           placeholder="Search..."
