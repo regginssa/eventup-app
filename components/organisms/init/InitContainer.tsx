@@ -8,6 +8,7 @@ import {
   MessageProvider,
   NotificationProvider,
   SocketProvider,
+  SubscriptionProvider,
   ToastProvider,
   TransferProvider,
 } from "@/components/providers";
@@ -24,34 +25,36 @@ const InitContainer: React.FC<InitContainerProps> = ({ children }) => {
   return (
     <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
       <AuthProvider>
-        <CommunityTicketProvider>
-          <SocketProvider>
-            <EventProvider>
-              <BookingProvider>
-                <ConversationProvider>
-                  <MessageProvider>
-                    <NotificationProvider>
-                      <FlightProvider>
-                        <HotelProvider>
-                          <TransferProvider>
-                            <KeyboardAvoidingView
-                              behavior={
-                                Platform.OS === "ios" ? "padding" : undefined
-                              }
-                              style={{ flex: 1 }}
-                            >
-                              <ToastProvider>{children}</ToastProvider>
-                            </KeyboardAvoidingView>
-                          </TransferProvider>
-                        </HotelProvider>
-                      </FlightProvider>
-                    </NotificationProvider>
-                  </MessageProvider>
-                </ConversationProvider>
-              </BookingProvider>
-            </EventProvider>
-          </SocketProvider>
-        </CommunityTicketProvider>
+        <SubscriptionProvider>
+          <CommunityTicketProvider>
+            <SocketProvider>
+              <EventProvider>
+                <BookingProvider>
+                  <ConversationProvider>
+                    <MessageProvider>
+                      <NotificationProvider>
+                        <FlightProvider>
+                          <HotelProvider>
+                            <TransferProvider>
+                              <KeyboardAvoidingView
+                                behavior={
+                                  Platform.OS === "ios" ? "padding" : undefined
+                                }
+                                style={{ flex: 1 }}
+                              >
+                                <ToastProvider>{children}</ToastProvider>
+                              </KeyboardAvoidingView>
+                            </TransferProvider>
+                          </HotelProvider>
+                        </FlightProvider>
+                      </NotificationProvider>
+                    </MessageProvider>
+                  </ConversationProvider>
+                </BookingProvider>
+              </EventProvider>
+            </SocketProvider>
+          </CommunityTicketProvider>
+        </SubscriptionProvider>
       </AuthProvider>
     </StripeProvider>
   );

@@ -1,6 +1,6 @@
-import { fetchAllSubscriptions } from "@/api/services/subscription";
 import { Button, Spinner, SubscriptionContainer } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useSubscription } from "@/components/providers/SubscriptionProvider";
 import { ISubscription } from "@/types/subscription";
 import { formatDateTime } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -40,7 +40,6 @@ export const calculateSave = (
 };
 
 const SubscriptionScreen = () => {
-  const [subscriptions, setSubscriptions] = useState<ISubscription[]>([]);
   const [currentSubscription, setCurrentSubscription] =
     useState<ISubscription | null>(null);
   const [isExpired, setIsExpired] = useState<boolean>(true);
@@ -53,16 +52,7 @@ const SubscriptionScreen = () => {
 
   const { user } = useAuth();
   const router = useRouter();
-
-  useEffect(() => {
-    const getAllSubscriptions = async () => {
-      const response = await fetchAllSubscriptions();
-      if (!response.data) return;
-      setSubscriptions(response.data);
-    };
-
-    getAllSubscriptions();
-  }, []);
+  const { subscriptions } = useSubscription();
 
   useEffect(() => {
     if (subscriptions.length === 0) {

@@ -7,5 +7,6 @@ export { default as HotelProvider } from "./HotelProvider";
 export { default as MessageProvider } from "./MessageProvider";
 export { default as NotificationProvider } from "./NotificationProvider";
 export { default as SocketProvider } from "./SocketProvider";
+export { default as SubscriptionProvider } from "./SubscriptionProvider";
 export { default as ToastProvider } from "./ToastProvider";
 export { default as TransferProvider } from "./TransferProvider";

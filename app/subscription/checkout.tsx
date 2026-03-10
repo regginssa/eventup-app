@@ -1,8 +1,8 @@
-import { fetchSubscriptionById } from "@/api/services/subscription";
 import UserAPI from "@/api/services/user";
 import { Button, PaymentMethodGroup } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useSubscription } from "@/components/providers/SubscriptionProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
@@ -135,13 +135,10 @@ const SubscriptionCheckout = () => {
   const [btnLabel, setBtnLabel] = useState("Subscribe");
 
   const { id: subscriptionId, oneMonthPrice } = useLocalSearchParams();
-
   const { user, setAuthUser } = useAuth();
-
+  const { subscriptions } = useSubscription();
   const { pay: payStripe } = useStripe();
-
   const toast = useToast();
-
   const router = useRouter();
 
   useEffect(() => {
@@ -151,19 +148,21 @@ const SubscriptionCheckout = () => {
       try {
         setLoading(true);
 
-        const response = await fetchSubscriptionById(subscriptionId as any);
+        const subscription = subscriptions.find(
+          (sub) => sub._id === subscriptionId,
+        );
 
-        if (response.data) {
+        if (subscription) {
           const savePercent = calculateSave(
-            response.data.price,
-            response.data.month,
+            subscription.price,
+            subscription.month,
             Number(oneMonthPrice),
           );
 
           const formatted: TSubscriptionItem = {
-            ...response.data,
-            isActive: user?.subscription.id === response.data._id,
-            isRecommended: response.data.month === 6,
+            ...subscription,
+            isActive: user?.subscription.id === subscription._id,
+            isRecommended: subscription.month === 6,
             save: savePercent === 0 ? undefined : savePercent,
           };
 

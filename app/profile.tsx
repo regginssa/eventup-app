@@ -10,6 +10,7 @@ import {
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
+import { useSubscription } from "@/components/providers/SubscriptionProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { Country } from "@/types/location.types";
 import { IUser } from "@/types/user";
@@ -39,6 +40,7 @@ const ProfileScreen = () => {
   const { id: userId } = useLocalSearchParams();
   const { user: authUser, setAuthUser } = useAuth();
   const { conversations, createConversation } = useConversation();
+  const { subscriptions } = useSubscription();
   const router = useRouter();
   const toast = useToast();
 
@@ -67,6 +69,14 @@ const ProfileScreen = () => {
 
   const handleMessage = async () => {
     if (!user?._id || !authUser?._id) return;
+
+    const sub = subscriptions.find((sub) => sub._id === user.subscription.id);
+    if (sub && sub.month === 0) {
+      return toast.info(
+        "You must subscribe your membership to write direct message",
+      );
+    }
+
     try {
       setMessageLoading(true);
       const conversation = conversations.find(
@@ -156,6 +166,20 @@ const ProfileScreen = () => {
     );
   }
 
+  const membershipStarted = user.subscription?.startedAt
+    ? new Date(user.subscription.startedAt)
+    : null;
+
+  const membershipMonths = membershipStarted
+    ? Math.max(
+        1,
+        Math.floor(
+          (Date.now() - membershipStarted.getTime()) /
+            (1000 * 60 * 60 * 24 * 30),
+        ),
+      )
+    : 0;
+
   return (
     <SimpleContainer title={user.name} scrolled>
       <View className="flex-1 px-4 pb-10">
@@ -188,7 +212,7 @@ const ProfileScreen = () => {
           <View className="flex-row items-center opacity-60">
             <Ionicons name="location-sharp" size={14} color="#64748b" />
             <Text className="text-slate-500 font-dm-sans-medium text-sm ml-1">
-              {user.location?.city?.name}, {user.location?.country?.name}
+              {user.location?.city?.name}
             </Text>
             <FlagButton
               countryCode={user.location?.country?.code as any}
@@ -279,6 +303,98 @@ const ProfileScreen = () => {
             </Text>
           </LinearGradient>
         </View>
+
+        {isMe && (
+          <View className="w-full mb-6">
+            {/* Upper */}
+            <View className="bg-white rounded-t-[24px] border-t border-l border-r border-slate-200 p-6">
+              <Text className="text-slate-400 font-poppins-bold text-[10px] uppercase tracking-[2px] mb-4">
+                Account Information
+              </Text>
+
+              <View className="gap-4">
+                {/* Email */}
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center">
+                      <Feather name="mail" size={16} color="#64748b" />
+                    </View>
+                    <Text className="text-slate-700 font-dm-sans-medium">
+                      {user.email}
+                    </Text>
+                  </View>
+
+                  {user.emailVerified && (
+                    <View className="flex-row items-center gap-1">
+                      <Feather name="check-circle" size={14} color="#10b981" />
+                      <Text className="text-emerald-600 text-xs font-dm-sans-bold">
+                        VERIFIED
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Phone */}
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center">
+                      <Feather name="phone" size={16} color="#64748b" />
+                    </View>
+                    <Text className="text-slate-700 font-dm-sans-medium">
+                      {user.phone || "No phone added"}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            {/* Divider */}
+            <View className="flex-row items-center justify-between bg-white">
+              <View className="w-5 h-10 rounded-r-full bg-slate-50 border-r border-t border-b border-slate-200 -ml-[1px]" />
+              <View className="flex-1 h-[1px] border-b border-dashed border-slate-300 mx-2" />
+              <View className="w-5 h-10 rounded-l-full bg-slate-50 border-l border-t border-b border-slate-200 -mr-[1px]" />
+            </View>
+
+            {/* Membership */}
+            <View className="bg-white rounded-b-[24px] border-b border-l border-r border-slate-200 p-6 pt-2">
+              <View className="flex-row items-center justify-between mb-4">
+                <View>
+                  <Text className="text-slate-400 font-dm-sans-bold text-[10px] uppercase tracking-widest mb-1">
+                    Membership Since
+                  </Text>
+                  <Text className="font-poppins-bold text-slate-800 text-lg">
+                    {membershipStarted
+                      ? membershipStarted.toLocaleDateString()
+                      : "Free User"}
+                  </Text>
+                </View>
+
+                <View className="bg-purple-100 px-3 py-1.5 rounded-xl flex-row items-center gap-1">
+                  <MaterialCommunityIcons
+                    name="crown"
+                    size={14}
+                    color="#844AFF"
+                  />
+                  <Text className="text-[10px] font-poppins-bold text-purple-600 uppercase">
+                    {user.accountType}
+                  </Text>
+                </View>
+              </View>
+
+              {membershipStarted && (
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-slate-500 font-dm-sans-medium">
+                    Active Membership
+                  </Text>
+
+                  <Text className="font-poppins-semibold text-slate-800">
+                    {membershipMonths} month{membershipMonths > 1 ? "s" : ""}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
 
         {/* --- VERIFICATION TICKET --- */}
         <View className="w-full">
