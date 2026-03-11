@@ -69,7 +69,7 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
   > | null>(null);
 
   function resolvePurchaseMeta(productId: string) {
-    if (productId.startsWith("ETP.SUBSCRIPTION")) {
+    if (productId.startsWith("ETW.SUBSCRIPTION")) {
       const sub = getSubBySku(productId);
       return {
         type: "subscription",
@@ -80,7 +80,7 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
       };
     }
 
-    if (productId.startsWith("ETP.TICKET")) {
+    if (productId.startsWith("ETW.TICKET")) {
       const ticket = getTicketBySku(productId);
 
       return {
