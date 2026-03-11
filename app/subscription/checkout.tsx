@@ -4,13 +4,16 @@ import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useSubscription } from "@/components/providers/SubscriptionProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import { getSku } from "@/constants/skus";
 import { useStripe } from "@/hooks";
+import { useIap } from "@/hooks/useIap";
 import { TPaymentMethod } from "@/types";
+import df from "@/utils/date";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Platform, Text, View } from "react-native";
 import { calculateSave, TSubscriptionItem } from ".";
 
 const SubscriptionHeroCard = ({ subscription, loading }: any) => {
@@ -122,22 +125,38 @@ const SubscriptionCheckout = () => {
   const [subscription, setSubscription] = useState<TSubscriptionItem | null>(
     null,
   );
-
   const [method, setMethod] = useState<TPaymentMethod>("credit");
-
   const [stripePaymentMethodId, setStripePaymentMethodId] =
     useState<string>("");
-
   const [loading, setLoading] = useState(false);
-
   const [subLoading, setSubLoading] = useState(false);
-
-  const [btnLabel, setBtnLabel] = useState("Subscribe");
+  const [sku, setSku] = useState<any>(null);
 
   const { id: subscriptionId, oneMonthPrice } = useLocalSearchParams();
   const { user, setAuthUser } = useAuth();
   const { subscriptions } = useSubscription();
   const { pay: payStripe } = useStripe();
+
+  const handleIapSuccess = async () => {
+    if (!user?._id) return;
+    const res = await UserAPI.update(user?._id as string, {
+      ...user,
+      subscription: {
+        id: subscriptionId as any,
+        startedAt: df.toISOString(new Date()),
+      },
+    });
+    if (res.data) {
+      setAuthUser(res.data);
+      toast.success("Subscribed successfully");
+      router.back();
+    }
+  };
+
+  const { ready, buy: buyIap } = useIap({
+    userId: user?._id as string,
+    onVerified: handleIapSuccess,
+  });
   const toast = useToast();
   const router = useRouter();
 
@@ -167,6 +186,7 @@ const SubscriptionCheckout = () => {
           };
 
           setSubscription(formatted);
+          setSku(getSku(subscription.month as any));
         }
       } finally {
         setLoading(false);
@@ -208,8 +228,6 @@ const SubscriptionCheckout = () => {
     try {
       setSubLoading(true);
 
-      setBtnLabel("Processing Payment...");
-
       let paymentResult;
 
       if (method === "credit") {
@@ -234,7 +252,18 @@ const SubscriptionCheckout = () => {
     } catch (error) {
       toast.error("Subscription failed");
     } finally {
-      setBtnLabel("Subscribe");
+      setSubLoading(false);
+    }
+  };
+
+  const handlePayIap = async () => {
+    if (!sku) {
+      return toast.error("Apple's production isn't ready yet");
+    }
+    try {
+      setSubLoading(true);
+      await buyIap(sku);
+    } finally {
       setSubLoading(false);
     }
   };
@@ -248,24 +277,38 @@ const SubscriptionCheckout = () => {
 
         <SubscriptionReceipt subscription={subscription} />
 
-        <PaymentMethodGroup
-          method={method}
-          stripePaymentMethodId={stripePaymentMethodId}
-          onSelectMethod={setMethod}
-          onSelectStripePaymentMethod={setStripePaymentMethodId}
-        />
+        {Platform.OS !== "ios" && (
+          <PaymentMethodGroup
+            method={method}
+            stripePaymentMethodId={stripePaymentMethodId}
+            onSelectMethod={setMethod}
+            onSelectStripePaymentMethod={setStripePaymentMethodId}
+          />
+        )}
       </View>
 
       <View className="mt-10 gap-4">
-        <Button
-          type="primary"
-          label={btnLabel}
-          buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
-          textClassName="text-lg font-poppins-bold"
-          loading={subLoading}
-          disabled={loading || !subscription}
-          onPress={handleSubscribe}
-        />
+        {Platform.OS === "ios" ? (
+          <Button
+            type="primary"
+            label="Subscribe"
+            buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
+            textClassName="text-lg font-poppins-bold"
+            loading={subLoading}
+            disabled={loading || !subscription || !ready}
+            onPress={handlePayIap}
+          />
+        ) : (
+          <Button
+            type="primary"
+            label="Subscribe"
+            buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
+            textClassName="text-lg font-poppins-bold"
+            loading={subLoading}
+            disabled={loading || !subscription}
+            onPress={handleSubscribe}
+          />
+        )}
 
         <View className="flex-row items-center justify-center bg-slate-50 py-3 rounded-xl border border-slate-100">
           <MaterialCommunityIcons
