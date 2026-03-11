@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 const GoogleIcon = require("@/assets/images/icons/google.png");
+const AppleIcon = require("@/assets/images/icons/apple.png");
 
 // Define your brand colors
 const BRAND_GRADIENT = ["#C427E0", "#844AFF", "#12A9FF"];
@@ -156,7 +157,10 @@ const Button: React.FC<ButtonProps> = ({
         disabled={loading}
         onPress={onPress}
       >
-        <Image source={GoogleIcon} style={styles.socialIcon} />
+        <Image
+          source={socialType === "apple" ? AppleIcon : GoogleIcon}
+          style={styles.socialIcon}
+        />
         <Text className="text-slate-600 font-poppins-semibold text-sm">
           {label}
         </Text>

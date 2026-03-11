@@ -1,5 +1,6 @@
 import { setAuthToken } from "@/api/client";
 import {
+  appleLogin,
   emailLogin,
   googleLogin,
   resendOtp,
@@ -19,9 +20,10 @@ import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/config/env";
 import { useRedirect } from "@/hooks";
 import { Feather } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Platform, Text, TouchableOpacity, View } from "react-native";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState<string>("");
@@ -36,6 +38,7 @@ const LoginScreen = () => {
   const [otpTime, setOtpTime] = useState<number>(180);
   const [otpLoading, setOtpLoading] = useState<boolean>(false);
   const [resendLoading, setResendLoading] = useState<boolean>(false);
+  const [appleLoading, setAppleLoading] = useState<boolean>(false);
 
   const { redirect } = useRedirect();
   const { setAuthUser } = useAuth();
@@ -109,6 +112,32 @@ const LoginScreen = () => {
       }
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    setAppleLoading(true);
+    try {
+      const credential = await AppleAuthentication.signInAsync();
+
+      const { user: appleId, email, fullName } = credential;
+
+      if (!appleId) {
+        toast.error("Apple log in failed");
+        return setAppleLoading(false);
+      }
+
+      const res = await appleLogin({ appleId, email });
+      const { token, user } = res.data;
+      await setAuthToken(token);
+      setAuthUser(user);
+      toast.success("Welcome back!!!");
+
+      redirect(user);
+    } catch (error: any) {
+      toast.error(error?.message || "Apple log in failed");
+    } finally {
+      setAppleLoading(false);
     }
   };
 
@@ -258,11 +287,11 @@ const LoginScreen = () => {
 
         <Button
           type="social"
-          socialType="google"
-          label="Sign in with Google"
+          socialType={Platform.OS === "ios" ? "apple" : "google"}
+          label={`Sign in with ${Platform.OS === "ios" ? "Apple" : "Google"}`}
           buttonClassName="h-12"
-          loading={googleLoading}
-          onPress={handleGoogleLogin}
+          loading={Platform.OS === "ios" ? appleLoading : googleLoading}
+          onPress={Platform.OS == "ios" ? handleAppleLogin : handleGoogleLogin}
         />
 
         <View className="flex flex-row items-center justify-center gap-2">

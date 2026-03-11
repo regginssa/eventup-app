@@ -1,5 +1,6 @@
 import { setAuthToken } from "@/api/client";
 import {
+  appleRegister,
   emailRegister,
   googleRegister,
   resendOtp,
@@ -12,9 +13,10 @@ import { useToast } from "@/components/providers/ToastProvider";
 import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/config/env";
 import { Feather } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Platform, Text, TouchableOpacity, View } from "react-native";
 
 const RegisterScreen = () => {
   const [firstName, setFirstName] = useState<string>("");
@@ -38,6 +40,7 @@ const RegisterScreen = () => {
   const [otpTime, setOtpTime] = useState<number>(180);
   const [otpLoading, setOtpLoading] = useState<boolean>(false);
   const [resendLoading, setResendLoading] = useState<boolean>(false);
+  const [appleLoading, setAppleLoading] = useState<boolean>(false);
 
   const router = useRouter();
   const { setAuthUser } = useAuth();
@@ -150,6 +153,42 @@ const RegisterScreen = () => {
       }
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const handleAppleRegister = async () => {
+    setAppleLoading(true);
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      const { fullName, email, user: appleId } = credential;
+
+      const firstName = fullName?.givenName || "";
+      const lastName = fullName?.familyName || "";
+
+      if (!appleId) {
+        toast.error("Apple register failed");
+        return setAppleLoading(false);
+      }
+
+      const res = await appleRegister({ firstName, lastName, email, appleId });
+
+      const { token, user } = res.data;
+      await setAuthToken(token);
+      setAuthUser(user);
+
+      toast.success("Welcome !!!");
+      router.replace("/auth/onboarding/step1");
+    } catch (error: any) {
+      const message = error?.message || error?.response?.data?.message;
+      toast.error(message);
+    } finally {
+      setAppleLoading(false);
     }
   };
 
@@ -327,11 +366,13 @@ const RegisterScreen = () => {
 
         <Button
           type="social"
-          socialType="google"
-          label="Sign up with Google"
+          socialType={Platform.OS === "ios" ? "apple" : "google"}
+          label={`Sign up with ${Platform.OS === "ios" ? "Apple" : "Google"}`}
           buttonClassName="h-12"
-          loading={googleLoading}
-          onPress={handleGoogleRegister}
+          loading={Platform.OS === "ios" ? appleLoading : googleLoading}
+          onPress={
+            Platform.OS == "ios" ? handleAppleRegister : handleGoogleRegister
+          }
         />
 
         <View className="flex flex-row items-center justify-center gap-2">

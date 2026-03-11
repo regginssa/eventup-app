@@ -1,43 +1,29 @@
 import { ApiResponse, AuthResponse } from "@/types/api";
 import { IUser } from "@/types/user";
 import AxiosInstance from "../client";
-import {
-  EMAIL_LOGIN,
-  EMAIL_REGISTER,
-  GET_ME,
-  GOOGLE_LOGIN,
-  GOOGLE_REGISTER,
-  VERIFY_OTP,
-} from "../endpoints";
 
-export const googleLogin = async (
-  email: string,
-  google_id: string,
-): Promise<ApiResponse<AuthResponse>> => {
-  return await AxiosInstance.post(GOOGLE_LOGIN, { email, google_id });
-};
+const BASE_URL = "/auth";
 
 export const googleRegister = async (
   firstName: string,
   lastName: string,
   email: string,
-  google_id: string,
+  googleId: string,
   avatar: string,
 ): Promise<ApiResponse<AuthResponse>> => {
-  return await AxiosInstance.post(GOOGLE_REGISTER, {
+  return await AxiosInstance.post(BASE_URL + "/register/google", {
     firstName,
     lastName,
     email,
-    google_id,
+    googleId,
     avatar,
   });
 };
 
-export const emailLogin = async (
-  email: string,
-  password: string,
+export const appleRegister = async (
+  body: any,
 ): Promise<ApiResponse<AuthResponse>> => {
-  return await AxiosInstance.post(EMAIL_LOGIN, { email, password });
+  return await AxiosInstance.post(BASE_URL + "/register/apple", body);
 };
 
 export const emailRegister = async (
@@ -47,7 +33,7 @@ export const emailRegister = async (
   email: string,
   password: string,
 ): Promise<ApiResponse<AuthResponse>> => {
-  return await AxiosInstance.post(EMAIL_REGISTER, {
+  return await AxiosInstance.post(BASE_URL + "/register/email", {
     firstName,
     lastName,
     name,
@@ -56,16 +42,44 @@ export const emailRegister = async (
   });
 };
 
+export const googleLogin = async (
+  email: string,
+  googleId: string,
+): Promise<ApiResponse<AuthResponse>> => {
+  return await AxiosInstance.post(BASE_URL + "/login/google", {
+    email,
+    googleId,
+  });
+};
+
+export const appleLogin = async (
+  body: any,
+): Promise<ApiResponse<AuthResponse>> => {
+  return await AxiosInstance.post(BASE_URL + "/login/apple", body);
+};
+
+export const emailLogin = async (
+  email: string,
+  password: string,
+): Promise<ApiResponse<AuthResponse>> => {
+  return await AxiosInstance.post(BASE_URL + "/login/email", {
+    email,
+    password,
+  });
+};
+
 export const verifyOtp = async (body: any): Promise<ApiResponse<IUser>> => {
-  return await AxiosInstance.post(VERIFY_OTP, body);
+  return await AxiosInstance.post(BASE_URL + "/verify/otp", body);
 };
 
 export const resendOtp = async (
   email: string,
 ): Promise<ApiResponse<boolean>> => {
-  return await AxiosInstance.get(VERIFY_OTP + "/resend", { params: { email } });
+  return await AxiosInstance.get(BASE_URL + "/verify/otp/resend", {
+    params: { email },
+  });
 };
 
 export const getMe = async (): Promise<ApiResponse<IUser>> => {
-  return await AxiosInstance.get(GET_ME);
+  return await AxiosInstance.get(BASE_URL);
 };
