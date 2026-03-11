@@ -13,11 +13,6 @@ const toShortDate = (date: Date | string | null): string => {
     month: "short",
     day: "numeric",
   });
-  const timePart = toDate.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
   return `${datePart}`;
 };
 

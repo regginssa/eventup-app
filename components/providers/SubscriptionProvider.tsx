@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 interface SubscriptionContextProps {
   subscriptions: ISubscription[];
+  getBySku: (sku: string) => ISubscription | null;
 }
 
 const Context = createContext<SubscriptionContextProps | undefined>(undefined);
@@ -25,6 +26,13 @@ const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 }) => {
   const [subscriptions, setSubscriptions] = useState<ISubscription[]>([]);
 
+  const getBySku = (sku: string): ISubscription | null => {
+    return (
+      subscriptions.find((s) => s.month.toString() === sku.split(".")[2]) ||
+      null
+    );
+  };
+
   useEffect(() => {
     const loadSubscriptions = async () => {
       const res = await SubscriptionAPI.getAll();
@@ -34,7 +42,9 @@ const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   }, []);
 
   return (
-    <Context.Provider value={{ subscriptions }}>{children}</Context.Provider>
+    <Context.Provider value={{ subscriptions, getBySku }}>
+      {children}
+    </Context.Provider>
   );
 };
 

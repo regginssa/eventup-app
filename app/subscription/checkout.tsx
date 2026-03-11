@@ -1,19 +1,20 @@
 import UserAPI from "@/api/services/user";
+import Web3API from "@/api/services/web3";
 import { Button, PaymentMethodGroup } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useIap } from "@/components/providers/IapProvider";
 import { useSubscription } from "@/components/providers/SubscriptionProvider";
 import { useToast } from "@/components/providers/ToastProvider";
-import { getSku } from "@/constants/skus";
+import { SERVER_API_ENDPOINT } from "@/config/env";
+import { getSubscriptionSku } from "@/constants/skus";
 import { useStripe } from "@/hooks";
-import { useIap } from "@/hooks/useIap";
 import { TPaymentMethod } from "@/types";
-import df from "@/utils/date";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Platform, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Platform, Text, View } from "react-native";
 import { calculateSave, TSubscriptionItem } from ".";
 
 const SubscriptionHeroCard = ({ subscription, loading }: any) => {
@@ -131,69 +132,60 @@ const SubscriptionCheckout = () => {
   const [loading, setLoading] = useState(false);
   const [subLoading, setSubLoading] = useState(false);
   const [sku, setSku] = useState<any>(null);
+  const [crypto, setCrypto] = useState<string>("eth");
+  const [cryptoPrices, setCryptoPrices] = useState<{
+    eth: number;
+    sol: number;
+    chrle: number;
+    babyu: number;
+  }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
 
   const { id: subscriptionId, oneMonthPrice } = useLocalSearchParams();
   const { user, setAuthUser } = useAuth();
   const { subscriptions } = useSubscription();
   const { pay: payStripe } = useStripe();
 
-  const handleIapSuccess = async () => {
-    if (!user?._id) return;
-    const res = await UserAPI.update(user?._id as string, {
-      ...user,
-      subscription: {
-        id: subscriptionId as any,
-        startedAt: df.toISOString(new Date()),
-      },
-    });
-    if (res.data) {
-      setAuthUser(res.data);
-      toast.success("Subscribed successfully");
-      router.back();
-    }
-  };
-
-  const { ready, buy: buyIap } = useIap({
-    userId: user?._id as string,
-    onVerified: handleIapSuccess,
-  });
+  const { ready, buy: buyIap, lastPurchase, resetPurchase } = useIap();
   const toast = useToast();
   const router = useRouter();
 
   useEffect(() => {
+    setLoading(true);
     const getSubscription = async () => {
       if (!subscriptionId || !oneMonthPrice) return;
 
-      try {
-        setLoading(true);
+      const subscription = subscriptions.find(
+        (sub) => sub._id === subscriptionId,
+      );
 
-        const subscription = subscriptions.find(
-          (sub) => sub._id === subscriptionId,
+      if (subscription) {
+        const savePercent = calculateSave(
+          subscription.price,
+          subscription.month,
+          Number(oneMonthPrice),
         );
 
-        if (subscription) {
-          const savePercent = calculateSave(
-            subscription.price,
-            subscription.month,
-            Number(oneMonthPrice),
-          );
+        const formatted: TSubscriptionItem = {
+          ...subscription,
+          isActive: user?.subscription.id === subscription._id,
+          isRecommended: subscription.month === 6,
+          save: savePercent === 0 ? undefined : savePercent,
+        };
 
-          const formatted: TSubscriptionItem = {
-            ...subscription,
-            isActive: user?.subscription.id === subscription._id,
-            isRecommended: subscription.month === 6,
-            save: savePercent === 0 ? undefined : savePercent,
-          };
-
-          setSubscription(formatted);
-          setSku(getSku(subscription.month as any));
-        }
-      } finally {
-        setLoading(false);
+        setSubscription(formatted);
+        setSku(getSubscriptionSku(subscription.month as any));
       }
     };
 
+    const loadCryptoPrices = async () => {
+      const res = await Web3API.getPrices();
+      setCryptoPrices(res.data);
+    };
+
+    setLoading(true);
     getSubscription();
+    loadCryptoPrices();
+    setLoading(false);
   }, [subscriptionId]);
 
   useEffect(() => {
@@ -201,6 +193,53 @@ const SubscriptionCheckout = () => {
 
     setStripePaymentMethodId(user.stripe.paymentMethods[0].id);
   }, [user]);
+
+  useEffect(() => {
+    if (
+      !lastPurchase?.ok ||
+      lastPurchase.type !== "subscription" ||
+      lastPurchase.subscriptionId !== subscriptionId
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const onSuccess = async () => {
+      const response = await UserAPI.get(user?._id as string);
+
+      if (cancelled) return;
+
+      if (response.data.subscription?.id === subscriptionId) {
+        setAuthUser(response.data);
+        toast.success("Subscribed successfully");
+        resetPurchase();
+        router.back();
+      }
+    };
+
+    onSuccess();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lastPurchase, subscriptionId, user?._id]);
+
+  const getTokenAmount = () => {
+    const totalAmount = Number(subscription?.price);
+    switch (crypto) {
+      case "eth":
+        return (totalAmount / cryptoPrices.eth).toFixed(6);
+      case "sol":
+        return (totalAmount / cryptoPrices.sol).toFixed(6);
+      case "chrle":
+        return (totalAmount / cryptoPrices.chrle).toFixed(6);
+      case "babyu":
+        return (totalAmount / cryptoPrices.babyu).toFixed(6);
+      default:
+        return totalAmount.toFixed(2);
+    }
+  };
 
   const handleStripePayment = async (
     amount: number,
@@ -222,32 +261,63 @@ const SubscriptionCheckout = () => {
     return res.paymentIntentId || null;
   };
 
+  const handleSuccess = async () => {
+    const response = await UserAPI.get(user?._id as string);
+
+    if (response.data.subscription.id === subscriptionId) {
+      setAuthUser(response.data);
+      toast.success("Subscribed successfully");
+      router.back();
+    }
+  };
+
+  const handleCrypto = async () => {
+    const amount = getTokenAmount();
+    if (Number(amount) <= 0) {
+      toast.error("Invalid amount for selected cryptocurrency.");
+      return null;
+    }
+
+    const data = {
+      amount: amount,
+      currency: crypto,
+      webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
+      metadata: { type: "subscription", subscriptionId },
+      redirect: "eventup://subscription" + subscriptionId,
+    };
+
+    const res = await Web3API.getCheckoutUrl(data);
+
+    if (!res.data) {
+      toast.error("Failed to initiate crypto payment.");
+      return null;
+    }
+
+    const checkoutUrl = res.data;
+    await Linking.openURL(checkoutUrl);
+  };
+
   const handleSubscribe = async () => {
     if (!subscription) return;
 
     try {
       setSubLoading(true);
 
-      let paymentResult;
-
       if (method === "credit") {
-        paymentResult = await handleStripePayment(
+        const paymentResult = await handleStripePayment(
           subscription.price,
           subscription.currency,
         );
+        if (!paymentResult) {
+          toast.error("Payment failed");
+          return;
+        }
+        await handleSuccess();
       }
 
-      if (!paymentResult) {
-        toast.error("Payment failed");
-        return;
-      }
-
-      const response = await UserAPI.get(user?._id as string);
-
-      if (response.data.subscription.id === subscriptionId) {
-        setAuthUser(response.data);
-        toast.success("Subscribed successfully");
-        router.back();
+      if (method === "crypto" || method === "token") {
+        await handleCrypto();
+        return setSubLoading(false);
       }
     } catch (error) {
       toast.error("Subscription failed");
@@ -281,6 +351,8 @@ const SubscriptionCheckout = () => {
           <PaymentMethodGroup
             method={method}
             stripePaymentMethodId={stripePaymentMethodId}
+            selectedCryptoCurrency={crypto}
+            onSelectCryptoCurrency={setCrypto}
             onSelectMethod={setMethod}
             onSelectStripePaymentMethod={setStripePaymentMethodId}
           />

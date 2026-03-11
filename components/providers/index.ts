@@ -4,6 +4,7 @@ export { default as ConversationProvider } from "./ConversationProvider";
 export { default as EventProvider } from "./EventProvider";
 export { default as FlightProvider } from "./FlightProvider";
 export { default as HotelProvider } from "./HotelProvider";
+export { default as IapProvider } from "./IapProvider";
 export { default as MessageProvider } from "./MessageProvider";
 export { default as NotificationProvider } from "./NotificationProvider";
 export { default as SocketProvider } from "./SocketProvider";

@@ -5,6 +5,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 interface CommunityTicketContextProps {
   communityTickets: ICommunityTicket[];
   updateCommunityTickets: (val: ICommunityTicket[]) => void;
+  getBySku: (sku: string) => ICommunityTicket | null;
 }
 
 const CommunityTicketContext = createContext<
@@ -34,6 +35,16 @@ const CommunityTicketProvider: React.FC<CommunityTicketProviderProps> = ({
     [],
   );
 
+  const getBySku = (sku: string): ICommunityTicket | null => {
+    return (
+      communityTickets.find(
+        (ct) =>
+          ct.currency.toUpperCase() === sku.split(".")[2] &&
+          ct.price.toString() === sku.split(".")[3],
+      ) || null
+    );
+  };
+
   useEffect(() => {
     const getAllTickets = async () => {
       const response = await fetchAllTickets();
@@ -51,7 +62,7 @@ const CommunityTicketProvider: React.FC<CommunityTicketProviderProps> = ({
 
   return (
     <CommunityTicketContext.Provider
-      value={{ communityTickets, updateCommunityTickets }}
+      value={{ communityTickets, updateCommunityTickets, getBySku }}
     >
       {children}
     </CommunityTicketContext.Provider>
