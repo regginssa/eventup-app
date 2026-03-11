@@ -103,16 +103,18 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
         const ok = await RNIap.initConnection();
         if (!ok || !mounted) return;
 
-        await RNIap.flushFailedPurchasesCachedAsPendingAndroid?.();
-
         const allSkus = [
           ...Object.values(IOS_SKUS.subscription),
           ...Object.values(IOS_SKUS.ticket),
         ];
 
-        const prods = await RNIap.getProducts(allSkus as any);
+        const prods = await RNIap.fetchProducts({
+          skus: allSkus,
+        });
 
-        if (mounted) setProducts(prods);
+        if (mounted && prods) {
+          setProducts(prods as RNIap.Product[]);
+        }
 
         setReady(true);
       } catch (error) {
@@ -126,7 +128,7 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
       try {
         if (!user?._id) return;
 
-        const receipt = purchase.transactionReceipt;
+        const receipt = purchase.purchaseToken;
         if (!receipt) return;
 
         const meta = resolvePurchaseMeta(purchase.productId);
@@ -185,8 +187,15 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
 
     try {
       await RNIap.requestPurchase({
-        sku,
-        andDangerouslyFinishTransactionAutomaticallyIOS: false,
+        type: "in-app",
+        request: {
+          apple: {
+            sku: sku,
+          },
+          android: {
+            skus: [sku],
+          },
+        },
       });
     } catch (error) {
       console.warn("Purchase request error:", error);
