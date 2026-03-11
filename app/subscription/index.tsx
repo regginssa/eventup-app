@@ -50,11 +50,15 @@ const SubscriptionScreen = () => {
   >(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { user } = useAuth();
+  const { user, refreshAuthUser } = useAuth();
   const router = useRouter();
   const { subscriptions } = useSubscription();
 
   useEffect(() => {
+    const refreshUser = async () => {
+      await refreshAuthUser();
+    };
+    setLoading(true);
     if (subscriptions.length === 0) {
       setOneMonthPrice(12);
     } else {
@@ -83,7 +87,9 @@ const SubscriptionScreen = () => {
       expiryDay.setHours(0, 0, 0, 0);
 
       setIsExpired(today > expiryDay);
+      refreshUser();
     }
+    setLoading(false);
   }, [subscriptions, user]);
 
   const selectedSubscription = subscriptions.find(

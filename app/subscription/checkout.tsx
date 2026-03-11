@@ -206,6 +206,7 @@ const SubscriptionCheckout = () => {
     let cancelled = false;
 
     const onSuccess = async () => {
+      setSubLoading(true);
       const response = await UserAPI.get(user?._id as string);
 
       if (cancelled) return;
@@ -216,6 +217,7 @@ const SubscriptionCheckout = () => {
         resetPurchase();
         router.back();
       }
+      setSubLoading(false);
     };
 
     onSuccess();
@@ -283,7 +285,7 @@ const SubscriptionCheckout = () => {
       currency: crypto,
       webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
       metadata: { type: "subscription", subscriptionId },
-      redirect: "eventup://subscription" + subscriptionId,
+      redirect: "eventup://subscription",
     };
 
     const res = await Web3API.getCheckoutUrl(data);

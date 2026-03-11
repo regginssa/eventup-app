@@ -10,6 +10,7 @@ interface AuthContextProps {
   isAuthenticated: boolean;
   user: IUser | null;
   setAuthUser: (val: IUser | null) => void;
+  refreshAuthUser: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -101,9 +102,20 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     router.replace("/start");
   };
 
+  const refreshAuthUser = async () => {
+    const res = await getMe();
+    setUser(res.data);
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, setAuthUser: setUser, isAuthenticated: !!user, logout }}
+      value={{
+        user,
+        setAuthUser: setUser,
+        isAuthenticated: !!user,
+        logout,
+        refreshAuthUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

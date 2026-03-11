@@ -1,9 +1,14 @@
 import { getMe } from "@/api/services/auth";
-import { fetchTicketById } from "@/api/services/ticket";
+import UserAPI from "@/api/services/user";
+import Web3API from "@/api/services/web3";
 import { Button, PaymentMethodGroup, Spinner } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useCommunityTicket } from "@/components/providers/CommunityTicketProvider";
+import { useIap } from "@/components/providers/IapProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import { SERVER_API_ENDPOINT } from "@/config/env";
+import { getTicketSku } from "@/constants/skus";
 import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { ICommunityTicket } from "@/types/ticket";
@@ -13,7 +18,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Alert, Linking, Platform, Text, View } from "react-native";
 
 // -----------------------------------------------------------------------------
 // HERO CARD — Redesigned (Matches EventHeroCard style)
@@ -158,24 +163,43 @@ const TicketsCheckout = () => {
   const [loading, setLoading] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<TPaymentMethod>("credit");
+  const [sku, setSku] = useState<any>(null);
+  const [crypto, setCrypto] = useState<string>("eth");
+  const [cryptoPrices, setCryptoPrices] = useState<{
+    eth: number;
+    sol: number;
+    chrle: number;
+    babyu: number;
+  }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
 
   const { id: ticketId, from, eventId } = useLocalSearchParams();
   const router = useRouter();
   const { user, setAuthUser } = useAuth();
   const { pay: payStripe } = useStripe();
+  const { ready, buy: buyIap, lastPurchase, resetPurchase } = useIap();
+  const { communityTickets } = useCommunityTicket();
   const toast = useToast();
 
   useEffect(() => {
     if (!ticketId) return;
 
     const loadTicket = async () => {
-      setLoading(true);
-      const res = await fetchTicketById(ticketId as string);
-      setTicket(res.data || null);
-      setLoading(false);
+      const tkt = communityTickets.find((ct) => ct._id === ticketId) || null;
+      if (tkt) {
+        setTicket(tkt);
+        setSku(getTicketSku(tkt.currency as any, tkt.price as any));
+      }
     };
 
+    const loadCryptoPrices = async () => {
+      const res = await Web3API.getPrices();
+      setCryptoPrices(res.data);
+    };
+
+    setLoading(true);
     loadTicket();
+    loadCryptoPrices();
+    setLoading(false);
   }, [ticketId]);
 
   useEffect(() => {
@@ -184,13 +208,60 @@ const TicketsCheckout = () => {
     setStripePaymentMethodId(user.stripe.paymentMethods[0].id);
   }, [user]);
 
+  useEffect(() => {
+    if (
+      !lastPurchase?.ok ||
+      lastPurchase.type !== "subscription" ||
+      lastPurchase.ticketId !== ticketId
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const onSuccess = async () => {
+      setPurchaseLoading(true);
+      const response = await UserAPI.get(user?._id as string);
+
+      if (cancelled) return;
+
+      if (response.data) {
+        setAuthUser(response.data);
+        toast.success("Purhcased successfully");
+        resetPurchase();
+        router.back();
+      }
+      setPurchaseLoading(false);
+    };
+
+    onSuccess();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lastPurchase, ticketId, user?._id]);
+
+  const getTokenAmount = () => {
+    const totalAmount = Number(ticket?.price);
+    switch (crypto) {
+      case "eth":
+        return (totalAmount / cryptoPrices.eth).toFixed(6);
+      case "sol":
+        return (totalAmount / cryptoPrices.sol).toFixed(6);
+      case "chrle":
+        return (totalAmount / cryptoPrices.chrle).toFixed(6);
+      case "babyu":
+        return (totalAmount / cryptoPrices.babyu).toFixed(6);
+      default:
+        return totalAmount.toFixed(2);
+    }
+  };
+
   const handlePurchase = async () => {
     if (!ticket) return;
 
     try {
       setPurchaseLoading(true);
-
-      let txHash = null;
 
       switch (paymentMethod) {
         case "credit":
@@ -204,48 +275,90 @@ const TicketsCheckout = () => {
               ticketPrice: ticket.price,
             },
           });
-          txHash = res.paymentIntentId;
-          break;
-      }
+          const txHash = res.paymentIntentId;
 
-      if (!txHash) {
-        toast.error("Payment failed");
-        return setPurchaseLoading(false);
-      }
-
-      // Wait for user data refresh
-      const updated = await new Promise<boolean>((resolve) => {
-        let elapsed = 0;
-        const interval = setInterval(async () => {
-          elapsed += 2000;
-          const me = await getMe();
-
-          if (me.data.tickets.length > (user?.tickets.length || 0)) {
-            setAuthUser(me.data);
-            clearInterval(interval);
-            resolve(true);
+          if (!txHash) {
+            toast.error("Payment failed");
+            return setPurchaseLoading(false);
           }
 
-          if (elapsed >= 20000) {
-            clearInterval(interval);
-            resolve(false);
-          }
-        }, 2000);
-      });
+          // Wait for user data refresh
+          const updated = await new Promise<boolean>((resolve) => {
+            let elapsed = 0;
+            const interval = setInterval(async () => {
+              elapsed += 2000;
+              const me = await getMe();
 
-      if (updated) {
-        Alert.alert("Success", "Ticket purchased successfully!");
-        if (from && eventId) {
-          router.replace({
-            pathname: "/event/details/user",
-            params: { id: eventId },
+              if (me.data.tickets.length > (user?.tickets.length || 0)) {
+                setAuthUser(me.data);
+                clearInterval(interval);
+                resolve(true);
+              }
+
+              if (elapsed >= 20000) {
+                clearInterval(interval);
+                resolve(false);
+              }
+            }, 2000);
           });
-        } else {
-          router.replace(from || ("/mine/tickets" as any));
-        }
+
+          if (updated) {
+            Alert.alert("Success", "Ticket purchased successfully!");
+            if (from && eventId) {
+              router.replace({
+                pathname: "/event/details/user",
+                params: { id: eventId },
+              });
+            } else {
+              router.replace(from || ("/mine/tickets" as any));
+            }
+          }
+          break;
+
+        case "crypto":
+        case "token":
+          const amount = getTokenAmount();
+          if (Number(amount) <= 0) {
+            toast.error("Invalid amount for selected cryptocurrency.");
+            return null;
+          }
+
+          const data = {
+            amount: amount,
+            currency: crypto,
+            webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
+            metadata: { type: "subscription", ticketId },
+            redirect: "eventup://mine/tickets",
+          };
+
+          const response = await Web3API.getCheckoutUrl(data);
+
+          if (!response.data) {
+            toast.error("Failed to initiate crypto payment.");
+            return null;
+          }
+
+          const checkoutUrl = response.data;
+          await Linking.openURL(checkoutUrl);
+          break;
+
+        default:
+          toast.warn("No supported payment method");
       }
     } catch (err: any) {
       Alert.alert("Error", "Unable to complete purchase");
+    } finally {
+      setPurchaseLoading(false);
+    }
+  };
+
+  const handlePayIap = async () => {
+    if (!sku) {
+      return toast.error("Apple's production isn't ready yet");
+    }
+    try {
+      setPurchaseLoading(true);
+      await buyIap(sku);
     } finally {
       setPurchaseLoading(false);
     }
@@ -258,31 +371,47 @@ const TicketsCheckout = () => {
 
         <TicketReceipt ticket={ticket} />
 
-        <PaymentMethodGroup
-          method={paymentMethod}
-          stripePaymentMethodId={stripePaymentMethodId}
-          onSelectMethod={setPaymentMethod}
-          onSelectStripePaymentMethod={setStripePaymentMethodId}
-        />
+        {Platform.OS !== "ios" && (
+          <PaymentMethodGroup
+            method={paymentMethod}
+            stripePaymentMethodId={stripePaymentMethodId}
+            selectedCryptoCurrency={crypto}
+            onSelectCryptoCurrency={setCrypto}
+            onSelectMethod={setPaymentMethod}
+            onSelectStripePaymentMethod={setStripePaymentMethodId}
+          />
+        )}
       </View>
 
       {/* FOOTER ACTION */}
       <View className="mt-10 gap-4">
-        <Button
-          type="primary"
-          label={
-            purchaseLoading
-              ? "Processing..."
-              : `Pay ${getCurrencySymbol((ticket?.currency.toUpperCase() as any) || "USD")}${
-                  ticket?.price || 0
-                }`
-          }
-          buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
-          textClassName="text-lg font-poppins-bold"
-          loading={purchaseLoading}
-          onPress={handlePurchase}
-          disabled={loading}
-        />
+        {Platform.OS === "ios" ? (
+          <Button
+            type="primary"
+            label="Subscribe"
+            buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
+            textClassName="text-lg font-poppins-bold"
+            loading={purchaseLoading}
+            disabled={loading || !ticket || !ready}
+            onPress={handlePayIap}
+          />
+        ) : (
+          <Button
+            type="primary"
+            label={
+              purchaseLoading
+                ? "Processing..."
+                : `Pay ${getCurrencySymbol((ticket?.currency.toUpperCase() as any) || "USD")}${
+                    ticket?.price || 0
+                  }`
+            }
+            buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
+            textClassName="text-lg font-poppins-bold"
+            loading={purchaseLoading}
+            onPress={handlePurchase}
+            disabled={loading}
+          />
+        )}
 
         <View className="flex-row items-center justify-center bg-slate-50 py-3 rounded-xl border border-slate-100">
           <MaterialCommunityIcons
