@@ -185,17 +185,20 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
   const buy = async (sku: string) => {
     if (!ready) return;
 
+    const isSubscription = sku.startsWith("ETW.SUBSCRIPTION");
+
     try {
       await RNIap.requestPurchase({
-        type: "in-app",
-        request: {
-          apple: {
-            sku: sku,
-          },
-          android: {
-            skus: [sku],
-          },
-        },
+        type: isSubscription ? "subs" : "in-app",
+        request: isSubscription
+          ? {
+              ios: { sku },
+              android: { skus: [sku] },
+            }
+          : {
+              ios: { sku },
+              android: { skus: [sku] },
+            },
       });
     } catch (error) {
       console.warn("Purchase request error:", error);
