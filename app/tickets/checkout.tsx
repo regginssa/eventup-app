@@ -327,7 +327,7 @@ const TicketsCheckout = () => {
             amount: amount,
             currency: crypto,
             webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
-            metadata: { type: "subscription", ticketId },
+            metadata: { type: "subscription", ticketId, userId: user?._id },
             redirect: "eventup://mine/tickets",
           };
 

@@ -284,7 +284,7 @@ const SubscriptionCheckout = () => {
       amount: amount,
       currency: crypto,
       webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
-      metadata: { type: "subscription", subscriptionId },
+      metadata: { type: "subscription", subscriptionId, userId: user?._id },
       redirect: "eventup://subscription",
     };
 
