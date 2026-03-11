@@ -7,10 +7,10 @@ export const GOOGLE_WEB_CLIENT_ID =
   "732132936043-85fpifatj1b2kusu319c6urvdnub7aq7.apps.googleusercontent.com";
 export const GOOGLE_WEB_CLIENT_SECRET = "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";
 export const SERVER_API_ENDPOINT =
-  "https://eventup-server-production.up.railway.app/api/v1";
+  "https://eventworld-server-production.up.railway.app/api/v1";
 export const SERVER_SOCKET_URL =
-  "wss://eventup-server-production.up.railway.app";
-// https://eventup-server-production.up.railway.app
+  "wss://eventworld-server-production.up.railway.app";
+// https://eventworld-server-production.up.railway.app
 // http://192.168.125.100:5001
 // http://38.180.245.212:5001
 export const STRIPE_PUBLISHABLE_KEY =

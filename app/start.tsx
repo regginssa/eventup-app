@@ -19,7 +19,7 @@ const StartScreen = () => {
       <View className="w-full absolute bottom-0 px-5 pb-14 gap-5">
         <View className="gap-3">
           <Text className="font-poppins-semibold text-white text-3xl text-center">
-            EventUp
+            EventWorld
           </Text>
           <Text className="font-dm-sans text-white/90 font-medium text-center">
             AI Event Discovery System

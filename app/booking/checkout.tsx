@@ -547,7 +547,7 @@ const CheckoutScreen = () => {
       currency: crypto,
       webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
       metadata: { type: "booking", bookingId },
-      redirect: "eventup://booking/status?id=" + bookingId,
+      redirect: "eventworld://booking/status?id=" + bookingId,
     };
 
     const res = await Web3API.getCheckoutUrl(data);

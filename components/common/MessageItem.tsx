@@ -74,7 +74,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
     try {
       setDownloadLoading(true);
 
-      const destination = new Directory(Paths.cache, "eventup", "files");
+      const destination = new Directory(Paths.cache, "eventworld", "files");
 
       // Download into the file
       destination.create();

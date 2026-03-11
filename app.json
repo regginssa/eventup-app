@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "EventUp",
-    "slug": "eventup",
+    "name": "EventWorld",
+    "slug": "eventworld",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "eventup",
+    "scheme": "eventworld",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.charlieunicornai.eventup",
+      "bundleIdentifier": "com.charlieunicornai.eventworld",
       "usesAppleSignIn": true,
       "config": {
         "googleMapsApiKey": "AIzaSyD-ctseOmsg3Gg2fTwPyN6XmY_kgMOpVrI"
@@ -18,9 +18,9 @@
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
         "ITSAppUsesNonExemptEncryption": false,
-        "NSLocationWhenInUseUsageDescription": "EventUp needs access to your location to show nearby events.",
-        "NSPhotoLibraryUsageDescription": "EventUp requires access to your photo library to let you upload pictures for events.",
-        "NSCameraUsageDescription": "EventUp uses the camera to let you take photos for your events.",
+        "NSLocationWhenInUseUsageDescription": "EventWorld needs access to your location to show nearby events.",
+        "NSPhotoLibraryUsageDescription": "EventWorld requires access to your photo library to let you upload pictures for events.",
+        "NSCameraUsageDescription": "EventWorld uses the camera to let you take photos for your events.",
         "UIBackgroundModes": ["audio"]
       }
     },
@@ -33,14 +33,17 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.charlieunicornai.eventup",
+      "package": "com.charlieunicornai.eventworld",
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyD-ctseOmsg3Gg2fTwPyN6XmY_kgMOpVrI"
         }
       },
       "softwareKeyboardLayoutMode": "pan",
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "output": "static",
@@ -63,7 +66,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "EventUp accesses your photos to let you share them with your friends."
+          "photosPermission": "EventWorld accesses your photos to let you share them with your friends."
         }
       ],
       [
@@ -90,7 +93,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "43130ed1-f67b-4ed3-8442-df4cfa60aab8"
+        "projectId": "c9afabe0-7fc5-4659-993e-9130c34f6bdb"
       }
     },
     "owner": "charlie-unicorn-ai"

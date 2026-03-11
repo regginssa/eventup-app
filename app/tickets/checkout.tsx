@@ -328,7 +328,7 @@ const TicketsCheckout = () => {
             currency: crypto,
             webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
             metadata: { type: "subscription", ticketId, userId: user?._id },
-            redirect: "eventup://mine/tickets",
+            redirect: "eventworld://mine/tickets",
           };
 
           const response = await Web3API.getCheckoutUrl(data);
