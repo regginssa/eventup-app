@@ -69,7 +69,7 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
   > | null>(null);
 
   function resolvePurchaseMeta(productId: string) {
-    if (productId.startsWith("ETW.SUBSCRIPTION")) {
+    if (productId.startsWith("EVENTWORLD.SUBSCRIPTION")) {
       const sub = getSubBySku(productId);
       return {
         type: "subscription",
@@ -80,7 +80,7 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
       };
     }
 
-    if (productId.startsWith("ETW.TICKET")) {
+    if (productId.startsWith("EVENTWORLD.TICKET")) {
       const ticket = getTicketBySku(productId);
 
       return {
@@ -185,7 +185,7 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
   const buy = async (sku: string) => {
     if (!ready) return;
 
-    const isSubscription = sku.startsWith("ETW.SUBSCRIPTION");
+    const isSubscription = sku.startsWith("EVENTWORLD.SUBSCRIPTION");
 
     try {
       await RNIap.requestPurchase({
