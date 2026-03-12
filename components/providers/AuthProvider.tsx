@@ -5,7 +5,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { usePathname, useRouter } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 import { createContext, useContext, useEffect, useState } from "react";
-import { useSocket } from "./SocketProvider";
 
 interface AuthContextProps {
   isAuthenticated: boolean;
@@ -38,7 +37,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { redirect } = useRedirect();
-  const { socket } = useSocket();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -94,20 +92,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     fetchMe();
   }, [authChecked]);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleUpdateUser = ({ user }: { user: IUser }) => {
-      setUser(user);
-    };
-
-    socket.on("auth_user_updated", handleUpdateUser);
-
-    return () => {
-      socket.off("auth_user_updated", handleUpdateUser);
-    };
-  }, [socket, user]);
 
   const logout = async () => {
     const token = await AsyncStorage.getItem("Authorization");

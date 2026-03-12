@@ -4,4 +4,6 @@ export const GOOGLE_IOS_CLIENT_ID = "";
 export const GOOGLE_WEB_CLIENT_ID = "";
 export const GOOGLE_WEB_CLIENT_SECRET = "";
 export const SERVER_API_ENDPOINT = "";
+export const SERVER_SOCKET_URL = "";
 export const STRIPE_PUBLISHABLE_KEY = "";
+export const MAX_FILE_SIZE = 5; // 5MB

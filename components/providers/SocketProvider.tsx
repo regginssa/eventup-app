@@ -1,4 +1,5 @@
 import { SERVER_SOCKET_URL } from "@/config/env";
+import { IUser } from "@/types/user";
 import { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "./AuthProvider";
@@ -26,7 +27,7 @@ interface SocketProviderProps {
 const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<any>(null);
 
-  const { user } = useAuth();
+  const { user, setAuthUser } = useAuth();
 
   useEffect(() => {
     if (!user) return;
@@ -46,6 +47,20 @@ const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       sk.disconnect();
     };
   }, [user]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUpdateUser = ({ user }: { user: IUser }) => {
+      setAuthUser(user);
+    };
+
+    socket.on("auth_user_updated", handleUpdateUser);
+
+    return () => {
+      socket.off("auth_user_updated", handleUpdateUser);
+    };
+  }, [socket, user]);
 
   return (
     <SocketContext.Provider value={{ socket }}>
