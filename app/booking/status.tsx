@@ -451,40 +451,37 @@ const BookingStatus = () => {
               ))}
             </View>
 
-            <LinearGradient
-              colors={["#844AFF15", "#12A9FF15"]}
-              start={{ x: 0, y: 0 }}
-              style={{
-                marginTop: 24,
-                borderRadius: 20,
-                padding: 20,
-                borderWidth: 1,
-                borderColor: "#844AFF20",
-              }}
-            >
-              <View className="flex-row items-center">
-                <View className="bg-[#844AFF] w-12 h-12 rounded-xl items-center justify-center mr-4 shadow-lg shadow-purple-300">
-                  <MaterialCommunityIcons
-                    name="information-outline"
-                    size={24}
-                    color="white"
-                  />
+            {!completed && (
+              <LinearGradient
+                colors={["#844AFF15", "#12A9FF15"]}
+                start={{ x: 0, y: 0 }}
+                style={{
+                  marginTop: 24,
+                  borderRadius: 20,
+                  padding: 20,
+                  borderWidth: 1,
+                  borderColor: "#844AFF20",
+                }}
+              >
+                <View className="flex-row items-center">
+                  <View className="bg-[#844AFF] w-12 h-12 rounded-xl items-center justify-center mr-4 shadow-lg shadow-purple-300">
+                    <MaterialCommunityIcons
+                      name="information-outline"
+                      size={24}
+                      color="white"
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="font-poppins-semibold uppercase text-slate-900 text-sm">
+                      Important Notice
+                    </Text>
+                    <Text className="font-dm-sans-bold text-slate-500 text-xs">
+                      Stay here until all bookings are confirmed
+                    </Text>
+                  </View>
                 </View>
-                <View className="flex-1">
-                  <Text className="font-poppins-semibold uppercase text-slate-900 text-sm">
-                    Important Notice
-                  </Text>
-                  <Text className="font-dm-sans-bold text-slate-500 text-xs">
-                    Stay here until all bookings are confirmed
-                  </Text>
-                </View>
-                {/* <MaterialCommunityIcons
-                  name="chevron-right"
-                  size={20}
-                  color="#844AFF"
-                /> */}
-              </View>
-            </LinearGradient>
+              </LinearGradient>
+            )}
 
             {completed && booking.ticketStatus === "pending" && (
               <LinearGradient
@@ -511,7 +508,9 @@ const BookingStatus = () => {
                       TICKET PURCHASE NOTICE
                     </Text>
                     <Text className="font-dm-sans-bold text-slate-500 text-xs">
-                      You can still purchase the ticket in event details
+                      Ticket purchases aren't available in the app yet. To buy a
+                      ticket, please visit the ticket provider's website and
+                      complete your purchase there.
                     </Text>
                   </View>
                   {/* <MaterialCommunityIcons

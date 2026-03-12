@@ -43,7 +43,7 @@ const OnboarindStep5Screen = () => {
       title="Congratulations!"
       subtitle="You’ve successfully complete the onboarding."
       des="You’re all set to explore our platform and discover all the amazing features we have to offer"
-      step={4}
+      step={5}
       onBack={() => router.back()}
       logo={
         <View className="w-[372px] h-[266px] relative">

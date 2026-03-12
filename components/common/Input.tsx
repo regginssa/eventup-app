@@ -47,11 +47,13 @@ const Input: React.FC<InputProps> = ({
       )}
 
       <View
-        className={`py-1 px-3 gap-2 bg-white flex flex-row items-center rounded-full`}
+        className={`px-3 gap-2 bg-white flex flex-row items-center rounded-full`}
         style={{
           borderWidth: bordered ? 1 : 0,
           borderColor: "#d1d5db",
           minHeight: 40,
+          maxHeight: maxHeight,
+          height: multiline ? inputHeight : 40,
         }}
       >
         {icon && icon}
@@ -65,7 +67,6 @@ const Input: React.FC<InputProps> = ({
           }}
           style={{
             flex: 1,
-            minHeight: 40,
             maxHeight: maxHeight,
             height: multiline ? inputHeight : 40,
           }}

@@ -88,7 +88,13 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
         disabled={disabled}
         onPress={() => !disabled && setIsOpen((prev) => !prev)}
         className={`py-1 px-4 gap-2 bg-white flex flex-row items-center rounded-full`}
-        style={[{ borderWidth: bordered ? 1 : 0, borderColor: "#d1d5db" }]}
+        style={[
+          {
+            borderWidth: bordered ? 1 : 0,
+            borderColor: "#d1d5db",
+            minHeight: 40,
+          },
+        ]}
       >
         {icon}
         <TextInput
