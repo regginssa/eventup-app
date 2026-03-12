@@ -90,7 +90,13 @@ const CountryPicker: React.FC<CountryPickerProps> = ({
       <TouchableOpacity
         activeOpacity={0.8}
         className={`py-1 px-4 gap-2 bg-white flex flex-row items-center rounded-full`}
-        style={[{ borderWidth: bordered ? 1 : 0, borderColor: "#d1d5db" }]}
+        style={[
+          {
+            borderWidth: bordered ? 1 : 0,
+            borderColor: "#d1d5db",
+            minHeight: 40,
+          },
+        ]}
         onPress={() => setIsOpen(true)}
       >
         <MaterialCommunityIcons name="earth" size={16} color="#4b5563" />

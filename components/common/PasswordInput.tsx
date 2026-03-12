@@ -26,7 +26,10 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
 
   return (
     <View className="w-full gap-2">
-      <View className="py-1 px-3 gap-2 bg-white rounded-full flex flex-row items-center">
+      <View
+        className="py-1 px-3 gap-2 bg-white rounded-full flex flex-row items-center"
+        style={{ minHeight: 40 }}
+      >
         {isConfirm ? (
           <Feather name="check-circle" size={16} color="#4b5563" />
         ) : (

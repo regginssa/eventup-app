@@ -215,6 +215,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         className={`py-1 px-4 gap-2 bg-white rounded-full flex flex-row items-center ${
           bordered ? "border border-gray-200" : ""
         }`}
+        style={{
+          minHeight: 40,
+        }}
       >
         <Feather name="map" size={16} color="#4b5563" />
         <TextInput

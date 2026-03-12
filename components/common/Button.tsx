@@ -86,6 +86,11 @@ const Button: React.FC<ButtonProps> = ({
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         className="flex-1 items-center justify-center"
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
         {renderContent()}
       </LinearGradient>
@@ -115,7 +120,7 @@ const Button: React.FC<ButtonProps> = ({
             colors={["#844AFF15", "#C427E010"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            className="absolute inset-0"
+            style={{ position: "absolute", inset: 0 }}
           />
           {renderContent("text-purple-600")}
         </View>
@@ -136,7 +141,8 @@ const Button: React.FC<ButtonProps> = ({
           colors={STROKE_GRADIENT as any}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          className="flex-1 p-[1.5px] rounded-full"
+          className="rounded-full"
+          style={{ flex: 1, padding: 1.5 }}
         >
           <View className="flex-1 bg-white rounded-[11px] items-center justify-center">
             <Text className="text-purple-600 font-poppins-semibold">
