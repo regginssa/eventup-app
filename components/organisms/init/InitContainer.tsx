@@ -26,10 +26,10 @@ const InitContainer: React.FC<InitContainerProps> = ({ children }) => {
   return (
     <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
       <AuthProvider>
-        <SubscriptionProvider>
-          <CommunityTicketProvider>
-            <IapProvider>
-              <SocketProvider>
+        <SocketProvider>
+          <SubscriptionProvider>
+            <CommunityTicketProvider>
+              <IapProvider>
                 <EventProvider>
                   <BookingProvider>
                     <ConversationProvider>
@@ -56,10 +56,10 @@ const InitContainer: React.FC<InitContainerProps> = ({ children }) => {
                     </ConversationProvider>
                   </BookingProvider>
                 </EventProvider>
-              </SocketProvider>
-            </IapProvider>
-          </CommunityTicketProvider>
-        </SubscriptionProvider>
+              </IapProvider>
+            </CommunityTicketProvider>
+          </SubscriptionProvider>
+        </SocketProvider>
       </AuthProvider>
     </StripeProvider>
   );
