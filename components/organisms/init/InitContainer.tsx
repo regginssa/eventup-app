@@ -27,38 +27,40 @@ const InitContainer: React.FC<InitContainerProps> = ({ children }) => {
     <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
       <AuthProvider>
         <SocketProvider>
-          <SubscriptionProvider>
-            <CommunityTicketProvider>
-              <IapProvider>
-                <EventProvider>
-                  <BookingProvider>
-                    <ConversationProvider>
-                      <MessageProvider>
-                        <NotificationProvider>
-                          <FlightProvider>
-                            <HotelProvider>
-                              <TransferProvider>
-                                <KeyboardAvoidingView
-                                  behavior={
-                                    Platform.OS === "ios"
-                                      ? "padding"
-                                      : undefined
-                                  }
-                                  style={{ flex: 1 }}
-                                >
-                                  <ToastProvider>{children}</ToastProvider>
-                                </KeyboardAvoidingView>
-                              </TransferProvider>
-                            </HotelProvider>
-                          </FlightProvider>
-                        </NotificationProvider>
-                      </MessageProvider>
-                    </ConversationProvider>
-                  </BookingProvider>
-                </EventProvider>
-              </IapProvider>
-            </CommunityTicketProvider>
-          </SubscriptionProvider>
+          <ToastProvider>
+            <SubscriptionProvider>
+              <CommunityTicketProvider>
+                <IapProvider>
+                  <EventProvider>
+                    <BookingProvider>
+                      <ConversationProvider>
+                        <MessageProvider>
+                          <NotificationProvider>
+                            <FlightProvider>
+                              <HotelProvider>
+                                <TransferProvider>
+                                  <KeyboardAvoidingView
+                                    behavior={
+                                      Platform.OS === "ios"
+                                        ? "padding"
+                                        : undefined
+                                    }
+                                    style={{ flex: 1 }}
+                                  >
+                                    {children}
+                                  </KeyboardAvoidingView>
+                                </TransferProvider>
+                              </HotelProvider>
+                            </FlightProvider>
+                          </NotificationProvider>
+                        </MessageProvider>
+                      </ConversationProvider>
+                    </BookingProvider>
+                  </EventProvider>
+                </IapProvider>
+              </CommunityTicketProvider>
+            </SubscriptionProvider>
+          </ToastProvider>
         </SocketProvider>
       </AuthProvider>
     </StripeProvider>
