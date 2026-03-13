@@ -97,5 +97,5 @@ export const changeAuthPassword = async (
 };
 
 export const getMe = async (): Promise<ApiResponse<IUser>> => {
-  return await AxiosInstance.get(BASE_URL);
+  return await AxiosInstance.get(BASE_URL + "/me");
 };

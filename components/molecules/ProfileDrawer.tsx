@@ -80,7 +80,8 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
     {
       label: "Verify Identity",
       icon: <FontAwesome name="id-card-o" size={20} color="#374151" />,
-      href: "/",
+      href: "/auth/onboarding/step3",
+      params: { from: "/home" },
     },
     {
       label: "Tickets",

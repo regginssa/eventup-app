@@ -17,7 +17,7 @@ import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 
 const OnboardingStep4Screen = () => {
   const [category, setCategory] = useState<TDropdownItem | null>(null);
@@ -75,7 +75,7 @@ const OnboardingStep4Screen = () => {
       }
     } catch (error: any) {
       const message = error?.response?.data?.message;
-      Alert.alert(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
