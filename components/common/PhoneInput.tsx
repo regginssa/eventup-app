@@ -49,7 +49,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
         />
 
         <TextInput
-          placeholder={placeholder}
+          placeholder="Enter your phone number (e,g. 7386961234)"
           value={value}
           onChangeText={onChange}
           className={`bg-none text-black font-dm-sans text-sm flex-1`}

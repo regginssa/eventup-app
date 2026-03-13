@@ -68,7 +68,9 @@ export const emailLogin = async (
   });
 };
 
-export const verifyOtp = async (body: any): Promise<ApiResponse<IUser>> => {
+export const verifyOtp = async (
+  body: any,
+): Promise<ApiResponse<AuthResponse>> => {
   return await AxiosInstance.post(BASE_URL + "/verify/otp", body);
 };
 

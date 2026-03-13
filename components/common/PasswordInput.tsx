@@ -28,7 +28,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
   return (
     <View className="w-full gap-2">
       <View
-        className="py-1 px-3 gap-2 bg-white rounded-full flex flex-row items-center"
+        className="px-3 gap-2 bg-white rounded-full flex flex-row items-center"
         style={{
           minHeight: 40,
           borderWidth: bordered ? 1 : 0,

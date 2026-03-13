@@ -233,7 +233,8 @@ const RegisterScreen = () => {
       if (!res.ok) {
         toast.error(res.message);
       } else {
-        setAuthUser(res.data);
+        await setAuthToken(res.data.token);
+        setAuthUser(res.data.user);
         setIsOtpOpen(false);
         toast.success("Welcome !!!");
         router.replace("/auth/onboarding/step1");

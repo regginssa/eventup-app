@@ -118,7 +118,7 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
 
         setReady(true);
       } catch (error) {
-        console.warn("IAP init error:", error);
+        // console.warn("IAP init error:", error);
       }
     }
 
@@ -169,7 +169,7 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
     });
 
     errorSub.current = RNIap.purchaseErrorListener((error) => {
-      console.warn("IAP purchase error:", error);
+      // console.warn("IAP purchase error:", error);
     });
 
     return () => {
