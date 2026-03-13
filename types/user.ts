@@ -66,4 +66,6 @@ export interface IUser {
   phone: string;
   gender: "mr" | "ms";
   emailVerified: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

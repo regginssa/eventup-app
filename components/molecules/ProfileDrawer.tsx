@@ -81,7 +81,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
       label: "Verify Identity",
       icon: <FontAwesome name="id-card-o" size={20} color="#374151" />,
       href: "/auth/onboarding/step3",
-      params: { from: "/home" },
+      params: { to: "/home" },
     },
     {
       label: "Tickets",
@@ -137,36 +137,40 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
         </View>
 
         <View className="flex-1 gap-5">
-          {items.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              activeOpacity={0.8}
-              className="w-full flex flex-row items-center justify-between py-2"
-              onPress={() => {
-                router.push({
-                  pathname: item.href as any,
-                  params: item.params,
-                });
-                onClose();
-              }}
-            >
-              <View className="flex flex-row items-center gap-2">
-                {item.icon}
-                <Text className={`text-gray-700 font-poppins`}>
-                  {item.label}
-                </Text>
-                {item.badge && (
-                  <Text
-                    className={`rounded-full bg-gray-200 text-gray-700 font-poppins-medium text-xs px-2 py-1`}
-                  >
-                    {item.badge}
+          {items.map((item, index) =>
+            user.idVerified && index === 1 ? (
+              <></>
+            ) : (
+              <TouchableOpacity
+                key={index}
+                activeOpacity={0.8}
+                className="w-full flex flex-row items-center justify-between py-2"
+                onPress={() => {
+                  router.push({
+                    pathname: item.href as any,
+                    params: item.params,
+                  });
+                  onClose();
+                }}
+              >
+                <View className="flex flex-row items-center gap-2">
+                  {item.icon}
+                  <Text className={`text-gray-700 font-poppins`}>
+                    {item.label}
                   </Text>
-                )}
-              </View>
+                  {item.badge && (
+                    <Text
+                      className={`rounded-full bg-gray-200 text-gray-700 font-poppins-medium text-xs px-2 py-1`}
+                    >
+                      {item.badge}
+                    </Text>
+                  )}
+                </View>
 
-              <Feather name="arrow-up-right" size={20} color="#374151" />
-            </TouchableOpacity>
-          ))}
+                <Feather name="arrow-up-right" size={20} color="#374151" />
+              </TouchableOpacity>
+            ),
+          )}
 
           {/* <View className="w-full flex flex-row items-center justify-between py-2">
             <View className="flex flex-row items-center gap-2">

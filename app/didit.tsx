@@ -15,7 +15,7 @@ const DiditScreen = () => {
   const lottieRef = useRef<LottieView>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { status } = useLocalSearchParams();
+  const { status, nextUrl } = useLocalSearchParams();
   const router = useRouter();
   const { user, setAuthUser } = useAuth();
 
@@ -31,7 +31,13 @@ const DiditScreen = () => {
         setAuthUser(response.data);
 
         if (kycStatus === "Approved") {
-          router.replace("/auth/onboarding/step4");
+          router.replace(
+            (nextUrl as any) ||
+              router.replace({
+                pathname: "/auth/onboarding/step3",
+                params: { to: "/auth/login" },
+              }),
+          );
         } else {
           router.replace("/auth/onboarding/step3");
         }

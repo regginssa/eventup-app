@@ -5,7 +5,7 @@ export const USER_BASE = "/user/";
 export const UPLOAD = "/upload";
 
 // Didit apis
-export const FETCH_IDENTITY_VERIFICATION_SESSION = "/didit/create-session/";
+export const FETCH_IDENTITY_VERIFICATION_SESSION = "/didit/create-session";
 
 // Events apis
 export const FETCH_EVENTS_FEED = "/events/feed";

@@ -181,20 +181,22 @@ const HomeScreen = () => {
       </View>
 
       {/* TABS */}
-      <Tabs
-        tabs={tabs}
-        tabClassName="flex-1 h-11 rounded-xl"
-        selectedTab={selectedTab}
-        onSelct={setSelectedTab}
-      />
-
-      {/* LIST FEED */}
-      <View className="flex-1 mt-4">
-        <EventsPreviewGroup
-          events={events}
-          loading={loading}
-          onReachedBottomChange={setIsBottom}
+      <View className="flex-1 rounded-3xl p-6 bg-white">
+        <Tabs
+          tabs={tabs}
+          tabClassName="flex-1 h-11 rounded-xl"
+          selectedTab={selectedTab}
+          onSelct={setSelectedTab}
         />
+
+        {/* LIST FEED */}
+        <View className="flex-1 mt-4">
+          <EventsPreviewGroup
+            events={events}
+            loading={loading}
+            onReachedBottomChange={setIsBottom}
+          />
+        </View>
       </View>
 
       {/* PAGINATION: PREV & NEXT BUTTONS (Absolute Centered) */}

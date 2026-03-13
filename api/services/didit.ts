@@ -4,7 +4,7 @@ import AxiosInstance from "../client";
 import { FETCH_IDENTITY_VERIFICATION_SESSION } from "../endpoints";
 
 export const fetchIdentityVerificationSession = async (
-  id: string
+  body: any,
 ): Promise<ApiResponse<IKyc>> => {
-  return await AxiosInstance.get(FETCH_IDENTITY_VERIFICATION_SESSION + id);
+  return await AxiosInstance.post(FETCH_IDENTITY_VERIFICATION_SESSION, body);
 };

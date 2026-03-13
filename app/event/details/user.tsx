@@ -102,7 +102,7 @@ const UserEventDetail = () => {
   };
 
   const fetchUserCurrentLocation = async () => {
-    if (!user?.location.coordinate) return;
+    if (!user?.location?.coordinate) return;
     const coords = await getUserLocationAndSave();
 
     setCurrentLocationCoords(coords);
@@ -150,7 +150,7 @@ const UserEventDetail = () => {
         setTabs(ownerTabs);
         setSelectedTab(ownerTabs[1]);
       } else {
-        const att = eventData?.attendees.find((a) => a.user._id === user?._id);
+        const att = eventData?.attendees.find((a) => a.user?._id === user?._id);
         setMyAttendees(att || null);
         setTabs(userTabs);
 
@@ -317,12 +317,12 @@ const UserEventDetail = () => {
             hoster={
               event.hoster
                 ? {
-                    _id: event.hoster._id ?? "",
-                    avatar: event.hoster.avatar ?? "",
-                    title: event.hoster.title ?? "",
-                    countryCode: event.hoster.location?.country?.code ?? "",
-                    countryName: event.hoster.location?.country?.name ?? "",
-                    is_verified: event.hoster.idVerified ?? false,
+                    _id: event.hoster?._id || "",
+                    avatar: event.hoster?.avatar || "",
+                    title: event.hoster?.title || "",
+                    countryCode: event.hoster?.location?.country?.code || "",
+                    countryName: event.hoster?.location?.country?.name || "",
+                    is_verified: event.hoster?.idVerified || false,
                   }
                 : undefined
             }
@@ -349,7 +349,7 @@ const UserEventDetail = () => {
         {event.type === "user" &&
           (event.hoster?._id === user?._id ||
             conversations.some((c) =>
-              c.participants.some((p) => p._id === myAttendees?.user._id),
+              c.participants.some((p) => p._id === myAttendees?.user?._id),
             )) && (
             <View className="w-full gap-4">
               {event.hoster?._id === user?._id && (

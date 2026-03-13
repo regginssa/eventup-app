@@ -1,7 +1,6 @@
 import { Avatar } from "@/components/common";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -50,22 +49,19 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
         >
           {hoster ? (
             <View className="flex-row items-center gap-3">
-              <View className="relative">
-                <Avatar source={hoster.avatar} name={hoster.title} size={40} />
-                {hoster.is_verified && (
-                  <View className="absolute -right-1 -bottom-1 bg-white rounded-full p-0.5">
-                    <Image
-                      source={VerifiedBadge}
-                      style={{ width: 18, height: 18 }}
-                    />
-                  </View>
-                )}
-              </View>
+              <Avatar source={hoster.avatar} name={hoster.title} size={40} />
 
               <View>
-                <Text className="font-poppins-bold text-slate-800 text-base">
-                  {hoster.title}
-                </Text>
+                <View className="flex flex-row items-center gap-2">
+                  <Text className="font-poppins-bold text-slate-800 text-base">
+                    {hoster.title}
+                  </Text>
+                  <MaterialCommunityIcons
+                    name="check-decagram"
+                    size={16}
+                    color={hoster.is_verified ? "#16a34a" : "#cbd5e1"}
+                  />
+                </View>
 
                 <Text className="font-dm-sans-bold text-slate-400 text-xs">
                   {hoster.countryName}

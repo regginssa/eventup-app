@@ -24,8 +24,6 @@ import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { FlagButton } from "react-native-country-picker-modal";
 
-const VerifiedBadge = require("@/assets/images/icons/verified_badge.png");
-
 const ProfileScreen = () => {
   const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -204,9 +202,11 @@ const ProfileScreen = () => {
             <Text className="text-2xl font-poppins-bold text-slate-800">
               {user.name}
             </Text>
-            {user.idVerified && (
-              <Image source={VerifiedBadge} style={{ width: 20, height: 20 }} />
-            )}
+            <MaterialCommunityIcons
+              name="check-decagram"
+              size={20}
+              color={user.idVerified ? "#16a34a" : "#cbd5e1"}
+            />
           </View>
 
           <View className="flex-row items-center opacity-60">
@@ -278,7 +278,11 @@ const ProfileScreen = () => {
           </View>
           <View className="flex-1 bg-slate-50 border border-slate-100 p-4 rounded-[24px] items-center">
             <Text className="text-slate-800 font-poppins-bold text-lg">
-              {user.accountType === "individual" ? "Pro" : "Host"}
+              {user.subscription?.id &&
+              subscriptions.find((s) => s._id === user.subscription?.id)
+                ?.month !== 0
+                ? "PRO"
+                : "FREE"}
             </Text>
             <Text className="text-slate-400 font-dm-sans-bold text-[10px] uppercase tracking-wider">
               Tier
@@ -457,7 +461,7 @@ const ProfileScreen = () => {
                   Member Since
                 </Text>
                 <Text className="font-poppins-bold text-slate-800 text-lg">
-                  {new Date().getFullYear()}
+                  {user.createdAt && `${df.toMonthYear(user.createdAt)}`}
                 </Text>
               </View>
               <View className="bg-purple-100 px-3 py-1.5 rounded-xl flex-row items-center gap-1">

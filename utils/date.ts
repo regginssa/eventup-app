@@ -16,6 +16,16 @@ const toShortDate = (date: Date | string | null): string => {
   return `${datePart}`;
 };
 
+const toMonthYear = (date: Date | string | null): string => {
+  if (!date) return "-";
+  const toDate = new Date(date);
+  const datePart = toDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+  });
+  return `${datePart}`;
+};
+
 const toShortDateTime = (date: Date | string | null): string => {
   if (!date) return "-";
   const toDate = new Date(date);
@@ -96,4 +106,5 @@ export default {
   to24Hour,
   toTransferDate,
   toDateTime,
+  toMonthYear,
 };

@@ -5,7 +5,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
 
@@ -15,6 +15,7 @@ const OnboardingStep3Screen = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
+  const { to } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
   const toast = useToast();
@@ -25,7 +26,10 @@ const OnboardingStep3Screen = () => {
     try {
       setLoading(true);
 
-      const response = await fetchIdentityVerificationSession(user._id);
+      const response = await fetchIdentityVerificationSession({
+        userId: user._id,
+        appCallbackNextUrl: to || "/auth/onboarding/step4",
+      });
 
       if (response.ok) {
         const { url } = response.data;
@@ -117,7 +121,9 @@ const OnboardingStep3Screen = () => {
             iconPosition="right"
             buttonClassName="h-12"
             textClassName="text-sm"
-            onPress={() => router.replace("/auth/onboarding/step4")}
+            onPress={() =>
+              router.replace(to || ("/auth/onboarding/step4" as any))
+            }
           />
         </View>
       ) : (
