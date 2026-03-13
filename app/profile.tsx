@@ -1,17 +1,21 @@
+import { changeAuthPassword } from "@/api/services/auth";
 import userServices from "@/api/services/user";
 import {
   Button,
   CountryPicker,
   DateTimePicker,
   Modal,
+  PasswordInput,
   PhoneInput,
   Spinner,
+  Tabs,
 } from "@/components/common";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
 import { useSubscription } from "@/components/providers/SubscriptionProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import { TDropdownItem } from "@/types";
 import { Country } from "@/types/location.types";
 import { IUser } from "@/types/user";
 import df from "@/utils/date";
@@ -34,6 +38,16 @@ const ProfileScreen = () => {
   const [phone, setPhone] = useState<string>("");
   const [country, setCountry] = useState<Country | null>(null);
   const [editLoading, setEditLoading] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<TDropdownItem>({
+    label: "General",
+    value: "general",
+  });
+  const [currentPass, setCurrentPass] = useState<string>("");
+  const [newPass, setNewPass] = useState<string>("");
+  const [confirmPass, setConfirmPass] = useState<string>("");
+  const [invalidNewPass, setInvalidNewPass] = useState<boolean>(false);
+  const [invalidPassTxt, setInvalidPassTxt] = useState<string>("");
+  const [passLoading, setPassLoading] = useState<boolean>(false);
 
   const { id: userId } = useLocalSearchParams();
   const { user: authUser, setAuthUser } = useAuth();
@@ -64,6 +78,26 @@ const ProfileScreen = () => {
     };
     fetchUserInfo();
   }, [userId]);
+
+  const getPasswordError = (password: string): string => {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long.";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "Password must include at least one uppercase letter (A–Z).";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "Password must include at least one lowercase letter (a–z).";
+    }
+    if (!/\d/.test(password)) {
+      return "Password must include at least one number (0–9).";
+    }
+    if (!/[@!#$%]/.test(password)) {
+      return "Password must include one special character (@!#$%).";
+    }
+
+    return ""; // valid
+  };
 
   const handleMessage = async () => {
     if (!user?._id || !authUser?._id) return;
@@ -137,6 +171,42 @@ const ProfileScreen = () => {
       toast.error("Edition failed");
     } finally {
       setEditLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    const invalidTxt = getPasswordError(newPass.trim());
+
+    if (invalidTxt !== "") {
+      setInvalidNewPass(true);
+      setInvalidPassTxt(invalidPassTxt);
+      return;
+    } else if (newPass.trim() !== confirmPass.trim()) {
+      setInvalidNewPass(true);
+      setInvalidPassTxt("Passwords aren't matched");
+      return;
+    } else {
+      setInvalidNewPass(false);
+      setInvalidPassTxt("");
+    }
+
+    setPassLoading(true);
+
+    try {
+      const res = await changeAuthPassword({
+        newPassword: newPass,
+        currentPassword: currentPass,
+      });
+
+      if (!res.ok) {
+        toast.error(res.message);
+      } else {
+        toast.success("Changed successfully");
+      }
+    } catch (error) {
+      toast.error("Changing password failed");
+    } finally {
+      setPassLoading(false);
     }
   };
 
@@ -380,7 +450,7 @@ const ProfileScreen = () => {
                     color="#844AFF"
                   />
                   <Text className="text-[10px] font-poppins-bold text-purple-600 uppercase">
-                    {user.accountType}
+                    {user.accountType === "individual" ? "PRO" : "HOST"}
                   </Text>
                 </View>
               </View>
@@ -471,7 +541,7 @@ const ProfileScreen = () => {
                   color="#844AFF"
                 />
                 <Text className="text-[10px] font-poppins-bold text-purple-600 uppercase">
-                  {user.accountType}
+                  {user.accountType === "individual" ? "PRO" : "HOST"}
                 </Text>
               </View>
             </View>
@@ -485,36 +555,82 @@ const ProfileScreen = () => {
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
       >
-        <View className="gap-4">
-          <DateTimePicker
-            label="Birthday"
-            bordered
-            value={new Date(user.birthday) || birthday}
-            onPick={setBirthday}
-          />
-          <CountryPicker
-            label="Country"
-            placeholder="Select your country"
-            invalidText="Invalid country"
-            bordered
-            value={country}
-            onPick={setCountry}
-          />
-          <PhoneInput
-            label="Phone number"
-            placeholder="Select your country first"
-            countryCode={user.location.country?.code}
-            bordered
-            value={phone}
-            onChange={setPhone}
-          />
-          <Button
-            type="gradient-glass"
-            label="Save Changes"
-            loading={editLoading}
-            onPress={handleEdit}
-          />
-        </View>
+        <Tabs
+          tabs={[
+            { label: "General", value: "general" },
+            { label: "Account", value: "account" },
+          ]}
+          tabClassName="flex-1"
+          selectedTab={selectedTab}
+          onSelct={setSelectedTab}
+        />
+
+        <View className="h-6"></View>
+
+        {selectedTab.value === "general" ? (
+          <View className="gap-4">
+            <DateTimePicker
+              label="Birthday"
+              bordered
+              value={new Date(user.birthday) || birthday}
+              onPick={setBirthday}
+            />
+            <CountryPicker
+              label="Country"
+              placeholder="Select your country"
+              invalidText="Invalid country"
+              bordered
+              value={country}
+              onPick={setCountry}
+            />
+            <PhoneInput
+              label="Phone number"
+              placeholder="Select your country first"
+              countryCode={user.location.country?.code}
+              bordered
+              value={phone}
+              onChange={setPhone}
+            />
+            <Button
+              type="gradient-glass"
+              label="Save Changes"
+              loading={editLoading}
+              onPress={handleEdit}
+            />
+          </View>
+        ) : (
+          <View className="gap-4">
+            <PasswordInput
+              placeholder="Current Password"
+              bordered
+              value={currentPass}
+              onChange={setCurrentPass}
+            />
+
+            <PasswordInput
+              placeholder="New Password"
+              bordered
+              invalid={invalidNewPass}
+              invalidTxt={invalidPassTxt}
+              value={newPass}
+              onChange={setNewPass}
+            />
+
+            <PasswordInput
+              placeholder="Confirm Password"
+              isConfirm
+              bordered
+              value={confirmPass}
+              onChange={setConfirmPass}
+            />
+            <Button
+              type="gradient-glass"
+              label="Change Password"
+              loading={passLoading}
+              onPress={handleUpdatePassword}
+            />
+          </View>
+        )}
       </Modal>
     </SimpleContainer>
   );

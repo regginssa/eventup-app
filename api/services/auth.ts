@@ -88,12 +88,18 @@ export const forgotPassword = async (
   return await AxiosInstance.post(BASE_URL + "/forgot-password", { email });
 };
 
-export const changeAuthPassword = async (
+export const resetAuthPassword = async (
   newPassword: string,
 ): Promise<ApiResponse<null>> => {
-  return await AxiosInstance.patch(BASE_URL + "/change-password", {
+  return await AxiosInstance.patch(BASE_URL + "/reset-password", {
     newPassword,
   });
+};
+
+export const changeAuthPassword = async (
+  body: any,
+): Promise<ApiResponse<IUser>> => {
+  return await AxiosInstance.patch(BASE_URL + "/change-password", body);
 };
 
 export const getMe = async (): Promise<ApiResponse<IUser>> => {

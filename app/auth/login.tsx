@@ -1,11 +1,11 @@
 import { setAuthToken } from "@/api/client";
 import {
   appleLogin,
-  changeAuthPassword,
   emailLogin,
   forgotPassword,
   googleLogin,
   resendOtp,
+  resetAuthPassword,
   verifyOtp,
 } from "@/api/services/auth";
 import {
@@ -130,7 +130,7 @@ const LoginScreen = () => {
     try {
       const credential = await AppleAuthentication.signInAsync();
 
-      const { user: appleId, email, fullName } = credential;
+      const { user: appleId, email } = credential;
 
       if (!appleId) {
         toast.error("Apple log in failed");
@@ -206,10 +206,10 @@ const LoginScreen = () => {
           return setOtpLoading(false);
         }
 
-        setAuthUser(res.data);
+        setAuthUser(res.data.user);
         setIsOtpOpen(false);
         toast.success("Welcome back!!!");
-        redirect(res.data);
+        redirect(res.data.user);
       }
     } catch (error) {
       toast.error("Verification failed");
@@ -306,7 +306,7 @@ const LoginScreen = () => {
     setPassLoading(true);
 
     try {
-      const res = await changeAuthPassword(newPassword);
+      const res = await resetAuthPassword(newPassword);
 
       if (!res.ok) {
         toast.error(res.message);

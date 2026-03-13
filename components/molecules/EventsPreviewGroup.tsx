@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { Button, Spinner } from "../common";
+import { useToast } from "../providers/ToastProvider";
 
 interface EventsPreviewGroupProps {
   events: IEvent[];
@@ -34,6 +35,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
   const lastIsBottomRef = useRef(false);
 
   const router = useRouter();
+  const toast = useToast();
 
   const setIsAtBottom = useCallback(
     (v: boolean) => {
@@ -119,6 +121,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
             <TouchableOpacity
               activeOpacity={0.8}
               className="bg-white p-1 rounded-full shadow-sm"
+              onPress={() => toast.success("Flagged as inappropriate")}
             >
               <MaterialCommunityIcons
                 name="flag-outline"

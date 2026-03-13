@@ -139,7 +139,9 @@ const OnboardingStep3Screen = () => {
             type="gradient-soft"
             label="Skip now"
             buttonClassName="h-12"
-            onPress={() => router.replace("/auth/onboarding/step4")}
+            onPress={() =>
+              router.replace(to || ("/auth/onboarding/step4" as any))
+            }
           />
         </View>
       )}
