@@ -1,7 +1,9 @@
 import { setAuthToken } from "@/api/client";
 import {
   appleLogin,
+  changeAuthPassword,
   emailLogin,
+  forgotPassword,
   googleLogin,
   resendOtp,
   verifyOtp,
@@ -34,11 +36,19 @@ const LoginScreen = () => {
   const [invalidEmail, setInvalidEmail] = useState<boolean>(false);
   const [invalidPassword, setInvalidPassword] = useState<boolean>(false);
   const [isOtpOpen, setIsOtpOpen] = useState<boolean>(false);
+  const [isForgotOpen, setIsForgotOpen] = useState<boolean>(false);
+  const [isPassOpen, setIsPassOpen] = useState<boolean>(false);
+  const [newPassword, setNewPassword] = useState<string>("");
   const [otp, setOtp] = useState<string>("");
   const [otpTime, setOtpTime] = useState<number>(180);
   const [otpLoading, setOtpLoading] = useState<boolean>(false);
   const [resendLoading, setResendLoading] = useState<boolean>(false);
   const [appleLoading, setAppleLoading] = useState<boolean>(false);
+  const [forgotEmail, setForgotEmail] = useState<string>("");
+  const [forgotLoading, setForgotLoading] = useState<boolean>(false);
+  const [passLoading, setPassLoading] = useState<boolean>(false);
+  const [invalidNewPassTxt, setInvalidNewPassTxt] = useState<string>("");
+  const [invalidNewPass, setInvalidNewPass] = useState<boolean>(false);
 
   const { redirect } = useRedirect();
   const { setAuthUser } = useAuth();
@@ -174,17 +184,28 @@ const LoginScreen = () => {
   };
 
   const handleVerifyOtp = async () => {
-    if (email.trim().length === 0 || otp.trim().length === 0)
-      return toast.warn("Email or Verification code is incorrect");
+    let currentEmail = email;
+    if (forgotEmail === "") {
+      if (email.trim().length === 0 || otp.trim().length === 0)
+        return toast.warn("Email or Verification code is incorrect");
+    } else {
+      currentEmail = forgotEmail;
+    }
 
     try {
       setOtpLoading(true);
 
-      const res = await verifyOtp({ email, code: otp });
+      const res = await verifyOtp({ email: currentEmail, code: otp });
 
       if (!res.ok) {
         toast.error(res.message);
       } else {
+        if (forgotEmail !== "") {
+          setIsPassOpen(true);
+          setForgotEmail("");
+          return setOtpLoading(false);
+        }
+
         setAuthUser(res.data);
         setIsOtpOpen(false);
         toast.success("Welcome back!!!");
@@ -227,6 +248,79 @@ const LoginScreen = () => {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
+  const handleForgot = async () => {
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail.trim());
+    if (!isValidEmail) {
+      return toast.error("Email is incorrect");
+    }
+
+    setForgotLoading(true);
+    try {
+      const res = await forgotPassword(forgotEmail);
+
+      if (!res.ok) {
+        toast.error(res.message);
+      } else {
+        await setAuthToken(res.data);
+        setIsForgotOpen(false);
+        setIsOtpOpen(true);
+      }
+    } catch (error) {
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const getPasswordError = (password: string): string => {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long.";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "Password must include at least one uppercase letter (A–Z).";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "Password must include at least one lowercase letter (a–z).";
+    }
+    if (!/\d/.test(password)) {
+      return "Password must include at least one number (0–9).";
+    }
+    if (!/[@!#$%]/.test(password)) {
+      return "Password must include one special character (@!#$%).";
+    }
+
+    return ""; // valid
+  };
+
+  const handleChangePassword = async () => {
+    const isValidPssword = getPasswordError(newPassword) === "";
+
+    if (!isValidPssword) {
+      setInvalidNewPass(true);
+      setInvalidNewPassTxt(getPasswordError(newPassword));
+      return;
+    } else {
+      setInvalidNewPass(false);
+      setInvalidNewPassTxt("");
+    }
+
+    setPassLoading(true);
+
+    try {
+      const res = await changeAuthPassword(newPassword);
+
+      if (!res.ok) {
+        toast.error(res.message);
+      } else {
+        setIsPassOpen(false);
+        setNewPassword("");
+        toast.success("Reset successfully");
+      }
+    } catch (error) {
+    } finally {
+      setPassLoading(false);
+    }
+  };
+
   return (
     <AuthScreenContainer
       title="Welcome back!"
@@ -237,7 +331,6 @@ const LoginScreen = () => {
           type="string"
           placeholder="Enter your email"
           icon={<Feather name="mail" size={16} color="#4b5563" />}
-          className="rounded-md"
           invalid={invalidEmail}
           invalidTxt="Email is invalid"
           value={email}
@@ -353,6 +446,59 @@ const LoginScreen = () => {
               />
             </View>
           </View>
+        </View>
+      </NormalModal>
+
+      <NormalModal
+        title=""
+        isOpen={isForgotOpen}
+        onClose={() => setIsForgotOpen(false)}
+      >
+        <View className="gap-6">
+          <Input
+            type="string"
+            placeholder="Enter your email"
+            icon={<Feather name="mail" size={16} color="#4b5563" />}
+            bordered
+            value={forgotEmail}
+            onChange={setForgotEmail}
+          />
+
+          <Button
+            type="primary"
+            label="Submit"
+            buttonClassName="h-12"
+            loading={forgotLoading}
+            onPress={handleForgot}
+          />
+        </View>
+      </NormalModal>
+
+      <NormalModal
+        title=""
+        isOpen={isPassOpen}
+        onClose={() => {
+          setIsPassOpen(false);
+          setNewPassword("");
+        }}
+      >
+        <View className="gap-6">
+          <PasswordInput
+            placeholder="Enter your new password"
+            bordered
+            invalid={invalidNewPass}
+            invalidTxt={invalidNewPassTxt}
+            value={newPassword}
+            onChange={setNewPassword}
+          />
+
+          <Button
+            type="primary"
+            label="Reset Password"
+            buttonClassName="h-12"
+            loading={passLoading}
+            onPress={handleChangePassword}
+          />
         </View>
       </NormalModal>
     </AuthScreenContainer>

@@ -7,6 +7,7 @@ interface PasswordInputProps {
   disabled?: boolean;
   invalid?: boolean;
   invalidTxt?: string;
+  bordered?: boolean;
   value: any;
   isConfirm?: boolean;
   onChange: (val: any) => void;
@@ -16,10 +17,10 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
   placeholder,
   disabled,
   invalid,
+  bordered,
   invalidTxt,
   isConfirm,
   value,
-
   onChange,
 }) => {
   const [isSecured, setIsSecured] = useState<boolean>(true);
@@ -28,7 +29,11 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
     <View className="w-full gap-2">
       <View
         className="py-1 px-3 gap-2 bg-white rounded-full flex flex-row items-center"
-        style={{ minHeight: 40 }}
+        style={{
+          minHeight: 40,
+          borderWidth: bordered ? 1 : 0,
+          borderColor: "#d1d5db",
+        }}
       >
         {isConfirm ? (
           <Feather name="check-circle" size={16} color="#4b5563" />

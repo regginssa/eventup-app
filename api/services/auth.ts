@@ -80,6 +80,20 @@ export const resendOtp = async (
   });
 };
 
+export const forgotPassword = async (
+  email: string,
+): Promise<ApiResponse<string>> => {
+  return await AxiosInstance.post(BASE_URL + "/forgot-password", { email });
+};
+
+export const changeAuthPassword = async (
+  newPassword: string,
+): Promise<ApiResponse<null>> => {
+  return await AxiosInstance.patch(BASE_URL + "/change-password", {
+    newPassword,
+  });
+};
+
 export const getMe = async (): Promise<ApiResponse<IUser>> => {
   return await AxiosInstance.get(BASE_URL);
 };
