@@ -1,4 +1,4 @@
-import { fetchUser } from "@/api/services/user";
+import UserAPI from "@/api/services/user";
 import { Button } from "@/components/common";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { TKycStatus } from "@/types";
@@ -25,7 +25,7 @@ const DiditScreen = () => {
     try {
       setLoading(true);
 
-      const response = await fetchUser(user._id);
+      const response = await UserAPI.get(user._id);
 
       if (response.ok) {
         setAuthUser(response.data);
