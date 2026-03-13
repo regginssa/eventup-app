@@ -6,12 +6,13 @@ import {
   OfficialTicketItem,
   TransferItem,
 } from "@/components/common";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { IBooking } from "@/types/booking";
 import { ICommunityTicket } from "@/types/ticket";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { Text, View } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
 
 interface EventDetailItineraryProps {
   booking: IBooking | null;
@@ -22,6 +23,8 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
   booking,
   communityTicket,
 }) => {
+  const { user } = useAuth();
+
   if (!booking) {
     return (
       <View className="flex-1 items-center justify-center py-12 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
@@ -55,6 +58,14 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
   ].every(Boolean);
 
   const router = useRouter();
+  const shouldBuyTicket = event.type === "ai";
+
+  const handleBuyTicket = async () => {
+    if (!event?.tm?.url || !user?._id) return;
+
+    const url = event.tm.url + `?subId=${user._id}`;
+    await Linking.openURL(url);
+  };
 
   // Helper to render the timeline dot/line
   const TimelineConnector = () => (
@@ -77,32 +88,60 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
               My Ticket
             </Text>
           </View>
-          <View
-            className={`${ticketStatus === "pending" ? "bg-yellow-100" : ticketStatus === "failed" ? "bg-red-100" : "bg-green-100"} px-3 py-1 rounded-full flex-row items-center`}
-          >
-            <MaterialCommunityIcons
-              name={
-                ticketStatus === "pending"
-                  ? "clock-outline"
-                  : ticketStatus === "failed"
-                    ? "cross-outline"
-                    : "check-decagram"
-              }
-              size={14}
-              color={
-                ticketStatus === "pending"
-                  ? "#a16207"
-                  : ticketStatus === "failed"
-                    ? "#b91c1c"
-                    : "#16a34a"
-              }
-            />
-            <Text
-              className={`${ticketStatus === "pending" ? "text-yellow-700" : ticketStatus === "failed" ? "text-red-700" : "text-green-700"} font-dm-sans-bold text-[10px] ml-1 uppercase`}
+          {shouldBuyTicket ? (
+            <Pressable
+              onPress={handleBuyTicket}
+              className="bg-[#844AFF] px-4 py-2 rounded-full flex-row items-center"
             >
-              {ticketStatus === "completed" ? "Confirmed" : ticketStatus}
-            </Text>
-          </View>
+              <MaterialCommunityIcons
+                name="open-in-new"
+                size={16}
+                color="white"
+              />
+              <Text className="text-white font-dm-sans-bold text-xs ml-1 uppercase">
+                Buy Ticket
+              </Text>
+            </Pressable>
+          ) : (
+            <View
+              className={`${
+                ticketStatus === "pending"
+                  ? "bg-yellow-100"
+                  : ticketStatus === "failed"
+                    ? "bg-red-100"
+                    : "bg-green-100"
+              } px-3 py-1 rounded-full flex-row items-center`}
+            >
+              <MaterialCommunityIcons
+                name={
+                  ticketStatus === "pending"
+                    ? "clock-outline"
+                    : ticketStatus === "failed"
+                      ? "close-circle"
+                      : "check-decagram"
+                }
+                size={14}
+                color={
+                  ticketStatus === "pending"
+                    ? "#a16207"
+                    : ticketStatus === "failed"
+                      ? "#b91c1c"
+                      : "#16a34a"
+                }
+              />
+              <Text
+                className={`${
+                  ticketStatus === "pending"
+                    ? "text-yellow-700"
+                    : ticketStatus === "failed"
+                      ? "text-red-700"
+                      : "text-green-700"
+                } font-dm-sans-bold text-[10px] ml-1 uppercase`}
+              >
+                {ticketStatus === "completed" ? "Confirmed" : ticketStatus}
+              </Text>
+            </View>
+          )}
         </View>
 
         {event.type === "ai" ? <OfficialTicketItem event={event} /> : null}

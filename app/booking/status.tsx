@@ -1,5 +1,10 @@
 import bookingServices from "@/api/services/booking";
-import { BookingStatusItem, Button, Spinner } from "@/components";
+import {
+  BookingStatusItem,
+  Button,
+  Spinner,
+  TicketBookingStatusItem,
+} from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useFlight } from "@/components/providers/FlightProvider";
@@ -13,9 +18,8 @@ import { TTransactionStatus } from "@/types/transaction";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
 
 const BookingStatus = () => {
   const [booking, setBooking] = useState<IBooking | null>(null);
@@ -334,7 +338,7 @@ const BookingStatus = () => {
     if (!event?.tm?.url || !user?._id) return;
 
     const url = event.tm.url + `?subId=${user._id}`;
-    await WebBrowser.openBrowserAsync(url);
+    await Linking.openURL(url);
   };
 
   const bookingItems = [
@@ -369,7 +373,7 @@ const BookingStatus = () => {
       icon: "bus-side",
       status: transfer.hotelToEvent.status,
     },
-  ].filter(Boolean);
+  ];
 
   return (
     <SimpleContainer title="Booking Status" scrolled>
@@ -440,15 +444,24 @@ const BookingStatus = () => {
                 </View>
               </View>
 
-              {bookingItems.map((item, index) => (
-                <BookingStatusItem
-                  key={item.label}
-                  label={item.label}
-                  icon={item.icon as any}
-                  status={item.status}
-                  isLast={index === bookingItems.length - 1}
-                />
-              ))}
+              {bookingItems.map((item, index) =>
+                index === 1 ? (
+                  <TicketBookingStatusItem
+                    label={item.label}
+                    status={item.status}
+                    isLast={index === bookingItems.length - 1}
+                    onPress={handleBuyTicket}
+                  />
+                ) : (
+                  <BookingStatusItem
+                    key={item.label}
+                    label={item.label}
+                    icon={item.icon as any}
+                    status={item.status}
+                    isLast={index === bookingItems.length - 1}
+                  />
+                ),
+              )}
             </View>
 
             {!completed && (

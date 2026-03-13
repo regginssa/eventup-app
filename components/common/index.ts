@@ -31,6 +31,7 @@ export { default as RoomCard } from "./RoomCard";
 export { default as Spinner } from "./Spinner";
 export { default as Tabs } from "./Tabs";
 export { default as Textarea } from "./Textarea";
+export { default as TicketBookingStatusItem } from "./TicketBookingStatusItem";
 export { default as TicketQR } from "./TicketQR";
 export { default as TimezonePicker } from "./TimezonePicker";
 export { default as Toast } from "./Toast";
