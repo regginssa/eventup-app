@@ -1,5 +1,5 @@
 import { TEventDates, TEventFee } from "@/types/event";
-import { formatDateTime, getCurrencySymbol } from "@/utils/format";
+import { formatEventDateTime, getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -98,7 +98,7 @@ const EventDetailHeader: React.FC<EventDetailHeaderProps> = ({
             color="#374151"
           />
           <Text className="font-dm-sans-medium text-sm text-gray-700">
-            {dates.start.time} / {formatDateTime(dates.start.date as string)}
+            {formatEventDateTime(dates?.start?.date, dates?.start?.time)}
           </Text>
         </View>
 

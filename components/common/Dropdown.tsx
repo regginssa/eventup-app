@@ -80,10 +80,16 @@ const Dropdown: React.FC<DropdownProps> = ({
       {isOpen && (
         <>
           <Pressable
+            style={{
+              position: "absolute",
+              top: -1000,
+              bottom: -1000,
+              left: -1000,
+              right: -1000,
+              zIndex: 10,
+            }}
             onPress={() => setIsOpen(false)}
-            className="absolute inset-0 z-10"
           />
-
           <View
             className={`absolute left-0 right-0 bg-white z-20 rounded-3xl ${
               direction === "up" ? "bottom-full mb-1" : "top-full mt-1"

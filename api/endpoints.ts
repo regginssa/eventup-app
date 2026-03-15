@@ -10,6 +10,7 @@ export const FETCH_IDENTITY_VERIFICATION_SESSION = "/didit/create-session";
 // Events apis
 export const FETCH_EVENTS_FEED = "/events/feed";
 export const FETCH_ALL_EVENTS = "/events/all";
+export const FETCH_EVENTS_FOR_MAP = "/events/map";
 export const EVENT_BASE = "/events/";
 export const FETCH_EVENTS_BY_USER = "/events/user";
 

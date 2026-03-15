@@ -47,10 +47,10 @@ export const formatEventDateTime = (
     "Dec",
   ];
 
-  return `${day}, ${months[Number(month) - 1]} ${time
+  return `${time
     .split(":")
     .slice(0, 2)
-    .join(":")}`;
+    .join(":")} / ${months[Number(month) - 1]} ${day}`;
 };
 
 export const formatTimezoneShort = (timeZone: string) => {

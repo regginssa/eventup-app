@@ -12,7 +12,7 @@ import { ICommunityTicket } from "@/types/ticket";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Linking, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 interface EventDetailItineraryProps {
   booking: IBooking | null;
@@ -81,11 +81,32 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
 
   return (
     <View className="flex-1">
+      <View className="mt-6 flex flex-row items-center justify-between">
+        <Text className="font-poppins-bold text-slate-800 text-xl">
+          BOOKING REF
+        </Text>
+
+        <TouchableOpacity
+          activeOpacity={0.7}
+          className="px-8 py-3 rounded-2xl shadow-xl shadow-slate-200 border border-slate-50 flex flex-row gap-2 items-center"
+        >
+          <Text className="font-dm-sans-medium text-slate-400 text-lg">
+            Itinerary #BOK_{booking._id?.toString().slice(-6).toUpperCase()}
+          </Text>
+
+          <MaterialCommunityIcons
+            name="clipboard-outline"
+            size={18}
+            color="#94a3b8"
+          />
+        </TouchableOpacity>
+      </View>
+
       <View className="mb-6 gap-4">
         <View className="flex-row items-center justify-between px-1">
           <View>
             <Text className="font-poppins-bold text-slate-800 text-xl">
-              My Ticket
+              MY TICKET
             </Text>
           </View>
           {shouldBuyTicket ? (
@@ -154,7 +175,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
       <View className="flex-row items-center justify-between mb-6 px-1">
         <View>
           <Text className="font-poppins-bold text-slate-800 text-xl">
-            My Journey
+            MY JOURNEY
           </Text>
           <Text className="font-dm-sans-medium text-blue-500 text-xs">
             Verified Itinerary

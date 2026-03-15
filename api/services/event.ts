@@ -6,6 +6,7 @@ import {
   FETCH_ALL_EVENTS,
   FETCH_EVENTS_BY_USER,
   FETCH_EVENTS_FEED,
+  FETCH_EVENTS_FOR_MAP,
 } from "../endpoints";
 
 const getFeed = async (
@@ -34,6 +35,10 @@ const getFeed = async (
 
 const getAll = async (): Promise<ApiResponse<IEvent[]>> => {
   return await AxiosInstance.get(FETCH_ALL_EVENTS);
+};
+
+const getByBounds = async (params: any): Promise<ApiResponse<IEvent[]>> => {
+  return await AxiosInstance.get(FETCH_EVENTS_FOR_MAP, { params });
 };
 
 const get = async (id: string): Promise<ApiResponse<IEvent>> => {
@@ -76,6 +81,7 @@ const checkPurhcaseTicket = async (
 export default {
   get,
   getAll,
+  getByBounds,
   getFeed,
   getByUserId,
   create,

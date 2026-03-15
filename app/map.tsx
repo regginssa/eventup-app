@@ -10,6 +10,7 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { debounce } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -24,15 +25,18 @@ const MapScreen = () => {
   const [events, setEvents] = useState<IEvent[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedEvent, setSelectedEvent] = useState<IEvent | undefined>(
-    undefined,
-  );
+  const [selectedEvent, setSelectedEvent] = useState<IEvent | undefined>();
   const [pressing, setPressing] = useState(false);
+  const [region, setRegion] = useState<any>(null);
+
   const mapRef = useRef<RNMapView | null>(null);
 
   const { user } = useAuth();
   const router = useRouter();
 
+  /**
+   * Select event
+   */
   const handleSelectEvent = (id?: string) => {
     if (pressing) return;
     setPressing(true);
@@ -48,94 +52,135 @@ const MapScreen = () => {
     });
   };
 
-  const fetchEvents = useCallback(async () => {
+  /**
+   * Fetch events inside visible map
+   */
+  const fetchEvents = async (region: any) => {
     try {
       setLoading(true);
 
-      const response = await eventRestServices.getAll();
+      const { latitude, longitude, latitudeDelta, longitudeDelta } = region;
 
-      if (response.ok) {
+      const north = latitude + latitudeDelta / 2;
+      const south = latitude - latitudeDelta / 2;
+      const east = longitude + longitudeDelta / 2;
+      const west = longitude - longitudeDelta / 2;
+
+      const response = await eventRestServices.getByBounds({
+        north,
+        south,
+        east,
+        west,
+      });
+
+      if (response?.ok) {
         setEvents(response.data);
       }
-    } catch (error: any) {
+    } catch (error) {
+      console.log(error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
+  /**
+   * Debounce map movement
+   */
+  const debouncedFetch = useCallback(
+    debounce((region) => {
+      fetchEvents(region);
+    }, 600),
+    [],
+  );
+
+  /**
+   * Trigger fetch when region changes
+   */
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    if (!region) return;
+    debouncedFetch(region);
+  }, [region]);
 
   return (
     <LayoutContainer title="Map">
+      {/* Event Counter */}
       <View className="flex flex-row items-center gap-2">
         <View className="w-2 h-2 rounded-full bg-emerald-500" />
-        <Text
-          className={`font-poppins-semibold text-[11px] uppercase tracking-widest text-gray-500`}
-        >
-          {events.length} events available
+        <Text className="font-poppins-semibold text-[11px] uppercase tracking-widest text-gray-500">
+          {events.length} events visible
         </Text>
       </View>
-      {loading ? (
-        <View className="flex-1 items-center justify-center gap-2">
-          <ActivityIndicator size={48} color="#C427E0" />
-          <Text className="text-[#C427E0] font-poppins-semibold">
-            Loading...
-          </Text>
-        </View>
-      ) : (
-        <View className="flex-1 rounded-lg overflow-hidden mt-4">
-          <RNMapView
-            ref={mapRef}
-            provider="google"
-            showsBuildings
-            showsPointsOfInterest
-            pitchEnabled
-            rotateEnabled
-            style={{ flex: 1 }}
-            customMapStyle={COLORFUL_MAP_STYLE}
-            initialRegion={{
-              latitude: user?.location.coordinate.latitude ?? 0,
-              longitude: user?.location.coordinate.longitude ?? 0,
-              latitudeDelta: 10.0,
-              longitudeDelta: 12.0,
-            }}
-          >
-            {events.map((event, index) => (
-              <MapMarker
-                key={event._id ?? index}
-                coordinate={event.location?.coordinate as any}
-                onPress={() => handleSelectEvent(event._id)}
-              />
-            ))}
 
-            {/* My location marker */}
-            <Marker coordinate={user?.location.coordinate as any}>
-              <View
-                style={{
-                  borderWidth: 3,
-                  borderColor: "#fff",
-                  borderRadius: 20,
-                  overflow: "hidden",
-                  elevation: 6,
-                  shadowColor: "#C427E0",
-                  shadowOpacity: 0.5,
-                  shadowRadius: 6,
-                  shadowOffset: { width: 0, height: 3 },
-                }}
-              >
-                <Image
-                  source={{ uri: user?.avatar }}
-                  style={{ width: 20, height: 20, borderRadius: 10 }}
-                  contentFit="cover"
-                />
-              </View>
-            </Marker>
-          </RNMapView>
+      {loading && (
+        <View className="absolute top-10 left-0 right-0 items-center z-50">
+          <ActivityIndicator size={40} color="#C427E0" />
         </View>
       )}
 
+      {/* Map */}
+      <View className="flex-1 rounded-3xl overflow-hidden mt-4">
+        <RNMapView
+          ref={mapRef}
+          provider="google"
+          showsBuildings
+          showsPointsOfInterest
+          pitchEnabled
+          rotateEnabled
+          style={{ flex: 1 }}
+          customMapStyle={COLORFUL_MAP_STYLE}
+          initialRegion={{
+            latitude: user?.location.coordinate.latitude ?? 0,
+            longitude: user?.location.coordinate.longitude ?? 0,
+            latitudeDelta: 5,
+            longitudeDelta: 5,
+          }}
+          onRegionChangeComplete={(region) => {
+            setRegion(region);
+          }}
+        >
+          {/* Event markers */}
+          {events.map((event, index) => (
+            <MapMarker
+              key={event._id ?? index}
+              coordinate={{
+                latitude: event?.location?.coordinate.latitude || 0,
+                longitude: event?.location?.coordinate.longitude || 0,
+              }}
+              onPress={() => handleSelectEvent(event._id)}
+            />
+          ))}
+
+          {/* User location marker */}
+          <Marker
+            coordinate={{
+              latitude: user?.location.coordinate.latitude ?? 0,
+              longitude: user?.location.coordinate.longitude ?? 0,
+            }}
+          >
+            <View
+              style={{
+                borderWidth: 3,
+                borderColor: "#fff",
+                borderRadius: 20,
+                overflow: "hidden",
+                elevation: 6,
+                shadowColor: "#C427E0",
+                shadowOpacity: 0.5,
+                shadowRadius: 6,
+                shadowOffset: { width: 0, height: 3 },
+              }}
+            >
+              <Image
+                source={{ uri: user?.avatar }}
+                style={{ width: 20, height: 20, borderRadius: 10 }}
+                contentFit="cover"
+              />
+            </View>
+          </Marker>
+        </RNMapView>
+      </View>
+
+      {/* Event Modal */}
       <Modal
         title=""
         isOpen={isOpen}
@@ -181,6 +226,7 @@ const MapScreen = () => {
                   <View className="w-2 h-2 bg-white rounded-full"></View>
                 </LinearGradient>
               </View>
+
               <Text className="font-dm-sans text-gray-800">
                 {selectedEvent?.classifications?.category
                   ? formatEventLabel(selectedEvent?.classifications?.category)
@@ -195,7 +241,7 @@ const MapScreen = () => {
                 color="#1f2937"
               />
               <Text className="font-dm-sans text-gray-800">
-                {selectedEvent?.location?.city.name as string},{" "}
+                {selectedEvent?.location?.city.name},{" "}
                 {selectedEvent?.location?.country.code}
               </Text>
             </View>

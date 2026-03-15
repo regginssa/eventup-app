@@ -142,10 +142,16 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
       {/* Dropdown panel */}
       {isOpen && !disabled && (
         <>
-          {/* Full-screen overlay to close on outside press */}
           <Pressable
+            style={{
+              position: "absolute",
+              top: -1000,
+              bottom: -1000,
+              left: -1000,
+              right: -1000,
+              zIndex: 10,
+            }}
             onPress={() => setIsOpen(false)}
-            className="absolute inset-0 z-10"
           />
 
           <View
