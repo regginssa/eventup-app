@@ -52,7 +52,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`py-1 px-4 gap-2 bg-white flex flex-row items-center rounded-full`}
+        className={`px-4 gap-2 bg-white flex flex-row items-center rounded-full`}
         style={[
           {
             borderWidth: bordered ? 1 : 0,
@@ -91,8 +91,10 @@ const Dropdown: React.FC<DropdownProps> = ({
             style={styles.dropdownContainer}
           >
             <ScrollView
+              nestedScrollEnabled
+              showsVerticalScrollIndicator
               keyboardShouldPersistTaps="handled"
-              style={{ borderRadius: 24 }}
+              style={{ borderRadius: 24, maxHeight: 200 }}
             >
               {items.length === 0 ? (
                 <View className="px-4 py-6">

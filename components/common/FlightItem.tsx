@@ -8,6 +8,7 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 interface FlightItemProps {
   data: IFlightOffer | null;
   status?: TFlightBookStatus;
+  reference?: string;
   refreshLoading?: boolean;
   onRefresh?: () => Promise<void>;
 }
@@ -15,6 +16,7 @@ interface FlightItemProps {
 const FlightItem: React.FC<FlightItemProps> = ({
   data,
   status,
+  reference,
   refreshLoading,
   onRefresh,
 }) => {
@@ -196,6 +198,25 @@ const FlightItem: React.FC<FlightItemProps> = ({
 
           {/* FOOTER ACTION AREA */}
           <View className="rounded-2xl border border-slate-50 gap-2">
+            {reference && (
+              <View className="flex-row items-center justify-between bg-purple-50/40 border border-purple-100 px-3 py-2 rounded-xl">
+                <View className="flex-row items-center gap-2">
+                  <MaterialCommunityIcons
+                    name="ticket-confirmation-outline"
+                    size={16}
+                    color="#844AFF"
+                  />
+                  <Text className="font-dm-sans-bold text-[11px] text-purple-600">
+                    Booking Ref
+                  </Text>
+                </View>
+
+                <Text className="font-poppins-bold text-sm tracking-widest text-slate-900">
+                  {reference}
+                </Text>
+              </View>
+            )}
+
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
                 <View className="bg-slate-200/50 p-1.5 rounded-lg">

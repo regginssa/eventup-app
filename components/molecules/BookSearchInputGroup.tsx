@@ -315,11 +315,14 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   }, [includes.flight, includes.hotel]);
 
   const toggleInclude = (key: keyof typeof includes) => {
-    const canHaveTransfer = includes.flight || includes.hotel;
+    const canHaveAirportTransfer = includes.flight && includes.hotel;
 
-    if (key === "transferAirport" && !canHaveTransfer) return;
+    if (key === "transferAirport" && !canHaveAirportTransfer) return;
 
-    setIncludes((prev) => ({ ...prev, [key]: !prev[key] }));
+    setIncludes((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   };
 
   const getCardStyle = (isActive: boolean) => [

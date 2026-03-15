@@ -15,6 +15,7 @@ import {
 interface HotelItemProps {
   data: IHotelOffer | null;
   status?: THotelBookStatus;
+  reference?: string;
   refreshLoading?: boolean;
   onRefresh?: () => Promise<void>;
 }
@@ -52,6 +53,7 @@ const serviceIconMap: Record<string, any> = {
 const HotelItem: React.FC<HotelItemProps> = ({
   data: offer,
   status,
+  reference,
   refreshLoading,
   onRefresh,
 }) => {
@@ -343,6 +345,26 @@ const HotelItem: React.FC<HotelItemProps> = ({
                     </TouchableOpacity>
                   )}
                 </View>
+              </View>
+            )}
+
+            {/* REFERENCE */}
+            {reference && (
+              <View className="mb-4 flex-row items-center justify-between bg-purple-50 border border-purple-100 rounded-xl px-3 py-2">
+                <View className="flex-row items-center gap-2">
+                  <MaterialCommunityIcons
+                    name="ticket-confirmation-outline"
+                    size={16}
+                    color="#844AFF"
+                  />
+                  <Text className="font-dm-sans-bold text-[11px] text-purple-600 uppercase">
+                    Booking Ref
+                  </Text>
+                </View>
+
+                <Text className="font-poppins-bold text-sm tracking-widest text-slate-900">
+                  {reference}
+                </Text>
               </View>
             )}
 

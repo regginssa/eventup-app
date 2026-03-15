@@ -9,6 +9,7 @@ export { default as ConversationItem } from "./ConversationItem";
 export { default as CountryPicker } from "./CountryPicker";
 export { default as CryptoPayment } from "./CryptoPayment";
 export { default as CryptoPaymentQR } from "./CryptoPaymentQR";
+export { default as CurrencyList } from "./CurrencyList";
 export { default as DateTimePicker } from "./DateTimePicker";
 export { default as Drawer } from "./Drawer";
 export { default as Dropdown } from "./Dropdown";

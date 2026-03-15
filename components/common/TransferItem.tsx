@@ -8,6 +8,7 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 interface TransferItemProps {
   data: ITransferOffer | null;
   status?: TTransferBookStatus;
+  reference?: string;
   refreshLoading?: boolean;
   onRefresh?: () => Promise<void>;
 }
@@ -15,6 +16,7 @@ interface TransferItemProps {
 const TransferItem: React.FC<TransferItemProps> = ({
   data: offer,
   status,
+  reference,
   refreshLoading,
   onRefresh,
 }) => {
@@ -210,6 +212,26 @@ const TransferItem: React.FC<TransferItemProps> = ({
               </Text>
             </View>
           </View>
+
+          {/* BOOKING REFERENCE */}
+          {reference && (
+            <View className="mb-4 flex-row items-center justify-between bg-purple-50 border border-purple-100 rounded-xl px-3 py-2">
+              <View className="flex-row items-center gap-2">
+                <MaterialCommunityIcons
+                  name="ticket-confirmation-outline"
+                  size={16}
+                  color="#844AFF"
+                />
+                <Text className="font-dm-sans-bold text-[11px] text-purple-600 uppercase">
+                  Booking Ref
+                </Text>
+              </View>
+
+              <Text className="font-poppins-bold text-sm tracking-widest text-slate-900">
+                {reference}
+              </Text>
+            </View>
+          )}
 
           {/* FOOTER */}
           <View className="rounded-2xl border border-slate-50">

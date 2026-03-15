@@ -20,7 +20,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Linking, Text, View } from "react-native";
+import { Linking, Text, TouchableOpacity, View } from "react-native";
 
 // --- REDESIGNED SUB-COMPONENTS ---
 
@@ -80,10 +80,15 @@ const EventHeroCard = ({ event, packageType, loading }: any) => {
   );
 };
 
-const HighEndReceipt = ({ services, total, base, commission }: any) => (
+const HighEndReceipt = ({
+  services,
+  base,
+  commission,
+  total,
+  currency,
+}: any) => (
   <View className="w-full">
-    {/* Upper Part */}
-    <View className="bg-slate-50 rounded-t-[24px] border-t border-l border-r border-slate-200 p-6 pb-2">
+    <View className="bg-slate-50 rounded-t-[24px] border border-slate-200 p-6 pb-2">
       <Text className="text-slate-400 font-poppins-bold text-[10px] uppercase tracking-[2px] mb-4">
         Price Breakdown
       </Text>
@@ -98,49 +103,57 @@ const HighEndReceipt = ({ services, total, base, commission }: any) => (
             <View className="flex-1 h-[1px] border-b border-dotted border-slate-300 mx-4 opacity-50" />
 
             <Text className="text-slate-400 text-xs font-dm-sans-bold">
-              {service === "Ticket"
-                ? "Price estimated, confirmed on purchase"
-                : "Included"}
+              {service === "Ticket" ? "Price isn't estimated" : "Included"}
             </Text>
           </View>
         ))}
 
         <View className="flex-row justify-between items-center mt-2">
           <Text className="text-slate-500 font-dm-sans text-sm">Subtotal</Text>
-          <Text className="text-slate-800 font-dm-sans-bold text-sm">
-            ${base}
+          <Text className="text-slate-800 font-dm-sans-bold text-base">
+            <Text className="text-slate-600 font-dm-sans-medium text-xs">
+              {currency.toUpperCase()}
+            </Text>{" "}
+            {base}
           </Text>
         </View>
+
         <View className="flex-row justify-between items-center">
           <Text className="text-slate-500 font-dm-sans text-sm">
-            Service Fee
+            Commission
           </Text>
-          <Text className="text-slate-800 font-dm-sans-bold text-sm">
-            ${commission}
+
+          <Text className="text-slate-800 font-dm-sans-bold text-base">
+            <Text className="text-slate-600 font-dm-sans-medium text-xs">
+              {currency.toUpperCase()}
+            </Text>{" "}
+            {commission}
           </Text>
         </View>
       </View>
     </View>
 
-    {/* Punched Hole Divider */}
     <View className="flex-row items-center justify-between bg-slate-50">
       <View className="w-5 h-10 rounded-r-full bg-white border-r border-t border-b border-slate-200 -ml-[1px]" />
       <View className="flex-1 h-[1px] border-b border-dashed border-slate-300 mx-2" />
       <View className="w-5 h-10 rounded-l-full bg-white border-l border-t border-b border-slate-200 -mr-[1px]" />
     </View>
 
-    {/* Lower Part */}
-    <View className="bg-slate-50 rounded-b-[24px] border-b border-l border-r border-slate-200 p-6 pt-2">
+    <View className="bg-slate-50 rounded-b-[24px] border border-slate-200 p-6 pt-2">
       <View className="flex-row justify-between items-end">
         <View>
           <Text className="text-slate-400 font-dm-sans-bold text-[10px] uppercase tracking-widest mb-1">
             Total Amount
           </Text>
+
           <Text className="font-poppins-bold text-slate-900 text-3xl">
-            <Text className="text-lg text-slate-400">$</Text>
+            <Text className="font-poppins-bold text-slate-600 text-lg">
+              {currency.toUpperCase()}
+            </Text>{" "}
             {total}
           </Text>
         </View>
+
         <View className="bg-emerald-100 px-3 py-1.5 rounded-xl flex-row items-center gap-1">
           <Feather name="shield" size={12} color="#10b981" />
           <Text className="text-[10px] font-poppins-bold text-emerald-600 uppercase">
@@ -154,12 +167,15 @@ const HighEndReceipt = ({ services, total, base, commission }: any) => (
 
 const BookingStepper = ({ event }: { event: IEvent | null }) => {
   if (!event) return null;
+
+  const { user } = useAuth();
+
   const steps = [
     {
       title: event?.type === "ai" ? "Ticket Purchase" : "Ticket Deposit",
       description:
         event?.type === "ai"
-          ? "You'll be redirected to the event page to complete your ticket purchase. Final price confirmed there."
+          ? "To purchase tickets, visit the event provider's official ticket page using the link below."
           : "Your ticket will be deposited to the event.",
     },
     {
@@ -177,6 +193,13 @@ const BookingStepper = ({ event }: { event: IEvent | null }) => {
         "You'll get a summary of all services booked with estimated and confirmed details.",
     },
   ];
+
+  const handleBuyTicket = async () => {
+    if (!event?.tm?.url || !user?._id) return;
+
+    const url = event.tm.url + `?subId=${user._id}`;
+    await Linking.openURL(url);
+  };
 
   return (
     <View className="bg-slate-50 rounded-[24px] border border-slate-200 shadow-sm p-6">
@@ -211,6 +234,23 @@ const BookingStepper = ({ event }: { event: IEvent | null }) => {
                 <Text className="text-slate-400 text-xs mt-1">
                   {step.description}
                 </Text>
+
+                {index === 0 && event.type === "ai" && (
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    className="flex flex-row items-center gap-2"
+                    onPress={handleBuyTicket}
+                  >
+                    <Text className="font-dm-sans-bold text-sm text-purple-600 underline">
+                      Purhcase
+                    </Text>
+                    <MaterialCommunityIcons
+                      name="arrow-right"
+                      size={14}
+                      color="#9333ea"
+                    />
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           );
@@ -240,6 +280,7 @@ const CheckoutScreen = () => {
     babyu: number;
   }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
   const [booking, setBooking] = useState<IBooking | null>(null);
+  const [currency, setCurrency] = useState<string>("USD");
 
   const router = useRouter();
   const { eventId, packageType } = useLocalSearchParams();
@@ -290,7 +331,6 @@ const CheckoutScreen = () => {
     };
 
     const loadBooking = async () => {
-      console.log("Checking for existing booking...");
       if (!user?._id || !eventId) return;
       const res = await BookingAPI.getByUserIdAndEventId(
         user._id,
@@ -318,7 +358,13 @@ const CheckoutScreen = () => {
 
   useEffect(() => {
     let servicesList: string[] = [];
-    let base = 0;
+    let baseUSD = 0;
+
+    let commissionRate = 0.1;
+
+    if (currency === "chrle" || currency === "babyu") {
+      commissionRate = 0.03;
+    }
 
     if (event?.type === "ai") {
       servicesList.push("Ticket");
@@ -334,6 +380,7 @@ const CheckoutScreen = () => {
       servicesList.push("E-Ticket");
     }
 
+    // EXISTING BOOKING
     if (
       booking &&
       !flightOffer &&
@@ -345,52 +392,73 @@ const CheckoutScreen = () => {
 
       if (flight.offer) {
         servicesList.push("Round-trip Flight");
-        base += Number(flight.offer.totalAmount);
+        baseUSD += Number(flight.offer.totalAmount);
       }
+
       if (hotel.offer) {
-        servicesList.push("Hotel Accomodation");
-        base += Number(hotel.offer.totalAmount);
+        servicesList.push("Hotel Accommodation");
+        baseUSD += Number(hotel.offer.totalAmount);
       }
+
       if (transfer.airportToHotel.offer) {
         servicesList.push("Airport Transfer");
-        base += Number(transfer.airportToHotel.offer.totalAmount);
+        baseUSD += Number(transfer.airportToHotel.offer.totalAmount);
       }
+
       if (transfer.hotelToEvent.offer) {
         servicesList.push("Event Shuttle");
-        base += Number(transfer.hotelToEvent.offer.totalAmount);
+        baseUSD += Number(transfer.hotelToEvent.offer.totalAmount);
       }
-      const commission = Number((base * 0.1).toFixed(2));
-      setBaseAmount(Number(base.toFixed(2)));
-      setCommissionAmount(commission);
-      setTotalAmount(booking.price.totalAmount);
-      setServices(servicesList);
-      return;
+    } else {
+      // NEW BOOKING
+      if (flightOffer) {
+        servicesList.push("One-Way Flight");
+        baseUSD += Number(flightOffer.totalAmount);
+      }
+
+      if (hotelOffer) {
+        servicesList.push("Hotel Accommodation");
+        baseUSD += Number(hotelOffer.totalAmount);
+      }
+
+      if (airportToHotelOffer) {
+        servicesList.push("Airport Transfer");
+        baseUSD += Number(airportToHotelOffer.totalAmount);
+      }
+
+      if (hotelToEventOffer) {
+        servicesList.push("Event Shuttle");
+        baseUSD += Number(hotelToEventOffer.totalAmount);
+      }
     }
 
-    if (flightOffer) {
-      servicesList.push("One-Way Flight");
-      base += Number(flightOffer.totalAmount);
-    }
-    if (hotelOffer) {
-      servicesList.push("Hotel Accomodation");
-      console.log("Hotel Offer Total Amount:", hotelOffer.totalAmount);
-      base += Number(hotelOffer.totalAmount);
-    }
-    if (airportToHotelOffer) {
-      servicesList.push("Airport Transfer");
-      base += Number(airportToHotelOffer.totalAmount);
-    }
-    if (hotelToEventOffer) {
-      servicesList.push("Event Shuttle");
-      base += Number(hotelToEventOffer.totalAmount);
+    const commissionUSD = Number((baseUSD * commissionRate).toFixed(2));
+    const totalUSD = Number((baseUSD + commissionUSD).toFixed(2));
+
+    // 🔹 CONVERT IF CRYPTO
+    if (paymentMethod === "crypto" || paymentMethod === "token") {
+      const price = cryptoPrices[crypto as keyof typeof cryptoPrices];
+
+      if (price) {
+        const baseToken = Number((baseUSD / price).toFixed(2));
+        const commissionToken = Number((commissionUSD / price).toFixed(2));
+        const totalToken = Number((totalUSD / price).toFixed(2));
+
+        setBaseAmount(baseToken);
+        setCommissionAmount(commissionToken);
+        setTotalAmount(totalToken);
+      } else {
+        // fallback
+        setBaseAmount(baseUSD);
+        setCommissionAmount(commissionUSD);
+        setTotalAmount(totalUSD);
+      }
+    } else {
+      setBaseAmount(baseUSD);
+      setCommissionAmount(commissionUSD);
+      setTotalAmount(totalUSD);
     }
 
-    const commission = Number((base * 0.1).toFixed(2));
-    const total = Number((base + commission).toFixed(2));
-
-    setBaseAmount(Number(base.toFixed(2)));
-    setCommissionAmount(commission);
-    setTotalAmount(total);
     setServices(servicesList);
   }, [
     flightOffer,
@@ -400,7 +468,13 @@ const CheckoutScreen = () => {
     event,
     booking,
     user,
+    currency,
+    cryptoPrices,
   ]);
+
+  useEffect(() => {
+    setCurrency(paymentMethod === "credit" ? "USD" : crypto);
+  }, [paymentMethod, crypto]);
 
   const onBook = async () => {
     try {
@@ -622,7 +696,8 @@ const CheckoutScreen = () => {
     return response.data._id || null;
   };
 
-  const isUserEventPassable = event?.type === "user" && totalAmount === 0;
+  const isUserEventPassable =
+    event?.type === "user" && event.fee?.type === "free" && totalAmount === 0;
 
   return (
     <SimpleContainer title="Review & Pay" scrolled>
@@ -643,7 +718,48 @@ const CheckoutScreen = () => {
           base={baseAmount}
           commission={commissionAmount}
           total={totalAmount}
+          currency={currency}
         />
+
+        {paymentMethod !== "credit" && (
+          <LinearGradient
+            colors={["#844AFF15", "#12A9FF15"]}
+            start={{ x: 0, y: 0 }}
+            style={{
+              borderRadius: 20,
+              padding: 20,
+              borderWidth: 1,
+              borderColor: "#844AFF20",
+            }}
+          >
+            <View className="flex-row items-center">
+              <View className="bg-[#844AFF] w-12 h-12 rounded-xl items-center justify-center mr-4 shadow-lg shadow-purple-300">
+                <MaterialCommunityIcons
+                  name="information-outline"
+                  size={24}
+                  color="white"
+                />
+              </View>
+              <View className="flex-1">
+                <Text className="font-poppins-semibold uppercase text-slate-900 text-sm">
+                  Save with $CHRLE or $BABYU
+                </Text>
+                <Text className="font-dm-sans-bold text-slate-500 text-xs">
+                  Pay with $CHRLE or $BABYU and reduce service fees from 10% to
+                  3%. You save ${(baseAmount * 0.07).toFixed(2)} USD.
+                </Text>
+              </View>
+            </View>
+          </LinearGradient>
+        )}
+        {/* CURRENCY SELECTION */}
+        {/* <View className="bg-slate-50 border border-slate-200 rounded-3xl p-5 gap-3">
+          <Text className="text-slate-400 font-poppins-bold text-[10px] uppercase tracking-[2px]">
+            Payment Currency
+          </Text>
+
+          <CurrencyList value={currency} onSelect={setCurrency} />
+        </View> */}
 
         {/* PAYMENT METHOD */}
         <PaymentMethodGroup
@@ -665,7 +781,7 @@ const CheckoutScreen = () => {
               ? "Processing..."
               : isUserEventPassable
                 ? "Join Now"
-                : `Pay $${totalAmount}`
+                : `Pay`
           }
           buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
           textClassName="text-lg font-poppins-bold"
