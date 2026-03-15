@@ -1,3 +1,4 @@
+import { removeMe } from "@/api/services/auth";
 import { IUser } from "@/types/user";
 import {
   AntDesign,
@@ -20,6 +21,7 @@ import {
 } from "react-native";
 import { Avatar, Drawer } from "../common";
 import { useAuth } from "../providers/AuthProvider";
+import { useToast } from "../providers/ToastProvider";
 
 const LogoImage = require("@/assets/images/logo.png");
 const VerifiedBadge = require("@/assets/images/icons/verified_badge.png");
@@ -67,8 +69,10 @@ const EmptyUserData = () => {
 
 const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
   const [signOutLoading, setSignOutLoading] = useState<boolean>(false);
+  const [removeLoading, setRemoveLoading] = useState<boolean>(false);
 
   const router = useRouter();
+  const toast = useToast();
 
   const items = [
     {
@@ -110,6 +114,28 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
     }
     setSignOutLoading(false);
     router.replace("/start");
+  };
+
+  const handleRemove = async () => {
+    setRemoveLoading(true);
+    try {
+      const res = await removeMe();
+
+      if (!res.ok) {
+        toast.info(res.message);
+      } else {
+        const token = await AsyncStorage.getItem("Authorization");
+
+        if (token) {
+          await AsyncStorage.removeItem("Authorization");
+        }
+        router.replace("/start");
+      }
+    } catch (error) {
+      toast.error("Something went wrong");
+    } finally {
+      setRemoveLoading(false);
+    }
   };
 
   return (
@@ -198,15 +224,25 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
       </View>
 
       <View className="w-full gap-2 mb-[93px]">
-        <TouchableOpacity activeOpacity={0.8} className="w-full py-2">
+        <TouchableOpacity
+          activeOpacity={0.8}
+          className="w-full py-2"
+          disabled={removeLoading}
+          onPress={handleRemove}
+        >
           <View className="flex flex-row items-center gap-2">
-            <FontAwesome name="trash-o" size={24} color="#ef4444" />
+            {removeLoading ? (
+              <ActivityIndicator size={24} color="#ef4444" />
+            ) : (
+              <FontAwesome name="trash-o" size={24} color="#ef4444" />
+            )}
             <Text className="text-red-500 font-poppins">Delete Account</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.8}
           className="w-full py-2"
+          disabled={signOutLoading}
           onPress={handleSignOut}
         >
           <View className="flex flex-row items-center gap-2">

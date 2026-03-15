@@ -105,3 +105,7 @@ export const changeAuthPassword = async (
 export const getMe = async (): Promise<ApiResponse<IUser>> => {
   return await AxiosInstance.get(BASE_URL + "/me");
 };
+
+export const removeMe = async (): Promise<ApiResponse<boolean>> => {
+  return await AxiosInstance.delete(BASE_URL + "/me");
+};
