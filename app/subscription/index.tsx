@@ -62,13 +62,18 @@ const SubscriptionScreen = () => {
       setOneMonthPrice(subscriptions[1].price);
       setSelectedSubscriptionId(subscriptions[3]._id);
 
-      if (!user?.subscription) return;
+      if (!user?.subscription) {
+        return setLoading(false);
+      }
 
-      const current = subscriptions.find((s) => s._id === user.subscription.id);
+      const current = subscriptions.find(
+        (s) => s._id === user.subscription?.id,
+      );
       setCurrentSubscription(current || null);
 
       if (!user.subscription.startedAt || !current) {
-        return setIsExpired(false);
+        setIsExpired(false);
+        return setLoading(false);
       }
 
       const start = new Date(user.subscription.startedAt);
@@ -176,7 +181,7 @@ const SubscriptionScreen = () => {
 
     const formattedItem: TSubscriptionItem = {
       ...item,
-      isActive: user?.subscription.id === item._id,
+      isActive: user?.subscription?.id === item._id,
       isRecommended: item.month === 6,
       save: savePercent === 0 ? undefined : savePercent,
     };

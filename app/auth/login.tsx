@@ -201,8 +201,9 @@ const LoginScreen = () => {
         toast.error(res.message);
       } else {
         if (forgotEmail !== "") {
-          setIsPassOpen(true);
+          setIsOtpOpen(false);
           setForgotEmail("");
+          setIsPassOpen(true);
           return setOtpLoading(false);
         }
 
@@ -352,7 +353,10 @@ const LoginScreen = () => {
             onCheck={setIsRemembered}
           />
 
-          <TouchableOpacity activeOpacity={0.8}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setIsForgotOpen(true)}
+          >
             <Text className="text-[#15A5FF] font-dm-sans text-sm">
               Forgot Password
             </Text>

@@ -167,7 +167,7 @@ const SubscriptionCheckout = () => {
 
         const formatted: TSubscriptionItem = {
           ...subscription,
-          isActive: user?.subscription.id === subscription._id,
+          isActive: user?.subscription?.id === subscription._id,
           isRecommended: subscription.month === 6,
           save: savePercent === 0 ? undefined : savePercent,
         };
@@ -191,7 +191,7 @@ const SubscriptionCheckout = () => {
   useEffect(() => {
     if (!user?.stripe?.paymentMethods?.length) return;
 
-    setStripePaymentMethodId(user.stripe.paymentMethods[0].id);
+    setStripePaymentMethodId(user.stripe.paymentMethods[0]?.id);
   }, [user]);
 
   useEffect(() => {
@@ -266,7 +266,7 @@ const SubscriptionCheckout = () => {
   const handleSuccess = async () => {
     const response = await UserAPI.get(user?._id as string);
 
-    if (response.data.subscription.id === subscriptionId) {
+    if (response.data.subscription?.id === subscriptionId) {
       setAuthUser(response.data);
       toast.success("Subscribed successfully");
       router.back();

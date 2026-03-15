@@ -8,6 +8,7 @@ import { TDropdownItem } from "@/types";
 import { IEvent, TEventStatus } from "@/types/event";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
+import { View } from "react-native";
 
 const tabs: TDropdownItem[] = [
   {
@@ -16,17 +17,6 @@ const tabs: TDropdownItem[] = [
     icon: (
       <MaterialCommunityIcons
         name="calendar-plus-outline"
-        size={16}
-        color="#1f2937"
-      />
-    ),
-  },
-  {
-    label: "Completed",
-    value: "completed",
-    icon: (
-      <MaterialCommunityIcons
-        name="calendar-check-outline"
         size={16}
         color="#1f2937"
       />
@@ -79,13 +69,15 @@ const MyEventsScreen = () => {
 
   return (
     <MyEventsScreenContainer>
-      <Tabs
-        tabs={tabs}
-        selectedTab={selectedTab}
-        tabClassName="flex-1"
-        onSelct={setSelectedTab}
-      />
-      <EventsPreviewGroup events={events} loading={loading} />
+      <View className="flex-1 bg-white p-6 rounded-t-3xl">
+        <Tabs
+          tabs={tabs}
+          selectedTab={selectedTab}
+          tabClassName="flex-1"
+          onSelct={setSelectedTab}
+        />
+        <EventsPreviewGroup events={events} loading={loading} />
+      </View>
     </MyEventsScreenContainer>
   );
 };
