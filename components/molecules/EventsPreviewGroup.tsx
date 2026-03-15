@@ -4,7 +4,7 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   FlatList,
   NativeScrollEvent,
@@ -21,6 +21,7 @@ interface EventsPreviewGroupProps {
   events: IEvent[];
   loading?: boolean;
   onReachedBottomChange?: (isAtBottom: boolean) => void;
+  onRefresh?: () => Promise<void>;
 }
 
 const BOTTOM_PAD = 24;
@@ -29,13 +30,23 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
   events,
   loading,
   onReachedBottomChange,
+  onRefresh,
 }) => {
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const contentHeightRef = useRef(0);
   const containerHeightRef = useRef(0);
   const lastIsBottomRef = useRef(false);
 
   const router = useRouter();
   const toast = useToast();
+
+  const handleRefresh = async () => {
+    if (!onRefresh) return;
+
+    setRefreshing(true);
+    await onRefresh();
+    setRefreshing(false);
+  };
 
   const setIsAtBottom = useCallback(
     (v: boolean) => {
@@ -224,6 +235,8 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
             paddingBottom: 42,
             gap: 16,
           }}
+          refreshing={refreshing}
+          onRefresh={onRefresh ? onRefresh : () => {}}
         />
       )}
     </View>

@@ -110,6 +110,10 @@ const HomeScreen = () => {
     await fetchFeed(1);
   };
 
+  const handleRefresh = async () => {
+    await fetchFeed(pagination.page);
+  };
+
   const handleFilterReset = async () => {
     setStartDate(null);
     setCountry(null);
@@ -195,6 +199,7 @@ const HomeScreen = () => {
             events={events}
             loading={loading}
             onReachedBottomChange={setIsBottom}
+            onRefresh={handleRefresh}
           />
         </View>
       </View>

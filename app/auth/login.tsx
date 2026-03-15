@@ -160,15 +160,18 @@ const LoginScreen = () => {
 
       const response = await emailLogin(email, password);
 
-      const { token, user } = response.data;
-      await setAuthToken(token);
-      setAuthUser(user);
-
-      if (user.emailVerified) {
-        toast.success("Welcome back!!!");
-        redirect(user);
+      if (!response.ok) {
+        toast.error(response.message);
       } else {
-        setIsOtpOpen(true);
+        const { token, user } = response.data;
+        await setAuthToken(token);
+        setAuthUser(user);
+        if (user.emailVerified) {
+          toast.success("Welcome back!!!");
+          redirect(user);
+        } else {
+          setIsOtpOpen(true);
+        }
       }
     } catch (error: any) {
       const message = error?.response?.data?.message;
