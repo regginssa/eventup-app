@@ -4,7 +4,9 @@ import {
   Button,
   CountryPicker,
   DateTimePicker,
+  Dropdown,
   Modal,
+  MultiSelectDropdown,
   PasswordInput,
   PhoneInput,
   Spinner,
@@ -15,6 +17,13 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
 import { useSubscription } from "@/components/providers/SubscriptionProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import {
+  EVENT_CATEGORIES,
+  EVENT_LOCATION_TYPES,
+  EVENT_SUB_CATEGORIES,
+  EVENT_VENUE_TYPE,
+  EVENT_VIBE,
+} from "@/constants/events";
 import { TDropdownItem } from "@/types";
 import { Country } from "@/types/location.types";
 import { IUser } from "@/types/user";
@@ -48,6 +57,12 @@ const ProfileScreen = () => {
   const [invalidNewPass, setInvalidNewPass] = useState<boolean>(false);
   const [invalidPassTxt, setInvalidPassTxt] = useState<string>("");
   const [passLoading, setPassLoading] = useState<boolean>(false);
+  const [category, setCategory] = useState<TDropdownItem | null>(null);
+  const [subcategories, setSubcategories] = useState<TDropdownItem[]>([]);
+  const [vibes, setVibes] = useState<TDropdownItem[]>([]);
+  const [venueTypes, setVenueTypes] = useState<TDropdownItem[]>([]);
+  const [location, setLocation] = useState<TDropdownItem | null>(null);
+  const [preLoading, setPreLoading] = useState<boolean>(false);
 
   const { id: userId } = useLocalSearchParams();
   const { user: authUser, setAuthUser } = useAuth();
@@ -78,6 +93,42 @@ const ProfileScreen = () => {
     };
     fetchUserInfo();
   }, [userId]);
+
+  useEffect(() => {
+    if (user?._id !== authUser?._id || !user?.preferred) return;
+
+    const { category, subcategories, venueType, location, vibe } =
+      user.preferred;
+
+    if (!category) return;
+
+    setCategory(EVENT_CATEGORIES.find((ec) => ec.value === category) || null);
+
+    const sub =
+      EVENT_SUB_CATEGORIES[
+        category as keyof typeof EVENT_SUB_CATEGORIES
+      ]?.filter((su) => subcategories?.includes(su.value)) || [];
+
+    setSubcategories(sub);
+
+    const venue =
+      EVENT_VENUE_TYPE[category as keyof typeof EVENT_VENUE_TYPE]?.filter(
+        (ve) => venueType?.includes(ve.value),
+      ) || [];
+
+    setVenueTypes(venue);
+
+    const vib =
+      EVENT_VIBE[category as keyof typeof EVENT_VIBE]?.filter((vi) =>
+        vibe?.includes(vi.value),
+      ) || [];
+
+    setVibes(vib);
+
+    const loc =
+      EVENT_LOCATION_TYPES.find((el) => el.value === location) || null;
+    setLocation(loc);
+  }, [user, authUser]);
 
   const getPasswordError = (password: string): string => {
     if (password.length < 8) {
@@ -165,6 +216,7 @@ const ProfileScreen = () => {
       });
 
       setAuthUser(res.data);
+      setUser(res.data);
       setIsEditOpen(false);
       toast.success("Saved");
     } catch (error) {
@@ -207,6 +259,39 @@ const ProfileScreen = () => {
       toast.error("Changing password failed");
     } finally {
       setPassLoading(false);
+    }
+  };
+
+  const handlePrefer = async () => {
+    if (!user?._id) return;
+    if (!category) return toast.info("Category must be filled");
+
+    setPreLoading(true);
+    try {
+      const subs: string[] = subcategories.map((s) => s.value as string);
+      const vis: string[] = vibes.map((v) => v.value as string);
+      const venues: string[] = venueTypes.map((v) => v.value as string);
+
+      const res = await userServices.update(user._id as string, {
+        ...user,
+        preferred: {
+          category: category?.value as string,
+          subcategories: subs,
+          vibe: vis,
+          venueType: venues,
+          location: location?.value as any,
+        },
+      });
+
+      if (res.ok) {
+        toast.success("Saved successfully");
+        setUser(res.data);
+        if (user._id === authUser?._id) setAuthUser(res.data);
+      }
+    } catch (error) {
+      toast.error("Saving changes failed");
+    } finally {
+      setPreLoading(false);
     }
   };
 
@@ -559,6 +644,7 @@ const ProfileScreen = () => {
           tabs={[
             { label: "General", value: "general" },
             { label: "Account", value: "account" },
+            { label: "Prefer", value: "prefer" },
           ]}
           tabClassName="flex-1"
           selectedTab={selectedTab}
@@ -598,7 +684,7 @@ const ProfileScreen = () => {
               onPress={handleEdit}
             />
           </View>
-        ) : (
+        ) : selectedTab.value === "account" ? (
           <View className="gap-4">
             <PasswordInput
               placeholder="Current Password"
@@ -628,6 +714,104 @@ const ProfileScreen = () => {
               label="Change Password"
               loading={passLoading}
               onPress={handleUpdatePassword}
+            />
+          </View>
+        ) : (
+          <View className="gap-4">
+            <Dropdown
+              label="Event category"
+              placeholder="Select your preferred event category"
+              icon={
+                <MaterialCommunityIcons name="apps" size={16} color="#4b5563" />
+              }
+              items={EVENT_CATEGORIES}
+              selectedItem={category}
+              onSelect={setCategory}
+            />
+
+            <MultiSelectDropdown
+              label="Event subcategories"
+              placeholder="Select your preferred event subcategories"
+              icon={
+                <MaterialCommunityIcons
+                  name="format-list-bulleted"
+                  size={16}
+                  color="#4b5563"
+                />
+              }
+              items={
+                category?.value
+                  ? EVENT_SUB_CATEGORIES[
+                      category.value as keyof typeof EVENT_SUB_CATEGORIES
+                    ]
+                  : []
+              }
+              selectedItems={subcategories}
+              onChange={setSubcategories}
+            />
+
+            <MultiSelectDropdown
+              label="Event vibe types"
+              placeholder="Select your preferred event vibe types"
+              icon={
+                <MaterialCommunityIcons
+                  name="emoticon-outline"
+                  size={16}
+                  color="#4b5563"
+                />
+              }
+              items={
+                category?.value
+                  ? EVENT_VIBE[category.value as keyof typeof EVENT_VIBE]
+                  : []
+              }
+              selectedItems={vibes}
+              onChange={setVibes}
+            />
+
+            <MultiSelectDropdown
+              label="Event venue types"
+              placeholder="Select your preferred event venue types"
+              icon={
+                <MaterialCommunityIcons
+                  name="map-marker"
+                  size={16}
+                  color="#4b5563"
+                />
+              }
+              items={
+                category?.value
+                  ? EVENT_VENUE_TYPE[
+                      category.value as keyof typeof EVENT_VENUE_TYPE
+                    ]
+                  : []
+              }
+              direction="up"
+              selectedItems={venueTypes}
+              onChange={setVenueTypes}
+            />
+
+            <Dropdown
+              label="Event location"
+              placeholder="Select your preferred event location"
+              icon={
+                <MaterialCommunityIcons
+                  name="map-check-outline"
+                  size={16}
+                  color="#4b5563"
+                />
+              }
+              items={EVENT_LOCATION_TYPES}
+              direction="up"
+              selectedItem={location}
+              onSelect={setLocation}
+            />
+
+            <Button
+              type="gradient-glass"
+              label="Save Changes"
+              loading={preLoading}
+              onPress={handlePrefer}
             />
           </View>
         )}

@@ -85,7 +85,7 @@ const OnboardingStep4Screen = () => {
     <OnboardingContainer
       step={4}
       title="Personalize your party"
-      subtitle="Share your favorite vibes and we’ll match you with the perfect events"
+      subtitle="Share your favorite vibes and we'll match you with the perfect events"
       onBack={() => router.back()}
     >
       <View className="w-full gap-5">
