@@ -80,7 +80,7 @@ const FeaturesCard = ({ subscription }: any) => {
   );
 };
 
-const SubscriptionReceipt = ({ subscription }: any) => {
+const SubscriptionReceipt = ({ subscription, amount, currency }: any) => {
   if (!subscription) return null;
 
   return (
@@ -104,7 +104,7 @@ const SubscriptionReceipt = ({ subscription }: any) => {
           <Text className="text-slate-500 text-sm">Currency</Text>
 
           <Text className="font-dm-sans-bold text-slate-800">
-            {subscription.currency}
+            {currency.toUpperCase()}
           </Text>
         </View>
 
@@ -114,7 +114,10 @@ const SubscriptionReceipt = ({ subscription }: any) => {
           <Text className="text-slate-600 font-dm-sans-bold">Total Amount</Text>
 
           <Text className="font-poppins-bold text-3xl text-slate-900">
-            ${subscription.price}
+            <Text className="font-poppins-bold text-slate-600 text-lg">
+              {currency.toUpperCase()}
+            </Text>{" "}
+            {amount}
           </Text>
         </View>
       </View>
@@ -131,6 +134,7 @@ const SubscriptionCheckout = () => {
     useState<string>("");
   const [loading, setLoading] = useState(false);
   const [subLoading, setSubLoading] = useState(false);
+  const [amount, setAmount] = useState<number>(0);
   const [sku, setSku] = useState<any>(null);
   const [crypto, setCrypto] = useState<string>("eth");
   const [cryptoPrices, setCryptoPrices] = useState<{
@@ -139,6 +143,7 @@ const SubscriptionCheckout = () => {
     chrle: number;
     babyu: number;
   }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
+  const [currency, setCurrency] = useState<string>("USD");
 
   const { id: subscriptionId, oneMonthPrice } = useLocalSearchParams();
   const { user, setAuthUser } = useAuth();
@@ -195,6 +200,25 @@ const SubscriptionCheckout = () => {
   }, [user]);
 
   useEffect(() => {
+    if (!subscription) return;
+
+    const amountUSD = subscription.price;
+
+    if (method !== "credit") {
+      const price = cryptoPrices[crypto as keyof typeof cryptoPrices];
+
+      if (price) {
+        const cryptoAmount = Number((amountUSD / price).toFixed(2));
+        setAmount(cryptoAmount);
+      } else {
+        setAmount(amountUSD);
+      }
+    } else {
+      setAmount(amountUSD);
+    }
+  }, [subscription, currency, cryptoPrices]);
+
+  useEffect(() => {
     if (
       !lastPurchase?.ok ||
       lastPurchase.type !== "subscription" ||
@@ -227,21 +251,9 @@ const SubscriptionCheckout = () => {
     };
   }, [lastPurchase, subscriptionId, user?._id]);
 
-  const getTokenAmount = () => {
-    const totalAmount = Number(subscription?.price);
-    switch (crypto) {
-      case "eth":
-        return (totalAmount / cryptoPrices.eth).toFixed(6);
-      case "sol":
-        return (totalAmount / cryptoPrices.sol).toFixed(6);
-      case "chrle":
-        return (totalAmount / cryptoPrices.chrle).toFixed(6);
-      case "babyu":
-        return (totalAmount / cryptoPrices.babyu).toFixed(6);
-      default:
-        return totalAmount.toFixed(2);
-    }
-  };
+  useEffect(() => {
+    setCurrency(method === "credit" ? "USD" : crypto);
+  }, [method, crypto]);
 
   const handleStripePayment = async (
     amount: number,
@@ -274,7 +286,6 @@ const SubscriptionCheckout = () => {
   };
 
   const handleCrypto = async () => {
-    const amount = getTokenAmount();
     if (Number(amount) <= 0) {
       toast.error("Invalid amount for selected cryptocurrency.");
       return null;
@@ -347,7 +358,11 @@ const SubscriptionCheckout = () => {
 
         <FeaturesCard subscription={subscription} />
 
-        <SubscriptionReceipt subscription={subscription} />
+        <SubscriptionReceipt
+          subscription={subscription}
+          amount={amount}
+          currency={currency}
+        />
 
         {Platform.OS !== "ios" && (
           <PaymentMethodGroup
@@ -379,7 +394,7 @@ const SubscriptionCheckout = () => {
             buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
             textClassName="text-lg font-poppins-bold"
             loading={subLoading}
-            disabled={loading || !subscription}
+            disabled={loading || !subscription || amount <= 0}
             onPress={handleSubscribe}
           />
         )}

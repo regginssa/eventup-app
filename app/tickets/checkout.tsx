@@ -1,4 +1,5 @@
 import { getMe } from "@/api/services/auth";
+import CurrencyAPI from "@/api/services/currency";
 import UserAPI from "@/api/services/user";
 import Web3API from "@/api/services/web3";
 import { Button, PaymentMethodGroup, Spinner } from "@/components";
@@ -12,7 +13,6 @@ import { getTicketSku } from "@/constants/skus";
 import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { ICommunityTicket } from "@/types/ticket";
-import { getCurrencySymbol } from "@/utils/format";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -77,10 +77,8 @@ const TicketHeroCard = ({ ticket, loading }: any) => {
 // RECEIPT — Redesigned (Matches HighEndReceipt style)
 // -----------------------------------------------------------------------------
 
-const TicketReceipt = ({ ticket }: any) => {
+const TicketReceipt = ({ ticket, amount, currency }: any) => {
   if (!ticket) return null;
-
-  const currency = getCurrencySymbol(ticket.currency.toUpperCase());
 
   return (
     <View className="w-full">
@@ -90,33 +88,11 @@ const TicketReceipt = ({ ticket }: any) => {
           Price Breakdown
         </Text>
 
-        <View className="gap-3">
-          <View className="flex-row justify-between items-center">
-            <Text className="text-slate-600 font-dm-sans-medium text-sm">
-              Ticket Price
-            </Text>
-            <View className="flex-1 h-[1px] border-b border-dotted border-slate-300 mx-4 opacity-50" />
-            <Text className="text-slate-400 text-xs font-dm-sans-bold">
-              {currency}
-              {ticket.price}
-            </Text>
-          </View>
-        </View>
+        <View className="flex-row justify-between">
+          <Text className="text-slate-500 text-sm">Currency</Text>
 
-        <View className="flex-row justify-between items-center mt-2">
-          <Text className="text-slate-500 font-dm-sans text-sm">Subtotal</Text>
-          <Text className="text-slate-800 font-dm-sans-bold text-sm">
-            {currency}
-            {ticket.price}
-          </Text>
-        </View>
-
-        <View className="flex-row justify-between items-center">
-          <Text className="text-slate-500 font-dm-sans text-sm">
-            Service Fee
-          </Text>
-          <Text className="text-slate-800 font-dm-sans-bold text-sm">
-            {currency}0
+          <Text className="font-dm-sans-bold text-slate-800">
+            {currency.toUpperCase()}
           </Text>
         </View>
       </View>
@@ -136,8 +112,10 @@ const TicketReceipt = ({ ticket }: any) => {
               Total Amount
             </Text>
             <Text className="font-poppins-bold text-slate-900 text-3xl">
-              <Text className="text-lg text-slate-400">{currency}</Text>
-              {ticket.price}
+              <Text className="text-lg text-slate-400">
+                {currency.toUpperCase()}
+              </Text>{" "}
+              {amount}
             </Text>
           </View>
 
@@ -171,6 +149,9 @@ const TicketsCheckout = () => {
     chrle: number;
     babyu: number;
   }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
+  const [currency, setCurrency] = useState<string>("USD");
+  const [baseAmount, setBaseAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<number>(0);
 
   const { id: ticketId, from, eventId } = useLocalSearchParams();
   const router = useRouter();
@@ -188,6 +169,17 @@ const TicketsCheckout = () => {
       if (tkt) {
         setTicket(tkt);
         setSku(getTicketSku(tkt.currency as any, tkt.price as any));
+        setCurrency(tkt.currency.toUpperCase());
+
+        const res = await CurrencyAPI.convert({
+          from: tkt.currency,
+          to: "USD",
+          amount: tkt.price,
+        });
+
+        if (!res.ok) setAmount(0);
+        setBaseAmount(res.data);
+        setAmount(res.data);
       }
     };
 
@@ -241,21 +233,32 @@ const TicketsCheckout = () => {
     };
   }, [lastPurchase, ticketId, user?._id]);
 
-  const getTokenAmount = () => {
-    const totalAmount = Number(ticket?.price);
-    switch (crypto) {
-      case "eth":
-        return (totalAmount / cryptoPrices.eth).toFixed(6);
-      case "sol":
-        return (totalAmount / cryptoPrices.sol).toFixed(6);
-      case "chrle":
-        return (totalAmount / cryptoPrices.chrle).toFixed(6);
-      case "babyu":
-        return (totalAmount / cryptoPrices.babyu).toFixed(6);
-      default:
-        return totalAmount.toFixed(2);
+  useEffect(() => {
+    if (!ticket) return;
+
+    const amountUSD = baseAmount;
+
+    if (paymentMethod !== "credit") {
+      const price = cryptoPrices[crypto as keyof typeof cryptoPrices];
+
+      if (price) {
+        const cryptoAmount = Number(
+          (amountUSD / price).toFixed(
+            crypto === "eth" || crypto === "sol" ? 4 : 2,
+          ),
+        );
+        setAmount(cryptoAmount);
+      } else {
+        setAmount(amountUSD);
+      }
+    } else {
+      setAmount(amountUSD);
     }
-  };
+  }, [ticket, currency, cryptoPrices]);
+
+  useEffect(() => {
+    setCurrency(paymentMethod === "credit" ? "USD" : crypto);
+  }, [paymentMethod, crypto]);
 
   const handlePurchase = async () => {
     if (!ticket) return;
@@ -317,7 +320,6 @@ const TicketsCheckout = () => {
 
         case "crypto":
         case "token":
-          const amount = getTokenAmount();
           if (Number(amount) <= 0) {
             toast.error("Invalid amount for selected cryptocurrency.");
             return null;
@@ -327,7 +329,7 @@ const TicketsCheckout = () => {
             amount: amount,
             currency: crypto,
             webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
-            metadata: { type: "subscription", ticketId, userId: user?._id },
+            metadata: { type: "ticket", ticketId, userId: user?._id },
             redirect: "eventworld://mine/tickets",
           };
 
@@ -369,7 +371,7 @@ const TicketsCheckout = () => {
       <View className="flex-1 gap-8 px-1">
         <TicketHeroCard ticket={ticket} loading={loading} />
 
-        <TicketReceipt ticket={ticket} />
+        <TicketReceipt ticket={ticket} currency={currency} amount={amount} />
 
         {Platform.OS !== "ios" && (
           <PaymentMethodGroup
@@ -388,7 +390,7 @@ const TicketsCheckout = () => {
         {Platform.OS === "ios" ? (
           <Button
             type="primary"
-            label="Subscribe"
+            label="Pay"
             buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
             textClassName="text-lg font-poppins-bold"
             loading={purchaseLoading}
@@ -398,18 +400,12 @@ const TicketsCheckout = () => {
         ) : (
           <Button
             type="primary"
-            label={
-              purchaseLoading
-                ? "Processing..."
-                : `Pay ${getCurrencySymbol((ticket?.currency.toUpperCase() as any) || "USD")}${
-                    ticket?.price || 0
-                  }`
-            }
+            label={purchaseLoading ? "Processing..." : `Pay`}
             buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
             textClassName="text-lg font-poppins-bold"
             loading={purchaseLoading}
             onPress={handlePurchase}
-            disabled={loading}
+            disabled={loading || amount <= 0}
           />
         )}
 

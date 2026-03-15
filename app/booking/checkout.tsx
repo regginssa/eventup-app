@@ -610,14 +610,13 @@ const CheckoutScreen = () => {
   };
 
   const handleCryptoPayment = async (bookingId: string) => {
-    const amount = getTokenAmount();
-    if (Number(amount) <= 0) {
+    if (Number(totalAmount) <= 0) {
       toast.error("Invalid amount for selected cryptocurrency.");
       return null;
     }
 
     const data = {
-      amount: amount,
+      amount: totalAmount,
       currency: crypto,
       webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
       metadata: { type: "booking", bookingId },
@@ -635,21 +634,6 @@ const CheckoutScreen = () => {
     const checkoutUrl = res.data;
     await Linking.openURL(checkoutUrl);
     toast.success("Experience Booked!");
-  };
-
-  const getTokenAmount = () => {
-    switch (crypto) {
-      case "eth":
-        return (totalAmount / cryptoPrices.eth).toFixed(6);
-      case "sol":
-        return (totalAmount / cryptoPrices.sol).toFixed(6);
-      case "chrle":
-        return (totalAmount / cryptoPrices.chrle).toFixed(6);
-      case "babyu":
-        return (totalAmount / cryptoPrices.babyu).toFixed(6);
-      default:
-        return totalAmount.toFixed(2);
-    }
   };
 
   const createBooking = async (): Promise<string | null> => {
