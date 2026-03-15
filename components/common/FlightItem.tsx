@@ -207,7 +207,7 @@ const FlightItem: React.FC<FlightItemProps> = ({
                     color="#844AFF"
                   />
                   <Text className="font-dm-sans-bold text-[11px] text-purple-600">
-                    Booking Ref
+                    BOOKING REF
                   </Text>
                 </View>
 

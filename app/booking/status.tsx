@@ -373,7 +373,7 @@ const BookingStatus = () => {
       icon: "bus-side",
       status: transfer.hotelToEvent.status,
     },
-  ];
+  ].filter(Boolean);
 
   return (
     <SimpleContainer title="Booking Status" scrolled>
@@ -535,23 +535,6 @@ const BookingStatus = () => {
               </LinearGradient>
             )}
           </View>
-
-          {booking.ticketStatus === "pending" && (
-            <Button
-              type="gradient-glass"
-              label="Buy Ticket"
-              icon={
-                <MaterialCommunityIcons
-                  name="arrow-right"
-                  size={16}
-                  color="white"
-                />
-              }
-              iconPosition="right"
-              buttonClassName="h-12"
-              onPress={handleBuyTicket}
-            />
-          )}
 
           {completed && (
             <Button

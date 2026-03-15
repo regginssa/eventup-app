@@ -108,7 +108,11 @@ const SubscriptionReceipt = ({ subscription, amount, currency }: any) => {
           </Text>
         </View>
 
-        <View className="h-[1px] bg-slate-200 my-2" />
+        <View className="flex-row items-center justify-between bg-slate-50">
+          <View className="w-5 h-10 rounded-r-full bg-white border-r border-t border-b border-slate-200 -ml-[1px]" />
+          <View className="flex-1 h-[1px] border-b border-dashed border-slate-300 mx-2" />
+          <View className="w-5 h-10 rounded-l-full bg-white border-l border-t border-b border-slate-200 -mr-[1px]" />
+        </View>
 
         <View className="flex-row justify-between items-end">
           <Text className="text-slate-600 font-dm-sans-bold">Total Amount</Text>

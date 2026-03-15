@@ -5,15 +5,10 @@ import {
 } from "@stripe/stripe-react-native";
 import { Image } from "expo-image";
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { StripePaymentMethodGroup } from "../molecules";
 import { useAuth } from "../providers/AuthProvider";
+import { useToast } from "../providers/ToastProvider";
 
 const CardsGroup = require("@/assets/images/icons/credit_cards_group.png");
 
@@ -29,6 +24,7 @@ const CardPayment: React.FC<CardPaymentProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
 
   const { user, setAuthUser } = useAuth();
+  const toast = useToast();
 
   const handleAddCard = async () => {
     try {
@@ -41,7 +37,7 @@ const CardPayment: React.FC<CardPaymentProps> = ({
       const clientSecretRes = await stripeServices.getClientSecret();
       if (!clientSecretRes.data) {
         setLoading(false);
-        return Alert.alert("Error", "No Stripe client secret found.");
+        return toast.error("No Stripe client secret found.");
       }
 
       const { error } = await initPaymentSheet({
@@ -52,14 +48,14 @@ const CardPayment: React.FC<CardPaymentProps> = ({
       if (error) {
         console.error("Error initializing payment sheet:", error);
         setLoading(false);
-        return Alert.alert("Error", "Failed to initialize payment sheet.");
+        return toast.error("Failed to initialize payment sheet.");
       }
 
       const { error: presentError } = await presentPaymentSheet();
 
       if (presentError) {
         console.error("Payment sheet error:", presentError);
-        return Alert.alert("Error", "Payment sheet failed.");
+        return toast.error("Payment sheet failed.");
       }
 
       const response = await stripeServices.savePaymentMethod(
@@ -67,9 +63,9 @@ const CardPayment: React.FC<CardPaymentProps> = ({
       );
 
       setAuthUser(response.data);
-      Alert.alert("Success", "Card is successfully saved");
+      toast.success("Card is successfully saved");
     } catch (error) {
-      Alert.alert("Error", "Card is not added");
+      toast.error("Card is not added");
     } finally {
       setLoading(false);
     }

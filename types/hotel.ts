@@ -36,4 +36,9 @@ export interface IHotelOffer {
   checkIn: string;
   checkOut: string;
   checkInInfo: string;
+  converted: {
+    totalAmount: number;
+    netAmount: number;
+    currency: string;
+  };
 }

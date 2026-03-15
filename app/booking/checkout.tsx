@@ -140,7 +140,7 @@ const HighEndReceipt = ({
     </View>
 
     <View className="bg-slate-50 rounded-b-[24px] border border-slate-200 p-6 pt-2">
-      <View className="flex-row justify-between items-end">
+      <View className="flex-row justify-between items-end gap-4">
         <View>
           <Text className="text-slate-400 font-dm-sans-bold text-[10px] uppercase tracking-widest mb-1">
             Total Amount
@@ -392,43 +392,43 @@ const CheckoutScreen = () => {
 
       if (flight.offer) {
         servicesList.push("Round-trip Flight");
-        baseUSD += Number(flight.offer.totalAmount);
+        baseUSD += Number(flight.offer.converted.totalAmount);
       }
 
       if (hotel.offer) {
         servicesList.push("Hotel Accommodation");
-        baseUSD += Number(hotel.offer.totalAmount);
+        baseUSD += Number(hotel.offer.converted.totalAmount);
       }
 
       if (transfer.airportToHotel.offer) {
         servicesList.push("Airport Transfer");
-        baseUSD += Number(transfer.airportToHotel.offer.totalAmount);
+        baseUSD += Number(transfer.airportToHotel.offer.converted.totalAmount);
       }
 
       if (transfer.hotelToEvent.offer) {
         servicesList.push("Event Shuttle");
-        baseUSD += Number(transfer.hotelToEvent.offer.totalAmount);
+        baseUSD += Number(transfer.hotelToEvent.offer.converted.totalAmount);
       }
     } else {
       // NEW BOOKING
       if (flightOffer) {
         servicesList.push("One-Way Flight");
-        baseUSD += Number(flightOffer.totalAmount);
+        baseUSD += Number(flightOffer.converted.totalAmount);
       }
 
       if (hotelOffer) {
         servicesList.push("Hotel Accommodation");
-        baseUSD += Number(hotelOffer.totalAmount);
+        baseUSD += Number(hotelOffer.converted.totalAmount);
       }
 
       if (airportToHotelOffer) {
         servicesList.push("Airport Transfer");
-        baseUSD += Number(airportToHotelOffer.totalAmount);
+        baseUSD += Number(airportToHotelOffer.converted.totalAmount);
       }
 
       if (hotelToEventOffer) {
         servicesList.push("Event Shuttle");
-        baseUSD += Number(hotelToEventOffer.totalAmount);
+        baseUSD += Number(hotelToEventOffer.converted.totalAmount);
       }
     }
 
@@ -586,6 +586,9 @@ const CheckoutScreen = () => {
   };
 
   const handleCreditPayment = async (bookingId: string) => {
+    if (stripePaymentId === "")
+      return toast.error("Please add your credit card");
+
     const response = await payStripe({
       amount: totalAmount,
       currency: "USD",
@@ -666,7 +669,7 @@ const CheckoutScreen = () => {
       paymentStatus: "created",
       price: {
         totalAmount,
-        currency: "USD",
+        currency: currency,
       },
       ticketStatus: event?.type === "ai" ? "pending" : "completed",
       status: "pending",

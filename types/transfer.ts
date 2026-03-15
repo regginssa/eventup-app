@@ -14,6 +14,11 @@ export interface ITransferOffer {
   pickupPoint: string; // formatted UX-friendly string
   destinationPoint: string; // formatted UX-friendly string
   pickupDateTime: string;
+  converted: {
+    totalAmount: number;
+    netAmount: number;
+    currency: string;
+  };
 }
 
 export interface ITransferBookingResponse {

@@ -49,9 +49,7 @@ const TripSummary = ({
             <Text
               className={`font-dm-sans-bold text-[10px] px-2 py-0.5 rounded ${ticketStatus === "pending" ? "text-yellow-600 bg-yellow-50" : "text-emerald-600 bg-emerald-50"}`}
             >
-              {ticketStatus === "pending"
-                ? "Price estimated, confirmed on purchase"
-                : "INCLUDED"}
+              {ticketStatus === "pending" ? "NEED TO PURCHASE" : "INCLUDED"}
             </Text>
           </View>
           {services.map((service, i) => (
@@ -85,7 +83,7 @@ const TripSummary = ({
               Total Paid
             </Text>
             <Text className="font-poppins-bold text-slate-900 text-3xl">
-              <Text className="text-lg text-slate-400">$</Text>
+              <Text className="text-lg text-slate-400">{currency}</Text>
               {totalPrice}
             </Text>
           </View>
@@ -187,13 +185,21 @@ const BookedScreen = () => {
             <Text className="font-poppins-bold text-slate-800 text-sm ml-1 uppercase tracking-widest">
               Your Itinerary
             </Text>
-            <FlightItem data={booking?.flight.offer || null} />
-            <HotelItem data={booking?.hotel.offer || null} />
+            <FlightItem
+              data={booking?.flight.offer || null}
+              reference={booking?.flight?.booking?.bookingReference}
+            />
+            <HotelItem
+              data={booking?.hotel.offer || null}
+              reference={booking?.hotel?.booking?.reference}
+            />
             <TransferItem
               data={booking?.transfer.airportToHotel?.offer || null}
+              reference={booking?.transfer.airportToHotel.booking?.reference}
             />
             <TransferItem
               data={booking?.transfer.hotelToEvent?.offer || null}
+              reference={booking?.transfer.hotelToEvent.booking?.reference}
             />
           </View>
 

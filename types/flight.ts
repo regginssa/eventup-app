@@ -21,6 +21,11 @@ export interface IFlightOffer {
   destinationIata: string;
   flightNumbers: string[];
   stops: TStop[];
+  converted: {
+    totalAmount: number;
+    netAmount: number;
+    currency: string;
+  };
 }
 
 export interface IFlightBookingResponse {

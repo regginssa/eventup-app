@@ -74,10 +74,10 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   };
 
   const total = (
-    (Number(flightOffer?.totalAmount) || 0) +
-    (Number(hotelOffer?.totalAmount) || 0) +
-    (Number(airportToHotelOffer?.totalAmount) || 0) +
-    (Number(hotelToEventOffer?.totalAmount) || 0)
+    (Number(flightOffer?.converted?.totalAmount) || 0) +
+    (Number(hotelOffer?.converted?.totalAmount) || 0) +
+    (Number(airportToHotelOffer?.converted?.totalAmount) || 0) +
+    (Number(hotelToEventOffer?.converted?.totalAmount) || 0)
   ).toFixed(2);
 
   const SectionHeader = ({
@@ -244,12 +244,12 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
           <View className="flex-row justify-between items-end mb-6">
             <View className="gap-1">
               <Text className="font-dm-sans-bold text-slate-400 text-[10px] uppercase tracking-widest mb-1">
-                Grand Total
+                Grand Total in usd
               </Text>
 
               <View className="flex flex-row items-end">
                 <Text className="text-sm text-slate-400 font-poppins-semibold">
-                  {flightOffer?.currency || "USD"}{" "}
+                  USD
                 </Text>
                 <Text className="font-poppins-bold text-slate-900 text-3xl">
                   {total}
