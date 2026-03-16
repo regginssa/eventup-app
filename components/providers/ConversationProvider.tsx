@@ -168,10 +168,62 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
       );
     };
 
+    const handleDMBlocked = ({ userId, conversationId }: any) => {
+      if (user?._id === userId) return;
+      setConversations((prev) =>
+        prev.map((p) =>
+          p._id === conversationId
+            ? {
+                ...p,
+                participants: p.participants.map((pu) =>
+                  pu._id === userId
+                    ? {
+                        ...pu,
+                        blockedUsers: pu.blockedUsers.some(
+                          (bu) => bu === userId,
+                        )
+                          ? pu.blockedUsers
+                          : [...pu.blockedUsers, userId],
+                      }
+                    : pu,
+                ),
+              }
+            : p,
+        ),
+      );
+    };
+
+    const handleDMUnblocked = ({ userId, conversationId }: any) => {
+      if (user?._id === userId) return;
+      setConversations((prev) =>
+        prev.map((p) =>
+          p._id === conversationId
+            ? {
+                ...p,
+                participants: p.participants.map((pu) =>
+                  pu._id === userId
+                    ? {
+                        ...pu,
+                        blockedUsers: pu.blockedUsers.filter(
+                          (bu) => bu !== userId,
+                        ),
+                      }
+                    : pu,
+                ),
+              }
+            : p,
+        ),
+      );
+    };
+
     socket.on("conversation_updated", handleUpdatedConversation);
+    socket.on("dm_blocked", handleDMBlocked);
+    socket.on("dm_unblocked", handleDMUnblocked);
 
     return () => {
       socket.off("conversation_updated", handleUpdatedConversation);
+      socket.off("dm_blocked", handleDMBlocked);
+      socket.on("dm_unblocked", handleDMUnblocked);
     };
   }, [socket, user]);
 

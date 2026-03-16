@@ -19,7 +19,7 @@ import { useToast } from "@/components/providers/ToastProvider";
 import { MAX_FILE_SIZE } from "@/config/env";
 import { IMessage, TMessageFile } from "@/types/message";
 import { TOnlineStatus } from "@/types/user";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   AudioModule,
   RecordingPresets,
@@ -53,6 +53,7 @@ const ChatDM = () => {
   const [name, setName] = useState<string>("N/A");
   const [avatar, setAvatar] = useState<string | undefined>(undefined);
   const [otherUserId, setOtherUserId] = useState<string | undefined>(undefined);
+  const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
   const [status, setStatus] = useState<TOnlineStatus>("offline");
   const [text, setText] = useState<string>("");
   const [files, setFiles] = useState<TFile[]>([]);
@@ -86,6 +87,9 @@ const ChatDM = () => {
     markMessageSeen,
     updateMessage,
     removeMessage,
+    removeMessages,
+    blockDM,
+    unblockDM,
     messages,
   } = useMessage();
   const toast = useToast();
@@ -123,6 +127,7 @@ const ChatDM = () => {
       setAvatar(otherUser?.avatar as string | undefined);
       setOtherUserId(otherUser?._id || undefined);
       setStatus(otherUser?.status || "offline");
+      setBlockedUsers(otherUser?.blockedUsers || []);
 
       joinConversation(conversationId as string);
       await loadMessages(conversationId as string);
@@ -371,7 +376,25 @@ const ChatDM = () => {
     }
   };
 
-  const handleDeleteAll = async () => {};
+  const handleDeleteAll = async () => {
+    const ids = messages.map((m) => m._id);
+    await removeMessages(ids as string[]);
+  };
+
+  const handleBlock = async () => {
+    if (!user?._id || !otherUserId) return;
+    await blockDM(otherUserId);
+  };
+
+  const handleUnblock = async () => {
+    if (!user?._id || !otherUserId) return;
+    await unblockDM(otherUserId);
+  };
+
+  const isSendDisabled =
+    user?.blockedUsers.some((bu) => bu === otherUserId) ||
+    blockedUsers.some((bu) => bu === user?._id);
+  const meBlocked = user?.blockedUsers.some((bu) => bu === otherUserId);
 
   return (
     <ChatContainer
@@ -381,11 +404,14 @@ const ChatDM = () => {
       avatar={avatar}
       otherUserId={otherUserId}
       status={status}
+      isBlocked={isSendDisabled}
+      onDeleteAll={handleDeleteAll}
+      onBlock={handleBlock}
     >
       {loading ? (
         <Spinner size="md" text="Loading messages..." />
       ) : (
-        <View className="flex-1">
+        <View className="flex-1 relative bg-white rounded-3xl p-6">
           <FlatList
             ref={flatListRef}
             data={[...messages].reverse()}
@@ -396,6 +422,7 @@ const ChatDM = () => {
                 message={item}
                 isMine={item.sender._id === user?._id}
                 onLongPressMessage={(messageId: string) => {
+                  if (isSendDisabled) return;
                   setSelectedMessageId(messageId);
                   setIsMessageActionsOpen(true);
                 }}
@@ -404,6 +431,40 @@ const ChatDM = () => {
             inverted
             contentContainerStyle={{ gap: 16 }}
           />
+
+          {isSendDisabled && (
+            <View className="absolute inset-0 z-40 bg-white/80 rounded-3xl items-center justify-center px-8">
+              <View className="items-center gap-4">
+                <View className="bg-red-100 p-4 rounded-full">
+                  <AntDesign name="block" size={28} color="#dc2626" />
+                </View>
+
+                <Text className="text-lg font-poppins-bold text-gray-900 text-center">
+                  {meBlocked
+                    ? "You blocked this user"
+                    : "You can’t send messages to this user"}
+                </Text>
+
+                <Text className="text-gray-500 text-center leading-5">
+                  {meBlocked
+                    ? "You can't send messages while this user is blocked. Unblock them to continue the conversation."
+                    : "This conversation is unavailable right now."}
+                </Text>
+
+                {meBlocked && (
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    className="mt-2 bg-red-500 px-6 py-2 rounded-full"
+                    onPress={handleUnblock}
+                  >
+                    <Text className="text-white font-poppins-semibold">
+                      Unblock user
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          )}
         </View>
       )}
 
@@ -414,6 +475,7 @@ const ChatDM = () => {
               type="string"
               placeholder="Write a message..."
               multiline
+              disabled={isSendDisabled}
               maxHeight={130}
               value={isEditing ? editText : text}
               onChange={isEditing ? setEditText : setText}
@@ -491,6 +553,7 @@ const ChatDM = () => {
         <View className="flex flex-row items-center gap-2 mb-2">
           <TouchableOpacity
             activeOpacity={0.8}
+            disabled={isSendDisabled}
             onPress={isEditing ? handleEdit : handleSend}
           >
             <MaterialCommunityIcons
@@ -502,7 +565,7 @@ const ChatDM = () => {
 
           <TouchableOpacity
             activeOpacity={0.8}
-            disabled={voiceLoading}
+            disabled={voiceLoading || isSendDisabled}
             onPress={recorderState.isRecording ? stopRecording : startRecording}
           >
             {voiceLoading ? (
@@ -522,6 +585,7 @@ const ChatDM = () => {
 
           <TouchableOpacity
             activeOpacity={0.8}
+            disabled={isSendDisabled}
             onPress={() => setIsUploadOpen(true)}
           >
             <MaterialCommunityIcons

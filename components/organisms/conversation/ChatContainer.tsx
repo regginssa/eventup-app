@@ -18,6 +18,7 @@ interface ChatContainerProps {
   onViewGroup?: () => void;
   onDeleteAll?: () => Promise<void>;
   onBlock?: () => Promise<void>;
+  isBlocked?: boolean;
 }
 
 const ChatContainer: React.FC<ChatContainerProps> = ({
@@ -30,6 +31,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
   onViewGroup,
   onDeleteAll,
   onBlock,
+  isBlocked,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const router = useRouter();
@@ -69,17 +71,19 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className="w-10 h-10 rounded-full bg-white flex items-center justify-center relative"
-              onPress={() => setIsOpen(true)}
-            >
-              <MaterialCommunityIcons
-                name="dots-vertical"
-                size={16}
-                color="#4b5563"
-              />
-            </TouchableOpacity>
+            {!isBlocked && (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                className="w-10 h-10 rounded-full bg-white flex items-center justify-center relative"
+                onPress={() => setIsOpen(true)}
+              >
+                <MaterialCommunityIcons
+                  name="dots-vertical"
+                  size={16}
+                  color="#4b5563"
+                />
+              </TouchableOpacity>
+            )}
           </View>
 
           <View className="flex-1 gap-5">{children}</View>
@@ -101,6 +105,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
                       className="flex flex-row items-center gap-2"
                       onPress={async () => {
                         setIsOpen(false);
+                        await onDeleteAll();
                       }}
                     >
                       <MaterialCommunityIcons
@@ -118,8 +123,9 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
                     <TouchableOpacity
                       activeOpacity={0.8}
                       className="flex flex-row items-center gap-2"
-                      onPress={() => {
+                      onPress={async () => {
                         setIsOpen(false);
+                        await onBlock();
                       }}
                     >
                       <Ionicons name="ban" size={18} color="#1f2937" />

@@ -1,4 +1,8 @@
-import { fetchConversationMessages } from "@/api/services/message";
+import { updateMe } from "@/api/services/auth";
+import {
+  fetchConversationMessages,
+  removeMessagesMany,
+} from "@/api/services/message";
 import { IMessage } from "@/types/message";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
@@ -16,6 +20,9 @@ interface MessageContextProps {
   markMessageSeen: (payload: any) => void;
   updateMessage: (payload: any) => void;
   removeMessage: (payload: any) => void;
+  removeMessages: (ids: string[]) => Promise<void>;
+  blockDM: (userId: string) => Promise<void>;
+  unblockDM: (userId: string) => Promise<void>;
 }
 
 const MessageContext = createContext<MessageContextProps | undefined>(
@@ -35,7 +42,7 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
   const [currentConversationId, setCurrentConversationId] =
     useState<string>("");
 
-  const { user } = useAuth();
+  const { user, setAuthUser } = useAuth();
   const { socket } = useSocket();
   const { updateUnread } = useConversation();
 
@@ -105,16 +112,26 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
       );
     };
 
+    const handleMessagesRemoved = ({ ids, conversationId, userId }: any) => {
+      if (conversationId !== currentConversationId || user?._id !== userId)
+        return;
+      setMessages((prev) =>
+        prev.filter((p) => !ids.includes(p._id?.toString() as any)),
+      );
+    };
+
     socket.on("new_message", handleIncoming);
     socket.on("messages_seen", handleSuccessMessageSeen);
-    socket.on("message_removed", handleMessageRemoved);
     socket.on("message_updated", handleMessageUpdated);
+    socket.on("message_removed", handleMessageRemoved);
+    socket.on("messages_removed", handleMessagesRemoved);
 
     return () => {
       socket.off("new_message", handleIncoming);
       socket.off("messages_seen", handleSuccessMessageSeen);
-      socket.off("message_removed", handleMessageRemoved);
       socket.off("message_updated", handleMessageUpdated);
+      socket.off("message_removed", handleMessageRemoved);
+      socket.off("messages_removed", handleMessagesRemoved);
     };
   }, [socket, currentConversationId]);
 
@@ -144,6 +161,56 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
     socket.emit("update_message", payload);
   };
 
+  const removeMessages = async (ids: string[]): Promise<void> => {
+    if (currentConversationId === "") return;
+
+    const res = await removeMessagesMany(ids);
+    if (res.ok) {
+      setMessages((prev) =>
+        prev.filter((p) => !ids.includes(p._id?.toString() as any)),
+      );
+      socket.emit("remove_messages", {
+        ids,
+        conversationId: currentConversationId,
+        userId: user?._id,
+      });
+    }
+  };
+
+  const blockDM = async (userId: string): Promise<void> => {
+    if (user?.blockedUsers.some((bu) => bu === userId)) return;
+    const res = await updateMe({
+      ...user,
+      blockedUsers: [...(user?.blockedUsers as any), userId],
+    });
+    if (res.data) {
+      setAuthUser(res.data);
+
+      socket.emit("block_dm", {
+        userId,
+        conversationId: currentConversationId,
+      });
+    }
+  };
+
+  const unblockDM = async (userId: string): Promise<void> => {
+    if (!user?.blockedUsers.some((bu) => bu === userId)) return;
+    const res = await updateMe({
+      ...user,
+      blockedUsers: user?.blockedUsers.filter((bu) => bu !== userId),
+    });
+    if (res.data) {
+      setAuthUser(res.data);
+
+      console.log(res.data.blockedUsers);
+
+      socket.emit("unblock_dm", {
+        userId,
+        conversationId: currentConversationId,
+      });
+    }
+  };
+
   return (
     <MessageContext.Provider
       value={{
@@ -157,6 +224,9 @@ const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
         markMessageSeen,
         updateMessage,
         removeMessage,
+        removeMessages,
+        blockDM,
+        unblockDM,
       }}
     >
       {children}

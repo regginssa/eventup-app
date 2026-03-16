@@ -66,6 +66,7 @@ export interface IUser {
   phone: string;
   gender: "mr" | "ms";
   emailVerified: boolean;
+  blockedUsers: string[];
   createdAt?: Date;
   updatedAt?: Date;
 }

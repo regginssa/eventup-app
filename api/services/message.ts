@@ -28,3 +28,9 @@ export const removeMessageById = async (
 ): Promise<ApiResponse<boolean>> => {
   return await AxiosInstance.delete(MESSAGE_BASE + messageId);
 };
+
+export const removeMessagesMany = async (
+  ids: string[],
+): Promise<ApiResponse<null>> => {
+  return await AxiosInstance.post(MESSAGE_BASE + "many", { ids });
+};

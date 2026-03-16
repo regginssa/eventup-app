@@ -105,7 +105,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
           <Avatar source={sender.avatar} name={sender.name} size={40} />
         )}
         <View
-          className={`w-2/3 ${isMine ? "bg-green-200 rounded-l-xl rounded-tl-xl rounded-tr-full pr-6 pl-2" : "bg-slate-200 rounded-tl-full rounded-tr-xl rounded-r-xl pl-6 pr-2"} py-2`}
+          className={`w-2/3 ${isMine ? "bg-green-200" : "bg-slate-200"} rounded-xl p-4`}
         >
           {!isVoice ? (
             <>
