@@ -50,12 +50,20 @@ const SubscriptionScreen = () => {
   >(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { user } = useAuth();
+  const { user, refreshAuthUser } = useAuth();
   const router = useRouter();
   const { subscriptions } = useSubscription();
 
   useEffect(() => {
+    const refresh = async () => {
+      await refreshAuthUser();
+    };
+    refresh();
+  }, []);
+
+  useEffect(() => {
     setLoading(true);
+
     if (subscriptions.length === 0) {
       setOneMonthPrice(12);
     } else {
@@ -362,7 +370,7 @@ const SubscriptionScreen = () => {
       <Button
         type="primary"
         label={
-          isCurrentPlan && hasValidSubscription
+          hasValidSubscription
             ? `Ends on ${expiryDate}`
             : isFreePlan
               ? "Free Plan Selected"

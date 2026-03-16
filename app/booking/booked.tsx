@@ -172,7 +172,7 @@ const BookedScreen = () => {
                 Booking Confirmed!
               </Text>
               <Text className="font-dm-sans-medium text-slate-400 text-xs">
-                Itinerary #BOK_{bookingId?.toString().slice(-6).toUpperCase()}
+                Itinerary #BOK_{bookingId?.toString().slice(0, 8).toUpperCase()}
               </Text>
             </View>
           </View>

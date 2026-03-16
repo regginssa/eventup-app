@@ -306,7 +306,7 @@ const TicketsCheckout = () => {
           });
 
           if (updated) {
-            Alert.alert("Success", "Ticket purchased successfully!");
+            toast.success("Ticket purchased successfully!");
             if (from && eventId) {
               router.replace({
                 pathname: "/event/details/user",

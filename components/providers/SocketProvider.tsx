@@ -52,6 +52,7 @@ const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     if (!socket) return;
 
     const handleUpdateUser = ({ user }: { user: IUser }) => {
+      console.log("[auth_user_updated]");
       setAuthUser(user);
     };
 

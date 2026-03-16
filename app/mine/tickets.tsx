@@ -19,7 +19,7 @@ type TTicketItem = {
 const MineTickets = () => {
   const [items, setItems] = useState<TTicketItem[]>([]);
 
-  const { user } = useAuth();
+  const { user, refreshAuthUser } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -46,6 +46,14 @@ const MineTickets = () => {
 
     setItems(result);
   }, [user]);
+
+  useEffect(() => {
+    const refresh = async () => {
+      await refreshAuthUser();
+      console.log("refreshed");
+    };
+    refresh();
+  }, []);
 
   const renderItem = ({ item }: { item: TTicketItem }) => {
     const { ticket, count } = item;

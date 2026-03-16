@@ -605,10 +605,7 @@ const CheckoutScreen = () => {
       return toast.error("Payment failed");
     }
 
-    router.replace({
-      pathname: "/booking/status",
-      params: { id: bookingId },
-    });
+    router.replace(`/booking/status/${booking?._id}` as any);
     toast.success("Experience Booked!");
   };
 
@@ -623,7 +620,7 @@ const CheckoutScreen = () => {
       currency: crypto,
       webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
       metadata: { type: "booking", bookingId },
-      redirect: "eventworld://booking/status?id=" + bookingId,
+      redirect: `eventworld://booking/status/${booking?._id}`,
     };
 
     const res = await Web3API.getCheckoutUrl(data);

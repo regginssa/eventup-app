@@ -447,14 +447,14 @@ const BookingStatus = () => {
               {bookingItems.map((item, index) =>
                 index === 1 ? (
                   <TicketBookingStatusItem
-                    label={item.label}
+                    label={item.label + index}
                     status={item.status}
                     isLast={index === bookingItems.length - 1}
                     onPress={handleBuyTicket}
                   />
                 ) : (
                   <BookingStatusItem
-                    key={item.label}
+                    key={item.label + index}
                     label={item.label}
                     icon={item.icon as any}
                     status={item.status}

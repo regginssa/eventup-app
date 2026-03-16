@@ -91,7 +91,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
           className="px-8 py-3 rounded-2xl shadow-xl shadow-slate-200 border border-slate-50 flex flex-row gap-2 items-center"
         >
           <Text className="font-dm-sans-medium text-slate-400 text-lg">
-            Itinerary #BOK_{booking._id?.toString().slice(-6).toUpperCase()}
+            Itinerary #BOK_{booking._id?.toString().slice(0, 8).toUpperCase()}
           </Text>
 
           <MaterialCommunityIcons
@@ -270,10 +270,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
                 },
               });
             } else {
-              router.push({
-                pathname: "/booking/status",
-                params: { id: booking._id },
-              });
+              router.push(`/booking/status/${booking._id}` as any);
             }
           }}
         />
