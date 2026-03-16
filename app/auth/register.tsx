@@ -332,7 +332,10 @@ const RegisterScreen = () => {
             By signing up, you agree to our{" "}
           </Text>
 
-          <TouchableOpacity activeOpacity={0.8}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => router.push("/about-us")}
+          >
             <Text className="font-dm-sans text-sm text-[#15A5FF]">
               Terms of Service
             </Text>
@@ -340,7 +343,10 @@ const RegisterScreen = () => {
 
           <Text className="font-dm-sans text-sm text-gray-500"> and </Text>
 
-          <TouchableOpacity activeOpacity={0.8}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => router.push("/about-us")}
+          >
             <Text className="font-dm-sans text-sm text-[#15A5FF]">
               Privacy Policy
             </Text>
