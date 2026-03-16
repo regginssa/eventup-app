@@ -270,7 +270,10 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
                 },
               });
             } else {
-              router.push(`/booking/status/${booking._id}` as any);
+              router.push({
+                pathname: "/booking/status",
+                params: { id: booking._id },
+              });
             }
           }}
         />

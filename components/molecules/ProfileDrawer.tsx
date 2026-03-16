@@ -101,7 +101,7 @@ const Profile = ({ user, onClose }: { user: IUser; onClose: () => void }) => {
     {
       label: "About us",
       icon: <AntDesign name="info-circle" size={20} color="#374151" />,
-      href: "/",
+      href: "/about-us",
     },
   ];
 

@@ -69,7 +69,7 @@ const MyEventsScreen = () => {
 
   return (
     <MyEventsScreenContainer>
-      <View className="flex-1 bg-white p-6 rounded-t-3xl">
+      <View className="flex-1 bg-white p-6 rounded-3xl gap-6">
         <Tabs
           tabs={tabs}
           selectedTab={selectedTab}
