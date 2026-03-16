@@ -95,92 +95,92 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
     return null;
   }
 
-  // useEffect(() => {
-  //   let mounted = true;
+  useEffect(() => {
+    let mounted = true;
 
-  //   async function initIap() {
-  //     try {
-  //       const ok = await RNIap.initConnection();
-  //       if (!ok || !mounted) return;
+    async function initIap() {
+      try {
+        const ok = await RNIap.initConnection();
+        if (!ok || !mounted) return;
 
-  //       const allSkus = [
-  //         ...Object.values(IOS_SKUS.subscription),
-  //         ...Object.values(IOS_SKUS.ticket),
-  //       ];
+        const allSkus = [
+          ...Object.values(IOS_SKUS.subscription),
+          ...Object.values(IOS_SKUS.ticket),
+        ];
 
-  //       const prods = await RNIap.fetchProducts({
-  //         skus: allSkus,
-  //       });
+        const prods = await RNIap.fetchProducts({
+          skus: allSkus,
+        });
 
-  //       if (mounted && prods) {
-  //         setProducts(prods as RNIap.Product[]);
-  //       }
+        if (mounted && prods) {
+          setProducts(prods as RNIap.Product[]);
+        }
 
-  //       setReady(true);
-  //     } catch (error) {
-  //       // console.warn("IAP init error:", error);
-  //     }
-  //   }
+        setReady(true);
+      } catch (error) {
+        // console.warn("IAP init error:", error);
+      }
+    }
 
-  //   initIap();
+    initIap();
 
-  //   purchaseSub.current = RNIap.purchaseUpdatedListener(async (purchase) => {
-  //     try {
-  //       if (!user?._id) return;
+    purchaseSub.current = RNIap.purchaseUpdatedListener(async (purchase) => {
+      try {
+        if (!user?._id) return;
 
-  //       const receipt = purchase.purchaseToken;
-  //       if (!receipt) return;
+        const receipt = purchase.purchaseToken;
+        if (!receipt) return;
 
-  //       const meta = resolvePurchaseMeta(purchase.productId);
+        const meta = resolvePurchaseMeta(purchase.productId);
 
-  //       if (!meta) {
-  //         toast.error("Unknown SKU");
-  //         return;
-  //       }
+        if (!meta) {
+          toast.error("Unknown SKU");
+          return;
+        }
 
-  //       const res = await IapAPI.verify({
-  //         userId: user._id,
-  //         type: meta.type,
-  //         ticketId: meta.ticketId,
-  //         subscriptionId: meta.subscriptionId,
-  //         currency: meta.currency,
-  //         amount: meta.amount,
-  //         productId: purchase.productId,
-  //         transactionId: purchase.transactionId,
-  //         receiptData: receipt,
-  //       });
+        const res = await IapAPI.verify({
+          userId: user._id,
+          type: meta.type,
+          ticketId: meta.ticketId,
+          subscriptionId: meta.subscriptionId,
+          currency: meta.currency,
+          amount: meta.amount,
+          productId: purchase.productId,
+          transactionId: purchase.transactionId,
+          receiptData: receipt,
+        });
 
-  //       if (res.ok) {
-  //         await RNIap.finishTransaction({
-  //           purchase,
-  //           isConsumable: meta.type === "ticket",
-  //         });
-  //         setLastPurchase({
-  //           ok: true,
-  //           type: meta.type as any,
-  //           ticketId: meta.ticketId,
-  //           subscriptionId: meta.subscriptionId,
-  //           message: "Purchase successful",
-  //         });
-  //       }
-  //     } catch (error) {
-  //       toast.error("Purchase failed");
-  //     }
-  //   });
+        if (res.ok) {
+          await RNIap.finishTransaction({
+            purchase,
+            isConsumable: meta.type === "ticket",
+          });
+          setLastPurchase({
+            ok: true,
+            type: meta.type as any,
+            ticketId: meta.ticketId,
+            subscriptionId: meta.subscriptionId,
+            message: "Purchase successful",
+          });
+        }
+      } catch (error) {
+        toast.error("Purchase failed");
+      }
+    });
 
-  //   errorSub.current = RNIap.purchaseErrorListener((error) => {
-  //     // console.warn("IAP purchase error:", error);
-  //   });
+    errorSub.current = RNIap.purchaseErrorListener((error) => {
+      // console.warn("IAP purchase error:", error);
+    });
 
-  //   return () => {
-  //     mounted = false;
+    return () => {
+      mounted = false;
 
-  //     purchaseSub.current?.remove();
-  //     errorSub.current?.remove();
+      purchaseSub.current?.remove();
+      errorSub.current?.remove();
 
-  //     RNIap.endConnection();
-  //   };
-  // }, [user?._id]);
+      RNIap.endConnection();
+    };
+  }, [user?._id]);
 
   const buy = async (sku: string) => {
     if (!ready) return;
