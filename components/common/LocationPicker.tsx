@@ -212,7 +212,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         <Text className="font-dm-sans text-sm text-gray-700">{label}</Text>
       )}
       <View
-        className={`py-1 px-3 gap-2 bg-white rounded-full flex flex-row items-center ${
+        className={`px-4 gap-2 bg-white rounded-full flex flex-row items-center ${
           bordered ? "border border-gray-200" : ""
         }`}
         style={{

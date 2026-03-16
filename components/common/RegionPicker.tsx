@@ -83,7 +83,7 @@ const RegionPicker: React.FC<RegionPickerProps> = ({
 
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`py-1 px-4 gap-2 bg-white rounded-full flex flex-row items-center ${className}`}
+        className={`px-4 gap-2 bg-white rounded-full flex flex-row items-center ${className}`}
         style={[
           {
             borderWidth: bordered ? 1 : 0,

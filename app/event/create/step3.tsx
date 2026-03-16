@@ -2,6 +2,7 @@ import eventRestServices from "@/api/services/event";
 import { Button, DateTimePicker, TimezonePicker } from "@/components/common";
 import { CreateEventContainer } from "@/components/organisms";
 import { useEvent } from "@/components/providers/EventProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { IEvent } from "@/types/event";
 import { formatBookingDate, formatTime } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
@@ -27,6 +28,7 @@ const CreateEventStep3Screen = () => {
 
   const router = useRouter();
   const { newEvent, updateNewEvent } = useEvent();
+  const toast = useToast();
 
   const handleGalleryPick = async () => {
     const permissionResult =
@@ -50,10 +52,10 @@ const CreateEventStep3Screen = () => {
     if (!result.canceled) {
       const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
       const validAssets = result.assets.filter((asset) => {
+        console.log(asset.fileSize);
         if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
-          Alert.alert(
-            "File too large",
-            `The file is larger than 5MB. Please select a smaller file.`,
+          toast.info(
+            "The file is larger than 5MB. Please select a smaller file.",
           );
           return false;
         }
@@ -80,7 +82,7 @@ const CreateEventStep3Screen = () => {
 
     // Launch camera
     let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ["images", "videos"], // same as gallery
+      mediaTypes: ["images", "videos"],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -91,8 +93,7 @@ const CreateEventStep3Screen = () => {
       const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
       if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
-        Alert.alert(
-          "File too large",
+        toast.info(
           "The captured file is larger than 5MB. Please try again with lower quality settings.",
         );
         return;

@@ -89,7 +89,7 @@ const CountryPicker: React.FC<CountryPickerProps> = ({
 
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`py-1 px-4 gap-2 bg-white flex flex-row items-center rounded-full`}
+        className={`px-4 gap-2 bg-white flex flex-row items-center rounded-full`}
         style={[
           {
             borderWidth: bordered ? 1 : 0,
