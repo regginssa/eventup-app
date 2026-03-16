@@ -34,7 +34,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import parsePhoneNumberFromString from "libphonenumber-js";
 import React, { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Linking, Text, TouchableOpacity, View } from "react-native";
 import { FlagButton } from "react-native-country-picker-modal";
 
 const ProfileScreen = () => {
@@ -63,6 +63,7 @@ const ProfileScreen = () => {
   const [venueTypes, setVenueTypes] = useState<TDropdownItem[]>([]);
   const [location, setLocation] = useState<TDropdownItem | null>(null);
   const [preLoading, setPreLoading] = useState<boolean>(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const { id: userId } = useLocalSearchParams();
   const { user: authUser, setAuthUser } = useAuth();
@@ -153,8 +154,8 @@ const ProfileScreen = () => {
   const handleMessage = async () => {
     if (!user?._id || !authUser?._id) return;
 
-    const sub = subscriptions.find((sub) => sub._id === user.subscription.id);
-    if (sub && sub.month === 0) {
+    const sub = subscriptions.find((sub) => sub._id === user.subscription?.id);
+    if ((sub && sub.month === 0) || !user.subscription?.id) {
       return toast.info(
         "You must subscribe your membership to write direct message",
       );
@@ -299,6 +300,48 @@ const ProfileScreen = () => {
     }
   };
 
+  const getProfileShareText = () => {
+    if (!user) return "";
+
+    const url = `eventworld://profile?id=${user._id}`;
+
+    return `👤 ${user.name} on EventWorld
+
+Discover their events and connect 👇
+${url}`;
+  };
+
+  const shareToTwitter = async () => {
+    const text = encodeURIComponent(getProfileShareText());
+    const url = `https://twitter.com/intent/tweet?text=${text}`;
+
+    Linking.openURL(url);
+  };
+
+  const shareToFacebook = async () => {
+    if (!user) return;
+
+    const url = `https://yourapp.com/profile/${user._id}`;
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+
+    Linking.openURL(fbUrl);
+  };
+
+  const shareToWhatsapp = async () => {
+    const text = encodeURIComponent(getProfileShareText());
+
+    const url = `https://wa.me/?text=${text}`;
+
+    Linking.openURL(url);
+  };
+
+  const shareToTelegram = async () => {
+    const text = encodeURIComponent(getProfileShareText());
+    const url = `https://t.me/share/url?text=${text}`;
+
+    Linking.openURL(url);
+  };
+
   if (loading)
     return (
       <SimpleContainer title="Profile">
@@ -410,7 +453,10 @@ const ProfileScreen = () => {
                 }
                 loading={messageLoading}
               />
-              <TouchableOpacity className="w-12 h-12 bg-slate-100 rounded-2xl items-center justify-center">
+              <TouchableOpacity
+                className="w-12 h-12 bg-slate-100 rounded-2xl items-center justify-center"
+                onPress={() => setIsShareOpen(true)}
+              >
                 <Feather name="share-2" size={20} color="#64748b" />
               </TouchableOpacity>
             </>
@@ -824,6 +870,47 @@ const ProfileScreen = () => {
             />
           </View>
         )}
+      </Modal>
+
+      <Modal
+        title="Share Profile"
+        scrolled
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+      >
+        <View className="flex-row flex-wrap gap-6 justify-center">
+          <TouchableOpacity
+            className="items-center gap-2"
+            onPress={shareToTwitter}
+          >
+            <Ionicons name="logo-twitter" size={32} color="#1DA1F2" />
+            <Text>Twitter</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="items-center gap-2"
+            onPress={shareToFacebook}
+          >
+            <Ionicons name="logo-facebook" size={32} color="#1877F2" />
+            <Text>Facebook</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="items-center gap-2"
+            onPress={shareToWhatsapp}
+          >
+            <Ionicons name="logo-whatsapp" size={32} color="#25D366" />
+            <Text>WhatsApp</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="items-center gap-2"
+            onPress={shareToTelegram}
+          >
+            <Ionicons name="paper-plane" size={32} color="#229ED9" />
+            <Text>Telegram</Text>
+          </TouchableOpacity>
+        </View>
       </Modal>
     </SimpleContainer>
   );

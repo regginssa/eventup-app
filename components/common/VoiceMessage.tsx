@@ -23,7 +23,7 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({
   };
 
   // Animated waveform bars
-  const bars = [...Array(12).keys()];
+  const bars = [...Array(20).keys()];
   const animations = useRef(bars.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {

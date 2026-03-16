@@ -42,7 +42,12 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
       className="w-full flex flex-row items-center gap-3 border-b border-gray-200 p-2"
       onPress={() => onPress(item._id as string)}
     >
-      <Avatar source={otherUser?.avatar} name={otherUser?.name} size={40} />
+      <Avatar
+        source={otherUser?.avatar}
+        name={otherUser?.name}
+        size={40}
+        status={user.status}
+      />
 
       <View className="flex-1 flex flex-row items-start gap-4">
         <View className="gap-2 flex-1">

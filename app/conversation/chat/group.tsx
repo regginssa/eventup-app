@@ -7,6 +7,7 @@ import {
   MessageItem,
   NormalModal,
   Spinner,
+  Streamer,
 } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
@@ -254,7 +255,7 @@ const ChatGroup = () => {
         </View>
       )}
 
-      <View className="w-full flex flex-row items-end gap-2 bg-white rounded-full px-4">
+      <View className="w-full flex flex-row items-end gap-2 bg-white rounded-xl pl-2 pr-4 py-2">
         <View className="flex-1 flex flex-col gap-2">
           <View className="w-full">
             <Input
@@ -266,9 +267,15 @@ const ChatGroup = () => {
               onChange={isEditing ? setEditText : setText}
             />
           </View>
+
+          {recorderState.isRecording && (
+            <View className="h-[100px] w-full px-4 pb-4">
+              <Streamer isPlaying={recorderState.isRecording} />
+            </View>
+          )}
         </View>
 
-        <View className="flex flex-row items-center gap-2 mb-3">
+        <View className="flex flex-row items-center gap-2 mb-2">
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={isEditing ? handleEdit : handleSend}

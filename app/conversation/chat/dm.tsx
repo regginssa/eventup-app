@@ -8,7 +8,9 @@ import {
   Input,
   MessageItem,
   Modal,
+  NormalModal,
   Spinner,
+  Streamer,
 } from "@/components";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
@@ -369,6 +371,8 @@ const ChatDM = () => {
     }
   };
 
+  const handleDeleteAll = async () => {};
+
   return (
     <ChatContainer
       type="dm"
@@ -379,7 +383,7 @@ const ChatDM = () => {
       status={status}
     >
       {loading ? (
-        <Spinner size="md" />
+        <Spinner size="md" text="Loading messages..." />
       ) : (
         <View className="flex-1">
           <FlatList
@@ -403,7 +407,7 @@ const ChatDM = () => {
         </View>
       )}
 
-      <View className="w-full flex flex-row items-end gap-2 bg-white rounded-full px-2">
+      <View className="w-full flex flex-row items-end gap-2 bg-white rounded-xl pl-2 pr-4 py-2">
         <View className="flex-1 flex flex-col gap-2">
           <View className="w-full">
             <Input
@@ -415,6 +419,12 @@ const ChatDM = () => {
               onChange={isEditing ? setEditText : setText}
             />
           </View>
+
+          {recorderState.isRecording && (
+            <View className="h-[100px] w-full px-4 pb-4">
+              <Streamer isPlaying={recorderState.isRecording} />
+            </View>
+          )}
 
           {files.length > 0 && (
             <ScrollView
@@ -478,7 +488,7 @@ const ChatDM = () => {
           )}
         </View>
 
-        <View className="flex flex-row items-center gap-2 mb-3">
+        <View className="flex flex-row items-center gap-2 mb-2">
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={isEditing ? handleEdit : handleSend}
@@ -524,54 +534,90 @@ const ChatDM = () => {
       </View>
 
       {/* Message Actions */}
-      <Modal
-        title="Actions"
-        scrolled
+      <NormalModal
+        title="Message Actions"
         isOpen={isMessageActionsOpen}
         onClose={() => {
           setSelectedMessageId("");
           setIsMessageActionsOpen(false);
         }}
       >
-        <View className="w-full gap-2">
+        <View className="w-full gap-3">
+          {/* EDIT MESSAGE */}
           <TouchableOpacity
-            activeOpacity={0.8}
-            className="w-full flex flex-row items-center gap-2 p-4 bg-gray-200 rounded-lg"
+            activeOpacity={0.85}
             disabled={editLoading}
+            className="flex-row items-center justify-between p-4 rounded-xl bg-gray-100 border border-gray-200"
             onPress={() => {
               const message = messages.find((m) => m._id === selectedMessageId);
-              if (message?.sender._id !== user?._id)
-                return toast.warn("The message is not yours");
-              setEditText(message?.text || "");
+
+              if (!message) return;
+
+              if (message.sender._id !== user?._id) {
+                toast.warn("You can only edit your own message");
+                return;
+              }
+
+              setEditText(message.text || "");
               setIsEditing(true);
               setIsMessageActionsOpen(false);
             }}
           >
-            <MaterialCommunityIcons
-              name="pencil-outline"
-              size={18}
-              color="#1f2937"
-            />
-            <Text className="font-poppins-medium text-gray-800">Edit</Text>
-            {editLoading && <ActivityIndicator size={18} color="#1f2937" />}
-          </TouchableOpacity>
+            <View className="flex-row items-center gap-3">
+              {/* ICON */}
+              <View className="w-10 h-10 rounded-full bg-gray-200 items-center justify-center">
+                <MaterialCommunityIcons
+                  name="pencil-outline"
+                  size={18}
+                  color="#374151"
+                />
+              </View>
 
+              {/* TEXT */}
+              <View>
+                <Text className="font-poppins-semibold text-gray-900 text-[15px]">
+                  Edit Message
+                </Text>
+                <Text className="text-gray-500 text-xs">
+                  Modify the content of your message
+                </Text>
+              </View>
+            </View>
+
+            {editLoading && <ActivityIndicator size={18} color="#374151" />}
+          </TouchableOpacity>
+          {/* DELETE MESSAGE */}
           <TouchableOpacity
-            activeOpacity={0.8}
-            className="w-full flex flex-row items-center gap-2 p-4 bg-red-200 rounded-lg"
+            activeOpacity={0.85}
             disabled={deleteLoading}
             onPress={handleDelete}
+            className="flex-row items-center justify-between p-4 rounded-xl bg-red-50 border border-red-200"
           >
-            <MaterialCommunityIcons
-              name="trash-can-outline"
-              size={18}
-              color="#dc2626"
-            />
-            <Text className="font-poppins-medium text-red-600">Delete</Text>
+            <View className="flex-row items-center gap-3">
+              {/* ICON */}
+              <View className="w-10 h-10 rounded-full bg-red-100 items-center justify-center">
+                <MaterialCommunityIcons
+                  name="trash-can-outline"
+                  size={18}
+                  color="#dc2626"
+                />
+              </View>
+
+              {/* TEXT */}
+              <View>
+                <Text className="font-poppins-semibold text-red-600 text-[15px]">
+                  Delete Message
+                </Text>
+                <Text className="text-red-400 text-xs">
+                  This action cannot be undone
+                </Text>
+              </View>
+            </View>
+
             {deleteLoading && <ActivityIndicator size={18} color="#dc2626" />}
           </TouchableOpacity>
         </View>
-      </Modal>
+      </NormalModal>
 
       <Modal
         title="Upload"

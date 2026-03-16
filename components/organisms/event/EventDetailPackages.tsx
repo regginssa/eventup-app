@@ -126,110 +126,141 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
           })}
         </View>
 
-        {/* SEARCH INPUT GROUP CONTAINER */}
-        <View className="bg-white rounded-[32px] shadow-xl shadow-slate-200 border border-slate-50">
-          <View className="flex-row items-center gap-2 mb-6">
-            <LinearGradient
-              colors={["#844AFF", "#12A9FF"]}
-              className="w-8 h-8 items-center justify-center"
-              style={{ borderRadius: 8 }}
-            >
-              <MaterialCommunityIcons
-                name="map-marker-path"
-                size={18}
-                color="white"
-              />
-            </LinearGradient>
-            <View>
-              <Text className="font-poppins-semibold text-slate-800">
-                Booking Details
-              </Text>
-              <Text className="font-dm-sans-medium text-slate-600 text-[10px]">
-                {eventPackage === "gold"
-                  ? "Configuring Luxury Suite & First Class"
-                  : "Configuring Standard Stay & Economy"}
-              </Text>
-            </View>
-          </View>
-
-          {/* E-TICKET */}
-          {event.type === "user" && event.fee?.type === "paid" && (
-            <View className="bg-slate-50/50 py-4 rounded-2xl border border-slate-100">
-              <View className="flex-row items-center gap-2 mb-4">
-                <View className="w-6 h-6 rounded-full bg-[#844AFF10] items-center justify-center">
-                  <MaterialCommunityIcons
-                    name="ticket-outline"
-                    size={14}
-                    color="#844AFF"
-                  />
-                </View>
-                <Text className="font-poppins-semibold text-sm text-slate-800">
-                  E-Ticket Required
+        {event.type === "user" && !event.hoster ? (
+          <LinearGradient
+            colors={["#dc262615", "#b91c1c15"]}
+            start={{ x: 0, y: 0 }}
+            style={{
+              marginTop: 24,
+              borderRadius: 20,
+              padding: 20,
+              borderWidth: 1,
+              borderColor: "#844AFF20",
+            }}
+          >
+            <View className="flex-row items-center">
+              <View className="bg-red-600 w-12 h-12 rounded-xl items-center justify-center mr-4 shadow-lg shadow-purple-300">
+                <MaterialCommunityIcons
+                  name="information-outline"
+                  size={24}
+                  color="white"
+                />
+              </View>
+              <View className="flex-1">
+                <Text className="font-poppins-semibold uppercase text-red-600 text-sm">
+                  Unconfirmed Event
+                </Text>
+                <Text className="font-dm-sans-bold text-red-700 text-sm">
+                  Event's hoster isn't existed.
                 </Text>
               </View>
-
-              {communityTicket ? (
-                <CommunityTicketItem item={communityTicket} />
-              ) : (
-                <View className="w-full flex-row items-start gap-2">
-                  <MaterialCommunityIcons
-                    name="information-outline"
-                    size={14}
-                    color="#64748b"
-                  />
-
-                  <View className="flex-1">
-                    <Text className="font-dm-sans-medium text-sm text-slate-700 leading-5">
-                      An official e-ticket is required for entry. You can
-                      purchase it in the app for{" "}
-                      <Text className="font-dm-sans-bold">
-                        {getCurrencySymbol(event.fee?.currency as any)}
-                        {event.fee?.amount}
-                      </Text>
-                      .
-                    </Text>
-
-                    <TouchableOpacity
-                      activeOpacity={0.7}
-                      className="mt-2"
-                      onPress={() =>
-                        router.push({
-                          pathname: "/tickets",
-                          params: {
-                            amount: event.fee?.amount,
-                            currency: event.fee?.currency,
-                          },
-                        })
-                      }
-                    >
-                      <Text className="font-poppins-semibold text-sm text-[#844AFF] underline">
-                        Purchase E-Ticket
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
             </View>
-          )}
+          </LinearGradient>
+        ) : (
+          <View className="bg-white rounded-[32px] shadow-xl shadow-slate-200 border border-slate-50">
+            <View className="flex-row items-center gap-2 mb-6">
+              <LinearGradient
+                colors={["#844AFF", "#12A9FF"]}
+                className="w-8 h-8 items-center justify-center"
+                style={{ borderRadius: 8 }}
+              >
+                <MaterialCommunityIcons
+                  name="map-marker-path"
+                  size={18}
+                  color="white"
+                />
+              </LinearGradient>
+              <View>
+                <Text className="font-poppins-semibold text-slate-800">
+                  Booking Details
+                </Text>
+                <Text className="font-dm-sans-medium text-slate-600 text-[10px]">
+                  {eventPackage === "gold"
+                    ? "Configuring Luxury Suite & First Class"
+                    : "Configuring Standard Stay & Economy"}
+                </Text>
+              </View>
+            </View>
 
-          <BookSearchInputGroup
-            event={event}
-            packageType={eventPackage}
-            currentLocationCoords={currentLocationCoords}
-            currentCity={currentLocation.city}
-            currentCountryCode={currentLocation.countryCode}
-          />
+            {/* E-TICKET */}
+            {event.type === "user" && event.fee?.type === "paid" && (
+              <View className="bg-slate-50/50 py-4 rounded-2xl border border-slate-100">
+                <View className="flex-row items-center gap-2 mb-4">
+                  <View className="w-6 h-6 rounded-full bg-[#844AFF10] items-center justify-center">
+                    <MaterialCommunityIcons
+                      name="ticket-outline"
+                      size={14}
+                      color="#844AFF"
+                    />
+                  </View>
+                  <Text className="font-poppins-semibold text-sm text-slate-800">
+                    E-Ticket Required
+                  </Text>
+                </View>
 
-          <View className="mt-6">
-            <Button
-              type="gradient-soft"
-              label="Explore Details"
-              buttonClassName="h-14 rounded-2xl"
-              textClassName="font-poppins-bold"
-              onPress={() => setIsOpen(true)}
+                {communityTicket ? (
+                  <CommunityTicketItem item={communityTicket} />
+                ) : (
+                  <View className="w-full flex-row items-start gap-2">
+                    <MaterialCommunityIcons
+                      name="information-outline"
+                      size={14}
+                      color="#64748b"
+                    />
+
+                    <View className="flex-1">
+                      <Text className="font-dm-sans-medium text-sm text-slate-700 leading-5">
+                        An official e-ticket is required for entry. You can
+                        purchase it in the app for{" "}
+                        <Text className="font-dm-sans-bold">
+                          {getCurrencySymbol(event.fee?.currency as any)}
+                          {event.fee?.amount}
+                        </Text>
+                        .
+                      </Text>
+
+                      <TouchableOpacity
+                        activeOpacity={0.7}
+                        className="mt-2"
+                        onPress={() =>
+                          router.push({
+                            pathname: "/tickets",
+                            params: {
+                              amount: event.fee?.amount,
+                              currency: event.fee?.currency,
+                            },
+                          })
+                        }
+                      >
+                        <Text className="font-poppins-semibold text-sm text-[#844AFF] underline">
+                          Purchase E-Ticket
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              </View>
+            )}
+
+            <BookSearchInputGroup
+              event={event}
+              packageType={eventPackage}
+              currentLocationCoords={currentLocationCoords}
+              currentCity={currentLocation.city}
+              currentCountryCode={currentLocation.countryCode}
             />
+
+            <View className="mt-6">
+              <Button
+                type="gradient-soft"
+                label="Explore Details"
+                buttonClassName="h-14 rounded-2xl"
+                textClassName="font-poppins-bold"
+                onPress={() => setIsOpen(true)}
+              />
+            </View>
           </View>
-        </View>
+        )}
       </View>
 
       <PackageConfirmModal

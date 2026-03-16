@@ -30,6 +30,7 @@ export { default as RadioButton } from "./RadioButton";
 export { default as RegionPicker } from "./RegionPicker";
 export { default as RoomCard } from "./RoomCard";
 export { default as Spinner } from "./Spinner";
+export { default as Streamer } from "./Streamer";
 export { default as Tabs } from "./Tabs";
 export { default as Textarea } from "./Textarea";
 export { default as TicketBookingStatusItem } from "./TicketBookingStatusItem";
