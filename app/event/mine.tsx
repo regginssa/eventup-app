@@ -67,6 +67,25 @@ const MyEventsScreen = () => {
     loadData();
   }, [selectedTab]);
 
+  const handleRefresh = async () => {
+    if (!user?._id) return;
+    if (selectedTab.value === "booked") {
+      const response = await BookingAPI.getAllByUserId(user._id);
+      if (response.data) {
+        const events = response.data.map((booking) => booking.event);
+        setEvents(events);
+      }
+    } else {
+      const response = await eventServices.getByUserId(
+        user._id,
+        selectedTab.value as TEventStatus,
+      );
+      if (response.ok) {
+        setEvents(response.data);
+      }
+    }
+  };
+
   return (
     <MyEventsScreenContainer>
       <View className="flex-1 bg-white p-6 rounded-3xl gap-6">
@@ -76,7 +95,11 @@ const MyEventsScreen = () => {
           tabClassName="flex-1"
           onSelct={setSelectedTab}
         />
-        <EventsPreviewGroup events={events} loading={loading} />
+        <EventsPreviewGroup
+          events={events}
+          loading={loading}
+          onRefresh={handleRefresh}
+        />
       </View>
     </MyEventsScreenContainer>
   );

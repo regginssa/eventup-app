@@ -416,7 +416,10 @@ const BookingStatus = () => {
                     </Text>
                     <View className="flex-row items-baseline mt-1">
                       <Text className="text-white font-poppins-bold text-3xl">
-                        ${price.totalAmount}
+                        <Text className="text-slate-200 font-poppins-bold text-sm">
+                          {price.currency}
+                        </Text>
+                        {price.totalAmount}
                       </Text>
                     </View>
                   </View>
@@ -447,7 +450,8 @@ const BookingStatus = () => {
               {bookingItems.map((item, index) =>
                 index === 1 ? (
                   <TicketBookingStatusItem
-                    label={item.label + index}
+                    key={item.label}
+                    label={item.label}
                     status={item.status}
                     isLast={index === bookingItems.length - 1}
                     onPress={handleBuyTicket}

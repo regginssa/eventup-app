@@ -619,8 +619,8 @@ const CheckoutScreen = () => {
       amount: totalAmount,
       currency: crypto,
       webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
-      metadata: { type: "booking", bookingId },
-      redirect: `eventworld://booking-status?id=${bookingId}`,
+      metadata: { type: "booking", bookingId, userId: user?._id },
+      redirect: `eventworld://booking/status?id=${bookingId}`,
     };
 
     const res = await Web3API.getCheckoutUrl(data);
@@ -633,7 +633,6 @@ const CheckoutScreen = () => {
 
     const checkoutUrl = res.data;
     await Linking.openURL(checkoutUrl);
-    router.replace({ pathname: "/booking/status", params: { id: bookingId } });
   };
 
   const createBooking = async (): Promise<string | null> => {

@@ -88,10 +88,10 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
 
         <TouchableOpacity
           activeOpacity={0.7}
-          className="px-8 py-3 rounded-2xl shadow-xl shadow-slate-200 border border-slate-50 flex flex-row gap-2 items-center"
+          className="px-8 py-3 rounded-2xl shadow-xl bg-slate-200 shadow-slate-200 border border-slate-50 flex flex-row gap-2 items-center"
         >
-          <Text className="font-dm-sans-medium text-slate-400 text-lg">
-            Itinerary #BOK_{booking._id?.toString().slice(0, 8).toUpperCase()}
+          <Text className="font-dm-sans-medium text-slate-400 text-base">
+            #BOK_{booking._id?.toString().slice(0, 8).toUpperCase()}
           </Text>
 
           <MaterialCommunityIcons
@@ -102,7 +102,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
         </TouchableOpacity>
       </View>
 
-      <View className="mb-6 gap-4">
+      <View className="mb-6 gap-4 mt-6">
         <View className="flex-row items-center justify-between px-1">
           <View>
             <Text className="font-poppins-bold text-slate-800 text-xl">
