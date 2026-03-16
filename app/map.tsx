@@ -5,58 +5,39 @@ import { LayoutContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { COLORFUL_MAP_STYLE } from "@/constants/themes";
 import { IEvent } from "@/types/event";
-import { formatDateTime, formatEventLabel } from "@/utils/format";
+import { formatEventDateTime, formatEventLabel } from "@/utils/format";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { debounce } from "lodash";
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  InteractionManager,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import RNMapView, { Marker } from "react-native-maps";
 
 const MapScreen = () => {
   const [events, setEvents] = useState<IEvent[]>([]);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<IEvent | undefined>();
-  const [pressing, setPressing] = useState(false);
-  const [region, setRegion] = useState<any>(null);
+  const [showSearchButton, setShowSearchButton] = useState(false);
 
   const mapRef = useRef<RNMapView | null>(null);
+  const currentRegion = useRef<any>(null);
+
+  const ignoreRegionChange = useRef(false);
+  const isFetching = useRef(false);
 
   const { user } = useAuth();
   const router = useRouter();
 
   /**
-   * Select event
-   */
-  const handleSelectEvent = (id?: string) => {
-    if (pressing) return;
-    setPressing(true);
-
-    InteractionManager.runAfterInteractions(() => {
-      const event = events.find((e) => e._id === id);
-      if (!event) return;
-
-      setSelectedEvent(event);
-      setIsOpen(true);
-
-      setTimeout(() => setPressing(false), 300);
-    });
-  };
-
-  /**
-   * Fetch events inside visible map
+   * Fetch events
    */
   const fetchEvents = async (region: any) => {
+    if (isFetching.current) return;
+
     try {
+      isFetching.current = true;
       setLoading(true);
 
       const { latitude, longitude, latitudeDelta, longitudeDelta } = region;
@@ -76,30 +57,84 @@ const MapScreen = () => {
       if (response?.ok) {
         setEvents(response.data);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.log(err);
     } finally {
+      isFetching.current = false;
       setLoading(false);
     }
   };
 
   /**
-   * Debounce map movement
+   * When user moves map
    */
-  const debouncedFetch = useCallback(
-    debounce((region) => {
-      fetchEvents(region);
-    }, 600),
-    [],
-  );
+  const handleRegionChangeComplete = (region: any) => {
+    if (ignoreRegionChange.current) return;
+
+    currentRegion.current = region;
+    setShowSearchButton(true);
+  };
 
   /**
-   * Trigger fetch when region changes
+   * User taps "Search this area"
+   */
+  const handleSearchArea = () => {
+    if (!currentRegion.current) return;
+
+    fetchEvents(currentRegion.current);
+    setShowSearchButton(false);
+  };
+
+  /**
+   * Select marker
+   */
+  const handleSelectEvent = (id?: string) => {
+    const event = events.find((e) => e._id === id);
+    if (!event) return;
+
+    ignoreRegionChange.current = true;
+
+    setSelectedEvent(event);
+    setIsOpen(true);
+
+    setTimeout(() => {
+      ignoreRegionChange.current = false;
+    }, 200);
+  };
+
+  /**
+   * Initial fetch
    */
   useEffect(() => {
-    if (!region) return;
-    debouncedFetch(region);
-  }, [region]);
+    if (!user?.location?.coordinate) return;
+
+    const initialRegion = {
+      latitude: user.location.coordinate.latitude,
+      longitude: user.location.coordinate.longitude,
+      latitudeDelta: 5,
+      longitudeDelta: 5,
+    };
+
+    currentRegion.current = initialRegion;
+
+    fetchEvents(initialRegion);
+  }, []);
+
+  /**
+   * Memo markers
+   */
+  const markers = useMemo(() => {
+    return events.map((event, index) => (
+      <MapMarker
+        key={event._id ?? index}
+        coordinate={{
+          latitude: event?.location?.coordinate.latitude || 0,
+          longitude: event?.location?.coordinate.longitude || 0,
+        }}
+        onPress={() => handleSelectEvent(event._id)}
+      />
+    ));
+  }, [events]);
 
   return (
     <LayoutContainer title="Map">
@@ -111,22 +146,49 @@ const MapScreen = () => {
         </Text>
       </View>
 
-      {loading && (
-        <View className="absolute top-10 left-0 right-0 items-center z-50">
-          <ActivityIndicator size={40} color="#C427E0" />
-        </View>
-      )}
-
-      {/* Map */}
+      {/* Map Container */}
       <View className="flex-1 rounded-3xl overflow-hidden mt-4">
+        {/* Floating Search Button */}
+        {showSearchButton && (
+          <View
+            style={{
+              position: "absolute",
+              top: 20,
+              alignSelf: "center",
+              zIndex: 50,
+            }}
+          >
+            <Button
+              label="Search this area"
+              type="primary"
+              buttonClassName="h-12"
+              onPress={handleSearchArea}
+            />
+          </View>
+        )}
+
+        {/* Loader */}
+        {loading && (
+          <View
+            style={{
+              position: "absolute",
+              top: 80,
+              alignSelf: "center",
+              zIndex: 50,
+            }}
+          >
+            <ActivityIndicator size={36} color="#C427E0" />
+          </View>
+        )}
+
         <RNMapView
           ref={mapRef}
           provider="google"
+          style={{ flex: 1 }}
           showsBuildings
           showsPointsOfInterest
           pitchEnabled
           rotateEnabled
-          style={{ flex: 1 }}
           customMapStyle={COLORFUL_MAP_STYLE}
           initialRegion={{
             latitude: user?.location.coordinate.latitude ?? 0,
@@ -134,23 +196,12 @@ const MapScreen = () => {
             latitudeDelta: 5,
             longitudeDelta: 5,
           }}
-          onRegionChangeComplete={(region) => {
-            setRegion(region);
-          }}
+          onRegionChangeComplete={handleRegionChangeComplete}
         >
           {/* Event markers */}
-          {events.map((event, index) => (
-            <MapMarker
-              key={event._id ?? index}
-              coordinate={{
-                latitude: event?.location?.coordinate.latitude || 0,
-                longitude: event?.location?.coordinate.longitude || 0,
-              }}
-              onPress={() => handleSelectEvent(event._id)}
-            />
-          ))}
+          {markers}
 
-          {/* User location marker */}
+          {/* User marker */}
           <Marker
             coordinate={{
               latitude: user?.location.coordinate.latitude ?? 0,
@@ -164,10 +215,6 @@ const MapScreen = () => {
                 borderRadius: 20,
                 overflow: "hidden",
                 elevation: 6,
-                shadowColor: "#C427E0",
-                shadowOpacity: 0.5,
-                shadowRadius: 6,
-                shadowOffset: { width: 0, height: 3 },
               }}
             >
               <Image
@@ -181,23 +228,17 @@ const MapScreen = () => {
       </View>
 
       {/* Event Modal */}
-      <Modal
-        title=""
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        scrolled={true}
-      >
+      <Modal title="" isOpen={isOpen} onClose={() => setIsOpen(false)} scrolled>
         <View className="w-full flex flex-row gap-4 mb-4">
           <View className="relative w-[125px] h-[125px] rounded-lg overflow-hidden">
-            {selectedEvent?.images && selectedEvent.images.length > 0 ? (
+            {selectedEvent?.images?.length ? (
               <Image
-                source={{ uri: selectedEvent?.images[0] }}
-                alt={selectedEvent?.name}
+                source={{ uri: selectedEvent.images[0] }}
                 contentFit="cover"
                 style={styles.image}
               />
             ) : (
-              <View className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <View className="absolute inset-0 flex items-center justify-center">
                 <MaterialIcons name="hide-image" size={32} color="#1f2937" />
                 <Text className="text-gray-800 font-poppins-semibold">
                   No Image
@@ -206,12 +247,12 @@ const MapScreen = () => {
             )}
           </View>
 
-          <View className="flex-1 items-start justify-between">
+          <View className="flex-1 justify-between">
             <Text className="font-poppins-semibold text-sm text-gray-800">
               {selectedEvent?.name}
             </Text>
 
-            <View className="flex flex-row items-center gap-2.5">
+            <View className="flex-row items-center gap-2">
               <View className="w-4 h-4 rounded-full overflow-hidden">
                 <LinearGradient
                   colors={["#C427E0", "#844AFF", "#12A9FF"]}
@@ -229,12 +270,12 @@ const MapScreen = () => {
 
               <Text className="font-dm-sans text-gray-800">
                 {selectedEvent?.classifications?.category
-                  ? formatEventLabel(selectedEvent?.classifications?.category)
+                  ? formatEventLabel(selectedEvent.classifications.category)
                   : "Unknown"}
               </Text>
             </View>
 
-            <View className="flex flex-row items-center gap-2.5">
+            <View className="flex-row items-center gap-2">
               <MaterialCommunityIcons
                 name="map-marker-outline"
                 size={16}
@@ -246,18 +287,17 @@ const MapScreen = () => {
               </Text>
             </View>
 
-            <View className="flex flex-row items-center gap-2.5">
+            <View className="flex-row items-center gap-2">
               <MaterialCommunityIcons
                 name="calendar-blank-outline"
                 size={16}
                 color="#1f2937"
               />
               <Text className="font-dm-sans text-gray-800">
-                {selectedEvent?.dates?.start.date
-                  ? `${selectedEvent.dates.start.time} / ${formatDateTime(
-                      selectedEvent.dates.start.date,
-                    )}`
-                  : "N/A"}
+                {formatEventDateTime(
+                  selectedEvent?.dates?.start?.date,
+                  selectedEvent?.dates?.start?.time,
+                )}
               </Text>
             </View>
           </View>

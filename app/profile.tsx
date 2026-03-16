@@ -190,6 +190,10 @@ const ProfileScreen = () => {
   };
 
   const validate = () => {
+    if (!country) {
+      return toast.error("Please select your country");
+    }
+
     const phoneNumber = parsePhoneNumberFromString(
       phone,
       (country?.cca2 as any) || "US",
@@ -725,6 +729,7 @@ const ProfileScreen = () => {
                 <MaterialCommunityIcons name="apps" size={16} color="#4b5563" />
               }
               items={EVENT_CATEGORIES}
+              bordered
               selectedItem={category}
               onSelect={setCategory}
             />
@@ -746,6 +751,7 @@ const ProfileScreen = () => {
                     ]
                   : []
               }
+              bordered
               selectedItems={subcategories}
               onChange={setSubcategories}
             />
@@ -765,6 +771,7 @@ const ProfileScreen = () => {
                   ? EVENT_VIBE[category.value as keyof typeof EVENT_VIBE]
                   : []
               }
+              bordered
               selectedItems={vibes}
               onChange={setVibes}
             />
@@ -787,6 +794,7 @@ const ProfileScreen = () => {
                   : []
               }
               direction="up"
+              bordered
               selectedItems={venueTypes}
               onChange={setVenueTypes}
             />
@@ -803,6 +811,7 @@ const ProfileScreen = () => {
               }
               items={EVENT_LOCATION_TYPES}
               direction="up"
+              bordered
               selectedItem={location}
               onSelect={setLocation}
             />

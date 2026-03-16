@@ -13,7 +13,7 @@ interface MapMarkerProps {
 const MapMarker: React.FC<MapMarkerProps> = ({ coordinate, onPress }) => {
   return (
     <Marker coordinate={coordinate} onPress={onPress}>
-      <View className="w-[21.33px] h-[26.67px] relative">
+      <View className="w-[24.33px] h-[32.67px] relative">
         <Image
           source={MarkerIcon}
           alt="marker"

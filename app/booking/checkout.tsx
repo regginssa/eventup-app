@@ -686,6 +686,48 @@ const CheckoutScreen = () => {
   const isUserEventPassable =
     event?.type === "user" && event.fee?.type === "free" && totalAmount === 0;
 
+  const hasTravelServices =
+    !!flightOffer ||
+    !!hotelOffer ||
+    !!airportToHotelOffer ||
+    !!hotelToEventOffer ||
+    !!booking?.flight?.offer ||
+    !!booking?.hotel?.offer ||
+    !!booking?.transfer?.airportToHotel?.offer ||
+    !!booking?.transfer?.hotelToEvent?.offer;
+
+  const hasRequiredTicket =
+    event?.type === "user" &&
+    event?.fee?.type === "paid" &&
+    user?.tickets?.some(
+      (t) => t.currency === event.fee?.currency && t.price == event.fee?.amount,
+    );
+
+  const isPayDisabled = (() => {
+    if (!event) return true;
+
+    // AI event
+    if (event.type === "ai") {
+      return !hasTravelServices;
+    }
+
+    // USER event
+    if (event.type === "user") {
+      // paid ticket event
+      if (event.fee?.type === "paid") {
+        if (!hasRequiredTicket) return true;
+        return !hasTravelServices;
+      }
+
+      // free event
+      if (event.fee?.type === "free") {
+        return !hasTravelServices;
+      }
+    }
+
+    return true;
+  })();
+
   return (
     <SimpleContainer title="Review & Pay" scrolled>
       <View className="flex-1 gap-4 px-1">
@@ -772,7 +814,7 @@ const CheckoutScreen = () => {
           }
           buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
           textClassName="text-lg font-poppins-bold"
-          loading={bookLoading}
+          loading={bookLoading || isPayDisabled}
           onPress={onBook}
         />
 

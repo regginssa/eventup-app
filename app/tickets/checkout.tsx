@@ -366,6 +366,9 @@ const TicketsCheckout = () => {
     }
   };
 
+  const isPayDisabled =
+    amount <= 0 || (paymentMethod === "credit" && stripePaymentMethodId === "");
+
   return (
     <SimpleContainer title="Checkout" scrolled>
       <View className="flex-1 gap-8 px-1">
@@ -405,7 +408,7 @@ const TicketsCheckout = () => {
             textClassName="text-lg font-poppins-bold"
             loading={purchaseLoading}
             onPress={handlePurchase}
-            disabled={loading || amount <= 0}
+            disabled={loading || isPayDisabled}
           />
         )}
 
