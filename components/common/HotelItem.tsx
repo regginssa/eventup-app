@@ -67,8 +67,6 @@ const HotelItem: React.FC<HotelItemProps> = ({
     address,
     city,
     countryCode,
-    totalAmount,
-    currency,
     roomName,
     boardName,
     services,
@@ -76,6 +74,8 @@ const HotelItem: React.FC<HotelItemProps> = ({
     checkOut,
     checkInInfo,
   } = offer;
+
+  const { currency, totalAmount } = offer.converted;
 
   const starCount = parseInt(category?.match(/\d+/)?.[0] || "0");
 

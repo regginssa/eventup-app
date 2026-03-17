@@ -26,13 +26,13 @@ const TransferItem: React.FC<TransferItemProps> = ({
     vehicleName,
     vehicleType,
     capacity,
-    totalAmount,
-    currency,
     pickupPoint,
     destinationPoint,
     waitingTime,
     pickupDateTime,
   } = offer;
+
+  const { currency, totalAmount } = offer.converted;
 
   return (
     <View className="mb-4 shadow-xl shadow-purple-200">

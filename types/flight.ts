@@ -7,6 +7,8 @@ export type TStop = {
   duration: string;
 };
 
+export type TTripType = "round" | "one_way";
+
 export interface IFlightOffer {
   id: string;
   airlineName: string;
@@ -14,18 +16,29 @@ export interface IFlightOffer {
   totalAmount: string;
   currency: string;
   passengerIds: string[];
-  departureTime: string;
+
+  slices: IFlightSlice[];
   arrivalTime: string;
-  duration: string; // e.g., "02h 30m"
-  originIata: string;
-  destinationIata: string;
-  flightNumbers: string[];
-  stops: TStop[];
+  departureTime: string;
+
   converted: {
     totalAmount: number;
     netAmount: number;
     currency: string;
   };
+  tripType: TTripType;
+}
+
+export interface IFlightSlice {
+  departureTime: string;
+  arrivalTime: string;
+  duration: string;
+
+  originIata: string;
+  destinationIata: string;
+
+  flightNumbers: string[];
+  stops: TStop[];
 }
 
 export interface IFlightBookingResponse {

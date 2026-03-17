@@ -6,12 +6,10 @@ export const GOOGLE_IOS_CLIENT_ID =
 export const GOOGLE_WEB_CLIENT_ID =
   "732132936043-85fpifatj1b2kusu319c6urvdnub7aq7.apps.googleusercontent.com";
 export const GOOGLE_WEB_CLIENT_SECRET = "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";
-export const SERVER_API_ENDPOINT =
-  "https://eventworld-server-production.up.railway.app/api/v1";
-export const SERVER_SOCKET_URL =
-  "wss://eventworld-server-production.up.railway.app";
+export const SERVER_API_ENDPOINT = "http://192.168.122.100:5001/api/v1";
+export const SERVER_SOCKET_URL = "ws://192.168.122.100:5001";
 // https://eventworld-server-production.up.railway.app
-// http://192.168.125.100:5001
+// http://192.168.122.100:5001
 // http://38.180.245.212:5001
 export const STRIPE_PUBLISHABLE_KEY =
   "pk_test_51RGgNOB3QdeQ8arQcprVRXtbcpeDjhIQV6pBlLRrNJpb9MqGi9lrR7VTLYaHbsnozaqQjP42RM8FBqSBPzmjAJ5m00FAlzmRBY";

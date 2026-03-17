@@ -202,7 +202,7 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
   };
 
   return (
-    <View className="flex-1 rounded-2xl pb-16">
+    <View className="flex-1 rounded-2xl">
       {loading ? (
         <Spinner size="md" />
       ) : events.length === 0 ? (

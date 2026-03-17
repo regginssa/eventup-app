@@ -247,7 +247,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
                 Grand Total in usd
               </Text>
 
-              <View className="flex flex-row items-end">
+              <View className="flex flex-row items-end gap-1">
                 <Text className="text-sm text-slate-400 font-poppins-semibold">
                   USD
                 </Text>
@@ -271,7 +271,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
           <Button
             type="primary"
             label={loading ? "Verifying..." : "Confirm & Checkout"}
-            buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
+            buttonClassName="h-12 shadow-xl shadow-purple-200"
             textClassName="text-lg font-poppins-bold"
             disabled={!isValid}
             loading={loading}

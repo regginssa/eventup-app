@@ -1,4 +1,4 @@
-import { TCoordinate, TPackageType } from "@/types";
+import { TCoordinate, TDropdownItem, TPackageType } from "@/types";
 import { IEvent } from "@/types/event";
 import { IFlightOffer } from "@/types/flight";
 import { IHotelOffer } from "@/types/hotel";
@@ -11,6 +11,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 import {
   Button,
   DateTimePicker,
+  Dropdown,
   FlightItem,
   HotelItem,
   RadioButton,
@@ -56,6 +57,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [refreshLoading, setRefreshLoading] = useState<Map<string, boolean>>(
     new Map(),
   );
+  const [tripType, setTripType] = useState<TDropdownItem>({
+    label: "One Way",
+    value: "one_way",
+  });
+  const [flightReturnDate, setFlightReturnDate] = useState<Date>(new Date());
 
   const { user } = useAuth();
   const {
@@ -117,6 +123,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       destLng: destGeo?.longitude,
       departureDate: df.toISOString(departureDate),
       packageType,
+      tripType: tripType.value,
+      returnDate: df.toISOString(flightReturnDate),
     };
 
     const data = await searchFlight(params);
@@ -138,10 +146,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     const hotelGeo = event.location?.coordinate;
 
     // Validate checkout vs event date
-    if (eventDate > checkOut) {
-      toast.info("The hotel checkout date cannot be after the event date.");
-      return null;
-    }
+    // if (eventDate > checkOut) {
+    //   toast.info("The hotel checkout date cannot be after the event date.");
+    //   return null;
+    // }
 
     let checkIn: any;
 
@@ -154,10 +162,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     } else {
       // When no flight: validate check-in vs event
       const checkInDate = normalizeDateUTC(hotelCheckInDate);
-      if (eventDate < checkInDate) {
-        toast.info("The hotel checkIn date cannot be after the event date.");
-        return null;
-      }
+      // if (eventDate < checkInDate) {
+      //   toast.info("The hotel checkIn date cannot be after the event date.");
+      //   return null;
+      // }
       checkIn = hotelCheckInDate;
     }
 
@@ -185,12 +193,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (!includes.transferAirport) return;
 
     if (flightOffer && hotelOffer) {
-      console.log(flightOffer.arrivalTime);
+      const destinationIata = flightOffer.slices[0].originIata;
       setLoading("airportToHotel", true);
       const params = {
         from: {
           type: "airport",
-          code: flightOffer.destinationIata,
+          code: destinationIata,
         },
         to: {
           type: "hotel",
@@ -557,13 +565,36 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
         <View className="gap-4">
           {includes.flight && (
-            <DateTimePicker
-              label="Departure from your location"
-              className="rounded-xl"
-              bordered
-              value={departureDate}
-              onPick={setDepartureDate}
-            />
+            <>
+              <Dropdown
+                label="Trip type"
+                bordered
+                items={[
+                  { label: "One Way", value: "one_way" },
+                  { label: "Round", value: "round" },
+                ]}
+                selectedItem={tripType}
+                onSelect={setTripType}
+              />
+
+              <DateTimePicker
+                label="Departure from your location"
+                className="rounded-xl"
+                bordered
+                value={departureDate}
+                onPick={setDepartureDate}
+              />
+
+              {tripType.value === "round" && (
+                <DateTimePicker
+                  label="Flight return date"
+                  className="rounded-xl"
+                  bordered
+                  value={flightReturnDate}
+                  onPick={setFlightReturnDate}
+                />
+              )}
+            </>
           )}
           {!includes.flight && includes.hotel && (
             <DateTimePicker
