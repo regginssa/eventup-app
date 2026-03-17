@@ -111,7 +111,7 @@ const TicketReceipt = ({ ticket, amount, currency }: any) => {
             <Text className="text-slate-400 font-dm-sans-bold text-[10px] uppercase tracking-widest mb-1">
               Total Amount
             </Text>
-            <View className="flex flex-row items-center gap-1">
+            <View className="flex flex-row items-center gap-1 mt-1">
               <Text className="text-lg text-slate-400">
                 {currency.toUpperCase()}
               </Text>
