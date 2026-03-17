@@ -499,7 +499,7 @@ ${url}`;
         <View className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden mb-6">
           <LinearGradient
             colors={["rgba(132, 74, 255, 0.05)", "transparent"]}
-            className="p-6"
+            style={{ padding: 24 }}
           >
             <Text className="text-slate-400 font-poppins-bold text-[10px] uppercase tracking-[2px] mb-3">
               About & Bio

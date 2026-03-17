@@ -84,8 +84,13 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
                     {isActive ? (
                       <LinearGradient
                         colors={["#C427E0", "#844AFF", "#12A9FF"]}
-                        className="w-6 h-6 items-center justify-center"
-                        style={{ borderRadius: 12 }}
+                        style={{
+                          borderRadius: 12,
+                          width: 24,
+                          height: 24,
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
                       >
                         <Ionicons name="checkmark" size={14} color="white" />
                       </LinearGradient>
@@ -161,8 +166,13 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
             <View className="flex-row items-center gap-2 mb-6">
               <LinearGradient
                 colors={["#844AFF", "#12A9FF"]}
-                className="w-8 h-8 items-center justify-center"
-                style={{ borderRadius: 8 }}
+                style={{
+                  borderRadius: 8,
+                  width: 32,
+                  height: 32,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
                 <MaterialCommunityIcons
                   name="map-marker-path"

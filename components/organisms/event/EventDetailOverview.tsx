@@ -98,7 +98,7 @@ const EventDetailOverview: React.FC<EventDetailOverviewProps> = ({
         <View className="flex-row items-center gap-2 mb-4">
           <LinearGradient
             colors={["#844AFF", "#C427E0"]}
-            className="w-1 h-5 rounded-full"
+            style={{ width: 4, height: 20, borderRadius: 1 }}
           />
           <Text className="font-poppins-bold text-slate-900 text-base">
             About this event

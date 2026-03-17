@@ -27,7 +27,7 @@ const TicketHeroCard = ({ ticket, loading }: any) => {
     <View className="w-full rounded-[24px] overflow-hidden bg-white border border-slate-100 shadow-sm">
       <LinearGradient
         colors={["rgba(16,185,129,0.08)", "transparent"]}
-        className="p-4 flex-row gap-4"
+        style={{ padding: 16, display: "flex", flexDirection: "row", gap: 16 }}
       >
         <Image
           source={{ uri: ticket.image }}

@@ -366,8 +366,13 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       {checked ? (
         <LinearGradient
           colors={["#C427E0", "#844AFF", "#12A9FF"]}
-          className="w-5 h-5 items-center justify-center"
-          style={{ borderRadius: 6 }}
+          style={{
+            borderRadius: 6,
+            width: 20,
+            height: 20,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           <MaterialCommunityIcons name="check" size={14} color="white" />
         </LinearGradient>

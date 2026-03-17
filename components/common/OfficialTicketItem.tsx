@@ -52,8 +52,7 @@ const OfficialTicketItem: React.FC<OfficialTicketItemProps> = ({ event }) => {
           <View className="flex-row items-center gap-3 mb-5">
             <LinearGradient
               colors={["#844AFF20", "#C427E020"]}
-              className="p-2"
-              style={{ borderRadius: 12 }}
+              style={{ borderRadius: 12, padding: 8 }}
             >
               <MaterialCommunityIcons
                 name="ticket-confirmation"

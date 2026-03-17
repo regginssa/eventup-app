@@ -233,7 +233,15 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
             <View className="items-center w-6">
               <LinearGradient
                 colors={["#844AFF", "#C427E0"]}
-                className="w-4 h-4 rounded-full border-2 border-white shadow-md z-10"
+                className="shadow-md"
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: 8,
+                  borderWidth: 2,
+                  borderColor: "white",
+                  zIndex: 10,
+                }}
               />
               <MaterialCommunityIcons
                 name="flag-checkered"

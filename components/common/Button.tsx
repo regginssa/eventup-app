@@ -85,7 +85,6 @@ const Button: React.FC<ButtonProps> = ({
         colors={disabled ? ["#94a3b8", "#cbd5e1"] : (colors as any)}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
-        className="flex-1 items-center justify-center"
         style={{
           flex: 1,
           alignItems: "center",
