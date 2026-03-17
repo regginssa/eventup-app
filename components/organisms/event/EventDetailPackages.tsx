@@ -157,7 +157,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
             </View>
           </LinearGradient>
         ) : (
-          <View className="bg-white rounded-[32px] shadow-xl shadow-slate-200 border border-slate-50">
+          <View className="bg-white">
             <View className="flex-row items-center gap-2 mb-6">
               <LinearGradient
                 colors={["#844AFF", "#12A9FF"]}

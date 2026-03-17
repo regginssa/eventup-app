@@ -371,7 +371,16 @@ const HotelItem: React.FC<HotelItemProps> = ({
             {/* PRICE */}
             <LinearGradient
               colors={["#F8FAFC", "#FFFFFF"]}
-              className="flex-row items-center justify-between p-3 rounded-2xl border border-slate-50"
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: 12,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: "#f8fafc",
+              }}
             >
               <View className="flex-row items-center gap-2">
                 <View className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200" />

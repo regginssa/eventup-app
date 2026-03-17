@@ -118,8 +118,12 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
             colors={isGold ? ["#FACC15", "#EAB308"] : ["#844AFF", "#C427E0"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            className="px-6 py-2 shadow-md"
-            style={{ borderRadius: 24 }}
+            className="shadow-md"
+            style={{
+              borderRadius: 24,
+              paddingHorizontal: 24,
+              paddingVertical: 8,
+            }}
           >
             <Text className="font-poppins-bold text-white text-xs uppercase tracking-widest">
               {isGold ? "✨ Gold Package" : "Standard Package"}

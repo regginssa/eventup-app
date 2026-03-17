@@ -182,6 +182,7 @@ const BookingStatus = () => {
         const flightOffer = booking.flight.offer;
         const hotelOffer = booking.hotel.offer;
         const transferOffer = airportToHotel.offer;
+        const flightArrival = flightOffer.slices[0];
 
         const body = {
           quoteId: transferOffer.id,
@@ -199,8 +200,10 @@ const BookingStatus = () => {
             flight: {
               airline_code: flightOffer.airlineName,
               flight_number:
-                flightOffer.flightNumbers[flightOffer.flightNumbers.length - 1],
-              airport_code: flightOffer.destinationIata,
+                flightArrival.flightNumbers[
+                  flightArrival.flightNumbers.length - 1
+                ],
+              airport_code: flightArrival.destinationIata,
               flight_date_time: flightOffer.arrivalTime,
             },
           },
@@ -415,10 +418,10 @@ const BookingStatus = () => {
                       Total Investment
                     </Text>
                     <View className="flex-row items-baseline mt-1">
+                      <Text className="text-slate-200 font-poppins-bold text-sm">
+                        {price.currency}
+                      </Text>
                       <Text className="text-white font-poppins-bold text-3xl">
-                        <Text className="text-slate-200 font-poppins-bold text-sm">
-                          {price.currency}
-                        </Text>
                         {price.totalAmount}
                       </Text>
                     </View>
