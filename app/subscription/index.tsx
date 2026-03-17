@@ -122,68 +122,7 @@ const SubscriptionScreen = () => {
     item: ISubscription;
     selected: boolean;
   }) => {
-    const Wrapper = ({ children }: any) =>
-      selected && item._id !== currentSubscription?._id ? (
-        <LinearGradient
-          colors={["#C427E0", "#844AFF", "#12A9FF"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            borderRadius: 12,
-            position: "relative",
-            width: "100%",
-            height: 150,
-            overflow: "visible",
-          }}
-        >
-          {children}
-          <LinearGradient
-            colors={["#C427E0", "#844AFF", "#12A9FF"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 14,
-              position: "absolute",
-              top: -14,
-              left: "50%",
-              marginLeft: -14,
-            }}
-          >
-            <View className="bg-white flex flex-row inset-[1px] absolute rounded-full">
-              <LinearGradient
-                colors={["#C427E0", "#844AFF", "#12A9FF"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{
-                  width: 18,
-                  height: 18,
-                  borderRadius: 9,
-                  position: "absolute",
-                  inset: 4,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <MaterialCommunityIcons name="check" size={18} color="white" />
-              </LinearGradient>
-            </View>
-          </LinearGradient>
-        </LinearGradient>
-      ) : (
-        <View
-          style={{
-            borderRadius: 12,
-            position: "relative",
-            width: "100%",
-            height: 150,
-          }}
-        >
-          {children}
-        </View>
-      );
+    const showSelected = selected && item._id !== currentSubscription?._id;
 
     const savePercent = calculateSave(item.price, item.month, oneMonthPrice);
 
@@ -195,10 +134,45 @@ const SubscriptionScreen = () => {
     };
 
     return (
-      <Wrapper selected={selected}>
+      <View
+        style={{
+          width: "100%",
+          height: 150,
+          position: "relative",
+        }}
+      >
+        {/* Gradient Border */}
+        {showSelected ? (
+          <LinearGradient
+            colors={["#C427E0", "#844AFF", "#12A9FF"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+              borderRadius: 12,
+              position: "absolute",
+              inset: 0,
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              borderRadius: 12,
+              position: "absolute",
+              inset: 0,
+            }}
+          />
+        )}
+
+        {/* Card Content */}
         <TouchableOpacity
           activeOpacity={0.8}
-          className={`p-5 ${item._id !== currentSubscription?._id ? "bg-white" : "bg-gray-200"} rounded-xl flex flex-col gap-4 absolute inset-[1px]`}
+          className={`p-5 ${
+            item._id !== currentSubscription?._id ? "bg-white" : "bg-gray-200"
+          } rounded-xl flex flex-col gap-4`}
+          style={{
+            position: "absolute",
+            inset: 1,
+          }}
           disabled={item._id === currentSubscription?._id}
           onPress={
             shouldDisableButton
@@ -206,6 +180,7 @@ const SubscriptionScreen = () => {
               : () => setSelectedSubscriptionId(item._id)
           }
         >
+          {/* Header */}
           <View className="w-full flex flex-row items-start justify-between">
             <View className="flex flex-col items-start gap-1">
               <View className="flex flex-row items-center gap-2">
@@ -213,6 +188,7 @@ const SubscriptionScreen = () => {
                   <Text className="font-poppins-semibold text-2xl text-gray-800">
                     {formattedItem.month === 0 ? "Free" : formattedItem.month}
                   </Text>
+
                   {formattedItem.month > 0 && (
                     <Text className="font-poppins-semibold text-lg text-gray-600">
                       {formattedItem.month === 1 ? "Month" : "Months"}
@@ -263,6 +239,7 @@ const SubscriptionScreen = () => {
             </View>
           </View>
 
+          {/* Features */}
           <View className="gap-2">
             <View className="flex flex-row items-center gap-4">
               {item.features.slice(0, 2).map((feature: any, index: number) => (
@@ -301,7 +278,51 @@ const SubscriptionScreen = () => {
             </View>
           </View>
         </TouchableOpacity>
-      </Wrapper>
+
+        {/* Check Badge (OUTSIDE card so iOS won't clip it) */}
+        {showSelected && (
+          <LinearGradient
+            colors={["#C427E0", "#844AFF", "#12A9FF"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 14,
+              position: "absolute",
+              top: -14,
+              left: "50%",
+              marginLeft: -14,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "white",
+                borderRadius: 14,
+                width: 24,
+                height: 24,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <LinearGradient
+                colors={["#C427E0", "#844AFF", "#12A9FF"]}
+                style={{
+                  width: 18,
+                  height: 18,
+                  borderRadius: 9,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <MaterialCommunityIcons name="check" size={16} color="white" />
+              </LinearGradient>
+            </View>
+          </LinearGradient>
+        )}
+      </View>
     );
   };
 

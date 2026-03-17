@@ -1,7 +1,7 @@
 import eventRestServices from "@/api/services/event";
 import { Button, Modal } from "@/components/common";
 import { MapMarker } from "@/components/molecules";
-import { LayoutContainer } from "@/components/organisms/layout";
+import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { COLORFUL_MAP_STYLE } from "@/constants/themes";
 import { IEvent } from "@/types/event";
@@ -137,7 +137,7 @@ const MapScreen = () => {
   }, [events]);
 
   return (
-    <LayoutContainer title="Map">
+    <SimpleContainer title="Map">
       {/* Event Counter */}
       <View className="flex flex-row items-center gap-2">
         <View className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -147,7 +147,7 @@ const MapScreen = () => {
       </View>
 
       {/* Map Container */}
-      <View className="flex-1 rounded-3xl overflow-hidden mt-4">
+      <View className="flex-1 rounded-3xl overflow-hidden">
         {/* Floating Search Button */}
         {showSearchButton && (
           <View
@@ -315,7 +315,7 @@ const MapScreen = () => {
           }
         />
       </Modal>
-    </LayoutContainer>
+    </SimpleContainer>
   );
 };
 

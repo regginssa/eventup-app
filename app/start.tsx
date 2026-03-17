@@ -22,7 +22,7 @@ const StartScreen = () => {
             EventWorld
           </Text>
           <Text className="font-dm-sans text-white/90 font-medium text-center">
-            AI Event Discovery System
+            AI Event Discovery & Creating System
           </Text>
         </View>
         <View className="w-full flex flex-row gap-4 items-center justify-center">

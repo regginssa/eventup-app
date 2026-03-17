@@ -12,15 +12,13 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
-import MaskedView from "@react-native-masked-view/masked-view";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const tabs: TDropdownItem[] = [
   {
-    label: "AI Discovery",
+    label: "Discovery",
     value: "ai",
     icon: <AntDesign name="api" size={14} color="#844AFF" />,
   },
@@ -166,6 +164,14 @@ const HomeScreen = () => {
               </View>
             )}
           </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className={`w-12 h-12 rounded-full flex items-center justify-center bg-white`}
+            style={styles.shadow}
+            onPress={() => router.push("/map")}
+          >
+            <MaterialIcons name="map" size={20} color="#4b5563" />
+          </TouchableOpacity>
         </View>
 
         <View className="w-full flex flex-row items-center justify-between px-1">
@@ -247,37 +253,6 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
       )}
-
-      {/* BOTTOM CONTROLS (GO TO & MAP) */}
-      <View className="absolute bottom-24 left-0 right-0 flex-row justify-end px-5">
-        {/* MAP BUTTON */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          className="bg-white h-12 px-6 rounded-full flex flex-row items-center gap-2 border border-slate-100"
-          style={styles.shadow}
-          onPress={() => router.replace("/map")}
-        >
-          <MaskedView
-            style={{ width: 20, height: 20 }}
-            maskElement={<Feather name="map" size={20} color="black" />}
-          >
-            <LinearGradient
-              colors={["#C427E0", "#844AFF", "#12A9FF"]}
-              style={{ flex: 1 }}
-            />
-          </MaskedView>
-
-          <MaskedView
-            style={{ width: 35, height: 20 }}
-            maskElement={<Text className="font-poppins-bold">Map</Text>}
-          >
-            <LinearGradient
-              colors={["#C427E0", "#844AFF", "#12A9FF"]}
-              style={{ flex: 1 }}
-            />
-          </MaskedView>
-        </TouchableOpacity>
-      </View>
 
       <EventFilterModal
         isOpen={isFilterOpen}

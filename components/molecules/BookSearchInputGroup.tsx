@@ -7,7 +7,7 @@ import { normalizeDateUTC } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Platform, Text, TouchableOpacity, View } from "react-native";
 import {
   Button,
   DateTimePicker,
@@ -151,29 +151,29 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     //   return null;
     // }
 
-    let checkIn: any;
+    // let checkIn: any;
 
-    // If flights are included, ensure flight is selected and use its arrival time
-    if (includes.flight) {
-      if (!flightOffer) {
-        return null;
-      }
-      checkIn = new Date(flightOffer.arrivalTime);
-    } else {
-      // When no flight: validate check-in vs event
-      const checkInDate = normalizeDateUTC(hotelCheckInDate);
-      // if (eventDate < checkInDate) {
-      //   toast.info("The hotel checkIn date cannot be after the event date.");
-      //   return null;
-      // }
-      checkIn = hotelCheckInDate;
-    }
+    // // If flights are included, ensure flight is selected and use its arrival time
+    // if (includes.flight) {
+    //   if (!flightOffer) {
+    //     return null;
+    //   }
+    //   checkIn = new Date(flightOffer.arrivalTime);
+    // } else {
+    //   // When no flight: validate check-in vs event
+    //   const checkInDate = normalizeDateUTC(hotelCheckInDate);
+    //   // if (eventDate < checkInDate) {
+    //   //   toast.info("The hotel checkIn date cannot be after the event date.");
+    //   //   return null;
+    //   // }
+    //   checkIn = hotelCheckInDate;
+    // }
 
     // Build params
     const params = {
       lat: hotelGeo?.latitude,
       lng: hotelGeo?.longitude,
-      checkIn: df.toISOString(checkIn),
+      checkIn: df.toISOString(hotelCheckInDate),
       checkOut: df.toISOString(hotelCheckoutDate),
       packageType,
     };
@@ -578,7 +578,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               />
 
               <DateTimePicker
-                label="Departure from your location"
+                label="Flight departure date"
                 className="rounded-xl"
                 bordered
                 value={departureDate}
@@ -596,29 +596,31 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               )}
             </>
           )}
-          {!includes.flight && includes.hotel && (
-            <DateTimePicker
-              label="Hotel CheckIn Date"
-              className="rounded-xl"
-              bordered
-              mode="date"
-              value={hotelCheckInDate}
-              onPick={setHotelCheckInDate}
-            />
-          )}
+
           {includes.hotel && (
-            <DateTimePicker
-              label="Hotel Checkout Date"
-              className="rounded-xl"
-              bordered
-              mode="date"
-              value={hotelCheckoutDate}
-              onPick={setHotelCheckoutDate}
-            />
+            <>
+              <DateTimePicker
+                label="Hotel CheckIn Date"
+                className="rounded-xl"
+                bordered
+                mode="date"
+                value={hotelCheckInDate}
+                onPick={setHotelCheckInDate}
+              />
+              <DateTimePicker
+                label="Hotel Checkout Date"
+                className="rounded-xl"
+                bordered
+                mode="date"
+                value={hotelCheckoutDate}
+                onPick={setHotelCheckoutDate}
+              />
+            </>
           )}
+
           {includes.transferEvent && (
             <DateTimePicker
-              label="Transfer to Event Time"
+              label="Transfer date time to Event"
               className="rounded-xl"
               bordered
               mode="datetime"
@@ -684,6 +686,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           </View>
         </View>
       )}
+
+      {Platform.OS === "ios" && <View className="h-4"></View>}
 
       {/* SEARCH BUTTON */}
       <Button
