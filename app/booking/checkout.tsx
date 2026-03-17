@@ -36,7 +36,7 @@ const EventHeroCard = ({ event, packageType, loading }: any) => {
     <View className="w-full rounded-[24px] overflow-hidden bg-white border border-slate-100 shadow-sm">
       <LinearGradient
         colors={["rgba(132, 74, 255, 0.05)", "transparent"]}
-        className="p-4 flex-row gap-4"
+        style={{ padding: 16, display: "flex", flexDirection: "row", gap: 16 }}
       >
         <View className="relative">
           <Image
