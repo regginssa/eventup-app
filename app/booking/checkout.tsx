@@ -110,12 +110,14 @@ const HighEndReceipt = ({
 
         <View className="flex-row justify-between items-center mt-2">
           <Text className="text-slate-500 font-dm-sans text-sm">Subtotal</Text>
-          <Text className="text-slate-800 font-dm-sans-bold text-base">
+          <View className="flex flex-row items-center gap-1">
             <Text className="text-slate-600 font-dm-sans-medium text-xs">
               {currency.toUpperCase()}
-            </Text>{" "}
-            {base}
-          </Text>
+            </Text>
+            <Text className="text-slate-800 font-dm-sans-bold text-base">
+              {base}
+            </Text>
+          </View>
         </View>
 
         <View className="flex-row justify-between items-center">
@@ -123,12 +125,14 @@ const HighEndReceipt = ({
             Commission
           </Text>
 
-          <Text className="text-slate-800 font-dm-sans-bold text-base">
+          <View className="flex flex-row items-center gap-1">
             <Text className="text-slate-600 font-dm-sans-medium text-xs">
               {currency.toUpperCase()}
-            </Text>{" "}
-            {commission}
-          </Text>
+            </Text>
+            <Text className="text-slate-800 font-dm-sans-bold text-base">
+              {commission}
+            </Text>
+          </View>
         </View>
       </View>
     </View>
@@ -146,12 +150,14 @@ const HighEndReceipt = ({
             Total Amount
           </Text>
 
-          <Text className="font-poppins-bold text-slate-900 text-3xl">
+          <View className="flex flex-row items-center gap-1">
             <Text className="font-poppins-bold text-slate-600 text-lg">
               {currency.toUpperCase()}
-            </Text>{" "}
-            {total}
-          </Text>
+            </Text>
+            <Text className="font-poppins-bold text-slate-900 text-3xl">
+              {total}
+            </Text>
+          </View>
         </View>
 
         <View className="bg-emerald-100 px-3 py-1.5 rounded-xl flex-row items-center gap-1">

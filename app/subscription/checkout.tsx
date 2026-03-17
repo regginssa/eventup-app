@@ -32,7 +32,13 @@ const SubscriptionHeroCard = ({ subscription, loading }: any) => {
     <View className="w-full rounded-[24px] overflow-hidden bg-white border border-slate-100">
       <LinearGradient
         colors={["rgba(132,74,255,0.08)", "transparent"]}
-        className="p-6 flex flex-row items-center justify-between"
+        style={{
+          padding: 24,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
       >
         <View>
           <Text className="text-purple-600 font-poppins-bold text-[10px] uppercase tracking-widest">
@@ -113,12 +119,14 @@ const SubscriptionReceipt = ({ subscription, amount, currency }: any) => {
         <View className="flex-row justify-between items-end">
           <Text className="text-slate-600 font-dm-sans-bold">Total Amount</Text>
 
-          <Text className="font-poppins-bold text-3xl text-slate-900">
+          <View className="flex flex-row items-center gap-1">
             <Text className="font-poppins-bold text-slate-600 text-lg">
               {currency.toUpperCase()}
-            </Text>{" "}
-            {amount}
-          </Text>
+            </Text>
+            <Text className="font-poppins-bold text-3xl text-slate-900">
+              {amount}
+            </Text>
+          </View>
         </View>
       </View>
     </View>
