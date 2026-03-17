@@ -84,7 +84,7 @@ const OnboardingStep4Screen = () => {
   return (
     <OnboardingContainer
       step={4}
-      title="Personalize your party"
+      title="Personalize your event"
       subtitle="Share your favorite vibes and we'll match you with the perfect events"
       onBack={() => router.back()}
     >

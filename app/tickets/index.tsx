@@ -1,6 +1,8 @@
-import { Button, Modal, Spinner } from "@/components";
+import { Button, Modal } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { useCommunityTicket } from "@/components/providers/CommunityTicketProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -29,9 +31,10 @@ const TicketsScreen = () => {
     currencies[0].value,
   );
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
 
+  const { user } = useAuth();
   const { amount, currency, from, callback } = useLocalSearchParams();
+  const toast = useToast();
   const router = useRouter();
 
   const { communityTickets } = useCommunityTicket();
@@ -108,12 +111,17 @@ const TicketsScreen = () => {
                 type="primary"
                 label="Purchase"
                 buttonClassName="w-[108px] h-10"
-                onPress={() =>
+                onPress={() => {
+                  if (!user?._id) {
+                    toast.warn("You should log in first");
+                    return router.replace("/auth/login");
+                  }
+
                   router.push({
                     pathname: "/tickets/checkout",
                     params: { id: item._id },
-                  })
-                }
+                  });
+                }}
               />
             </View>
           </View>
@@ -167,16 +175,12 @@ const TicketsScreen = () => {
       </View>
 
       <View className="flex-1 p-5">
-        {loading ? (
-          <Spinner size="md" />
-        ) : (
-          <FlatList
-            data={filteredTickets}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={{ gap: 16 }}
-          />
-        )}
+        <FlatList
+          data={filteredTickets}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={{ gap: 16 }}
+        />
       </View>
 
       <Modal

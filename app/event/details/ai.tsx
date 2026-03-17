@@ -14,7 +14,6 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
-import { ICommunityTicket } from "@/types/ticket";
 import { formatEventLabel } from "@/utils/format";
 import * as Location from "expo-location";
 import { useLocalSearchParams } from "expo-router";
@@ -42,8 +41,6 @@ const AIEventDetail = () => {
     countryCode: string | null;
   }>({ city: null, countryCode: null });
   const [booking, setBooking] = useState<IBooking | null>(null);
-  const [communityTicket, setCommunityTicket] =
-    useState<ICommunityTicket | null>(null);
 
   const { id, callback } = useLocalSearchParams();
   const { user } = useAuth();
@@ -77,7 +74,6 @@ const AIEventDetail = () => {
   };
 
   const fetchUserCurrentLocation = async () => {
-    if (!user?.location.coordinate) return;
     const coords = await getUserLocationAndSave();
 
     setCurrentLocationCoords(coords);

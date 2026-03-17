@@ -102,7 +102,6 @@ const UserEventDetail = () => {
   };
 
   const fetchUserCurrentLocation = async () => {
-    if (!user?.location?.coordinate) return;
     const coords = await getUserLocationAndSave();
 
     setCurrentLocationCoords(coords);

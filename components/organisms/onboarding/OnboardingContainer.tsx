@@ -59,7 +59,7 @@ const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
 
             <OnboardingStepper completedStep={step} />
             <View
-              className="w-full p-4 gap-5 bg-[#eef1f7] rounded-lg border"
+              className="w-full p-4 gap-5 bg-[#eef1f7] rounded-xl border"
               style={{ borderColor: "white" }}
             >
               {children}

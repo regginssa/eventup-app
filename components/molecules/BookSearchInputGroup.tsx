@@ -6,6 +6,7 @@ import df from "@/utils/date";
 import { normalizeDateUTC } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Platform, Text, TouchableOpacity, View } from "react-native";
 import {
@@ -81,6 +82,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     initialize: initializeTransfer,
   } = useTransfer();
   const toast = useToast();
+  const router = useRouter();
 
   const initialize = () => {
     initializeFlight();
@@ -268,8 +270,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       packageType,
     };
 
-    console.log(params);
-
     setLoading("hotelToEvent", true);
     await searchTransfer(params, "he");
     setLoading("hotelToEvent", false);
@@ -279,6 +279,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (!event._id) return toast.warn("Event ID is missing.");
 
     if (!event.dates?.timezone) return toast.warn("Event timezone is missing.");
+
+    if (!user?._id) {
+      toast.warn("You should log in first");
+      return router.replace("/auth/login");
+    }
 
     try {
       setSearchLoading(true);
@@ -511,39 +516,42 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             </TouchableOpacity>
 
             {/* Home Location Option */}
-            <TouchableOpacity
-              style={getCardStyle(departureLocation === "home")}
-              className="rounded-full"
-              onPress={() => setDepartureLocation("home")}
-              activeOpacity={0.7}
-            >
-              <View className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm">
-                <MaterialCommunityIcons
-                  name="home-map-marker"
-                  size={22}
-                  color={departureLocation === "home" ? "#844AFF" : "#94a3b8"}
-                />
-              </View>
-
-              <View className="flex-1 ml-3">
-                <Text
-                  style={{
-                    color: departureLocation === "home" ? "#844AFF" : "#94a3b8",
-                  }}
-                  className="font-dm-sans-bold text-[10px] uppercase tracking-[1.5px]"
-                >
-                  Saved Home
-                </Text>
-                <Text className="font-dm-sans-medium text-slate-700 text-xs mt-0.5">
-                  {user?.location.city.name}, {user?.location.country.code}
-                </Text>
-              </View>
-
-              <RadioButton
-                checked={departureLocation === "home"}
+            {user?._id && (
+              <TouchableOpacity
+                style={getCardStyle(departureLocation === "home")}
+                className="rounded-full"
                 onPress={() => setDepartureLocation("home")}
-              />
-            </TouchableOpacity>
+                activeOpacity={0.7}
+              >
+                <View className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm">
+                  <MaterialCommunityIcons
+                    name="home-map-marker"
+                    size={22}
+                    color={departureLocation === "home" ? "#844AFF" : "#94a3b8"}
+                  />
+                </View>
+
+                <View className="flex-1 ml-3">
+                  <Text
+                    style={{
+                      color:
+                        departureLocation === "home" ? "#844AFF" : "#94a3b8",
+                    }}
+                    className="font-dm-sans-bold text-[10px] uppercase tracking-[1.5px]"
+                  >
+                    Saved Home
+                  </Text>
+                  <Text className="font-dm-sans-medium text-slate-700 text-xs mt-0.5">
+                    {user?.location.city.name}, {user?.location.country.code}
+                  </Text>
+                </View>
+
+                <RadioButton
+                  checked={departureLocation === "home"}
+                  onPress={() => setDepartureLocation("home")}
+                />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       )}

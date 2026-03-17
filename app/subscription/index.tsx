@@ -6,7 +6,7 @@ import { formatDateTime } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 
@@ -328,6 +328,10 @@ const SubscriptionScreen = () => {
 
   const price =
     subscriptions.find((s) => s._id === selectedSubscriptionId)?.price || 0;
+
+  if (!user?._id) {
+    return <Redirect href="/auth/login" />;
+  }
 
   return (
     <SubscriptionContainer>
