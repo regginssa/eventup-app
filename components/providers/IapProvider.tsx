@@ -7,6 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { Platform } from "react-native";
 import * as RNIap from "react-native-iap";
 import { useAuth } from "./AuthProvider";
 import { useCommunityTicket } from "./CommunityTicketProvider";
@@ -96,6 +97,8 @@ const IapProvider: React.FC<IapProviderProps> = ({ children }) => {
   }
 
   useEffect(() => {
+    if (Platform.OS !== "ios") return;
+
     let mounted = true;
 
     async function initIap() {

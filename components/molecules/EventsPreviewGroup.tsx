@@ -14,7 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Button, Spinner } from "../common";
+import { Spinner } from "../common";
 import { useToast } from "../providers/ToastProvider";
 
 interface EventsPreviewGroupProps {
@@ -81,9 +81,16 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
     const event = item;
 
     return (
-      <View
+      <TouchableOpacity
+        activeOpacity={0.7}
         className="rounded-xl relative w-full h-[250px] overflow-hidden bg-white"
         style={styles.item}
+        onPress={() =>
+          router.push({
+            pathname: `/event/details/${event.type}` as any,
+            params: { id: event._id },
+          })
+        }
       >
         {!event.images || event.images.length === 0 ? (
           <View
@@ -187,23 +194,10 @@ const EventsPreviewGroup: React.FC<EventsPreviewGroupProps> = ({
                   </Text>
                 </View>
               </View>
-
-              <Button
-                type="primary"
-                label="View package"
-                buttonClassName="w-[125px] h-10"
-                textClassName="text-sm"
-                onPress={() =>
-                  router.push({
-                    pathname: `/event/details/${event.type}` as any,
-                    params: { id: event._id },
-                  })
-                }
-              />
             </View>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 

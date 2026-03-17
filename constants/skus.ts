@@ -12,17 +12,17 @@ export const IOS_SKUS = {
     ticket_usd_50: "EVENTWORLD.TICKET.USD.50",
     ticket_usd_100: "EVENTWORLD.TICKET.USD.100",
 
-    ticket_eur_5: "EVENTWORLD.TICKET.USD.5",
-    ticket_eur_10: "EVENTWORLD.TICKET.USD.10",
-    ticket_eur_20: "EVENTWORLD.TICKET.USD.20",
-    ticket_eur_50: "EVENTWORLD.TICKET.USD.50",
-    ticket_eur_100: "EVENTWORLD.TICKET.USD.100",
+    ticket_eur_5: "EVENTWORLD.TICKET.EUR.5",
+    ticket_eur_10: "EVENTWORLD.TICKET.EUR.10",
+    ticket_eur_20: "EVENTWORLD.TICKET.EUR.20",
+    ticket_eur_50: "EVENTWORLD.TICKET.EUR.50",
+    ticket_eur_100: "EVENTWORLD.TICKET.EUR.100",
 
-    ticket_pln_5: "EVENTWORLD.TICKET.USD.5",
-    ticket_pln_10: "EVENTWORLD.TICKET.USD.10",
-    ticket_pln_20: "EVENTWORLD.TICKET.USD.20",
-    ticket_pln_50: "EVENTWORLD.TICKET.USD.50",
-    ticket_pln_100: "EVENTWORLD.TICKET.USD.100",
+    ticket_pln_20: "EVENTWORLD.TICKET.PLN.20",
+    ticket_pln_40: "EVENTWORLD.TICKET.PLN.40",
+    ticket_pln_80: "EVENTWORLD.TICKET.PLN.80",
+    ticket_pln_200: "EVENTWORLD.TICKET.PLN.200",
+    ticket_pln_400: "EVENTWORLD.TICKET.PLN.400",
   },
 };
 
@@ -30,11 +30,7 @@ export function getSubscriptionSku(months: 1 | 3 | 6 | 12) {
   return IOS_SKUS.subscription[`month_${months}`];
 }
 
-type Currency = "usd" | "eur" | "pln";
-type TicketPrice = 5 | 10 | 20 | 50 | 100;
-type TicketKey = `ticket_${Currency}_${TicketPrice}`;
-
-export function getTicketSku(currency: Currency, price: TicketPrice) {
-  const key = `ticket_${currency}_${price}` as TicketKey;
-  return IOS_SKUS.ticket[key];
+export function getTicketSku(currency: string, price: number) {
+  const key = `ticket_${currency.toLowerCase()}_${price}` as any;
+  return IOS_SKUS.ticket[key as keyof typeof IOS_SKUS.ticket];
 }
