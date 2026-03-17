@@ -10,7 +10,7 @@ import {
 } from "../endpoints";
 
 const getFeed = async (
-  userId: string,
+  userId: string | null,
   type: "ai" | "user",
   startDate?: Date,
   countryCode?: string,

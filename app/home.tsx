@@ -53,11 +53,10 @@ const HomeScreen = () => {
   const { user } = useAuth();
 
   const fetchFeed = async (page: number = 1) => {
-    if (!user?._id) return;
     try {
       setLoading(true);
       const response = await eventServices.getFeed(
-        user._id,
+        user?._id || null,
         selectedTab.value as any,
         startDate as any,
         country?.cca2 as any,

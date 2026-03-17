@@ -462,7 +462,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       {/* SECTION 1: ORIGIN (Only if Flight is checked) */}
       {includes.flight && (
-        <View className="bg-slate-50/50 py-4 rounded-2xl border border-slate-100">
+        <View className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
           <View className="flex-row items-center gap-2 mb-4">
             <View className="w-6 h-6 rounded-full bg-[#844AFF20] items-center justify-center">
               <MaterialCommunityIcons
@@ -557,7 +557,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       )}
 
       {/* SECTION 2: SCHEDULE (Dynamic Date Pickers) */}
-      <View className="bg-slate-50/50 py-4 rounded-2xl border border-slate-100">
+      <View className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
         <View className="flex-row items-center gap-2 mb-4">
           <View className="w-6 h-6 rounded-full bg-[#844AFF20] items-center justify-center">
             <MaterialCommunityIcons
@@ -644,7 +644,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         hotelOffer ||
         airportToHotelOffer ||
         hotelToEventOffer) && (
-        <View className="gap-3">
+        <View className="gap-3 ">
           <View className="flex-row items-center gap-2 mb-4">
             <View className="w-6 h-6 rounded-full bg-[#844AFF20] items-center justify-center">
               <MaterialCommunityIcons
