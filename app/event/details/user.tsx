@@ -1,7 +1,5 @@
 import bookingServices from "@/api/services/booking";
 import eventServices from "@/api/services/event";
-import notificationServices from "@/api/services/notification";
-import userServices from "@/api/services/user";
 import {
   AttendeesCardGroup,
   Button,
@@ -23,9 +21,7 @@ import { TCoordinate, TDropdownItem } from "@/types";
 import { IBooking } from "@/types/booking";
 import { IConversation } from "@/types/conversation";
 import { IAttendees, IEvent } from "@/types/event";
-import { INotification } from "@/types/notification";
 import { ICommunityTicket } from "@/types/ticket";
-import { IUser } from "@/types/user";
 import { formatEventLabel } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -200,68 +196,68 @@ const UserEventDetail = () => {
     setGroupConversation(conv || null);
   }, [conversations, event, user?._id]);
 
-  const handleUserTicketRelease = async () => {
-    if (!event?._id || !myAttendees || !event.hoster?._id) return;
+  // const handleUserTicketRelease = async () => {
+  //   if (!event?._id || !myAttendees || !event.hoster?._id) return;
 
-    try {
-      setReleaseLoading(true);
+  //   try {
+  //     setReleaseLoading(true);
 
-      // Change the ticket status from event attendees
-      const eventBodyData: IEvent = {
-        ...event,
-        attendees: event.attendees.map((att) =>
-          att.user._id === user?._id
-            ? { ...att, ticket: { ...att.ticket, status: "released" } }
-            : att,
-        ) as any,
-      };
+  //     // Change the ticket status from event attendees
+  //     const eventBodyData: IEvent = {
+  //       ...event,
+  //       attendees: event.attendees.map((att) =>
+  //         att.user._id === user?._id
+  //           ? { ...att, ticket: { ...att.ticket, status: "released" } }
+  //           : att,
+  //       ) as any,
+  //     };
 
-      const eventRes = await eventServices.update(event._id, eventBodyData);
+  //     const eventRes = await eventServices.update(event._id, eventBodyData);
 
-      setEvent(eventRes.data || null);
+  //     setEvent(eventRes.data || null);
 
-      // Add ticket to the event hoster's tickets array
-      const hosterBodyData: IUser = {
-        ...event.hoster,
-        tickets: [...event.hoster.tickets, myAttendees.ticket?.ticketId as any],
-      };
+  //     // Add ticket to the event hoster's tickets array
+  //     const hosterBodyData: IUser = {
+  //       ...event.hoster,
+  //       tickets: [...event.hoster.tickets, myAttendees.ticket?.ticketId as any],
+  //     };
 
-      const hosterRes = await userServices.update(
-        hosterBodyData._id as string,
-        hosterBodyData,
-      );
+  //     const hosterRes = await userServices.update(
+  //       hosterBodyData._id as string,
+  //       hosterBodyData,
+  //     );
 
-      // Send a notification to the event hoster
-      if (hosterRes.ok) {
-        // Create a new notification
-        const newNotification: INotification = {
-          type: "event_ticket_released",
-          metadata: {
-            eventId: event._id,
-            ticketUserId: user?._id,
-          },
-          title: `A ticket has been released`,
-          body: `${user?.name}'s ticket for the event "${event.name}" has been successfully released.`,
-          isRead: false,
-          isArchived: false,
-          user: event.hoster._id as any,
-          link: `/event/${event._id}`,
-        };
+  //     // Send a notification to the event hoster
+  //     if (hosterRes.ok) {
+  //       // Create a new notification
+  //       const newNotification: INotification = {
+  //         type: "event_ticket_released",
+  //         metadata: {
+  //           eventId: event._id,
+  //           ticketUserId: user?._id,
+  //         },
+  //         title: `A ticket has been released`,
+  //         body: `${user?.name}'s ticket for the event "${event.name}" has been successfully released.`,
+  //         isRead: false,
+  //         isArchived: false,
+  //         user: event.hoster._id as any,
+  //         link: `/event/details/${event.type}/${event._id}`,
+  //       };
 
-        const notifyRes = await notificationServices.create(newNotification);
-        if (notifyRes.data) {
-          sendNotification({
-            notificationId: notifyRes.data._id,
-            userId: event.hoster._id,
-          });
-        }
-      }
-    } catch (error) {
-      toast.error("Release ticket error");
-    } finally {
-      setReleaseLoading(false);
-    }
-  };
+  //       const notifyRes = await notificationServices.create(newNotification);
+  //       if (notifyRes.data) {
+  //         sendNotification({
+  //           notificationId: notifyRes.data._id,
+  //           userId: event.hoster._id,
+  //         });
+  //       }
+  //     }
+  //   } catch (error) {
+  //     toast.error("Release ticket error");
+  //   } finally {
+  //     setReleaseLoading(false);
+  //   }
+  // };
 
   const renderContent = () => {
     if (loading) {
@@ -404,7 +400,7 @@ const UserEventDetail = () => {
                 activeOpacity={0.8}
                 className="w-full p-4 rounded-xl bg-green-600 flex flex-row items-center justify-center gap-2 mt-4"
                 disabled={releaseLoading}
-                onPress={handleUserTicketRelease}
+                // onPress={handleUserTicketRelease}
               >
                 <Text className="font-poppins-medium text-sm text-white">
                   Release Ticket

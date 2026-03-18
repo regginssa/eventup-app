@@ -1,5 +1,6 @@
 import BookingAPI from "@/api/services/booking";
 import eventServices from "@/api/services/event";
+import NotificationAPI from "@/api/services/notification";
 import userServices from "@/api/services/user";
 import Web3API from "@/api/services/web3";
 import { Button, Spinner } from "@/components/common";
@@ -8,6 +9,7 @@ import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useFlight } from "@/components/providers/FlightProvider";
 import { useHotel } from "@/components/providers/HotelProvider";
+import { useNotification } from "@/components/providers/NotificationProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useTransfer } from "@/components/providers/TransferProvider";
 import { SERVER_API_ENDPOINT } from "@/config/env";
@@ -15,6 +17,7 @@ import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
+import { INotification } from "@/types/notification";
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -295,6 +298,7 @@ const CheckoutScreen = () => {
   const { offer: hotelOffer } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
   const { pay: payStripe } = useStripe();
+  const { send: sendNotification } = useNotification();
   const toast = useToast();
 
   // useEffect(() => {
@@ -546,7 +550,6 @@ const CheckoutScreen = () => {
           params: {
             amount: event.fee?.amount,
             currency: event.fee?.currency,
-            from: "/booking/checkout",
           },
         });
         return null;
@@ -584,6 +587,29 @@ const CheckoutScreen = () => {
           },
         ],
       });
+
+      if (updatedEvent.data) {
+        const notifyBody: INotification = {
+          type: "new_attendees",
+          metadata: {
+            eventId: event._id,
+          },
+          title: "New attendee joined your event 🎉",
+          body: `${user?.name} just joined your event "${event.name}". Check out the attendee list!`,
+          isRead: false,
+          isArchived: false,
+          user: event.hoster._id as any,
+          link: `/event/details/${event.type}`,
+        };
+
+        const notifyRes = await NotificationAPI.create(notifyBody);
+        if (notifyRes.data) {
+          sendNotification({
+            notificationId: notifyRes.data._id,
+            userId: event.hoster._id,
+          });
+        }
+      }
 
       return updatedEvent.data;
     }

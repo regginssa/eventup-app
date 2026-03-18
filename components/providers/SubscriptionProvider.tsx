@@ -1,6 +1,8 @@
 import SubscriptionAPI from "@/api/services/subscription";
 import { ISubscription } from "@/types/subscription";
 import { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthProvider";
+import { useSocket } from "./SocketProvider";
 
 interface SubscriptionContextProps {
   subscriptions: ISubscription[];
@@ -26,6 +28,9 @@ const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 }) => {
   const [subscriptions, setSubscriptions] = useState<ISubscription[]>([]);
 
+  const { user, setAuthUser } = useAuth();
+  const { socket } = useSocket();
+
   const getBySku = (sku: string): ISubscription | null => {
     return (
       subscriptions.find((s) => s.month.toString() === sku.split(".")[2]) ||
@@ -40,6 +45,28 @@ const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     };
     loadSubscriptions();
   }, []);
+
+  useEffect(() => {
+    if (!socket || !user?._id) return;
+
+    const handleExpire = ({ freeSubId, userId }: any) => {
+      if (user._id !== userId) return;
+
+      setAuthUser({
+        ...user,
+        subscription: {
+          id: freeSubId,
+          startedAt: undefined,
+        },
+      });
+    };
+
+    socket.on("subscription_expired", handleExpire);
+
+    return () => {
+      socket.off("subscription_expired", handleExpire);
+    };
+  }, [socket, user]);
 
   return (
     <Context.Provider value={{ subscriptions, getBySku }}>

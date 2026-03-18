@@ -216,14 +216,27 @@ const ConversationProvider: React.FC<ConversationProviderProps> = ({
       );
     };
 
+    const handleOneUserStatusUpdated = ({ userId, status }: any) => {
+      setConversations((prev) =>
+        prev.map((conv) => ({
+          ...conv,
+          participants: conv.participants.map((p) =>
+            p._id === userId ? { ...p, status } : p,
+          ),
+        })),
+      );
+    };
+
     socket.on("conversation_updated", handleUpdatedConversation);
     socket.on("dm_blocked", handleDMBlocked);
     socket.on("dm_unblocked", handleDMUnblocked);
+    socket.on("one_user_status_updated", handleOneUserStatusUpdated);
 
     return () => {
       socket.off("conversation_updated", handleUpdatedConversation);
       socket.off("dm_blocked", handleDMBlocked);
-      socket.on("dm_unblocked", handleDMUnblocked);
+      socket.off("dm_unblocked", handleDMUnblocked);
+      socket.off("one_user_status_updated", handleOneUserStatusUpdated);
     };
   }, [socket, user]);
 
