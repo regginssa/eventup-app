@@ -14,10 +14,11 @@ import { TCoordinate, TDropdownItem, TLocation } from "@/types";
 import { Country, RegionType } from "@/types/location.types";
 import { IUser } from "@/types/user";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { useEffect, useState } from "react";
-import { Alert } from "react-native";
+import { Alert, Text, View } from "react-native";
 
 const genders = [
   { label: "Male", value: "mr" },
@@ -124,6 +125,37 @@ const OnboardingStep1Screen = () => {
       subtitle="Tell us a bit about yourself"
       onBack={() => router.replace("/start")}
     >
+      <LinearGradient
+        colors={["#844AFF15", "#12A9FF15"]}
+        start={{ x: 0, y: 0 }}
+        style={{
+          marginTop: 24,
+          borderRadius: 20,
+          padding: 20,
+          borderWidth: 1,
+          borderColor: "#844AFF20",
+        }}
+      >
+        <View className="flex-row items-center">
+          <View className="bg-[#844AFF] w-12 h-12 rounded-xl items-center justify-center mr-4 shadow-lg shadow-purple-300">
+            <MaterialCommunityIcons
+              name="information-outline"
+              size={24}
+              color="white"
+            />
+          </View>
+          <View className="flex-1">
+            <Text className="font-poppins-semibold uppercase text-slate-900 text-sm">
+              Important Notice
+            </Text>
+            <Text className="font-dm-sans-bold text-slate-500 text-xs">
+              Please ensure your details are accurate. We will use this
+              information to book your flights, hotels, and transfers.
+            </Text>
+          </View>
+        </View>
+      </LinearGradient>
+
       <Dropdown
         label="Gender"
         placeholder="Gender"
