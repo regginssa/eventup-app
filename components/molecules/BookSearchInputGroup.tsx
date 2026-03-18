@@ -385,7 +385,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   return (
     <View className="w-full flex flex-col gap-2">
       {/* SECTION 0: INCLUSIONS */}
-      <View className="bg-slate-50/50 py-4 rounded-2xl border border-slate-100">
+      <View className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
         <View className="flex-row items-center gap-2 mb-4">
           <View className="w-6 h-6 rounded-full bg-[#844AFF10] items-center justify-center">
             <MaterialCommunityIcons

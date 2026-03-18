@@ -44,6 +44,13 @@ const BookingStatus = () => {
 
   useEffect(() => {
     bookingRef.current = booking;
+    console.log(
+      "[booking updated]: ",
+      booking?.flight?.booking,
+      booking?.hotel?.booking,
+      booking?.transfer?.airportToHotel?.booking,
+      booking?.transfer?.hotelToEvent?.booking,
+    );
   }, [booking]);
 
   useEffect(() => {
