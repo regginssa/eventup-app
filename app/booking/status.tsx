@@ -73,231 +73,244 @@ const BookingStatus = () => {
     };
     init();
   }, [bookingId]);
-  //
+
   // ✈️ Flight Booking
-  //
   useEffect(() => {
-    if (booking?.paymentStatus !== "completed") return;
+    if (
+      flightBookingRef.current ||
+      booking?.paymentStatus !== "completed" ||
+      !booking?.flight?.offer ||
+      !user ||
+      booking?.flight?.status === "confirmed"
+    ) {
+      return;
+    }
+
+    flightBookingRef.current = true;
 
     const handleFlight = async () => {
-      if (
-        flightBookingRef.current ||
-        !booking?.flight?.offer ||
-        !user ||
-        booking.flight.status === "confirmed"
-      )
-        return;
+      try {
+        const result = await bookFlight(booking.flight.offer);
 
-      flightBookingRef.current = true;
+        if (!result.orderId) {
+          flightBookingRef.current = false;
+          return toast.error(result.message);
+        }
 
-      const result = await bookFlight(booking.flight.offer);
+        const bookingBodyData: IBooking = {
+          ...booking,
+          flight: {
+            ...booking.flight,
+            booking: result,
+            status: "confirmed",
+          },
+        };
 
-      if (!result.orderId) {
+        await updateBooking(bookingBodyData);
+      } catch (err) {
         flightBookingRef.current = false;
-        return toast.error(result.message);
+        toast.error("Flight booking failed");
       }
-
-      const bookingBodyData: IBooking = {
-        ...booking,
-        flight: {
-          ...booking.flight,
-          booking: result,
-          status: "confirmed",
-        },
-      };
-
-      await updateBooking(bookingBodyData);
     };
 
     handleFlight();
-  }, [booking?.flight?.status, booking?.paymentStatus, user]);
+  }, [booking?.paymentStatus]);
 
-  //
   // 🏨 Hotel Booking
-  //
   useEffect(() => {
-    if (booking?.paymentStatus !== "completed") return;
+    if (
+      hotelBookingRef.current ||
+      booking?.paymentStatus !== "completed" ||
+      !booking?.hotel?.offer ||
+      !user ||
+      booking?.hotel?.booking?.id ||
+      booking?.hotel?.status === "confirmed"
+    ) {
+      return;
+    }
+
+    hotelBookingRef.current = true;
 
     const handleHotel = async () => {
-      if (
-        hotelBookingRef.current ||
-        !booking?.hotel?.offer ||
-        !user ||
-        booking.hotel.status === "confirmed"
-      )
-        return;
+      try {
+        const result = await bookHotel(booking.hotel.offer.id);
 
-      hotelBookingRef.current = true;
+        if (result.status !== "confirmed") {
+          hotelBookingRef.current = false;
+          return toast.error(result.message);
+        }
 
-      const result = await bookHotel(booking.hotel.offer.id);
+        const bookingBodyData: IBooking = {
+          ...booking,
+          hotel: {
+            ...booking.hotel,
+            booking: result,
+            status: result.status,
+          },
+        };
 
-      if (result.status !== "confirmed") {
+        await updateBooking(bookingBodyData);
+      } catch (err) {
         hotelBookingRef.current = false;
-        return toast.error(result.message);
+        toast.error("Hotel booking failed");
       }
-
-      const bookingBodyData: IBooking = {
-        ...booking,
-        hotel: {
-          ...booking.hotel,
-          booking: result,
-          status: result.status,
-        },
-      };
-
-      await updateBooking(bookingBodyData);
     };
 
     handleHotel();
-  }, [booking?.hotel?.status, booking?.paymentStatus, user]);
+  }, [booking?.paymentStatus]);
 
-  //
-  // 🚗 Transfer Booking
-  //
+  // Transfer Booking
   useEffect(() => {
-    if (booking?.paymentStatus !== "completed") return;
+    if (
+      transferBookingRef.current ||
+      booking?.paymentStatus !== "completed" ||
+      !booking?.transfer ||
+      !user ||
+      !event?.location
+    ) {
+      return;
+    }
+
+    transferBookingRef.current = true;
 
     const handleTransfer = async () => {
-      if (
-        transferBookingRef.current ||
-        !booking?.transfer ||
-        !event?.location ||
-        !user
-      )
-        return;
+      try {
+        const { airportToHotel, hotelToEvent } = booking.transfer;
 
-      transferBookingRef.current = true;
+        //
+        // Airport → Hotel
+        //
+        if (
+          airportToHotel?.offer &&
+          airportToHotel.status !== "confirmed" &&
+          !airportToHotel.booking &&
+          booking.flight?.offer &&
+          booking.hotel?.offer
+        ) {
+          const flightOffer = booking.flight.offer;
+          const hotelOffer = booking.hotel.offer;
+          const transferOffer = airportToHotel.offer;
+          const flightArrival = flightOffer.slices[0];
 
-      const { airportToHotel, hotelToEvent } = booking.transfer;
-
-      //
-      // Airport → Hotel
-      //
-      if (
-        airportToHotel?.offer &&
-        airportToHotel.status !== "confirmed" &&
-        booking.flight?.offer &&
-        booking.hotel?.offer
-      ) {
-        const flightOffer = booking.flight.offer;
-        const hotelOffer = booking.hotel.offer;
-        const transferOffer = airportToHotel.offer;
-        const flightArrival = flightOffer.slices[0];
-
-        const body = {
-          quoteId: transferOffer.id,
-          offerHash: transferOffer.offerHash,
-          passenger: {
-            title: user.gender,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            countryCode: user.location.country.code,
-            email: user.email,
-            phone: user.phone,
-          },
-          offer: transferOffer,
-          outward: {
-            flight: {
-              airline_code: flightOffer.airlineName,
-              flight_number:
-                flightArrival.flightNumbers[
-                  flightArrival.flightNumbers.length - 1
-                ],
-              airport_code: flightArrival.destinationIata,
-              flight_date_time: flightOffer.arrivalTime,
+          const body = {
+            quoteId: transferOffer.id,
+            offerHash: transferOffer.offerHash,
+            passenger: {
+              title: user.gender,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              countryCode: user.location.country.code,
+              email: user.email,
+              phone: user.phone,
             },
-          },
-          destination: {
-            accommodation: {
-              name: hotelOffer.name,
-              address: hotelOffer.address,
+            offer: transferOffer,
+            outward: {
+              flight: {
+                airline_code: flightOffer.airlineName,
+                flight_number:
+                  flightArrival.flightNumbers[
+                    flightArrival.flightNumbers.length - 1
+                  ],
+                airport_code: flightArrival.destinationIata,
+                flight_date_time: flightOffer.arrivalTime,
+              },
             },
-          },
-        };
+            destination: {
+              accommodation: {
+                name: hotelOffer.name,
+                address: hotelOffer.address,
+              },
+            },
+          };
 
-        const result = await bookTransfer(body);
+          const result = await bookTransfer(body);
 
-        if (result.status !== "confirmed") {
-          transferBookingRef.current = false;
-          return toast.error(result.message);
+          if (result.status !== "confirmed") {
+            transferBookingRef.current = false;
+            return toast.error(result.message);
+          }
+
+          await updateBooking({
+            ...booking,
+            transfer: {
+              ...booking.transfer,
+              airportToHotel: {
+                ...airportToHotel,
+                booking: result,
+                status: "confirmed",
+              },
+            },
+          });
         }
 
-        await updateBooking({
-          ...booking,
-          transfer: {
-            ...booking.transfer,
-            airportToHotel: {
-              ...booking.transfer.airportToHotel,
-              booking: result,
-              status: "confirmed",
+        //
+        // Hotel → Event
+        //
+        if (
+          hotelToEvent?.offer &&
+          hotelToEvent.status !== "confirmed" &&
+          !hotelToEvent.booking &&
+          booking.hotel?.offer &&
+          booking.event
+        ) {
+          const hotelOffer = booking.hotel.offer;
+          const transferOffer = hotelToEvent.offer;
+          const eventData = booking.event;
+
+          const body = {
+            quoteId: transferOffer.id,
+            offerHash: transferOffer.offerHash,
+            passenger: {
+              title: user.gender,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              countryCode: user.location.country.code,
+              email: user.email,
+              phone: user.phone,
             },
-          },
-        });
-      }
-
-      //
-      // Hotel → Event
-      //
-      if (
-        hotelToEvent?.offer &&
-        hotelToEvent.status !== "confirmed" &&
-        booking.hotel?.offer &&
-        booking.event
-      ) {
-        const hotelOffer = booking.hotel.offer;
-        const transferOffer = hotelToEvent.offer;
-        const eventData = booking.event;
-
-        const body = {
-          quoteId: transferOffer.id,
-          offerHash: transferOffer.offerHash,
-          passenger: {
-            title: user.gender,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            countryCode: user.location.country.code,
-            email: user.email,
-            phone: user.phone,
-          },
-          offer: transferOffer,
-          outward: {
-            accommodation: {
-              name: hotelOffer.name,
-              address: hotelOffer.address,
-              pickup_date_time: transferOffer.pickupDateTime,
+            offer: transferOffer,
+            outward: {
+              accommodation: {
+                name: hotelOffer.name,
+                address: hotelOffer.address,
+                pickup_date_time: transferOffer.pickupDateTime,
+              },
             },
-          },
-          destination: {
-            accommodation: {
-              name: eventData.name,
-              address: eventData.location?.address,
+            destination: {
+              accommodation: {
+                name: eventData.name,
+                address: eventData.location?.address,
+              },
             },
-          },
-        };
+          };
 
-        const result = await bookTransfer(body);
+          const result = await bookTransfer(body);
 
-        if (result.status !== "confirmed") {
-          transferBookingRef.current = false;
-          return toast.error(result.message);
+          if (result.status !== "confirmed") {
+            transferBookingRef.current = false;
+            return toast.error(result.message);
+          }
+
+          await updateBooking({
+            ...booking,
+            transfer: {
+              ...booking.transfer,
+              hotelToEvent: {
+                ...hotelToEvent,
+                booking: result,
+                status: "confirmed",
+              },
+            },
+          });
         }
-
-        await updateBooking({
-          ...booking,
-          transfer: {
-            ...booking.transfer,
-            hotelToEvent: {
-              ...booking.transfer.hotelToEvent,
-              booking: result,
-              status: "confirmed",
-            },
-          },
-        });
+      } catch (err) {
+        transferBookingRef.current = false;
+        toast.error("Transfer booking failed");
       }
     };
 
     handleTransfer();
-  }, [booking?.transfer, booking?.paymentStatus, user, event]);
+  }, [booking?.paymentStatus]);
 
   useEffect(() => {
     if (!booking) return;

@@ -7,9 +7,11 @@ import {
   TransferItem,
 } from "@/components/common";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { IBooking } from "@/types/booking";
 import { ICommunityTicket } from "@/types/ticket";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Linking, Pressable, Text, TouchableOpacity, View } from "react-native";
@@ -24,6 +26,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
   communityTicket,
 }) => {
   const { user } = useAuth();
+  const toast = useToast();
 
   if (!booking) {
     return (
@@ -44,6 +47,14 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
       </View>
     );
   }
+
+  const copyBookingId = async () => {
+    if (!booking?._id) return;
+
+    await Clipboard.setStringAsync(booking._id.toString());
+
+    toast.success("Booking ID copied");
+  };
 
   const { flight, hotel, transfer, ticketStatus, event, paymentStatus } =
     booking;
@@ -89,6 +100,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
         <TouchableOpacity
           activeOpacity={0.7}
           className="px-8 py-3 rounded-2xl shadow-xl bg-slate-200 shadow-slate-200 border border-slate-50 flex flex-row gap-2 items-center"
+          onPress={copyBookingId}
         >
           <Text className="font-dm-sans-medium text-slate-400 text-base">
             #BOK_{booking._id?.toString().slice(0, 8).toUpperCase()}
