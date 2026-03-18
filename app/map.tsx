@@ -58,7 +58,6 @@ const MapScreen = () => {
         setEvents(response.data);
       }
     } catch (err) {
-      console.log(err);
     } finally {
       isFetching.current = false;
       setLoading(false);

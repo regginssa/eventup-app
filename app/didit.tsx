@@ -51,7 +51,6 @@ const DiditScreen = () => {
   };
 
   useEffect(() => {
-    console.log("callback kyc status: ", status);
     if (status) {
       setKycStatus(status as any);
     }
