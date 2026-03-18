@@ -49,7 +49,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             pathname !== "/auth/login" &&
             pathname !== "/auth/register" &&
             pathname !== "/home" &&
-            !pathname.includes("/event/details")
+            !pathname.includes("/event/details") &&
+            pathname !== "/about-us"
           )
             router.replace("/start");
           setAuthChecked(true);
