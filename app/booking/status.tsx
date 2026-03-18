@@ -40,6 +40,12 @@ const BookingStatus = () => {
   const hotelBookingRef = useRef(false);
   const transferBookingRef = useRef(false);
 
+  const bookingRef = useRef<IBooking | null>(null);
+
+  useEffect(() => {
+    bookingRef.current = booking;
+  }, [booking]);
+
   useEffect(() => {
     if (!socket) return;
 
@@ -81,7 +87,8 @@ const BookingStatus = () => {
       booking?.paymentStatus !== "completed" ||
       !booking?.flight?.offer ||
       !user ||
-      booking?.flight?.status === "confirmed"
+      booking?.flight?.status === "confirmed" ||
+      booking.flight?.booking?.orderId
     ) {
       return;
     }
@@ -106,7 +113,17 @@ const BookingStatus = () => {
           },
         };
 
-        await updateBooking(bookingBodyData);
+        const latest = bookingRef.current;
+        if (!latest) return;
+
+        await updateBooking({
+          ...latest,
+          flight: {
+            ...latest.flight,
+            booking: result,
+            status: "confirmed",
+          },
+        });
       } catch (err) {
         flightBookingRef.current = false;
         toast.error("Flight booking failed");
@@ -140,16 +157,17 @@ const BookingStatus = () => {
           return toast.error(result.message);
         }
 
-        const bookingBodyData: IBooking = {
-          ...booking,
+        const latest = bookingRef.current;
+        if (!latest) return;
+
+        await updateBooking({
+          ...latest,
           hotel: {
-            ...booking.hotel,
+            ...latest.hotel,
             booking: result,
             status: result.status,
           },
-        };
-
-        await updateBooking(bookingBodyData);
+        });
       } catch (err) {
         hotelBookingRef.current = false;
         toast.error("Hotel booking failed");
@@ -230,12 +248,15 @@ const BookingStatus = () => {
             return toast.error(result.message);
           }
 
+          const latest = bookingRef.current;
+          if (!latest) return;
+
           await updateBooking({
-            ...booking,
+            ...latest,
             transfer: {
-              ...booking.transfer,
+              ...latest.transfer,
               airportToHotel: {
-                ...airportToHotel,
+                ...latest.transfer.airportToHotel,
                 booking: result,
                 status: "confirmed",
               },
@@ -291,12 +312,15 @@ const BookingStatus = () => {
             return toast.error(result.message);
           }
 
+          const latest = bookingRef.current;
+          if (!latest) return;
+
           await updateBooking({
-            ...booking,
+            ...latest,
             transfer: {
-              ...booking.transfer,
+              ...latest.transfer,
               hotelToEvent: {
-                ...hotelToEvent,
+                ...latest.transfer.hotelToEvent,
                 booking: result,
                 status: "confirmed",
               },
@@ -335,8 +359,12 @@ const BookingStatus = () => {
   const { flight, hotel, transfer, price } = booking;
 
   const updateBooking = async (body: IBooking) => {
-    const response = await bookingServices.update(body._id as string, body);
+    if (!bookingRef.current?._id) return;
+
+    const response = await bookingServices.update(bookingRef.current._id, body);
+
     if (!response.data) return;
+
     setBooking(response.data);
   };
 

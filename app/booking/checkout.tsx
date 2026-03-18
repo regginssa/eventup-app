@@ -153,7 +153,7 @@ const HighEndReceipt = ({
             Total Amount
           </Text>
 
-          <View className="flex flex-row items-center gap-1">
+          <View className="flex flex-row items-end gap-1">
             <Text className="font-poppins-bold text-slate-600 text-lg">
               {currency.toUpperCase()}
             </Text>
@@ -459,12 +459,12 @@ const CheckoutScreen = () => {
         setTotalAmount(totalToken);
       } else {
         // fallback
-        setBaseAmount(baseUSD);
+        setBaseAmount(Number(baseUSD.toFixed(2)));
         setCommissionAmount(commissionUSD);
         setTotalAmount(totalUSD);
       }
     } else {
-      setBaseAmount(baseUSD);
+      setBaseAmount(Number(baseUSD.toFixed(2)));
       setCommissionAmount(commissionUSD);
       setTotalAmount(totalUSD);
     }

@@ -294,16 +294,16 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       const hotelData = await handleHotel(flightData);
 
       if (includes.transferAirport || includes.transferEvent) {
-        const eventDateTime = normalizeDateUTC(
-          new Date(event.dates?.start?.date as string),
-        );
-        const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
+        // const eventDateTime = normalizeDateUTC(
+        //   new Date(event.dates?.start?.date as string),
+        // );
+        // const hotelDepartureDateTime = normalizeDateUTC(hotelDepartureDate);
 
-        if (hotelDepartureDateTime > eventDateTime) {
-          return toast.warn(
-            "The hotel departure date cannot be after the event date.",
-          );
-        }
+        // if (hotelDepartureDateTime > eventDateTime) {
+        //   return toast.warn(
+        //     "The hotel departure date cannot be after the event date.",
+        //   );
+        // }
         await handleAirportToHotel(flightData, hotelData);
         await handleHotelToEvent(hotelData);
       }

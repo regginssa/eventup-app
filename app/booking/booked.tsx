@@ -82,18 +82,21 @@ const TripSummary = ({
             <Text className="font-dm-sans-bold text-slate-400 text-[10px] uppercase tracking-widest mb-1">
               Total Paid
             </Text>
-            <Text className="font-poppins-bold text-slate-900 text-3xl">
+            <View className="flex flex-row items-end gap-1 mt-1">
               <Text className="text-lg text-slate-400">{currency}</Text>
-              {totalPrice}
-            </Text>
+              <Text className="font-poppins-bold text-slate-900 text-3xl">
+                {totalPrice}
+              </Text>
+            </View>
           </View>
-          <View className="items-end">
+
+          <View className="bg-emerald-100 px-3 py-1.5 rounded-xl flex-row items-center gap-1">
             <MaterialCommunityIcons
               name="check-decagram"
-              size={24}
+              size={12}
               color="#10b981"
             />
-            <Text className="text-[10px] font-dm-sans-bold text-emerald-600 mt-1">
+            <Text className="text-[10px] font-poppins-bold text-emerald-600 ">
               SECURE PAYMENT
             </Text>
           </View>
