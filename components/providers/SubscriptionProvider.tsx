@@ -49,6 +49,18 @@ const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   useEffect(() => {
     if (!socket || !user?._id) return;
 
+    const handleActivated = ({ subId, startedAt, userId }: any) => {
+      if (user._id !== userId) return;
+
+      setAuthUser({
+        ...user,
+        subscription: {
+          id: subId,
+          startedAt,
+        },
+      });
+    };
+
     const handleExpire = ({ freeSubId, userId }: any) => {
       if (user._id !== userId) return;
 
@@ -61,9 +73,11 @@ const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       });
     };
 
+    socket.on("subscription_activated", handleActivated);
     socket.on("subscription_expired", handleExpire);
 
     return () => {
+      socket.off("subscription_activated", handleActivated);
       socket.off("subscription_expired", handleExpire);
     };
   }, [socket, user]);

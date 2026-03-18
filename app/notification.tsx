@@ -29,6 +29,12 @@ const NotificationScreen = () => {
     switch (type) {
       case "receive_invite_group_chat":
         params = { conversationId: metadata.conversationId };
+        break;
+
+      case "booking_payment_completed":
+        params = { id: metadata.bookingId };
+        break;
+
       default:
         params = {};
     }

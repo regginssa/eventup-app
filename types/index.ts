@@ -1,12 +1,3 @@
-import {
-  TAmadeusHotelBookingRequest,
-  TAmadeusHotelOffer,
-  TAmadeusHotelOrder,
-  TAmadeusTransferBookingRequest,
-  TAmadeusTransferOffer,
-  TAmadeusTransferOrder,
-} from "./amadeus";
-
 export type TCoordinate = {
   latitude: number;
   longitude: number;
@@ -54,17 +45,4 @@ export type TPagination = {
   limit: number;
   total: number;
   hasMore: boolean;
-};
-
-export interface THotel {
-  offers: TAmadeusHotelOffer[];
-  request?: TAmadeusHotelBookingRequest;
-  order?: TAmadeusHotelOrder;
-}
-
-export type TTransfer = {
-  ah: TAmadeusTransferOffer[];
-  he: TAmadeusTransferOffer[];
-  requests?: TAmadeusTransferBookingRequest[];
-  orders?: TAmadeusTransferOrder[];
 };

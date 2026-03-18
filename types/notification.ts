@@ -9,7 +9,10 @@ export type TNotificationType =
   | "event_ticket_refunded"
   | "receive_invite_group_chat"
   | "system"
-  | "subscription_expired";
+  | "subscription_activated"
+  | "subscription_expired"
+  | "new_ticket_purchased"
+  | "booking_payment_completed";
 
 export interface INotification {
   _id?: string;
