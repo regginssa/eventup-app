@@ -107,19 +107,19 @@ const LoginScreen = () => {
 
       const response = await googleLogin(googleUser.email, googleUser.id);
 
-      const { token, user } = response.data;
-      await setAuthToken(token);
-      setAuthUser(user);
-      toast.success("Welcome back!!!");
+      if (response.data) {
+        const { token, user } = response.data;
+        await setAuthToken(token);
+        setAuthUser(user);
+        toast.success("Welcome back!!!");
 
-      redirect(user);
-    } catch (error: any) {
-      const message = error?.message || error?.response?.data?.message;
-
-      toast.error(message);
-      if (error?.status === 404) {
-        router.replace("/auth/register");
+        redirect(user);
+      } else {
+        toast.error(response.message || "Google log in failed");
       }
+    } catch (error: any) {
+      const message = error?.response?.data?.message;
+      toast.error(error?.message || message || "Internal server error");
     } finally {
       setGoogleLoading(false);
     }
@@ -138,14 +138,20 @@ const LoginScreen = () => {
       }
 
       const res = await appleLogin({ appleId, email });
-      const { token, user } = res.data;
-      await setAuthToken(token);
-      setAuthUser(user);
-      toast.success("Welcome back!!!");
 
-      redirect(user);
+      if (res.data) {
+        const { token, user } = res.data;
+        await setAuthToken(token);
+        setAuthUser(user);
+        toast.success("Welcome back!!!");
+
+        redirect(user);
+      } else {
+        toast.error(res.message || "Apple log in failed");
+      }
     } catch (error: any) {
-      toast.error(error?.message || "Apple log in failed");
+      const message = error?.response?.data?.message;
+      toast.error(error?.message || message || "Internal server error");
     } finally {
       setAppleLoading(false);
     }
@@ -176,7 +182,7 @@ const LoginScreen = () => {
     } catch (error: any) {
       const message = error?.response?.data?.message;
 
-      toast.error(error?.message || message || "An error occurred");
+      toast.error(error?.message || message || "Internal server error");
 
       if (error?.status === 401) {
         setInvalidPassword(true);

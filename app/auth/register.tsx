@@ -138,19 +138,19 @@ const RegisterScreen = () => {
         googleUser.photo ?? "",
       );
 
-      const { token, user } = response.data;
-      await setAuthToken(token);
-      setAuthUser(user);
+      if (response.data) {
+        const { token, user } = response.data;
+        await setAuthToken(token);
+        setAuthUser(user);
 
-      toast.success("Welcome !!!");
-      router.replace("/auth/onboarding/step1");
+        toast.success("Welcome !!!");
+        router.replace("/auth/onboarding/step1");
+      } else {
+        toast.error(response.message || "Google register failed");
+      }
     } catch (error: any) {
       const message = error?.message || error?.response?.data?.message;
-
       toast.error(message);
-      if (error?.status === 400) {
-        router.replace("/auth/login");
-      }
     } finally {
       setGoogleLoading(false);
     }
@@ -178,12 +178,16 @@ const RegisterScreen = () => {
 
       const res = await appleRegister({ firstName, lastName, email, appleId });
 
-      const { token, user } = res.data;
-      await setAuthToken(token);
-      setAuthUser(user);
+      if (res.data) {
+        const { token, user } = res.data;
+        await setAuthToken(token);
+        setAuthUser(user);
 
-      toast.success("Welcome !!!");
-      router.replace("/auth/onboarding/step1");
+        toast.success("Welcome !!!");
+        router.replace("/auth/onboarding/step1");
+      } else {
+        toast.error(res.message || "Apple register error");
+      }
     } catch (error: any) {
       const message = error?.message || error?.response?.data?.message;
       toast.error(message);
@@ -207,14 +211,17 @@ const RegisterScreen = () => {
         password,
       );
 
-      const { token, user } = response.data;
-      await setAuthToken(token);
-      setAuthUser(user);
+      if (response.data) {
+        const { token, user } = response.data;
+        await setAuthToken(token);
+        setAuthUser(user);
 
-      setIsOtpOpen(true);
+        setIsOtpOpen(true);
+      } else {
+        toast.error(response.message || "Email register failed");
+      }
     } catch (error: any) {
       const message = error?.response?.data?.message;
-
       toast.error(message);
     } finally {
       setEmailLoading(false);
