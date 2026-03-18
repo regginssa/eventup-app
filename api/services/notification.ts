@@ -8,9 +8,9 @@ const get = async (id: string): Promise<ApiResponse<INotification>> => {
 };
 
 const getByUserId = async (
-  id: string,
+  userId: string,
 ): Promise<ApiResponse<INotification[]>> => {
-  return await AxiosInstance.get(NOTIFICATION_BASE + "user/" + id);
+  return await AxiosInstance.get(NOTIFICATION_BASE + "user/" + userId);
 };
 
 const create = async (

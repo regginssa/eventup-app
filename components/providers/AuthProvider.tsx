@@ -106,6 +106,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshAuthUser = async () => {
     const res = await getMe();
+    console.log("[refreshed auth user subscription]: ", res.data.subscription);
     setUser(res.data);
   };
 

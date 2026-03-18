@@ -4,6 +4,7 @@ import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Text, View } from "react-native";
@@ -18,7 +19,7 @@ type TTicketItem = {
 
 const MineTickets = () => {
   const [items, setItems] = useState<TTicketItem[]>([]);
-
+  const [refreshLoading, setRefreshLoading] = useState<boolean>(false);
   const { user, refreshAuthUser } = useAuth();
   const router = useRouter();
 
@@ -53,6 +54,14 @@ const MineTickets = () => {
     };
     refresh();
   }, []);
+
+  const handleRefresh = async () => {
+    if (!user?._id) return;
+
+    setRefreshLoading(true);
+    await refreshAuthUser();
+    setRefreshLoading(false);
+  };
 
   const renderItem = ({ item }: { item: TTicketItem }) => {
     const { ticket, count } = item;
@@ -122,28 +131,58 @@ const MineTickets = () => {
           contentFit="cover"
         />
 
-        <View className="absolute bottom-10 left-5 right-5 flex flex-row items-end justify-between">
-          <View>
-            <Text className="font-poppins-semibold text-2xl text-gray-800">
-              Tickets Marketplace
-            </Text>
-            <Text className="font-dm-sans-medium text-sm text-gray-700">
-              Sell your tickets in the marketplace
-            </Text>
-          </View>
+        <View className="absolute bottom-10 left-5 right-5">
+          <Text className="font-poppins-semibold text-2xl text-gray-800">
+            Tickets Marketplace
+          </Text>
+          <Text className="font-dm-sans-medium text-sm text-gray-700">
+            Sell your tickets in the marketplace
+          </Text>
         </View>
-
-        <Button
-          type="gradient-soft"
-          label="Refresh"
-          buttonClassName="h-12"
-          onPress={async () => {
-            await refreshAuthUser();
-          }}
-        />
       </View>
 
-      <View className="px-5 w-full">
+      <View className="px-5 mt-2">
+        <View className="rounded-xl border border-purple-100 bg-purple-50/40 p-4 flex flex-row items-center gap-3">
+          {/* Icon */}
+          <View className="w-10 h-10 rounded-full bg-white items-center justify-center border border-purple-100">
+            <LinearGradient
+              colors={["#C427E0", "#844AFF", "#12A9FF"]}
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 13,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <MaterialCommunityIcons name="refresh" size={16} color="white" />
+            </LinearGradient>
+          </View>
+
+          {/* Text */}
+          <View className="flex-1 gap-1">
+            <Text className="font-poppins-semibold text-sm text-gray-800">
+              Just completed your payment?
+            </Text>
+
+            <Text className="font-dm-sans text-xs text-gray-600">
+              Payments may take a few moments to confirm. Tap refresh to check
+              if your ticket purchase has been activated.
+            </Text>
+          </View>
+
+          {/* Refresh button */}
+          <Button
+            type="gradient-soft"
+            label="Refresh"
+            buttonClassName="h-10"
+            loading={refreshLoading}
+            onPress={handleRefresh}
+          />
+        </View>
+      </View>
+
+      <View className="px-5 w-full mt-4">
         <View className="flex flex-row items-start gap-2 p-2 rounded-xl bg-blue-200 border border-blue-600">
           <MaterialCommunityIcons
             name="information-outline"

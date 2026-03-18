@@ -49,6 +49,7 @@ const SubscriptionScreen = () => {
     string | null
   >(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [refreshLoading, setRefreshLoading] = useState<boolean>(false);
 
   const { user, refreshAuthUser } = useAuth();
   const router = useRouter();
@@ -372,6 +373,49 @@ const SubscriptionScreen = () => {
         ))}
       </View>
 
+      <View className="rounded-xl border border-purple-100 bg-purple-50/40 p-4 flex flex-row items-center gap-3">
+        {/* Icon */}
+        <View className="w-10 h-10 rounded-full bg-white items-center justify-center border border-purple-100">
+          <LinearGradient
+            colors={["#C427E0", "#844AFF", "#12A9FF"]}
+            style={{
+              width: 26,
+              height: 26,
+              borderRadius: 13,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <MaterialCommunityIcons name="refresh" size={16} color="white" />
+          </LinearGradient>
+        </View>
+
+        {/* Text */}
+        <View className="flex-1 gap-1">
+          <Text className="font-poppins-semibold text-sm text-gray-800">
+            Just purchased a plan?
+          </Text>
+
+          <Text className="font-dm-sans text-xs text-gray-600">
+            Payments may take a few moments to confirm. Tap refresh to activate
+            your subscription once the payment is verified.
+          </Text>
+        </View>
+
+        {/* Button */}
+        <Button
+          type="gradient-soft"
+          label="Refresh"
+          buttonClassName="h-10"
+          loading={refreshLoading}
+          onPress={async () => {
+            setRefreshLoading(true);
+            await refreshAuthUser();
+            setRefreshLoading(false);
+          }}
+        />
+      </View>
+
       <Text className="font-poppins-medium text-gray-700">Select plan</Text>
 
       <View className="flex-1 -mt-5">
@@ -403,6 +447,7 @@ const SubscriptionScreen = () => {
         }
         buttonClassName="h-12"
         disabled={!!shouldDisableButton}
+        loading={loading}
         onPress={() =>
           router.push({
             pathname: "/subscription/checkout",
