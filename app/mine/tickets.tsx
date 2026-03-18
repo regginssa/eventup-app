@@ -50,7 +50,6 @@ const MineTickets = () => {
   useEffect(() => {
     const refresh = async () => {
       await refreshAuthUser();
-      console.log("refreshed");
     };
     refresh();
   }, []);
@@ -123,14 +122,25 @@ const MineTickets = () => {
           contentFit="cover"
         />
 
-        <View className="absolute bottom-10 left-5 right-5">
-          <Text className="font-poppins-semibold text-2xl text-gray-800">
-            Tickets Marketplace
-          </Text>
-          <Text className="font-dm-sans-medium text-sm text-gray-700">
-            Sell your tickets in the marketplace
-          </Text>
+        <View className="absolute bottom-10 left-5 right-5 flex flex-row items-end justify-between">
+          <View>
+            <Text className="font-poppins-semibold text-2xl text-gray-800">
+              Tickets Marketplace
+            </Text>
+            <Text className="font-dm-sans-medium text-sm text-gray-700">
+              Sell your tickets in the marketplace
+            </Text>
+          </View>
         </View>
+
+        <Button
+          type="gradient-soft"
+          label="Refresh"
+          buttonClassName="h-12"
+          onPress={async () => {
+            await refreshAuthUser();
+          }}
+        />
       </View>
 
       <View className="px-5 w-full">

@@ -19,5 +19,4 @@ export { default as MineContainer } from "./mine/MineContainer";
 export { default as MyEventsScreenContainer } from "./my-events/MyEventsScreenContainer";
 export { default as OnboardingContainer } from "./onboarding/OnboardingContainer";
 export { default as ProfileHeader } from "./profile/ProfileHeader";
-export { default as ProfileReviews } from "./profile/ProfileReviews";
 export { default as SubscriptionContainer } from "./subscription/SubscriptionContainer";
