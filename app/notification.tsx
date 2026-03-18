@@ -74,7 +74,7 @@ const NotificationScreen = () => {
     }
 
     return (
-      <View className="mb-4 shadow-xl shadow-purple-200">
+      <View className="shadow-xl shadow-purple-200">
         <LinearGradient
           colors={["#844AFF", "#C427E0"]}
           start={{ x: 0, y: 0 }}
@@ -82,93 +82,113 @@ const NotificationScreen = () => {
           style={{ borderRadius: 24, padding: 1 }}
         >
           <View
-            className={`rounded-[23px] p-5 overflow-hidden ${
+            className={`rounded-[23px] overflow-hidden flex-row ${
               isRead ? "bg-white/95" : "bg-purple-50"
             }`}
           >
-            {/* Background Icon */}
-            <View className="absolute -right-10 -top-10 opacity-[0.05]">
-              <MaterialCommunityIcons
-                name="bell-outline"
-                size={140}
-                color="#000"
+            {/* UNREAD ACCENT BAR */}
+            {!isRead && (
+              <LinearGradient
+                colors={["#C427E0", "#844AFF", "#12A9FF"]}
+                style={{ width: 4 }}
               />
-            </View>
+            )}
 
-            {/* HEADER */}
-            <View className="flex-row items-start gap-3 mb-3">
-              {/* ICON */}
-              <View className="w-9 h-9 rounded-full bg-purple-100 items-center justify-center">
+            <View className="flex-1 p-5">
+              {/* Background Icon */}
+              <View className="absolute -right-10 -top-10 opacity-[0.05]">
                 <MaterialCommunityIcons
                   name="bell-outline"
-                  size={18}
-                  color="#844AFF"
+                  size={140}
+                  color="#000"
                 />
               </View>
 
-              {/* TITLE + BODY */}
-              <View className="flex-1 pr-3">
-                <Text className="font-poppins-bold text-sm text-slate-900 mb-1">
-                  {title}
-                </Text>
-
-                {body && (
-                  <Text className="font-dm-sans-medium text-[12px] text-slate-500">
-                    {body}
-                  </Text>
-                )}
-              </View>
-
-              {/* DELETE */}
-              <TouchableOpacity
-                activeOpacity={0.8}
-                disabled={deletings?.get(item._id as string)}
-                onPress={() => handleRemove(item._id as string)}
-                className="w-8 h-8 items-center justify-center rounded-full bg-slate-50 border border-slate-100"
-              >
-                {deletings?.get(item._id as string) ? (
-                  <ActivityIndicator size={12} color="#dc2626" />
-                ) : (
+              {/* HEADER */}
+              <View className="flex-row items-start gap-3 mb-3">
+                {/* ICON */}
+                <View
+                  className={`w-9 h-9 rounded-full items-center justify-center ${
+                    isRead ? "bg-slate-100" : "bg-purple-100"
+                  }`}
+                >
                   <MaterialCommunityIcons
-                    name="trash-can-outline"
-                    size={16}
-                    color="#dc2626"
+                    name="bell-outline"
+                    size={18}
+                    color={isRead ? "#64748b" : "#844AFF"}
                   />
-                )}
-              </TouchableOpacity>
-            </View>
-
-            {/* ACTION ROW */}
-            <View className="flex-row items-center justify-between mt-2">
-              {/* UNREAD INDICATOR */}
-              {!isRead && (
-                <View className="flex-row items-center gap-1">
-                  <View className="w-2 h-2 rounded-full bg-purple-500" />
-
-                  <Text className="font-dm-sans-bold text-[10px] text-purple-500 uppercase">
-                    New Notification
-                  </Text>
                 </View>
-              )}
 
-              {/* VIEW LINK */}
-              {link && (
+                {/* TITLE + BODY */}
+                <View className="flex-1 pr-3">
+                  <View className="flex-row items-center gap-2">
+                    <Text
+                      className={`text-sm ${
+                        isRead
+                          ? "font-poppins-medium text-slate-800"
+                          : "font-poppins-bold text-slate-900"
+                      }`}
+                    >
+                      {title}
+                    </Text>
+
+                    {!isRead && (
+                      <View className="px-2 py-[2px] bg-purple-100 rounded-md">
+                        <Text className="text-[9px] font-dm-sans-bold text-purple-600 uppercase">
+                          New
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {body && (
+                    <Text className="font-dm-sans-medium text-[12px] text-slate-500 mt-1">
+                      {body}
+                    </Text>
+                  )}
+                </View>
+
+                {/* DELETE */}
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  className="flex-row items-center gap-1 bg-purple-50 border border-purple-100 px-3 py-1.5 rounded-full"
-                  onPress={() => router.push({ pathname: link as any, params })}
+                  disabled={deletings?.get(item._id as string)}
+                  onPress={() => handleRemove(item._id as string)}
+                  className="w-8 h-8 items-center justify-center rounded-full bg-slate-50 border border-slate-100"
                 >
-                  <Text className="font-dm-sans-bold text-[11px] text-purple-600">
-                    View
-                  </Text>
-
-                  <MaterialCommunityIcons
-                    name="arrow-right"
-                    size={14}
-                    color="#844AFF"
-                  />
+                  {deletings?.get(item._id as string) ? (
+                    <ActivityIndicator size={12} color="#dc2626" />
+                  ) : (
+                    <MaterialCommunityIcons
+                      name="trash-can-outline"
+                      size={16}
+                      color="#dc2626"
+                    />
+                  )}
                 </TouchableOpacity>
-              )}
+              </View>
+
+              {/* ACTION ROW */}
+              <View className="flex-row items-center justify-end mt-2">
+                {link && (
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    className="flex-row items-center gap-1 bg-purple-50 border border-purple-100 px-3 py-1.5 rounded-full"
+                    onPress={() =>
+                      router.push({ pathname: link as any, params })
+                    }
+                  >
+                    <Text className="font-dm-sans-bold text-[11px] text-purple-600">
+                      View
+                    </Text>
+
+                    <MaterialCommunityIcons
+                      name="arrow-right"
+                      size={14}
+                      color="#844AFF"
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           </View>
         </LinearGradient>
@@ -178,7 +198,7 @@ const NotificationScreen = () => {
 
   return (
     <SimpleContainer title="Notifications">
-      <View className="flex-1 bg-white rounded-3xl px-6">
+      <View className="flex-1 -mt-6">
         {loading ? (
           <Spinner size="md" />
         ) : (
