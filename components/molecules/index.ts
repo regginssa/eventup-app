@@ -3,6 +3,7 @@ export { default as BadgeGroup } from "./BadgeGroup";
 export { default as BookSearchInputGroup } from "./BookSearchInputGroup";
 export { default as CreateEventStepper } from "./CreateEventStepper";
 export { default as CryptoPayout } from "./CryptoPayout";
+export { default as DuffelCheckoutForm } from "./DuffelCheckoutForm";
 export { default as EventFilterModal } from "./EventFilterModal";
 export { default as EventsPreviewGroup } from "./EventsPreviewGroup";
 export { default as MapMarker } from "./MapMarker";
