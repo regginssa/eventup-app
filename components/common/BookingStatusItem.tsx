@@ -16,6 +16,7 @@ const BookingStatusItem: React.FC<BookingStatusItemProps> = ({
 }) => {
   const isCompleted = status === "confirmed" || status === "completed";
   const isProcessing = status === "processing" || status === "pending";
+  const isFailed = status === "failed";
 
   return (
     <View className="flex-row items-start">
@@ -28,11 +29,19 @@ const BookingStatusItem: React.FC<BookingStatusItemProps> = ({
               ? "bg-emerald-500 border-emerald-500"
               : isProcessing
                 ? "bg-white border-[#844AFF]"
-                : "bg-slate-50 border-slate-200"
+                : isFailed
+                  ? "bg-red-500 border-red-500"
+                  : "bg-slate-50 border-slate-200"
           }`}
         >
           {isProcessing ? (
             <ActivityIndicator size="small" color="#844AFF" />
+          ) : isFailed ? (
+            <MaterialCommunityIcons
+              name="information-outline"
+              size={18}
+              color="white"
+            />
           ) : (
             <MaterialCommunityIcons
               name={isCompleted ? "check" : icon}
