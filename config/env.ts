@@ -6,7 +6,7 @@ export const GOOGLE_IOS_CLIENT_ID =
 export const GOOGLE_WEB_CLIENT_ID =
   "732132936043-85fpifatj1b2kusu319c6urvdnub7aq7.apps.googleusercontent.com";
 export const GOOGLE_WEB_CLIENT_SECRET = "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";
-export const SERVER_API_ENDPOINT = "http://192.168.122.100/api/v1";
+export const SERVER_API_ENDPOINT = "http://192.168.122.100:5001/api/v1";
 export const SERVER_SOCKET_URL = "ws://192.168.122.100";
 // https://eventworld-server-production.up.railway.app
 // http://38.180.245.212:5001

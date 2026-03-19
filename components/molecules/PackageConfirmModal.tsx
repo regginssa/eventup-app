@@ -14,6 +14,7 @@ import {
   OfficialTicketItem,
   TransferItem,
 } from "../common";
+import { useDuffel } from "../providers/DuffelProvider";
 import { useFlight } from "../providers/FlightProvider";
 import { useHotel } from "../providers/HotelProvider";
 import { useToast } from "../providers/ToastProvider";
@@ -41,6 +42,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   const { offer: flightOffer } = useFlight();
   const { offer: hotelOffer, quote } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
+  const { initClientKey } = useDuffel();
   const toast = useToast();
 
   const handleCheckout = async () => {
@@ -50,13 +52,34 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
     try {
       setLoading(true);
 
+      let amount = 0;
+
       if (hotelOffer) {
         const offerQuote = await quote(hotelOffer.id);
         if (!offerQuote) {
           setLoading(false);
-          return toast.error("Checking hotel rates failed");
+          return toast.error(
+            "Checking hotel rates failed. Please retry to search for a new hotel",
+          );
+        }
+        amount = offerQuote.converted.totalAmount;
+      }
+
+      if (flightOffer) {
+        amount += flightOffer.converted.totalAmount;
+      }
+
+      if (hotelOffer && flightOffer) {
+        const clientKey = await initClientKey({ amount, currency: "USD" });
+
+        console.log("duffel clientKey: ", clientKey);
+
+        if (!clientKey) {
+          setLoading(false);
+          return toast.error("Failed to create payment form");
         }
       }
+
       onClose();
       router.push({
         pathname: "/booking/checkout",

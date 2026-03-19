@@ -14,6 +14,7 @@ import {
   TransferProvider,
 } from "@/components/providers";
 import AuthProvider from "@/components/providers/AuthProvider";
+import DuffelProvider from "@/components/providers/DuffelProvider";
 import { STRIPE_PUBLISHABLE_KEY } from "@/config/env";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { KeyboardAvoidingView, Platform } from "react-native";
@@ -39,16 +40,18 @@ const InitContainer: React.FC<InitContainerProps> = ({ children }) => {
                             <FlightProvider>
                               <HotelProvider>
                                 <TransferProvider>
-                                  <KeyboardAvoidingView
-                                    behavior={
-                                      Platform.OS === "ios"
-                                        ? "padding"
-                                        : undefined
-                                    }
-                                    style={{ flex: 1 }}
-                                  >
-                                    {children}
-                                  </KeyboardAvoidingView>
+                                  <DuffelProvider>
+                                    <KeyboardAvoidingView
+                                      behavior={
+                                        Platform.OS === "ios"
+                                          ? "padding"
+                                          : undefined
+                                      }
+                                      style={{ flex: 1 }}
+                                    >
+                                      {children}
+                                    </KeyboardAvoidingView>
+                                  </DuffelProvider>
                                 </TransferProvider>
                               </HotelProvider>
                             </FlightProvider>

@@ -1,22 +1,19 @@
-import {
-  DuffelCardForm,
-  useDuffelCardFormActions,
-} from "@duffel/react-native-components";
+import { DuffelCardForm } from "@duffel/react-native-components";
 import { Text, View } from "react-native";
 
 interface DuffelCheckoutFormProps {
+  clientKey: string;
   onSuccess: () => Promise<void>;
   onFailure: () => Promise<void>;
 }
 
 const DuffelCheckoutForm: React.FC<DuffelCheckoutFormProps> = ({
+  clientKey,
   onSuccess,
   onFailure,
 }) => {
-  const {} = useDuffelCardFormActions();
-
   return (
-    <View className="mb-4 rounded-[24px] border border-slate-200 bg-slate-50">
+    <View className="w-full gap-4">
       <View className="p-5 rounded-[24px]">
         {/* HEADER */}
         <View className="mb-5">
@@ -44,7 +41,7 @@ const DuffelCheckoutForm: React.FC<DuffelCheckoutFormProps> = ({
         {/* FORM */}
         <View className="rounded-2xl border border-slate-200 bg-white p-4">
           <DuffelCardForm
-            clientKey=""
+            clientKey={clientKey}
             intent="to-create-card-for-temporary-use"
             onValidateSuccess={onSuccess}
             onValidateFailure={onFailure}

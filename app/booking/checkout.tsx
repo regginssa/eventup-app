@@ -290,6 +290,9 @@ const CheckoutScreen = () => {
   }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
   const [booking, setBooking] = useState<IBooking | null>(null);
   const [currency, setCurrency] = useState<string>("USD");
+  const [duffelClientKey, setduffelClientKey] = useState<string | undefined>(
+    undefined,
+  );
 
   const router = useRouter();
   const { eventId, packageType } = useLocalSearchParams();
@@ -300,33 +303,6 @@ const CheckoutScreen = () => {
   const { pay: payStripe } = useStripe();
   const { send: sendNotification } = useNotification();
   const toast = useToast();
-
-  // useEffect(() => {
-  //   const subscription = AppState.addEventListener(
-  //     "change",
-  //     async (nextState) => {
-  //       // Detect when returning from wallet
-  //       if (
-  //         appState.current.match(/background|inactive/) &&
-  //         nextState === "active"
-  //       ) {
-  //         if (checkoutUrlRef.current) {
-  //           console.log(
-  //             "Returned to app, reopening checkout URL to refresh state.",
-  //             checkoutUrlRef.current,
-  //           );
-  //           await WebBrowser.openBrowserAsync(checkoutUrlRef.current);
-  //         }
-  //       }
-
-  //       appState.current = nextState;
-  //     },
-  //   );
-
-  //   return () => {
-  //     subscription.remove();
-  //   };
-  // }, []);
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -402,22 +378,33 @@ const CheckoutScreen = () => {
 
       if (flight.offer) {
         servicesList.push("Round-trip Flight");
-        baseUSD += Number(flight.offer.converted.totalAmount);
+        if (!flight.booking?.orderId) {
+          baseUSD += Number(flight.offer.converted.totalAmount);
+        }
       }
 
       if (hotel.offer) {
         servicesList.push("Hotel Accommodation");
-        baseUSD += Number(hotel.offer.converted.totalAmount);
+        if (!hotel.booking?.id) {
+          baseUSD += Number(hotel.offer.converted.totalAmount);
+        }
       }
 
       if (transfer.airportToHotel.offer) {
         servicesList.push("Airport Transfer");
-        baseUSD += Number(transfer.airportToHotel.offer.converted.totalAmount);
+        if (!transfer.airportToHotel?.booking?.bookingId) {
+          baseUSD += Number(
+            transfer.airportToHotel.offer.converted.totalAmount,
+          );
+        }
       }
 
       if (transfer.hotelToEvent.offer) {
         servicesList.push("Event Shuttle");
-        baseUSD += Number(transfer.hotelToEvent.offer.converted.totalAmount);
+
+        if (!transfer.hotelToEvent?.booking?.bookingId) {
+          baseUSD += Number(transfer.hotelToEvent.offer.converted.totalAmount);
+        }
       }
     } else {
       // NEW BOOKING
@@ -711,8 +698,9 @@ const CheckoutScreen = () => {
     return response.data._id || null;
   };
 
-  const isUserEventPassable =
-    event?.type === "user" && event.fee?.type === "free" && totalAmount === 0;
+  const handleDuffelSuccess = async () => {};
+
+  const handleDuffelFailure = async () => {};
 
   const hasTravelServices =
     !!flightOffer ||
@@ -824,6 +812,7 @@ const CheckoutScreen = () => {
           onSelectCryptoCurrency={setCrypto}
           onSelectMethod={setPaymentMethod}
           onSelectStripePaymentMethod={setStripePaymentId}
+          hiddenStripe
         />
       </View>
 
@@ -831,13 +820,7 @@ const CheckoutScreen = () => {
       <View className="mt-10 gap-4">
         <Button
           type="primary"
-          label={
-            bookLoading
-              ? "Processing..."
-              : isUserEventPassable
-                ? "Join Now"
-                : `Pay`
-          }
+          label="Pay"
           buttonClassName="h-14 rounded-2xl shadow-xl shadow-purple-200"
           textClassName="text-lg font-poppins-bold"
           loading={bookLoading || isPayDisabled}

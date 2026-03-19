@@ -580,7 +580,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           {includes.flight && (
             <>
               <Dropdown
-                label="Trip type"
+                label="Flight Trip Type"
                 bordered
                 items={[
                   { label: "One Way", value: "one_way" },
@@ -591,7 +591,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               />
 
               <DateTimePicker
-                label="Flight departure date"
+                label="Flight Departure Date"
                 className="rounded-xl"
                 bordered
                 value={departureDate}

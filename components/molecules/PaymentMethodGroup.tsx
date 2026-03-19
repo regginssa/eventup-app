@@ -12,6 +12,7 @@ interface PaymentMethodGroupProps {
   onSelectCryptoCurrency?: (currency: string) => void;
   onSelectMethod: (method: TPaymentMethod) => void;
   onSelectStripePaymentMethod: (id: string) => void;
+  hiddenStripe?: boolean;
 }
 
 const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
@@ -21,6 +22,7 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
   onSelectCryptoCurrency,
   onSelectMethod,
   onSelectStripePaymentMethod,
+  hiddenStripe,
 }) => {
   return (
     <View
@@ -66,7 +68,7 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
         <View style={styles.divider} />
 
         {/* PAYMENT CONTENT */}
-        {method === "credit" ? (
+        {method === "credit" && !hiddenStripe ? (
           <CardPayment
             methodId={stripePaymentMethodId}
             onSelectMethod={onSelectStripePaymentMethod}
