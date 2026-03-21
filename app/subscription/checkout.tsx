@@ -118,9 +118,9 @@ const SubscriptionReceipt = ({ subscription, amount, currency }: any) => {
         <View className="h-[1px] bg-slate-200 my-2" />
 
         <View className="flex-row justify-between items-end">
-          <Text className="text-slate-600 font-dm-sans-bold">Total Amount</Text>
+          <Text className="text-slate-600 font-dm-sans-bold">Total</Text>
 
-          <View className="flex flex-row items-center gap-1">
+          <View className="flex flex-row items-end gap-1">
             <Text className="font-poppins-bold text-slate-600 text-lg">
               {currency.toUpperCase()}
             </Text>

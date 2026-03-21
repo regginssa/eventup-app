@@ -89,6 +89,7 @@ const AirwallexProvider: React.FC<AirwallexProviderProps> = ({ children }) => {
           toast.error("Payment failed");
       }
     } catch (e) {
+      console.log("airwallex payment error: ", e);
       toast.error("Payment failed");
     }
   };
