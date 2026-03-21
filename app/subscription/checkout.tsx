@@ -2,6 +2,7 @@ import UserAPI from "@/api/services/user";
 import Web3API from "@/api/services/web3";
 import { Button, PaymentMethodGroup } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
+import { useAirwallex } from "@/components/providers/AirwallexProvider";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useIap } from "@/components/providers/IapProvider";
 import { useSubscription } from "@/components/providers/SubscriptionProvider";
@@ -157,6 +158,7 @@ const SubscriptionCheckout = () => {
   const { user, setAuthUser } = useAuth();
   const { subscriptions } = useSubscription();
   const { pay: payStripe } = useStripe();
+  const { pay: payAirwallex } = useAirwallex();
 
   const { ready, buy: buyIap, lastPurchase, resetPurchase } = useIap();
   const toast = useToast();
@@ -325,14 +327,20 @@ const SubscriptionCheckout = () => {
       setSubLoading(true);
 
       if (method === "credit") {
-        const paymentResult = await handleStripePayment(
-          subscription.price,
-          subscription.currency,
-        );
-        if (!paymentResult) {
-          toast.error("Payment failed");
-          return;
-        }
+        await payAirwallex({
+          amount,
+          currency,
+          merchantOrderId: user?._id as string,
+          returnUrl: "eventworld://subscription",
+        });
+        // const paymentResult = await handleStripePayment(
+        //   subscription.price,
+        //   subscription.currency,
+        // );
+        // if (!paymentResult) {
+        //   toast.error("Payment failed");
+        //   return;
+        // }
         await handleSuccess();
       }
 

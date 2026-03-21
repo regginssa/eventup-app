@@ -3,7 +3,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import { CardPayment, CryptoPayment, TokenPayment } from "../common";
+import { CryptoPayment, TokenPayment } from "../common";
 
 interface PaymentMethodGroupProps {
   method: TPaymentMethod;
@@ -68,11 +68,8 @@ const PaymentMethodGroup: React.FC<PaymentMethodGroupProps> = ({
         <View style={styles.divider} />
 
         {/* PAYMENT CONTENT */}
-        {method === "credit" && !hiddenStripe ? (
-          <CardPayment
-            methodId={stripePaymentMethodId}
-            onSelectMethod={onSelectStripePaymentMethod}
-          />
+        {method === "credit" ? (
+          <></>
         ) : method === "crypto" ? (
           <CryptoPayment
             selectedCryptoCurrency={selectedCryptoCurrency}
