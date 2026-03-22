@@ -80,7 +80,6 @@ const BookingStatus = () => {
       if (!bookingId) return;
       setInitLoading(true);
       const response = await bookingServices.get(bookingId as string);
-      console.log(response.data.paymentStatus);
       setBooking(response.data);
       setEvent(response.data?.event || null);
       setInitLoading(false);

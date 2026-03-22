@@ -51,7 +51,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
   const copyBookingId = async () => {
     if (!booking?._id) return;
 
-    await Clipboard.setStringAsync(booking._id.toString());
+    await Clipboard.setStringAsync(`#BOK_${booking._id.toString()}`);
 
     toast.success("Booking ID copied");
   };

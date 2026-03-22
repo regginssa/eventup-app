@@ -473,6 +473,7 @@ const CheckoutScreen = () => {
   }, [paymentMethod, crypto]);
 
   const onBook = async () => {
+    if (!user?._id) return;
     try {
       setBookLoading(true);
 
@@ -610,6 +611,7 @@ const CheckoutScreen = () => {
       metadata: {
         type: "booking",
         bookingId,
+        userId: user?._id,
       },
       returnUrl: `eventworld://booking/status?id=${bookingId}`,
     });
