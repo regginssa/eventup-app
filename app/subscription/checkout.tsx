@@ -327,20 +327,12 @@ const SubscriptionCheckout = () => {
       setSubLoading(true);
 
       if (method === "credit") {
-        await payAirwallex({
+        const result = await payAirwallex({
           amount,
           currency,
-          merchantOrderId: user?._id as string,
-          returnUrl: "eventworld://subscription",
         });
-        // const paymentResult = await handleStripePayment(
-        //   subscription.price,
-        //   subscription.currency,
-        // );
-        // if (!paymentResult) {
-        //   toast.error("Payment failed");
-        //   return;
-        // }
+
+        if (result !== "success") return;
         await handleSuccess();
       }
 

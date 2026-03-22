@@ -11,13 +11,11 @@ import { useToast } from "./ToastProvider";
 type TAirwallexPayBody = {
   amount: number;
   currency: string;
-  merchantOrderId: string;
-  returnUrl: string;
 };
 
 interface AirwallexContextProps {
   initialized: boolean;
-  pay: (body: TAirwallexPayBody) => Promise<void>;
+  pay: (body: TAirwallexPayBody) => Promise<string>;
 }
 
 interface AirwallexProviderProps {
@@ -41,13 +39,13 @@ const AirwallexProvider: React.FC<AirwallexProviderProps> = ({ children }) => {
   const toast = useToast();
 
   useEffect(() => {
-    initialize();
+    initialize("demo");
   }, []);
 
-  const pay = async (body: TAirwallexPayBody) => {
-    if (!user?.location.country.code) return;
+  const pay = async (body: TAirwallexPayBody): Promise<string> => {
+    if (!user?.location.country.code) return "failed";
     try {
-      const intentRes = await AirwallexAPI.createPaymentIntent(body);
+      const intentRes = await AirwallexAPI.paymentIntent.create(body);
 
       if (!intentRes.data) {
         toast.error("Payment intent creation failed");
@@ -67,10 +65,10 @@ const AirwallexProvider: React.FC<AirwallexProviderProps> = ({ children }) => {
         paymentIntentId: intent.paymentIntentId,
         clientSecret: intent.clientSecret,
         currency: intent.currency,
-        countryCode: user?.location.country.code,
+        countryCode: "US",
         amount: intent.amount,
         paymentMethods: ["card"],
-        isBillingRequired: false,
+        isBillingRequired: true,
       };
 
       const result = await presentEntirePaymentFlow(session);
@@ -88,9 +86,12 @@ const AirwallexProvider: React.FC<AirwallexProviderProps> = ({ children }) => {
         default:
           toast.error("Payment failed");
       }
+
+      return result.status;
     } catch (e) {
       console.log("airwallex payment error: ", e);
       toast.error("Payment failed");
+      return "failed";
     }
   };
 
