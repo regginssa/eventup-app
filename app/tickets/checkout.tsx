@@ -251,10 +251,10 @@ const TicketsCheckout = () => {
         );
         setAmount(cryptoAmount);
       } else {
-        setAmount(amountEUR);
+        setAmount(Number(amountEUR.toFixed(2)));
       }
     } else {
-      setAmount(amountEUR);
+      setAmount(Number(amountEUR.toFixed(2)));
     }
   }, [ticket, currency, cryptoPrices]);
 

@@ -253,12 +253,12 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
           <View className="flex-row justify-between items-end mb-6">
             <View className="gap-1">
               <Text className="font-dm-sans-bold text-slate-400 text-[10px] uppercase tracking-widest mb-1">
-                Grand Total in usd
+                Grand Total In EUR
               </Text>
 
               <View className="flex flex-row items-end gap-1">
                 <Text className="text-sm text-slate-400 font-poppins-semibold">
-                  USD
+                  EUR
                 </Text>
                 <Text className="font-poppins-bold text-slate-900 text-3xl">
                   {total}

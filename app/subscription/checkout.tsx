@@ -220,10 +220,10 @@ const SubscriptionCheckout = () => {
         const cryptoAmount = Number((amountEUR / price).toFixed(2));
         setAmount(cryptoAmount);
       } else {
-        setAmount(amountEUR);
+        setAmount(Number(amountEUR.toFixed(2)));
       }
     } else {
-      setAmount(amountEUR);
+      setAmount(Number(amountEUR.toFixed(2)));
     }
   }, [subscription, currency, cryptoPrices]);
 
