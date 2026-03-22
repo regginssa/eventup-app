@@ -11,6 +11,7 @@ import { useToast } from "./ToastProvider";
 type TAirwallexPayBody = {
   amount: number;
   currency: string;
+  returnUrl: string;
 };
 
 interface AirwallexContextProps {
@@ -58,6 +59,7 @@ const AirwallexProvider: React.FC<AirwallexProviderProps> = ({ children }) => {
         clientSecret: intentData.client_secret,
         amount: intentData.amount,
         currency: intentData.currency,
+        returnUrl: intentData.return_url,
       };
 
       const session: PaymentSession = {
@@ -69,6 +71,7 @@ const AirwallexProvider: React.FC<AirwallexProviderProps> = ({ children }) => {
         amount: intent.amount,
         paymentMethods: ["card"],
         isBillingRequired: true,
+        returnUrl: intent.returnUrl,
       };
 
       const result = await presentEntirePaymentFlow(session);

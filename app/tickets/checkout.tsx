@@ -4,6 +4,7 @@ import UserAPI from "@/api/services/user";
 import Web3API from "@/api/services/web3";
 import { Button, PaymentMethodGroup, Spinner } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
+import { useAirwallex } from "@/components/providers/AirwallexProvider";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useCommunityTicket } from "@/components/providers/CommunityTicketProvider";
 import { useIap } from "@/components/providers/IapProvider";
@@ -159,6 +160,7 @@ const TicketsCheckout = () => {
   const router = useRouter();
   const { user, setAuthUser } = useAuth();
   const { pay: payStripe } = useStripe();
+  const { pay: payAirwallex } = useAirwallex();
   const { ready, buy: buyIap, lastPurchase, resetPurchase } = useIap();
   const { communityTickets } = useCommunityTicket();
   const toast = useToast();
@@ -270,22 +272,13 @@ const TicketsCheckout = () => {
 
       switch (paymentMethod) {
         case "credit":
-          const res = await payStripe({
-            amount: ticket.price,
-            currency: ticket.currency,
-            paymentMethodId: stripePaymentMethodId,
-            metadata: {
-              type: "ticket",
-              ticketId: ticket._id,
-              ticketPrice: ticket.price,
-            },
+          const result = await payAirwallex({
+            amount,
+            currency,
+            returnUrl: "eventworld://mine/tickets",
           });
-          const txHash = res.paymentIntentId;
 
-          if (!txHash) {
-            toast.error("Payment failed");
-            return setPurchaseLoading(false);
-          }
+          if (result !== "success") return;
 
           // Wait for user data refresh
           const updated = await new Promise<boolean>((resolve) => {

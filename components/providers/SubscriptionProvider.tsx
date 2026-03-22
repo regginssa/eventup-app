@@ -28,7 +28,7 @@ const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 }) => {
   const [subscriptions, setSubscriptions] = useState<ISubscription[]>([]);
 
-  const { user, setAuthUser } = useAuth();
+  const { user, setAuthUser, isAuthenticated } = useAuth();
   const { socket } = useSocket();
 
   const getBySku = (sku: string): ISubscription | null => {
@@ -44,7 +44,7 @@ const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       setSubscriptions(res.data);
     };
     loadSubscriptions();
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!socket || !user?._id) return;

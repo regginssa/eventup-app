@@ -1,6 +1,7 @@
 import { fetchAllTickets } from "@/api/services/ticket";
 import { ICommunityTicket } from "@/types/ticket";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthProvider";
 
 interface CommunityTicketContextProps {
   communityTickets: ICommunityTicket[];
@@ -35,6 +36,8 @@ const CommunityTicketProvider: React.FC<CommunityTicketProviderProps> = ({
     [],
   );
 
+  const { isAuthenticated } = useAuth();
+
   const getBySku = (sku: string): ICommunityTicket | null => {
     return (
       communityTickets.find(
@@ -55,7 +58,7 @@ const CommunityTicketProvider: React.FC<CommunityTicketProviderProps> = ({
     };
 
     getAllTickets();
-  }, []);
+  }, [isAuthenticated]);
 
   const updateCommunityTickets = (tickets: ICommunityTicket[]) =>
     setCommunityTickets(tickets);
