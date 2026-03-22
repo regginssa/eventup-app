@@ -11,6 +11,7 @@ import { useToast } from "./ToastProvider";
 type TAirwallexPayBody = {
   amount: number;
   currency: string;
+  metadata: any;
   returnUrl: string;
 };
 

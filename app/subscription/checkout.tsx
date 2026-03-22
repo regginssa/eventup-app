@@ -330,6 +330,11 @@ const SubscriptionCheckout = () => {
         const result = await payAirwallex({
           amount,
           currency,
+          metadata: {
+            type: "subscription",
+            userId: user?._id,
+            subId: subscriptionId,
+          },
           returnUrl: "eventworld://subscription",
         });
 

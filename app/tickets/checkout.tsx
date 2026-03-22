@@ -275,6 +275,11 @@ const TicketsCheckout = () => {
           const result = await payAirwallex({
             amount,
             currency,
+            metadata: {
+              type: "ticket",
+              userId: user?._id,
+              ticketId: ticket._id,
+            },
             returnUrl: "eventworld://mine/tickets",
           });
 
