@@ -151,7 +151,7 @@ const TicketsCheckout = () => {
     chrle: number;
     babyu: number;
   }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
-  const [currency, setCurrency] = useState<string>("USD");
+  const [currency, setCurrency] = useState<string>("EUR");
   const [baseAmount, setBaseAmount] = useState<number>(0);
   const [amount, setAmount] = useState<number>(0);
 
@@ -175,7 +175,7 @@ const TicketsCheckout = () => {
 
         const res = await CurrencyAPI.convert({
           from: tkt.currency,
-          to: "USD",
+          to: "EUR",
           amount: tkt.price,
         });
 
@@ -238,28 +238,28 @@ const TicketsCheckout = () => {
   useEffect(() => {
     if (!ticket) return;
 
-    const amountUSD = baseAmount;
+    const amountEUR = baseAmount;
 
     if (paymentMethod !== "credit") {
       const price = cryptoPrices[crypto as keyof typeof cryptoPrices];
 
       if (price) {
         const cryptoAmount = Number(
-          (amountUSD / price).toFixed(
+          (amountEUR / price).toFixed(
             crypto === "eth" || crypto === "sol" ? 4 : 2,
           ),
         );
         setAmount(cryptoAmount);
       } else {
-        setAmount(amountUSD);
+        setAmount(amountEUR);
       }
     } else {
-      setAmount(amountUSD);
+      setAmount(amountEUR);
     }
   }, [ticket, currency, cryptoPrices]);
 
   useEffect(() => {
-    setCurrency(paymentMethod === "credit" ? "USD" : crypto);
+    setCurrency(paymentMethod === "credit" ? "EUR" : crypto);
   }, [paymentMethod, crypto]);
 
   const handlePurchase = async () => {

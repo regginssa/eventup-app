@@ -14,7 +14,6 @@ import { useNotification } from "@/components/providers/NotificationProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useTransfer } from "@/components/providers/TransferProvider";
 import { SERVER_API_ENDPOINT } from "@/config/env";
-import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
@@ -290,7 +289,7 @@ const CheckoutScreen = () => {
     babyu: number;
   }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
   const [booking, setBooking] = useState<IBooking | null>(null);
-  const [currency, setCurrency] = useState<string>("USD");
+  const [currency, setCurrency] = useState<string>("EUR");
 
   const router = useRouter();
   const { eventId, packageType } = useLocalSearchParams();
@@ -298,7 +297,6 @@ const CheckoutScreen = () => {
   const { offer: flightOffer } = useFlight();
   const { offer: hotelOffer } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
-  const { pay: payStripe } = useStripe();
   const { pay: payAirwallex } = useAirwallex();
   const { send: sendNotification } = useNotification();
   const toast = useToast();
@@ -343,7 +341,7 @@ const CheckoutScreen = () => {
 
   useEffect(() => {
     let servicesList: string[] = [];
-    let baseUSD = 0;
+    let baseEUR = 0;
 
     let commissionRate = 0.1;
 
@@ -378,21 +376,21 @@ const CheckoutScreen = () => {
       if (flight.offer) {
         servicesList.push("Round-trip Flight");
         if (!flight.booking?.orderId) {
-          baseUSD += Number(flight.offer.converted.totalAmount);
+          baseEUR += Number(flight.offer.converted.totalAmount);
         }
       }
 
       if (hotel.offer) {
         servicesList.push("Hotel Accommodation");
         if (!hotel.booking?.id) {
-          baseUSD += Number(hotel.offer.converted.totalAmount);
+          baseEUR += Number(hotel.offer.converted.totalAmount);
         }
       }
 
       if (transfer.airportToHotel.offer) {
         servicesList.push("Airport Transfer");
         if (!transfer.airportToHotel?.booking?.bookingId) {
-          baseUSD += Number(
+          baseEUR += Number(
             transfer.airportToHotel.offer.converted.totalAmount,
           );
         }
@@ -402,57 +400,57 @@ const CheckoutScreen = () => {
         servicesList.push("Event Shuttle");
 
         if (!transfer.hotelToEvent?.booking?.bookingId) {
-          baseUSD += Number(transfer.hotelToEvent.offer.converted.totalAmount);
+          baseEUR += Number(transfer.hotelToEvent.offer.converted.totalAmount);
         }
       }
     } else {
       // NEW BOOKING
       if (flightOffer) {
         servicesList.push("One-Way Flight");
-        baseUSD += Number(flightOffer.converted.totalAmount);
+        baseEUR += Number(flightOffer.converted.totalAmount);
       }
 
       if (hotelOffer) {
         servicesList.push("Hotel Accommodation");
-        baseUSD += Number(hotelOffer.converted.totalAmount);
+        baseEUR += Number(hotelOffer.converted.totalAmount);
       }
 
       if (airportToHotelOffer) {
         servicesList.push("Airport Transfer");
-        baseUSD += Number(airportToHotelOffer.converted.totalAmount);
+        baseEUR += Number(airportToHotelOffer.converted.totalAmount);
       }
 
       if (hotelToEventOffer) {
         servicesList.push("Event Shuttle");
-        baseUSD += Number(hotelToEventOffer.converted.totalAmount);
+        baseEUR += Number(hotelToEventOffer.converted.totalAmount);
       }
     }
 
-    const commissionUSD = Number((baseUSD * commissionRate).toFixed(2));
-    const totalUSD = Number((baseUSD + commissionUSD).toFixed(2));
+    const commissionEUR = Number((baseEUR * commissionRate).toFixed(2));
+    const totalEUR = Number((baseEUR + commissionEUR).toFixed(2));
 
     // 🔹 CONVERT IF CRYPTO
     if (paymentMethod === "crypto" || paymentMethod === "token") {
       const price = cryptoPrices[crypto as keyof typeof cryptoPrices];
 
       if (price) {
-        const baseToken = Number((baseUSD / price).toFixed(2));
-        const commissionToken = Number((commissionUSD / price).toFixed(2));
-        const totalToken = Number((totalUSD / price).toFixed(2));
+        const baseToken = Number((baseEUR / price).toFixed(2));
+        const commissionToken = Number((commissionEUR / price).toFixed(2));
+        const totalToken = Number((totalEUR / price).toFixed(2));
 
         setBaseAmount(baseToken);
         setCommissionAmount(commissionToken);
         setTotalAmount(totalToken);
       } else {
         // fallback
-        setBaseAmount(Number(baseUSD.toFixed(2)));
-        setCommissionAmount(commissionUSD);
-        setTotalAmount(totalUSD);
+        setBaseAmount(Number(baseEUR.toFixed(2)));
+        setCommissionAmount(commissionEUR);
+        setTotalAmount(totalEUR);
       }
     } else {
-      setBaseAmount(Number(baseUSD.toFixed(2)));
-      setCommissionAmount(commissionUSD);
-      setTotalAmount(totalUSD);
+      setBaseAmount(Number(baseEUR.toFixed(2)));
+      setCommissionAmount(commissionEUR);
+      setTotalAmount(totalEUR);
     }
 
     setServices(servicesList);
@@ -469,7 +467,7 @@ const CheckoutScreen = () => {
   ]);
 
   useEffect(() => {
-    setCurrency(paymentMethod === "credit" ? "USD" : crypto);
+    setCurrency(paymentMethod === "credit" ? "EUR" : crypto);
   }, [paymentMethod, crypto]);
 
   const onBook = async () => {
@@ -784,7 +782,7 @@ const CheckoutScreen = () => {
               </Text>
               <Text className="font-dm-sans-bold text-slate-500 text-xs">
                 Pay with $CHRLE or $BABYU and reduce service fees from 10% to
-                3%. You save ${(baseAmount * 0.07).toFixed(2)} USD.
+                3%. You save ${(baseAmount * 0.07).toFixed(2)} EUR.
               </Text>
             </View>
           </View>

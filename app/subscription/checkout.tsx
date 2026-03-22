@@ -9,7 +9,6 @@ import { useSubscription } from "@/components/providers/SubscriptionProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { SERVER_API_ENDPOINT } from "@/config/env";
 import { getSubscriptionSku } from "@/constants/skus";
-import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { delay } from "@/utils/fc";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -153,12 +152,11 @@ const SubscriptionCheckout = () => {
     chrle: number;
     babyu: number;
   }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
-  const [currency, setCurrency] = useState<string>("USD");
+  const [currency, setCurrency] = useState<string>("EUR");
 
   const { id: subscriptionId, oneMonthPrice } = useLocalSearchParams();
   const { user, setAuthUser, refreshAuthUser } = useAuth();
   const { subscriptions } = useSubscription();
-  const { pay: payStripe } = useStripe();
   const { pay: payAirwallex } = useAirwallex();
 
   const { ready, buy: buyIap, lastPurchase, resetPurchase } = useIap();
@@ -213,19 +211,19 @@ const SubscriptionCheckout = () => {
   useEffect(() => {
     if (!subscription) return;
 
-    const amountUSD = subscription.price;
+    const amountEUR = subscription.price;
 
     if (method !== "credit") {
       const price = cryptoPrices[crypto as keyof typeof cryptoPrices];
 
       if (price) {
-        const cryptoAmount = Number((amountUSD / price).toFixed(2));
+        const cryptoAmount = Number((amountEUR / price).toFixed(2));
         setAmount(cryptoAmount);
       } else {
-        setAmount(amountUSD);
+        setAmount(amountEUR);
       }
     } else {
-      setAmount(amountUSD);
+      setAmount(amountEUR);
     }
   }, [subscription, currency, cryptoPrices]);
 
@@ -263,28 +261,8 @@ const SubscriptionCheckout = () => {
   }, [lastPurchase, subscriptionId, user?._id]);
 
   useEffect(() => {
-    setCurrency(method === "credit" ? "USD" : crypto);
+    setCurrency(method === "credit" ? "EUR" : crypto);
   }, [method, crypto]);
-
-  const handleStripePayment = async (
-    amount: number,
-    currency: string,
-  ): Promise<string | null> => {
-    if (!stripePaymentMethodId) return null;
-
-    const res = await payStripe({
-      amount,
-      currency,
-      metadata: {
-        type: "subscription",
-        userId: user?._id,
-        subscriptionId,
-      },
-      paymentMethodId: stripePaymentMethodId,
-    });
-
-    return res.paymentIntentId || null;
-  };
 
   const handleCrypto = async () => {
     if (Number(amount) <= 0) {

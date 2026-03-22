@@ -245,7 +245,7 @@ const TransferItem: React.FC<TransferItemProps> = ({
                 </View>
 
                 <Text className="font-dm-sans-bold text-[11px] text-slate-500">
-                  Door-to-Door Transfer
+                  Instant Confirmation
                 </Text>
               </View>
 
