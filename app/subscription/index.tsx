@@ -50,6 +50,7 @@ const SubscriptionScreen = () => {
   >(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [refreshLoading, setRefreshLoading] = useState<boolean>(false);
+  const [disabled, setDisabled] = useState<boolean>(false);
 
   const { user, refreshAuthUser } = useAuth();
   const router = useRouter();
@@ -101,6 +102,22 @@ const SubscriptionScreen = () => {
     }
     setLoading(false);
   }, [subscriptions, user]);
+
+  useEffect(() => {
+    if (!user?.subscription) return;
+
+    const isFreePlan = selectedSubscription?.month === 0;
+
+    const isCurrentPlan = selectedSubscriptionId === currentSubscription?._id;
+
+    const hasValidSubscription =
+      currentSubscription && currentSubscription.month > 0 && !isExpired;
+
+    const shouldDisableButton =
+      isFreePlan || isCurrentPlan || hasValidSubscription;
+
+    setDisabled(!!shouldDisableButton);
+  }, [user?.subscription]);
 
   const selectedSubscription = subscriptions.find(
     (s) => s._id === selectedSubscriptionId,
@@ -446,7 +463,7 @@ const SubscriptionScreen = () => {
               : `Subscribe for $${price}`
         }
         buttonClassName="h-12"
-        disabled={!!shouldDisableButton}
+        disabled={disabled}
         loading={loading}
         onPress={() =>
           router.push({

@@ -52,8 +52,6 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
     try {
       setLoading(true);
 
-      let amount = 0;
-
       if (hotelOffer) {
         const offerQuote = await quote(hotelOffer.id);
         if (!offerQuote) {
@@ -61,22 +59,6 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
           return toast.error(
             "Checking hotel rates failed. Please retry to search for a new hotel",
           );
-        }
-        amount = offerQuote.converted.totalAmount;
-      }
-
-      if (flightOffer) {
-        amount += flightOffer.converted.totalAmount;
-      }
-
-      if (hotelOffer && flightOffer) {
-        const clientKey = await initClientKey({ amount, currency: "USD" });
-
-        console.log("duffel clientKey: ", clientKey);
-
-        if (!clientKey) {
-          setLoading(false);
-          return toast.error("Failed to create payment form");
         }
       }
 

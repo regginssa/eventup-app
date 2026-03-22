@@ -12,6 +12,7 @@ import { SERVER_API_ENDPOINT } from "@/config/env";
 import { getTicketSku } from "@/constants/skus";
 import { TPaymentMethod } from "@/types";
 import { ICommunityTicket } from "@/types/ticket";
+import { delay } from "@/utils/fc";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -283,6 +284,8 @@ const TicketsCheckout = () => {
           if (result !== "success") return;
 
           await refreshAuthUser();
+
+          await delay(2000);
 
           if (from && eventId) {
             router.replace({

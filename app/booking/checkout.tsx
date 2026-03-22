@@ -6,6 +6,7 @@ import Web3API from "@/api/services/web3";
 import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
 import { SimpleContainer } from "@/components/organisms/layout";
+import { useAirwallex } from "@/components/providers/AirwallexProvider";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useFlight } from "@/components/providers/FlightProvider";
 import { useHotel } from "@/components/providers/HotelProvider";
@@ -290,9 +291,6 @@ const CheckoutScreen = () => {
   }>({ eth: 0, sol: 0, chrle: 0, babyu: 0 });
   const [booking, setBooking] = useState<IBooking | null>(null);
   const [currency, setCurrency] = useState<string>("USD");
-  const [duffelClientKey, setduffelClientKey] = useState<string | undefined>(
-    undefined,
-  );
 
   const router = useRouter();
   const { eventId, packageType } = useLocalSearchParams();
@@ -301,6 +299,7 @@ const CheckoutScreen = () => {
   const { offer: hotelOffer } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
   const { pay: payStripe } = useStripe();
+  const { pay: payAirwallex } = useAirwallex();
   const { send: sendNotification } = useNotification();
   const toast = useToast();
 
@@ -605,24 +604,17 @@ const CheckoutScreen = () => {
   };
 
   const handleCreditPayment = async (bookingId: string) => {
-    if (stripePaymentId === "")
-      return toast.error("Please add your credit card");
-
-    const response = await payStripe({
+    const result = await payAirwallex({
       amount: totalAmount,
-      currency: "USD",
+      currency: currency,
       metadata: {
         type: "booking",
         bookingId,
       },
-      paymentMethodId: stripePaymentId,
+      returnUrl: `eventworld://booking/status?id=${bookingId}`,
     });
-    const txHash = response.paymentIntentId || null;
 
-    if (!txHash) {
-      await BookingAPI.remove(bookingId);
-      return toast.error("Payment failed");
-    }
+    if (result !== "success") return;
 
     toast.success("Experience Booked!");
     router.replace({ pathname: "/booking/status", params: { id: bookingId } });
@@ -647,7 +639,7 @@ const CheckoutScreen = () => {
     if (!res.data) {
       await BookingAPI.remove(bookingId);
       toast.error("Failed to initiate crypto payment.");
-      return null;
+      return;
     }
 
     const checkoutUrl = res.data;

@@ -11,6 +11,7 @@ import { SERVER_API_ENDPOINT } from "@/config/env";
 import { getSubscriptionSku } from "@/constants/skus";
 import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
+import { delay } from "@/utils/fc";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -331,6 +332,8 @@ const SubscriptionCheckout = () => {
         if (result !== "success") return;
 
         await refreshAuthUser();
+
+        await delay(2000);
         router.back();
       }
 
