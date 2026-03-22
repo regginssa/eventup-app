@@ -5,7 +5,9 @@ import {
   presentEntirePaymentFlow,
 } from "airwallex-payment-react-native";
 import React, { createContext, ReactNode, useContext, useEffect } from "react";
+import { Linking } from "react-native";
 import { useAuth } from "./AuthProvider";
+import { useSocket } from "./SocketProvider";
 import { useToast } from "./ToastProvider";
 
 type TAirwallexPayBody = {
@@ -39,10 +41,25 @@ export const useAirwallex = () => {
 const AirwallexProvider: React.FC<AirwallexProviderProps> = ({ children }) => {
   const { user } = useAuth();
   const toast = useToast();
+  const { socket } = useSocket();
 
   useEffect(() => {
     initialize("demo");
   }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleRequireAction = ({ nextUrl }: any) => {
+      Linking.openURL(nextUrl);
+    };
+
+    socket.on("payment_requires_customer_action", handleRequireAction);
+
+    return () => {
+      socket.off("payment_requires_customer_action", handleRequireAction);
+    };
+  }, [socket]);
 
   const pay = async (body: TAirwallexPayBody): Promise<string> => {
     if (!user?.location.country.code) return "failed";
