@@ -1,4 +1,3 @@
-import { getMe } from "@/api/services/auth";
 import CurrencyAPI from "@/api/services/currency";
 import UserAPI from "@/api/services/user";
 import Web3API from "@/api/services/web3";
@@ -11,7 +10,6 @@ import { useIap } from "@/components/providers/IapProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { SERVER_API_ENDPOINT } from "@/config/env";
 import { getTicketSku } from "@/constants/skus";
-import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { ICommunityTicket } from "@/types/ticket";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -158,8 +156,7 @@ const TicketsCheckout = () => {
 
   const { id: ticketId, from, eventId } = useLocalSearchParams();
   const router = useRouter();
-  const { user, setAuthUser } = useAuth();
-  const { pay: payStripe } = useStripe();
+  const { user, setAuthUser, refreshAuthUser } = useAuth();
   const { pay: payAirwallex } = useAirwallex();
   const { ready, buy: buyIap, lastPurchase, resetPurchase } = useIap();
   const { communityTickets } = useCommunityTicket();
@@ -285,37 +282,17 @@ const TicketsCheckout = () => {
 
           if (result !== "success") return;
 
-          // Wait for user data refresh
-          const updated = await new Promise<boolean>((resolve) => {
-            let elapsed = 0;
-            const interval = setInterval(async () => {
-              elapsed += 2000;
-              const me = await getMe();
+          await refreshAuthUser();
 
-              if (me.data.tickets.length > (user?.tickets.length || 0)) {
-                setAuthUser(me.data);
-                clearInterval(interval);
-                resolve(true);
-              }
-
-              if (elapsed >= 20000) {
-                clearInterval(interval);
-                resolve(false);
-              }
-            }, 2000);
-          });
-
-          if (updated) {
-            toast.success("Ticket purchased successfully!");
-            if (from && eventId) {
-              router.replace({
-                pathname: "/event/details/user",
-                params: { id: eventId },
-              });
-            } else {
-              router.replace(from || ("/mine/tickets" as any));
-            }
+          if (from && eventId) {
+            router.replace({
+              pathname: "/event/details/user",
+              params: { id: eventId },
+            });
+          } else {
+            router.replace(from || ("/mine/tickets" as any));
           }
+
           break;
 
         case "crypto":

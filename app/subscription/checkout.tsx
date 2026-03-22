@@ -155,7 +155,7 @@ const SubscriptionCheckout = () => {
   const [currency, setCurrency] = useState<string>("USD");
 
   const { id: subscriptionId, oneMonthPrice } = useLocalSearchParams();
-  const { user, setAuthUser } = useAuth();
+  const { user, setAuthUser, refreshAuthUser } = useAuth();
   const { subscriptions } = useSubscription();
   const { pay: payStripe } = useStripe();
   const { pay: payAirwallex } = useAirwallex();
@@ -285,16 +285,6 @@ const SubscriptionCheckout = () => {
     return res.paymentIntentId || null;
   };
 
-  const handleSuccess = async () => {
-    const response = await UserAPI.get(user?._id as string);
-
-    if (response.data.subscription?.id === subscriptionId) {
-      setAuthUser(response.data);
-      toast.success("Subscribed successfully");
-      router.back();
-    }
-  };
-
   const handleCrypto = async () => {
     if (Number(amount) <= 0) {
       toast.error("Invalid amount for selected cryptocurrency.");
@@ -339,7 +329,9 @@ const SubscriptionCheckout = () => {
         });
 
         if (result !== "success") return;
-        await handleSuccess();
+
+        await refreshAuthUser();
+        router.back();
       }
 
       if (method === "crypto" || method === "token") {
