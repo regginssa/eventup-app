@@ -4,6 +4,7 @@ import {
   PackageConfirmModal,
 } from "@/components/molecules";
 import { TCoordinate } from "@/types";
+import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
 import { ICommunityTicket } from "@/types/ticket";
 import { getCurrencySymbol } from "@/utils/format";
@@ -21,6 +22,7 @@ interface EventDetailPackagesProps {
     countryCode: string | null;
   };
   communityTicket?: ICommunityTicket;
+  booking?: IBooking;
 }
 
 const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({

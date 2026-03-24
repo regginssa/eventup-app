@@ -1,4 +1,5 @@
 import { TCoordinate, TDropdownItem, TPackageType } from "@/types";
+import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
 import { IFlightOffer } from "@/types/flight";
 import { IHotelOffer } from "@/types/hotel";
@@ -30,6 +31,7 @@ interface BookSearchInputGroupProps {
   currentLocationCoords: TCoordinate | null;
   currentCity: string | null;
   currentCountryCode: string | null;
+  booking?: IBooking;
 }
 
 const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
@@ -38,6 +40,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   currentLocationCoords,
   currentCity,
   currentCountryCode,
+  booking,
 }) => {
   const [includes, setIncludes] = useState({
     flight: true,

@@ -3,13 +3,13 @@ import UserAPI from "@/api/services/user";
 import Web3API from "@/api/services/web3";
 import { Button, PaymentMethodGroup, Spinner } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
-import { useAirwallex } from "@/components/providers/AirwallexProvider";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useCommunityTicket } from "@/components/providers/CommunityTicketProvider";
 import { useIap } from "@/components/providers/IapProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { SERVER_API_ENDPOINT } from "@/config/env";
 import { getTicketSku } from "@/constants/skus";
+import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { ICommunityTicket } from "@/types/ticket";
 import { delay } from "@/utils/fc";
@@ -18,7 +18,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Linking, Platform, Text, View } from "react-native";
+import { Linking, Platform, Text, View } from "react-native";
 
 // -----------------------------------------------------------------------------
 // HERO CARD — Redesigned (Matches EventHeroCard style)
@@ -158,7 +158,7 @@ const TicketsCheckout = () => {
   const { id: ticketId, from, eventId } = useLocalSearchParams();
   const router = useRouter();
   const { user, setAuthUser, refreshAuthUser } = useAuth();
-  const { pay: payAirwallex } = useAirwallex();
+  const { pay: payStripe } = useStripe();
   const { ready, buy: buyIap, lastPurchase, resetPurchase } = useIap();
   const { communityTickets } = useCommunityTicket();
   const toast = useToast();
@@ -270,7 +270,8 @@ const TicketsCheckout = () => {
 
       switch (paymentMethod) {
         case "credit":
-          const result = await payAirwallex({
+          const tx = await payStripe({
+            paymentMethodId: stripePaymentMethodId,
             amount,
             currency,
             metadata: {
@@ -278,10 +279,12 @@ const TicketsCheckout = () => {
               userId: user?._id,
               ticketId: ticket._id,
             },
-            returnUrl: "eventworld://mine/tickets",
           });
 
-          if (result !== "success") return;
+          if (!tx.paymentIntentId) {
+            setPurchaseLoading(false);
+            return toast.error("Payment failed");
+          }
 
           await refreshAuthUser();
 
@@ -301,8 +304,8 @@ const TicketsCheckout = () => {
         case "crypto":
         case "token":
           if (Number(amount) <= 0) {
-            toast.error("Invalid amount for selected cryptocurrency.");
-            return null;
+            setPurchaseLoading(false);
+            return toast.error("Invalid amount for selected cryptocurrency.");
           }
 
           const data = {
@@ -316,8 +319,8 @@ const TicketsCheckout = () => {
           const response = await Web3API.getCheckoutUrl(data);
 
           if (!response.data) {
-            toast.error("Failed to initiate crypto payment.");
-            return null;
+            setPurchaseLoading(false);
+            return toast.error("Failed to initiate crypto payment.");
           }
 
           const checkoutUrl = response.data;
@@ -328,7 +331,6 @@ const TicketsCheckout = () => {
           toast.warn("No supported payment method");
       }
     } catch (err: any) {
-      Alert.alert("Error", "Unable to complete purchase");
     } finally {
       setPurchaseLoading(false);
     }
