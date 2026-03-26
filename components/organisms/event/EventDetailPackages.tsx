@@ -30,6 +30,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   currentLocationCoords,
   currentLocation,
   communityTicket,
+  booking,
 }) => {
   const [eventPackage, setEventPackage] = useState<"standard" | "gold">(
     "standard",
@@ -260,6 +261,7 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
               currentLocationCoords={currentLocationCoords}
               currentCity={currentLocation.city}
               currentCountryCode={currentLocation.countryCode}
+              booking={booking}
             />
 
             <View className="mt-6">

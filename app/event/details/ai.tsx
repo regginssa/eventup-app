@@ -29,7 +29,6 @@ const initialTabs = [
 const AIEventDetail = () => {
   const [event, setEvent] = useState<IEvent | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [tabs, setTabs] = useState<TDropdownItem[]>(initialTabs);
   const [selectedTab, setSelectedTab] = useState<TDropdownItem>({
     label: "Packages",
     value: "packages",
@@ -123,9 +122,6 @@ const AIEventDetail = () => {
 
       if (!bookingData) {
         await fetchUserCurrentLocation();
-      } else {
-        setTabs(initialTabs.slice(1, 3));
-        setSelectedTab(initialTabs[2]);
       }
 
       setLoading(false);
@@ -156,7 +152,7 @@ const AIEventDetail = () => {
 
           <View className="flex-1 bg-white rounded-3xl p-4 gap-6 border border-slate-100 shadow-sm">
             <Tabs
-              tabs={tabs}
+              tabs={initialTabs}
               selectedTab={selectedTab}
               onSelct={setSelectedTab}
               tabClassName="flex-1"

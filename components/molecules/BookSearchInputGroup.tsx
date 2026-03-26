@@ -51,6 +51,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [departureLocation, setDepartureLocation] = useState<
     "current" | "home"
   >("current");
+  const [booked, setBooked] = useState({
+    flight: false,
+    hotel: false,
+    transferAirport: false,
+    transferEvent: false,
+  });
   const [departureDate, setDepartureDate] = useState<Date>(new Date());
   const [hotelDepartureDate, setHotelDepartureDate] = useState<Date>(
     new Date(),
@@ -323,6 +329,30 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   }, []);
 
   useEffect(() => {
+    if (!booking) return;
+
+    const { flight, hotel, transfer } = booking;
+    const { airportToHotel, hotelToEvent } = transfer || {};
+
+    setBooked({
+      flight: isBooked(flight),
+      hotel: isBooked(hotel),
+      transferAirport: isBooked(airportToHotel),
+      transferEvent: isBooked(hotelToEvent),
+    });
+  }, [booking]);
+
+  useEffect(() => {
+    setIncludes((prev) => ({
+      ...prev,
+      flight: booked.flight ? true : prev.flight,
+      hotel: booked.hotel ? true : prev.hotel,
+      transferAirport: booked.transferAirport ? true : prev.transferAirport,
+      transferEvent: booked.transferEvent ? true : prev.transferEvent,
+    }));
+  }, [booked]);
+
+  useEffect(() => {
     const canHaveTransfer = includes.flight && includes.hotel;
 
     if (!canHaveTransfer && includes.transferAirport) {
@@ -331,6 +361,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   }, [includes.flight, includes.hotel]);
 
   const toggleInclude = (key: keyof typeof includes) => {
+    if (booked[key]) return; // 🔒 prevent changes
+
     const canHaveAirportTransfer = includes.flight && includes.hotel;
 
     if (key === "transferAirport" && !canHaveAirportTransfer) return;
@@ -340,6 +372,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       [key]: !prev[key],
     }));
   };
+  const isBooked = (item: any) =>
+    !!item?.booking && item.booking.status !== "failed";
 
   const getCardStyle = (isActive: boolean) => [
     {
@@ -416,33 +450,36 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               label: "Event Transfer",
               icon: "map-marker-distance",
             },
-          ].map((item) => (
-            <TouchableOpacity
-              key={item.key}
-              activeOpacity={0.7}
-              onPress={() => toggleInclude(item.key as any)}
-              className="rounded-full"
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "white",
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-                borderWidth: 1,
-                borderColor: includes[item.key as keyof typeof includes]
-                  ? "#844AFF30"
-                  : "#f1f5f9",
-              }}
-            >
-              <GradientCheckbox
-                checked={includes[item.key as keyof typeof includes]}
+          ]
+            // ❌ hide booked items
+            .filter((item) => !booked[item.key as keyof typeof booked])
+            .map((item) => (
+              <TouchableOpacity
+                key={item.key}
+                activeOpacity={0.7}
                 onPress={() => toggleInclude(item.key as any)}
-              />
-              <Text className="ml-2 font-dm-sans-medium text-[12px] text-slate-700">
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                className="rounded-full"
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "white",
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  borderWidth: 1,
+                  borderColor: includes[item.key as keyof typeof includes]
+                    ? "#844AFF30"
+                    : "#f1f5f9",
+                }}
+              >
+                <GradientCheckbox
+                  checked={includes[item.key as keyof typeof includes]}
+                  onPress={() => toggleInclude(item.key as any)}
+                />
+                <Text className="ml-2 font-dm-sans-medium text-[12px] text-slate-700">
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
         </View>
       </View>
 
@@ -469,7 +506,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       </View> */}
 
       {/* SECTION 1: ORIGIN (Only if Flight is checked) */}
-      {includes.flight && (
+      {includes.flight && !booked.flight && (
         <View className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
           <View className="flex-row items-center gap-2 mb-4">
             <View className="w-6 h-6 rounded-full bg-[#844AFF20] items-center justify-center">
@@ -580,7 +617,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         </View>
 
         <View className="gap-4">
-          {includes.flight && (
+          {includes.flight && !booked.flight && (
             <>
               <Dropdown
                 label="Flight Trip Type"
@@ -613,7 +650,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             </>
           )}
 
-          {includes.hotel && (
+          {includes.hotel && !booked.hotel && (
             <>
               <DateTimePicker
                 label="Hotel CheckIn Date"
@@ -634,7 +671,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             </>
           )}
 
-          {includes.transferEvent && (
+          {includes.transferEvent && !booked.transferEvent && (
             <DateTimePicker
               label="Transfer date time to Event"
               className="rounded-xl"
@@ -667,7 +704,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           </View>
 
           <View className="gap-2">
-            {includes.flight && (
+            {includes.flight && !booked.flight && (
               <FlightItem
                 data={flightOffer}
                 refreshLoading={refreshLoading.get("flight")}
@@ -676,7 +713,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 }}
               />
             )}
-            {includes.hotel && (
+            {includes.hotel && !booked.hotel && (
               <HotelItem
                 data={hotelOffer}
                 refreshLoading={refreshLoading.get("hotel")}
@@ -685,7 +722,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 }}
               />
             )}
-            {includes.transferAirport && (
+            {includes.transferEvent && !booked.transferEvent && (
               <TransferItem
                 data={airportToHotelOffer}
                 refreshLoading={refreshLoading.get("airportToHotel")}

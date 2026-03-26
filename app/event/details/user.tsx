@@ -180,6 +180,7 @@ const UserEventDetail = () => {
   useEffect(() => {
     if (!myAttendees) return;
     setTabs([
+      { label: "Packages", value: "packages" },
       { label: "Overview", value: "overview" },
       { label: "Itinerary", value: "itinerary" },
     ]);
