@@ -190,7 +190,7 @@ const BookedScreen = () => {
             </Text>
             <FlightItem
               data={booking?.flight.offer || null}
-              reference={booking?.flight?.booking?.bookingReference}
+              reference={booking?.flight?.booking?.reference}
             />
             <HotelItem
               data={booking?.hotel.offer || null}

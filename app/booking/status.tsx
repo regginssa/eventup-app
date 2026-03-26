@@ -95,7 +95,7 @@ const BookingStatus = () => {
       !booking?.flight?.offer ||
       !user ||
       booking?.flight?.status === "confirmed" ||
-      booking.flight?.booking?.orderId
+      booking.flight?.booking?.id
     ) {
       return;
     }
@@ -106,7 +106,7 @@ const BookingStatus = () => {
       try {
         const result = await bookFlight(booking.flight.offer);
 
-        if (!result.orderId) {
+        if (!result.id) {
           flightBookingRef.current = false;
           return toast.error(result.message);
         }

@@ -118,11 +118,8 @@ const AIEventDetail = () => {
       if (!id) return;
       setLoading(true);
       await fetchEventData();
-      const bookingData = await fetchBookingData();
-
-      if (!bookingData) {
-        await fetchUserCurrentLocation();
-      }
+      await fetchBookingData();
+      await fetchUserCurrentLocation();
 
       setLoading(false);
     };

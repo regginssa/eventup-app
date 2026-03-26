@@ -324,6 +324,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     }
   };
 
+  const isBooked = (item: any) => {
+    const status = item?.booking?.status;
+    console.log("status: ", status);
+    return status === "confirmed" || status === "completed";
+  };
+
   useEffect(() => {
     initialize();
   }, []);
@@ -372,8 +378,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       [key]: !prev[key],
     }));
   };
-  const isBooked = (item: any) =>
-    !!item?.booking && item.booking.status !== "failed";
 
   const getCardStyle = (isActive: boolean) => [
     {
@@ -451,7 +455,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               icon: "map-marker-distance",
             },
           ]
-            // ❌ hide booked items
             .filter((item) => !booked[item.key as keyof typeof booked])
             .map((item) => (
               <TouchableOpacity

@@ -375,7 +375,7 @@ const CheckoutScreen = () => {
 
       if (flight.offer) {
         servicesList.push("Round-trip Flight");
-        if (!flight.booking?.orderId) {
+        if (!flight.booking?.id) {
           baseEUR += Number(flight.offer.converted.totalAmount);
         }
       }

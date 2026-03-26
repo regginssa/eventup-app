@@ -204,7 +204,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
               <FlightItem
                 data={flight.offer}
                 status={flight.status}
-                reference={flight.booking?.bookingReference}
+                reference={flight.booking?.reference}
               />
             </View>
           </View>

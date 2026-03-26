@@ -43,8 +43,8 @@ export interface IFlightSlice {
 
 export interface IFlightBookingResponse {
   status: TFlightBookStatus;
-  orderId?: string;
-  bookingReference?: string;
+  id?: string;
+  reference?: string;
   message: string;
 }
 
