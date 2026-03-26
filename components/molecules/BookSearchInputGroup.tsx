@@ -108,7 +108,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   };
 
   const handleFlight = async () => {
-    if (!includes.flight) return null;
+    if (!includes.flight || booked.flight) return null;
 
     const eventDateTime = normalizeDateUTC(
       new Date(event.dates?.start?.date as string),
@@ -146,7 +146,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const handleHotel = async (
     flightOffer: IFlightOffer | null,
   ): Promise<IHotelOffer | null> => {
-    if (!includes.hotel) return null;
+    if (!includes.hotel || booked.hotel) return null;
 
     const eventDate = normalizeDateUTC(
       new Date(event.dates?.start?.date as string),
@@ -201,7 +201,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     flightOffer: IFlightOffer | null,
     hotelOffer: IHotelOffer | null,
   ) => {
-    if (!includes.transferAirport) return;
+    if (!includes.transferAirport || booked.transferAirport) return;
 
     if (flightOffer && hotelOffer) {
       const destinationIata = flightOffer.slices[0].originIata;
@@ -227,7 +227,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   };
 
   const handleHotelToEvent = async (hotelOffer: IHotelOffer | null) => {
-    if (!includes.transferEvent) return;
+    if (!includes.transferEvent || booked.transferEvent) return;
 
     const eventGeo = event.location?.coordinate;
     if (!eventGeo) return toast.warn("Event isn't selected");
@@ -322,10 +322,6 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     } finally {
       setSearchLoading(false);
     }
-  };
-
-  const isBooked = (item: any) => {
-    return item?.id;
   };
 
   useEffect(() => {

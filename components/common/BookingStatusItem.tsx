@@ -66,13 +66,13 @@ const BookingStatusItem: React.FC<BookingStatusItemProps> = ({
           {label}
         </Text>
         <Text
-          className={`font-poppins-semibold text-base mt-0.5 ${isCompleted ? "text-slate-900" : isProcessing ? "text-slate-800" : "text-slate-300"}`}
+          className={`font-poppins-semibold text-base mt-0.5 text-slate-800`}
         >
           {isCompleted
             ? "Confirmed"
             : isProcessing
               ? "In Progress..."
-              : "Pending"}
+              : "Failed"}
         </Text>
       </View>
     </View>

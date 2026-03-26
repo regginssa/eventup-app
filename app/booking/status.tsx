@@ -106,21 +106,27 @@ const BookingStatus = () => {
       try {
         const result = await bookFlight(booking.flight.offer);
 
+        const latest = bookingRef.current;
+
         if (!result.id) {
           flightBookingRef.current = false;
-          return toast.error(result.message);
+
+          if (latest) {
+            await updateBooking({
+              ...latest,
+              flight: {
+                ...latest.flight,
+                booking: {
+                  status: "failed",
+                },
+                status: "failed",
+              },
+            });
+          }
+
+          return toast.error("Flight booking failed");
         }
 
-        const bookingBodyData: IBooking = {
-          ...booking,
-          flight: {
-            ...booking.flight,
-            booking: result,
-            status: "confirmed",
-          },
-        };
-
-        const latest = bookingRef.current;
         if (!latest) return;
 
         await updateBooking({
@@ -158,13 +164,25 @@ const BookingStatus = () => {
     const handleHotel = async () => {
       try {
         const result = await bookHotel(booking.hotel.offer.id);
+        const latest = bookingRef.current;
 
         if (result.status !== "confirmed") {
           hotelBookingRef.current = false;
-          return toast.error(result.message);
+          if (latest) {
+            await updateBooking({
+              ...latest,
+              hotel: {
+                ...latest.hotel,
+                booking: {
+                  status: "failed",
+                },
+                status: "failed",
+              },
+            });
+          }
+          return toast.error("Hotel booking failed");
         }
 
-        const latest = bookingRef.current;
         if (!latest) return;
 
         await updateBooking({
@@ -346,9 +364,9 @@ const BookingStatus = () => {
   useEffect(() => {
     if (!booking) return;
 
-    const check = (service?: { offer?: any; status?: string }) => {
+    const check = (service?: any) => {
       if (!service?.offer) return true;
-      return service.status === "confirmed";
+      return !!service?.booking;
     };
 
     const allConfirmed =
@@ -377,7 +395,32 @@ const BookingStatus = () => {
 
   const handleView = async () => {
     setViewLoading(true);
-    await updateBooking({ ...booking, status: "confirmed" });
+
+    const bodyData: IBooking = {
+      ...booking,
+      flight: flight.booking?.status === "failed" ? undefined : (flight as any),
+      hotel: hotel.booking?.status === "faild" ? undefined : (hotel as any),
+      transfer: {
+        airportToHotel:
+          transfer.airportToHotel?.booking?.status === "faild"
+            ? undefined
+            : (transfer.airportToHotel as any),
+        hotelToEvent:
+          transfer.hotelToEvent?.booking?.status === "faild"
+            ? undefined
+            : (transfer.hotelToEvent as any),
+      },
+      status: "confirmed",
+    };
+
+    console.log(
+      "body data: ",
+      bodyData.flight,
+      bodyData.hotel,
+      bodyData.transfer,
+    );
+
+    await updateBooking(bodyData);
     setViewLoading(false);
     router.replace({
       pathname: "/booking/booked",
