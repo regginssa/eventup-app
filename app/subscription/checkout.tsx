@@ -302,12 +302,15 @@ const SubscriptionCheckout = () => {
           metadata: {
             type: "subscription",
             userId: user?._id,
-            subId: subscriptionId,
+            subscriptionId: subscriptionId,
           },
           returnUrl: "eventworld://subscription",
         });
 
-        if (result !== "success") return;
+        if (result !== "success") {
+          setSubLoading(false);
+          return toast.error("Payment failed");
+        }
 
         await refreshAuthUser();
 
@@ -317,7 +320,6 @@ const SubscriptionCheckout = () => {
 
       if (method === "crypto" || method === "token") {
         await handleCrypto();
-        return setSubLoading(false);
       }
     } catch (error) {
       toast.error("Subscription failed");

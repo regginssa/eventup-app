@@ -3,13 +3,13 @@ import UserAPI from "@/api/services/user";
 import Web3API from "@/api/services/web3";
 import { Button, PaymentMethodGroup, Spinner } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
+import { useAirwallex } from "@/components/providers/AirwallexProvider";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useCommunityTicket } from "@/components/providers/CommunityTicketProvider";
 import { useIap } from "@/components/providers/IapProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { SERVER_API_ENDPOINT } from "@/config/env";
 import { getTicketSku } from "@/constants/skus";
-import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { ICommunityTicket } from "@/types/ticket";
 import { delay } from "@/utils/fc";
@@ -111,7 +111,7 @@ const TicketReceipt = ({ ticket, amount, currency }: any) => {
             <Text className="text-slate-400 font-dm-sans-bold text-[10px] uppercase tracking-widest mb-1">
               Total Amount
             </Text>
-            <View className="flex flex-row items-center gap-1 mt-1">
+            <View className="flex flex-row items-end gap-1 mt-1">
               <Text className="text-lg text-slate-400">
                 {currency.toUpperCase()}
               </Text>
@@ -158,7 +158,7 @@ const TicketsCheckout = () => {
   const { id: ticketId, from, eventId } = useLocalSearchParams();
   const router = useRouter();
   const { user, setAuthUser, refreshAuthUser } = useAuth();
-  const { pay: payStripe } = useStripe();
+  const { pay: payAirwallex } = useAirwallex();
   const { ready, buy: buyIap, lastPurchase, resetPurchase } = useIap();
   const { communityTickets } = useCommunityTicket();
   const toast = useToast();
@@ -270,8 +270,7 @@ const TicketsCheckout = () => {
 
       switch (paymentMethod) {
         case "credit":
-          const tx = await payStripe({
-            paymentMethodId: stripePaymentMethodId,
+          const result = await payAirwallex({
             amount,
             currency,
             metadata: {
@@ -279,9 +278,10 @@ const TicketsCheckout = () => {
               userId: user?._id,
               ticketId: ticket._id,
             },
+            returnUrl: "eventworld://mine/tickets",
           });
 
-          if (!tx.paymentIntentId) {
+          if (result !== "success") {
             setPurchaseLoading(false);
             return toast.error("Payment failed");
           }

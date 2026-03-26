@@ -690,10 +690,6 @@ const CheckoutScreen = () => {
     return response.data._id || null;
   };
 
-  const handleDuffelSuccess = async () => {};
-
-  const handleDuffelFailure = async () => {};
-
   const hasTravelServices =
     !!flightOffer ||
     !!hotelOffer ||
@@ -804,7 +800,6 @@ const CheckoutScreen = () => {
           onSelectCryptoCurrency={setCrypto}
           onSelectMethod={setPaymentMethod}
           onSelectStripePaymentMethod={setStripePaymentId}
-          hiddenStripe
         />
       </View>
 
