@@ -276,7 +276,6 @@ const TicketsCheckout = () => {
             currency,
             metadata: {
               type: "ticket",
-              userId: user?._id,
               ticketId: ticket._id,
             },
           });

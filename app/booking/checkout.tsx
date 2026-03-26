@@ -297,7 +297,7 @@ const CheckoutScreen = () => {
   const { offer: flightOffer } = useFlight();
   const { offer: hotelOffer } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
-  const { pay: payStripe } = useStripe();
+  const { capture: captureStripe } = useStripe();
   const { send: sendNotification } = useNotification();
   const toast = useToast();
 
@@ -483,7 +483,7 @@ const CheckoutScreen = () => {
 
       let bookingId = booking?._id || null;
 
-      if (!bookingId) {
+      if (!bookingId || !booking) {
         console.log("Creating booking before payment...");
         bookingId = await createBooking();
         if (!bookingId) {
@@ -499,6 +499,10 @@ const CheckoutScreen = () => {
           setBookLoading(false);
           return;
         }
+
+        await BookingAPI.update(booking._id as string, {
+          ...booking,
+        });
       }
 
       if (totalAmount > 0) {
@@ -603,14 +607,13 @@ const CheckoutScreen = () => {
   };
 
   const handleCreditPayment = async (bookingId: string) => {
-    const tx = await payStripe({
+    const tx = await captureStripe({
       paymentMethodId: stripePaymentId,
       amount: totalAmount,
       currency: currency,
       metadata: {
         type: "booking",
         bookingId,
-        userId: user?._id,
       },
     });
 

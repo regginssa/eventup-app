@@ -302,7 +302,6 @@ const SubscriptionCheckout = () => {
           currency,
           metadata: {
             type: "subscription",
-            userId: user?._id,
             subscriptionId: subscriptionId,
           },
         });

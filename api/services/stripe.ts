@@ -2,6 +2,7 @@ import { ApiResponse } from "@/types/api";
 import { IUser } from "@/types/user";
 import AxiosInstance from "../client";
 import {
+  CREATE_STRIPE_CAPTURE_PAYMENT_INTENT,
   CREATE_STRIPE_PAYMENT_INTENT,
   FETCH_STRIPE_CLIENT_SECRET,
   FETCH_STRIPE_CUSTOMER_ID,
@@ -31,6 +32,15 @@ const createPaymentIntent = async (
   return await AxiosInstance.post(CREATE_STRIPE_PAYMENT_INTENT, bodyData);
 };
 
+const createCapturePaymentIntent = async (
+  bodyData: any,
+): Promise<ApiResponse<{ id: string; clientSecret: string }>> => {
+  return await AxiosInstance.post(
+    CREATE_STRIPE_CAPTURE_PAYMENT_INTENT,
+    bodyData,
+  );
+};
+
 const refund = async (paymentIntentId: string): Promise<ApiResponse<null>> => {
   return await AxiosInstance.post(REFUND_STRIPE_PAYMENT, { paymentIntentId });
 };
@@ -40,5 +50,6 @@ export default {
   getClientSecret,
   savePaymentMethod,
   createPaymentIntent,
+  createCapturePaymentIntent,
   refund,
 };
