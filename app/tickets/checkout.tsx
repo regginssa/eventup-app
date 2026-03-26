@@ -3,13 +3,13 @@ import UserAPI from "@/api/services/user";
 import Web3API from "@/api/services/web3";
 import { Button, PaymentMethodGroup, Spinner } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
-import { useAirwallex } from "@/components/providers/AirwallexProvider";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useCommunityTicket } from "@/components/providers/CommunityTicketProvider";
 import { useIap } from "@/components/providers/IapProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { SERVER_API_ENDPOINT } from "@/config/env";
 import { getTicketSku } from "@/constants/skus";
+import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { ICommunityTicket } from "@/types/ticket";
 import { delay } from "@/utils/fc";
@@ -158,7 +158,7 @@ const TicketsCheckout = () => {
   const { id: ticketId, from, eventId } = useLocalSearchParams();
   const router = useRouter();
   const { user, setAuthUser, refreshAuthUser } = useAuth();
-  const { pay: payAirwallex } = useAirwallex();
+  const { pay: payStripe } = useStripe();
   const { ready, buy: buyIap, lastPurchase, resetPurchase } = useIap();
   const { communityTickets } = useCommunityTicket();
   const toast = useToast();
@@ -270,7 +270,8 @@ const TicketsCheckout = () => {
 
       switch (paymentMethod) {
         case "credit":
-          const result = await payAirwallex({
+          const tx = await payStripe({
+            paymentMethodId: stripePaymentMethodId,
             amount,
             currency,
             metadata: {
@@ -278,10 +279,9 @@ const TicketsCheckout = () => {
               userId: user?._id,
               ticketId: ticket._id,
             },
-            returnUrl: "eventworld://mine/tickets",
           });
 
-          if (result !== "success") {
+          if (!tx.paymentIntentId) {
             setPurchaseLoading(false);
             return toast.error("Payment failed");
           }

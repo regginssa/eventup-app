@@ -6,7 +6,6 @@ import Web3API from "@/api/services/web3";
 import { Button, Spinner } from "@/components/common";
 import { PaymentMethodGroup } from "@/components/molecules";
 import { SimpleContainer } from "@/components/organisms/layout";
-import { useAirwallex } from "@/components/providers/AirwallexProvider";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useFlight } from "@/components/providers/FlightProvider";
 import { useHotel } from "@/components/providers/HotelProvider";
@@ -14,6 +13,7 @@ import { useNotification } from "@/components/providers/NotificationProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useTransfer } from "@/components/providers/TransferProvider";
 import { SERVER_API_ENDPOINT } from "@/config/env";
+import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
@@ -297,7 +297,7 @@ const CheckoutScreen = () => {
   const { offer: flightOffer } = useFlight();
   const { offer: hotelOffer } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
-  const { pay: payAirwallex } = useAirwallex();
+  const { pay: payStripe } = useStripe();
   const { send: sendNotification } = useNotification();
   const toast = useToast();
 
@@ -603,7 +603,8 @@ const CheckoutScreen = () => {
   };
 
   const handleCreditPayment = async (bookingId: string) => {
-    const result = await payAirwallex({
+    const tx = await payStripe({
+      paymentMethodId: stripePaymentId,
       amount: totalAmount,
       currency: currency,
       metadata: {
@@ -611,10 +612,9 @@ const CheckoutScreen = () => {
         bookingId,
         userId: user?._id,
       },
-      returnUrl: `eventworld://booking/status?id=${bookingId}`,
     });
 
-    if (result !== "success") return;
+    if (!tx.paymentIntentId) return;
 
     toast.success("Experience Booked!");
     router.replace({ pathname: "/booking/status", params: { id: bookingId } });

@@ -2,13 +2,13 @@ import UserAPI from "@/api/services/user";
 import Web3API from "@/api/services/web3";
 import { Button, PaymentMethodGroup } from "@/components";
 import { SimpleContainer } from "@/components/organisms/layout";
-import { useAirwallex } from "@/components/providers/AirwallexProvider";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useIap } from "@/components/providers/IapProvider";
 import { useSubscription } from "@/components/providers/SubscriptionProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { SERVER_API_ENDPOINT } from "@/config/env";
 import { getSubscriptionSku } from "@/constants/skus";
+import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { delay } from "@/utils/fc";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -157,7 +157,7 @@ const SubscriptionCheckout = () => {
   const { id: subscriptionId, oneMonthPrice } = useLocalSearchParams();
   const { user, setAuthUser, refreshAuthUser } = useAuth();
   const { subscriptions } = useSubscription();
-  const { pay: payAirwallex } = useAirwallex();
+  const { pay: payStripe } = useStripe();
 
   const { ready, buy: buyIap, lastPurchase, resetPurchase } = useIap();
   const toast = useToast();
@@ -296,7 +296,8 @@ const SubscriptionCheckout = () => {
       setSubLoading(true);
 
       if (method === "credit") {
-        const result = await payAirwallex({
+        const tx = await payStripe({
+          paymentMethodId: stripePaymentMethodId,
           amount,
           currency,
           metadata: {
@@ -304,10 +305,9 @@ const SubscriptionCheckout = () => {
             userId: user?._id,
             subscriptionId: subscriptionId,
           },
-          returnUrl: "eventworld://subscription",
         });
 
-        if (result !== "success") {
+        if (!tx.paymentIntentId) {
           setSubLoading(false);
           return toast.error("Payment failed");
         }
