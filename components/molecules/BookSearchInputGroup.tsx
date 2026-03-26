@@ -110,15 +110,15 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const handleFlight = async () => {
     if (!includes.flight || booked.flight) return null;
 
-    const eventDateTime = normalizeDateUTC(
-      new Date(event.dates?.start?.date as string),
-    );
-    const departureDateTime = normalizeDateUTC(departureDate);
+    // const eventDateTime = normalizeDateUTC(
+    //   new Date(event.dates?.start?.date as string),
+    // );
+    // const departureDateTime = normalizeDateUTC(departureDate);
 
-    if (eventDateTime < departureDateTime) {
-      toast.info("The departure date cannot be after the event date.");
-      return null;
-    }
+    // if (eventDateTime < departureDateTime) {
+    //   toast.info("The departure date cannot be after the event date.");
+    //   return null;
+    // }
 
     setLoading("flight", true);
     const originGeo =

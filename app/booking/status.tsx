@@ -53,13 +53,20 @@ const BookingStatus = () => {
     }: any) => {
       console.log("booking flight status changed: ", result);
       if (!booking?._id || bookingId !== booking?._id) return;
-      setBooking({
-        ...booking,
-        flight: { ...booking.flight, booking: result },
-        price: {
-          ...booking.price,
-          totalAmount: currentTotalAmount,
-        },
+      setBooking((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          flight: {
+            ...prev.flight,
+            booking: result,
+          },
+          price: {
+            ...prev.price,
+            totalAmount: currentTotalAmount,
+          },
+        };
       });
     };
 
@@ -70,13 +77,20 @@ const BookingStatus = () => {
     }: any) => {
       console.log("booking hotel status changed: ", result);
       if (!booking?._id || bookingId !== booking?._id) return;
-      setBooking({
-        ...booking,
-        hotel: { ...booking.hotel, booking: result },
-        price: {
-          ...booking.price,
-          totalAmount: currentTotalAmount,
-        },
+      setBooking((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          hotel: {
+            ...prev.hotel,
+            booking: result,
+          },
+          price: {
+            ...prev.price,
+            totalAmount: currentTotalAmount,
+          },
+        };
       });
     };
 
@@ -89,7 +103,7 @@ const BookingStatus = () => {
       socket.off("booking_flight_status_changed", bookingFlightStatus);
       socket.off("booking_hotel_status_changed", bookingHotelStatus);
     };
-  }, [socket, booking]);
+  }, [socket]);
 
   useEffect(() => {
     const init = async () => {
@@ -122,8 +136,6 @@ const BookingStatus = () => {
   }, [booking]);
 
   if (!booking) return null;
-
-  const { flight, hotel, transfer, price } = booking;
 
   const handleView = async () => {
     setViewLoading(true);
@@ -167,6 +179,8 @@ const BookingStatus = () => {
     await Linking.openURL(url);
   };
 
+  const { flight, hotel, transfer, price } = booking;
+
   const bookingItems = [
     {
       label: "Payment",
@@ -182,12 +196,12 @@ const BookingStatus = () => {
     flight.offer && {
       label: "Flight",
       icon: "airplane-takeoff",
-      status: flight.status,
+      status: flight.booking?.status,
     },
     hotel?.offer && {
       label: "Hotel",
       icon: "office-building",
-      status: hotel.status,
+      status: hotel.booking?.status,
     },
     transfer?.airportToHotel?.offer && {
       label: "Airport Transfer",
