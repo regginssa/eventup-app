@@ -325,9 +325,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   };
 
   const isBooked = (item: any) => {
-    const status = item?.booking?.status;
-    console.log("status: ", status);
-    return status === "confirmed" || status === "completed";
+    return item?.id;
   };
 
   useEffect(() => {
@@ -341,10 +339,10 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     const { airportToHotel, hotelToEvent } = transfer || {};
 
     setBooked({
-      flight: isBooked(flight),
-      hotel: isBooked(hotel),
-      transferAirport: isBooked(airportToHotel),
-      transferEvent: isBooked(hotelToEvent),
+      flight: !!flight?.booking?.id,
+      hotel: !!hotel?.booking?.id,
+      transferAirport: !!airportToHotel?.booking?.id,
+      transferEvent: !!hotelToEvent?.booking?.id,
     });
   }, [booking]);
 
@@ -359,12 +357,13 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   }, [booked]);
 
   useEffect(() => {
-    const canHaveTransfer = includes.flight && includes.hotel;
+    const canHaveTransfer =
+      (includes.flight || booked.flight) && (includes.hotel || booked.hotel);
 
     if (!canHaveTransfer && includes.transferAirport) {
       setIncludes((prev) => ({ ...prev, transferAirport: false }));
     }
-  }, [includes.flight, includes.hotel]);
+  }, [includes.flight, includes.hotel, booked]);
 
   const toggleInclude = (key: keyof typeof includes) => {
     if (booked[key]) return; // 🔒 prevent changes
@@ -377,6 +376,21 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       ...prev,
       [key]: !prev[key],
     }));
+  };
+
+  const getAirportTransferDescription = () => {
+    if (!booking?.flight || !booking?.hotel) return null;
+
+    const flight = booking.flight;
+    const hotel = booking.hotel;
+
+    const airport =
+      flight?.offer?.slices[flight.offer.slices.length - 1].destinationIata ||
+      "Arrival Airport";
+
+    const hotelName = hotel?.offer?.name || "Hotel";
+
+    return `From ${airport} → ${hotelName}`;
   };
 
   const getCardStyle = (isActive: boolean) => [
@@ -485,6 +499,21 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             ))}
         </View>
       </View>
+
+      {(includes.transferAirport || booked.transferAirport) &&
+        booked.flight &&
+        booked.hotel && (
+          <View className="p-3 rounded-xl bg-[#844AFF08] border border-[#844AFF20] flex-row items-center">
+            <MaterialCommunityIcons
+              name="information-outline"
+              size={16}
+              color="#844AFF"
+            />
+            <Text className="ml-2 text-xs text-slate-700 font-dm-sans-medium flex-1">
+              {getAirportTransferDescription()}
+            </Text>
+          </View>
+        )}
 
       {/* TIMEZONE INFO BOX */}
       {/* <View className="overflow-hidden rounded-2xl">
@@ -707,7 +736,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           </View>
 
           <View className="gap-2">
-            {includes.flight && !booked.flight && (
+            {includes.flight && (
               <FlightItem
                 data={flightOffer}
                 refreshLoading={refreshLoading.get("flight")}
@@ -716,7 +745,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 }}
               />
             )}
-            {includes.hotel && !booked.hotel && (
+            {includes.hotel && (
               <HotelItem
                 data={hotelOffer}
                 refreshLoading={refreshLoading.get("hotel")}
@@ -725,7 +754,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 }}
               />
             )}
-            {includes.transferEvent && !booked.transferEvent && (
+            {includes.transferAirport && (
               <TransferItem
                 data={airportToHotelOffer}
                 refreshLoading={refreshLoading.get("airportToHotel")}

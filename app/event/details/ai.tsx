@@ -171,6 +171,7 @@ const AIEventDetail = () => {
             event={event}
             currentLocationCoords={currentLocationCoords}
             currentLocation={currentLocation}
+            booking={booking || undefined}
           />
         );
       case "overview":

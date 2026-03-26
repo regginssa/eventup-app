@@ -305,6 +305,7 @@ const UserEventDetail = () => {
             currentLocationCoords={currentLocationCoords}
             currentLocation={currentLocation}
             communityTicket={communityTicket || undefined}
+            booking={booking || undefined}
           />
         );
       case "overview":
