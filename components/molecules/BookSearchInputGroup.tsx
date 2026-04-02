@@ -208,16 +208,14 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       setLoading("airportToHotel", true);
       const params = {
         from: {
-          type: "airport",
+          type: "IATA",
           code: destinationIata,
         },
         to: {
-          type: "hotel",
-          name: hotelOffer.name,
-          lat: hotelOffer.latitude,
-          lng: hotelOffer.longitude,
+          type: "GPS",
+          code: `${hotelOffer.latitude},${hotelOffer.longitude}`,
         },
-        departureTime: flightOffer.arrivalTime,
+        departureDateTime: flightOffer.arrivalTime,
         packageType,
       };
 
@@ -239,10 +237,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       if (!hotelOffer) return;
 
       fromParams = {
-        type: "hotel",
-        name: hotelOffer.name,
-        lat: hotelOffer.latitude,
-        lng: hotelOffer.longitude,
+        type: "GPS",
+        code: `${hotelOffer.latitude},${hotelOffer.longitude}`,
       };
     } else {
       if (departureLocation === "current" && !currentLocationCoords) return;
@@ -250,32 +246,26 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       if (departureLocation === "current") {
         fromParams = {
-          type: "geo",
-          name: `${currentCity}, ${currentCountryCode}`,
-          lat: currentLocationCoords?.latitude,
-          lng: currentLocationCoords?.longitude,
+          type: "GPS",
+          code: `${currentLocationCoords?.latitude},${currentLocationCoords?.longitude}`,
         };
       } else {
         fromParams = {
-          type: "geo",
-          name: `${user?.location.city.name}, ${user?.location.country.code}`,
-          lat: user?.location.coordinate?.latitude,
-          lng: user?.location.coordinate?.longitude,
+          type: "GPS",
+          code: `${user?.location.coordinate?.latitude},${user?.location.coordinate?.longitude}`,
         };
       }
     }
 
     const toParams = {
-      type: "geo",
-      name: event.location?.address,
-      lat: eventGeo.latitude,
-      lng: eventGeo.longitude,
+      type: "GPS",
+      code: `${eventGeo.latitude},${eventGeo.longitude}`,
     };
 
     const params = {
       from: fromParams,
       to: toParams,
-      departureTime: df.toTransferDate(hotelDepartureDate),
+      departureDateTime: df.toTransferDate(hotelDepartureDate),
       packageType,
     };
 
