@@ -11,7 +11,6 @@ import { useSocket } from "@/components/providers/SocketProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
-import { TTransactionStatus } from "@/types/transaction";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -34,144 +33,71 @@ const BookingStatus = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const bookingPaymentStatus = ({
-      bookingId: id,
-      status,
-    }: {
-      bookingId: string;
-      status: TTransactionStatus;
-    }) => {
-      if (id !== bookingId || !booking) return;
-      setBooking({ ...booking, paymentStatus: status });
-      toast.success(`Payment is ${status}`);
-    };
-
-    const bookingFlightStatus = ({
-      bookingId,
-      result,
-      currentTotalAmount,
-    }: any) => {
-      console.log("booking flight status changed: ", result);
-      if (!booking?._id || bookingId !== booking?._id) return;
+    const bookingChanged = ({ booking: incoming }: { booking: IBooking }) => {
       setBooking((prev) => {
-        if (!prev) return prev;
+        if (!prev || prev._id !== incoming._id) return prev;
 
         return {
           ...prev,
-          flight: {
-            ...prev.flight,
-            booking: result,
-          },
-          price: {
-            ...prev.price,
-            totalAmount: currentTotalAmount,
-          },
-        };
-      });
-    };
 
-    const bookingHotelStatus = ({
-      bookingId,
-      result,
-      currentTotalAmount,
-    }: any) => {
-      console.log("booking hotel status changed: ", result);
-      if (!booking?._id || bookingId !== booking?._id) return;
-      setBooking((prev) => {
-        if (!prev) return prev;
+          // --- Top-level safe merge ---
+          paymentStatus: incoming.paymentStatus ?? prev.paymentStatus,
+          ticketStatus: incoming.ticketStatus ?? prev.ticketStatus,
+          price: incoming.price ?? prev.price,
 
-        return {
-          ...prev,
-          hotel: {
-            ...prev.hotel,
-            booking: result,
-          },
-          price: {
-            ...prev.price,
-            totalAmount: currentTotalAmount,
-          },
-        };
-      });
-    };
+          // --- Flight ---
+          flight: incoming.flight
+            ? {
+                ...prev.flight,
+                ...incoming.flight,
+                booking: incoming.flight.booking ?? prev.flight?.booking,
+              }
+            : prev.flight,
 
-    const bookingAirportTransferStatus = ({
-      bookingId,
-      result,
-      currentTotalAmount,
-    }: any) => {
-      console.log("booking airport transfer status changed: ", result);
-      if (!booking?._id || bookingId !== booking?._id) return;
-      setBooking((prev) => {
-        if (!prev) return prev;
+          // --- Hotel ---
+          hotel: incoming.hotel
+            ? {
+                ...prev.hotel,
+                ...incoming.hotel,
+                booking: incoming.hotel.booking ?? prev.hotel?.booking,
+              }
+            : prev.hotel,
 
-        return {
-          ...prev,
+          // --- Transfer ---
           transfer: {
-            ...prev.transfer,
-            airportToHotel: {
-              ...prev.transfer.airportToHotel,
-              booking: result,
-            },
-          },
-          price: {
-            ...prev.price,
-            totalAmount: currentTotalAmount,
+            airportToHotel: incoming.transfer?.airportToHotel
+              ? {
+                  ...prev.transfer?.airportToHotel,
+                  ...incoming.transfer.airportToHotel,
+                  booking:
+                    incoming.transfer.airportToHotel.booking ??
+                    prev.transfer?.airportToHotel?.booking,
+                }
+              : prev.transfer?.airportToHotel,
+
+            hotelToEvent: incoming.transfer?.hotelToEvent
+              ? {
+                  ...prev.transfer?.hotelToEvent,
+                  ...incoming.transfer.hotelToEvent,
+                  booking:
+                    incoming.transfer.hotelToEvent.booking ??
+                    prev.transfer?.hotelToEvent?.booking,
+                }
+              : prev.transfer?.hotelToEvent,
           },
         };
       });
+
+      // ✅ Safe toast
+      if (incoming.paymentStatus) {
+        toast.success(`Payment is ${incoming.paymentStatus}`);
+      }
     };
 
-    const bookingEventTransferStatus = ({
-      bookingId,
-      result,
-      currentTotalAmount,
-    }: any) => {
-      console.log("booking event transfer status changed: ", result);
-      if (!booking?._id || bookingId !== booking?._id) return;
-      setBooking((prev) => {
-        if (!prev) return prev;
-
-        return {
-          ...prev,
-          transfer: {
-            ...prev.transfer,
-            hotelToEvent: {
-              ...prev.transfer.hotelToEvent,
-              booking: result,
-            },
-          },
-          price: {
-            ...prev.price,
-            totalAmount: currentTotalAmount,
-          },
-        };
-      });
-    };
-
-    socket.on("booking_payment_status_updated", bookingPaymentStatus);
-    socket.on("booking_flight_status_changed", bookingFlightStatus);
-    socket.on("booking_hotel_status_changed", bookingHotelStatus);
-    socket.on(
-      "booking_transfer_airport_status_changed",
-      bookingAirportTransferStatus,
-    );
-    socket.on(
-      "booking_transfer_event_status_changed",
-      bookingEventTransferStatus,
-    );
+    socket.on("booking_changed", bookingChanged);
 
     return () => {
-      socket.off("booking_payment_status_updated", bookingPaymentStatus);
-      socket.off("booking_flight_status_changed", bookingFlightStatus);
-      socket.off("booking_hotel_status_changed", bookingHotelStatus);
-      socket.off(
-        "booking_transfer_airport_status_changed",
-        bookingAirportTransferStatus,
-      );
-      socket.off(
-        "booking_transfer_event_status_changed",
-        bookingEventTransferStatus,
-      );
+      socket.off("booking_changed", bookingChanged);
     };
   }, [socket]);
 
@@ -259,29 +185,29 @@ const BookingStatus = () => {
         booking.paymentStatus === "completed" ? "confirmed" : "processing",
     },
     {
-      label: "Ticket",
+      label: "Ticke",
       icon: "ticket-outline",
       status: booking.ticketStatus,
     },
     flight.offer && {
       label: "Flight",
       icon: "airplane-takeoff",
-      status: flight.booking?.status,
+      status: flight.booking?.status || "pending",
     },
     hotel?.offer && {
       label: "Hotel",
       icon: "office-building",
-      status: hotel.booking?.status,
+      status: hotel.booking?.status || "pending",
     },
     transfer?.airportToHotel?.offer && {
       label: "Airport Transfer",
       icon: "car-wash",
-      status: transfer.airportToHotel.status,
+      status: transfer.airportToHotel.booking?.status || "pending",
     },
     transfer?.hotelToEvent?.offer && {
       label: "Event Transfer",
       icon: "bus-side",
-      status: transfer.hotelToEvent.status,
+      status: transfer.hotelToEvent.booking?.status || "pending",
     },
   ].filter(Boolean);
 

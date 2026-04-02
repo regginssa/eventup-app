@@ -188,22 +188,32 @@ const BookedScreen = () => {
             <Text className="font-poppins-bold text-slate-800 text-sm ml-1 uppercase tracking-widest">
               Your Itinerary
             </Text>
-            <FlightItem
-              data={booking?.flight.offer || null}
-              reference={booking?.flight?.booking?.reference}
-            />
-            <HotelItem
-              data={booking?.hotel.offer || null}
-              reference={booking?.hotel?.booking?.reference}
-            />
-            <TransferItem
-              data={booking?.transfer.airportToHotel?.offer || null}
-              reference={booking?.transfer.airportToHotel.booking?.reference}
-            />
-            <TransferItem
-              data={booking?.transfer.hotelToEvent?.offer || null}
-              reference={booking?.transfer.hotelToEvent.booking?.reference}
-            />
+            {booking?.flight.booking?.status === "confirmed" && (
+              <FlightItem
+                data={booking?.flight.offer || null}
+                reference={booking?.flight?.booking?.reference}
+              />
+            )}
+            {booking?.hotel?.booking?.status === "confirmed" && (
+              <HotelItem
+                data={booking?.hotel.offer || null}
+                reference={booking?.hotel?.booking?.reference}
+              />
+            )}
+            {booking?.transfer.airportToHotel?.booking?.status ===
+              "confirmed" && (
+              <TransferItem
+                data={booking?.transfer.airportToHotel?.offer || null}
+                reference={booking?.transfer.airportToHotel.booking?.reference}
+              />
+            )}
+            {booking?.transfer.hotelToEvent?.booking?.status ===
+            (
+              <TransferItem
+                data={booking?.transfer.hotelToEvent?.offer || null}
+                reference={booking?.transfer.hotelToEvent.booking?.reference}
+              />
+            )}
           </View>
 
           {/* Trip Summary Section */}

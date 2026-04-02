@@ -325,12 +325,26 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     const { flight, hotel, transfer } = booking;
     const { airportToHotel, hotelToEvent } = transfer || {};
 
+    const isConfirmed = (item: any) =>
+      item?.offer &&
+      item?.status === "confirmed" &&
+      item?.booking?.status === "confirmed";
+
     setBooked({
-      flight: !!flight?.booking?.id,
-      hotel: !!hotel?.booking?.id,
-      transferAirport: !!airportToHotel?.booking?.id,
-      transferEvent: !!hotelToEvent?.booking?.id,
+      flight: isConfirmed(flight),
+      hotel: isConfirmed(hotel),
+      transferAirport: isConfirmed(airportToHotel),
+      transferEvent: isConfirmed(hotelToEvent),
     });
+
+    setIncludes((prev) => ({
+      flight: isConfirmed(flight) ? false : prev.flight,
+      hotel: isConfirmed(hotel) ? false : prev.hotel,
+      transferAirport: isConfirmed(airportToHotel)
+        ? false
+        : prev.transferAirport,
+      transferEvent: isConfirmed(hotelToEvent) ? false : prev.transferEvent,
+    }));
   }, [booking]);
 
   useEffect(() => {

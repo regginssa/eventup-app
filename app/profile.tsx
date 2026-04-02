@@ -1,4 +1,5 @@
 import { changeAuthPassword } from "@/api/services/auth";
+import { uploadFile } from "@/api/services/upload";
 import userServices from "@/api/services/user";
 import {
   Button,
@@ -12,6 +13,7 @@ import {
   Spinner,
   Tabs,
 } from "@/components/common";
+import Avatar, { TAvatar } from "@/components/common/Avatar";
 import { SimpleContainer } from "@/components/organisms/layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConversation } from "@/components/providers/ConversationProvider";
@@ -29,7 +31,6 @@ import { Country } from "@/types/location.types";
 import { IUser } from "@/types/user";
 import df from "@/utils/date";
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import parsePhoneNumberFromString from "libphonenumber-js";
@@ -342,6 +343,38 @@ ${url}`;
     Linking.openURL(url);
   };
 
+  const handleAvatarChange = async (avatarFile: TAvatar) => {
+    if (!user?._id) return;
+
+    let avatarUri = user.avatar;
+
+    if (avatarFile) {
+      const fileUri = avatarFile?.uri; // keep the "file://" prefix on iOS
+      const fileName = avatarFile?.name || `photo_${Date.now()}.jpg`;
+      const mimeType = avatarFile?.mimeType || "image/jpeg"; // don't use "image"
+
+      const formData = new FormData();
+      formData.append("file", {
+        uri: fileUri,
+        name: fileName,
+        type: mimeType,
+      } as any);
+
+      const response = await uploadFile(formData);
+
+      if (response.ok && response.data) {
+        avatarUri = response.data;
+      }
+
+      const res = await userServices.update(user?._id as string, {
+        ...user,
+        avatar: avatarUri,
+      });
+      setAuthUser(res.data);
+      setUser(res.data);
+    }
+  };
+
   if (loading)
     return (
       <SimpleContainer title="Profile">
@@ -385,20 +418,14 @@ ${url}`;
       <View className="flex-1 px-4 pb-10">
         {/* --- HEADER SECTION --- */}
         <View className="items-center mb-6">
-          <View className="relative">
-            <View className="p-1 rounded-full border-2 border-purple-500/20">
-              <Image
-                source={user.avatar}
-                style={{ width: 120, height: 120, borderRadius: 60 }}
-                contentFit="cover"
-              />
-            </View>
-            <View className="absolute bottom-1 right-1 bg-white p-1.5 rounded-full shadow-sm">
-              <View
-                className={`w-3 h-3 rounded-full ${user.status === "online" ? "bg-emerald-500" : "bg-slate-300"}`}
-              />
-            </View>
-          </View>
+          <Avatar
+            source={user.avatar}
+            name={user.name}
+            size={120}
+            onChange={
+              isMe ? (file: TAvatar) => handleAvatarChange(file) : () => {}
+            }
+          />
 
           <View className="flex-row items-center mt-4 gap-2">
             <Text className="text-2xl font-poppins-bold text-slate-800">
