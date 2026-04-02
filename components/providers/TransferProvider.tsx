@@ -1,7 +1,6 @@
 import services from "@/api/services/transfer";
 import { ITransferBookingResponse, ITransferOffer } from "@/types/transfer";
 import { createContext, useContext, useState } from "react";
-import { useAuth } from "./AuthProvider";
 
 interface TransferContextProps {
   airportToHotelOffer: ITransferOffer | null;
@@ -32,8 +31,6 @@ const TransferProvider: React.FC<TransferProviderProps> = ({ children }) => {
     useState<ITransferOffer | null>(null);
   const [hotelToEventOffer, setHotelToEventOffer] =
     useState<ITransferOffer | null>(null);
-
-  const { user } = useAuth();
 
   const search = async (params: any, transferType: "ah" | "he") => {
     const response = await services.get(params);

@@ -232,34 +232,36 @@ const TransferItem: React.FC<TransferItemProps> = ({
             </View>
           )}
 
-          {/* FOOTER */}
-          <View className="rounded-2xl border border-slate-50">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
-                <View className="bg-slate-200/50 p-1.5 rounded-lg">
-                  <MaterialCommunityIcons
-                    name="map-marker-path"
-                    size={14}
-                    color="#64748b"
-                  />
-                </View>
-
-                <Text className="font-dm-sans-bold text-[11px] text-slate-500">
-                  Instant Confirmation
-                </Text>
-              </View>
-
-              <View className="flex-row items-baseline gap-1">
-                <Text className="font-dm-sans-bold text-[10px] text-slate-400 uppercase">
-                  {currency}
-                </Text>
-
-                <Text className="font-poppins-bold text-xl text-slate-900">
-                  {totalAmount}
-                </Text>
-              </View>
+          {/* PRICE */}
+          <LinearGradient
+            colors={["#F8FAFC", "#FFFFFF"]}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: 12,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: "#f8fafc",
+            }}
+          >
+            <View className="flex-row items-center gap-2">
+              <View className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200" />
+              <Text className="font-dm-sans-bold text-[10px] text-emerald-600 uppercase tracking-wider">
+                Instant Confirmation
+              </Text>
             </View>
-          </View>
+
+            <View className="flex-row items-baseline gap-1">
+              <Text className="font-dm-sans-bold text-[10px] text-slate-400 uppercase">
+                {currency}
+              </Text>
+              <Text className="font-poppins-bold text-xl text-slate-900">
+                {totalAmount}
+              </Text>
+            </View>
+          </LinearGradient>
         </View>
       </LinearGradient>
     </View>

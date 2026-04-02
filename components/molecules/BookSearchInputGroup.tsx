@@ -204,7 +204,8 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (!includes.transferAirport || booked.transferAirport) return;
 
     if (flightOffer && hotelOffer) {
-      const destinationIata = flightOffer.slices[0].originIata;
+      const destinationIata =
+        flightOffer.slices[flightOffer.slices.length - 1].destinationIata;
       setLoading("airportToHotel", true);
       const params = {
         from: {

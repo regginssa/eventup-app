@@ -94,14 +94,84 @@ const BookingStatus = () => {
       });
     };
 
+    const bookingAirportTransferStatus = ({
+      bookingId,
+      result,
+      currentTotalAmount,
+    }: any) => {
+      console.log("booking airport transfer status changed: ", result);
+      if (!booking?._id || bookingId !== booking?._id) return;
+      setBooking((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          transfer: {
+            ...prev.transfer,
+            airportToHotel: {
+              ...prev.transfer.airportToHotel,
+              booking: result,
+            },
+          },
+          price: {
+            ...prev.price,
+            totalAmount: currentTotalAmount,
+          },
+        };
+      });
+    };
+
+    const bookingEventTransferStatus = ({
+      bookingId,
+      result,
+      currentTotalAmount,
+    }: any) => {
+      console.log("booking event transfer status changed: ", result);
+      if (!booking?._id || bookingId !== booking?._id) return;
+      setBooking((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          transfer: {
+            ...prev.transfer,
+            hotelToEvent: {
+              ...prev.transfer.hotelToEvent,
+              booking: result,
+            },
+          },
+          price: {
+            ...prev.price,
+            totalAmount: currentTotalAmount,
+          },
+        };
+      });
+    };
+
     socket.on("booking_payment_status_updated", bookingPaymentStatus);
     socket.on("booking_flight_status_changed", bookingFlightStatus);
     socket.on("booking_hotel_status_changed", bookingHotelStatus);
+    socket.on(
+      "booking_transfer_airport_status_changed",
+      bookingAirportTransferStatus,
+    );
+    socket.on(
+      "booking_transfer_event_status_changed",
+      bookingEventTransferStatus,
+    );
 
     return () => {
       socket.off("booking_payment_status_updated", bookingPaymentStatus);
       socket.off("booking_flight_status_changed", bookingFlightStatus);
       socket.off("booking_hotel_status_changed", bookingHotelStatus);
+      socket.off(
+        "booking_transfer_airport_status_changed",
+        bookingAirportTransferStatus,
+      );
+      socket.off(
+        "booking_transfer_event_status_changed",
+        bookingEventTransferStatus,
+      );
     };
   }, [socket]);
 
