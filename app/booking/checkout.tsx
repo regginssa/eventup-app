@@ -454,6 +454,7 @@ const CheckoutScreen = () => {
     hotelToEventOffer,
     event,
     user,
+    booking,
     currency,
     cryptoPrices,
   ]);
@@ -464,6 +465,16 @@ const CheckoutScreen = () => {
 
   const onBook = async () => {
     if (!user?._id) return;
+
+    if (
+      booking &&
+      booking.price.currency.toLowerCase() !== currency.toLowerCase()
+    ) {
+      return toast.error(
+        `Please make a payment with ${booking.price.currency.toUpperCase()} you made before`,
+      );
+    }
+
     try {
       setBookLoading(true);
 
@@ -476,7 +487,6 @@ const CheckoutScreen = () => {
       let bookingId = booking?._id || null;
 
       if (!bookingId || !booking) {
-        console.log("Creating booking before payment...");
         bookingId = await createBooking();
         if (!bookingId) {
           setBookLoading(false);
@@ -525,7 +535,20 @@ const CheckoutScreen = () => {
           paymentStatus: "pending",
           price: {
             ...booking.price,
-            breakdown: priceBreakdown,
+            breakdown: {
+              flight: flightOffer
+                ? priceBreakdown.flight
+                : booking.price.breakdown.flight,
+              hotel: hotelOffer
+                ? priceBreakdown.hotel
+                : booking.price.breakdown.hotel,
+              transferAirport: airportToHotelOffer
+                ? priceBreakdown.transferAirport
+                : booking.price.breakdown.transferAirport,
+              transferEvent: hotelToEventOffer
+                ? priceBreakdown.transferEvent
+                : booking.price.breakdown.transferEvent,
+            },
           },
         });
       }
