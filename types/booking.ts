@@ -51,6 +51,12 @@ export interface IBooking {
   price: {
     totalAmount: number;
     currency: string;
+    breakdown: {
+      flight: number;
+      hotel: number;
+      transferAirport: number;
+      transferEvent: number;
+    };
   };
   packageType: TPackageType;
   paymentStatus: TTransactionStatus;

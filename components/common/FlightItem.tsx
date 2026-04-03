@@ -5,6 +5,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { useFlight } from "../providers/FlightProvider";
 
 interface FlightItemProps {
   data: IFlightOffer | null;
@@ -12,6 +13,7 @@ interface FlightItemProps {
   reference?: string;
   refreshLoading?: boolean;
   onRefresh?: () => Promise<void>;
+  isRemovable?: boolean;
 }
 
 const FlightItem: React.FC<FlightItemProps> = ({
@@ -20,10 +22,12 @@ const FlightItem: React.FC<FlightItemProps> = ({
   reference,
   refreshLoading,
   onRefresh,
+  isRemovable,
 }) => {
   const [expanded, setExpanded] = useState(false);
 
   if (!offer) return null;
+  const { initialize } = useFlight();
 
   const { airlineLogo, airlineName, slices } = offer;
   const { currency, totalAmount } = offer.converted;
@@ -107,6 +111,23 @@ const FlightItem: React.FC<FlightItemProps> = ({
               <TouchableOpacity
                 onPress={onRefresh}
                 disabled={refreshLoading}
+                className="w-8 h-8 items-center justify-center rounded-full bg-slate-50 border border-slate-100"
+              >
+                {refreshLoading ? (
+                  <ActivityIndicator size={12} color="#844AFF" />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="cached"
+                    size={16}
+                    color="#64748b"
+                  />
+                )}
+              </TouchableOpacity>
+            )}
+
+            {isRemovable && (
+              <TouchableOpacity
+                onPress={initialize}
                 className="w-8 h-8 items-center justify-center rounded-full bg-slate-50 border border-slate-100"
               >
                 {refreshLoading ? (

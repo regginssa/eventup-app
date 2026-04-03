@@ -23,7 +23,9 @@ const EventDetailContainer: React.FC<EventDetailContainerProps> = ({
             activeOpacity={0.8}
             className="w-10 h-10 rounded-full bg-white flex flex-col items-center justify-center"
             onPress={() =>
-              callback ? router.replace(callback as any) : router.back()
+              callback
+                ? router.replace(callback as any)
+                : router.replace("/home")
             }
           >
             <Feather name="arrow-left" size={16} color="#4b5563" />

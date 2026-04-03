@@ -87,11 +87,6 @@ const BookingStatus = () => {
           },
         };
       });
-
-      // ✅ Safe toast
-      if (incoming.paymentStatus) {
-        toast.success(`Payment is ${incoming.paymentStatus}`);
-      }
     };
 
     socket.on("booking_changed", bookingChanged);

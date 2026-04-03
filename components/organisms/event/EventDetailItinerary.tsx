@@ -1,5 +1,4 @@
 import {
-  Button,
   CommunityTicketItem,
   FlightItem,
   HotelItem,
@@ -13,13 +12,99 @@ import { ICommunityTicket } from "@/types/ticket";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 import { Linking, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 interface EventDetailItineraryProps {
   booking: IBooking | null;
   communityTicket?: ICommunityTicket;
 }
+
+const TripSummary = ({
+  services,
+  totalPrice,
+  currency,
+  ticketStatus,
+}: {
+  services: string[];
+  totalPrice: number;
+  currency: string;
+  ticketStatus: "pending" | "failed" | "completed";
+}) => {
+  return (
+    <View className="w-full mt-4">
+      {/* Receipt Top */}
+      <View className="bg-slate-50 border-t border-l border-r border-slate-200 rounded-t-[24px] p-6 pb-4">
+        <Text className="font-poppins-bold text-slate-400 text-[10px] uppercase tracking-[2px] mb-4">
+          Cost Breakdown
+        </Text>
+
+        <View className="gap-3">
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center gap-2">
+              <View className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+              <Text className="text-slate-600 font-dm-sans-medium text-sm">
+                Ticket
+              </Text>
+            </View>
+            <Text
+              className={`font-dm-sans-bold text-[10px] px-2 py-0.5 rounded ${ticketStatus === "pending" ? "text-yellow-600 bg-yellow-50" : "text-emerald-600 bg-emerald-50"}`}
+            >
+              {ticketStatus === "pending" ? "NEED TO PURCHASE" : "INCLUDED"}
+            </Text>
+          </View>
+          {services.map((service, i) => (
+            <View key={i} className="flex-row justify-between items-center">
+              <View className="flex-row items-center gap-2">
+                <View className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                <Text className="text-slate-600 font-dm-sans-medium text-sm">
+                  {service}
+                </Text>
+              </View>
+              <Text className="text-emerald-600 font-dm-sans-bold text-[10px] bg-emerald-50 px-2 py-0.5 rounded">
+                INCLUDED
+              </Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* Punched Hole Divider Line */}
+      <View className="flex-row items-center justify-between bg-slate-50 px-[2px]">
+        <View className="w-4 h-8 rounded-r-full bg-white border-r border-t border-b border-slate-200 -ml-[1px]" />
+        <View className="flex-1 h-[1px] border-b border-dashed border-slate-300 mx-2" />
+        <View className="w-4 h-8 rounded-l-full bg-white border-l border-t border-b border-slate-200 -mr-[1px]" />
+      </View>
+
+      {/* Receipt Bottom */}
+      <View className="bg-slate-50 border-b border-l border-r border-slate-200 rounded-b-[24px] p-6 pt-2">
+        <View className="flex-row justify-between items-end mt-2">
+          <View>
+            <Text className="font-dm-sans-bold text-slate-400 text-[10px] uppercase tracking-widest mb-1">
+              Total Paid
+            </Text>
+            <View className="flex flex-row items-end gap-1 mt-1">
+              <Text className="text-lg text-slate-400">{currency}</Text>
+              <Text className="font-poppins-bold text-slate-900 text-3xl">
+                {totalPrice}
+              </Text>
+            </View>
+          </View>
+
+          <View className="bg-emerald-100 px-3 py-1.5 rounded-xl flex-row items-center gap-1">
+            <MaterialCommunityIcons
+              name="check-decagram"
+              size={12}
+              color="#10b981"
+            />
+            <Text className="text-[10px] font-poppins-bold text-emerald-600 ">
+              SECURE PAYMENT
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
 
 const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
   booking,
@@ -48,6 +133,15 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
     );
   }
 
+  const selectedServices = [];
+  if (booking.flight.offer) selectedServices.push("Round-trip Flight");
+  if (booking.hotel.offer) selectedServices.push("Hotel Stay");
+  if (booking.transfer.airportToHotel?.offer)
+    selectedServices.push("Hotel Transfer");
+  if (booking.transfer.hotelToEvent?.offer) {
+    selectedServices.push("Event Transfer");
+  }
+
   const copyBookingId = async () => {
     if (!booking?._id) return;
 
@@ -68,7 +162,6 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
       transfer.hotelToEvent.status === "confirmed",
   ].every(Boolean);
 
-  const router = useRouter();
   const shouldBuyTicket = event.type === "ai";
 
   const handleBuyTicket = async () => {
@@ -273,8 +366,15 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
         )}
       </View>
 
+      <TripSummary
+        totalPrice={booking?.price.totalAmount || 0}
+        currency={booking?.price.currency || "EUR"}
+        services={selectedServices}
+        ticketStatus={booking?.ticketStatus || "pending"}
+      />
+
       {/* If all components are completed, show a celebratory message */}
-      {!isCompleted && (
+      {/* {!isCompleted && (
         <Button
           type="gradient-glass"
           label="Finialize Booking"
@@ -297,7 +397,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
             }
           }}
         />
-      )}
+      )} */}
     </View>
   );
 };

@@ -281,6 +281,12 @@ const CheckoutScreen = () => {
   const [baseAmount, setBaseAmount] = useState<number>(0);
   const [commissionAmount, setCommissionAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<TPaymentMethod>("credit");
+  const [priceBreakdown, setPriceBreakdown] = useState({
+    flight: 0,
+    hotel: 0,
+    transferAirport: 0,
+    transferEvent: 0,
+  });
   const [crypto, setCrypto] = useState<string>("eth");
   const [cryptoPrices, setCryptoPrices] = useState<{
     eth: number;
@@ -320,7 +326,7 @@ const CheckoutScreen = () => {
         eventId as string,
       );
 
-      if (res.data && res.data.paymentStatus !== "completed") {
+      if (res.data) {
         console.log("Existing booking found, loading details...");
         setBooking(res.data);
       }
@@ -341,7 +347,12 @@ const CheckoutScreen = () => {
 
   useEffect(() => {
     let servicesList: string[] = [];
-    let baseEUR = 0;
+    let breakdown = {
+      flight: 0,
+      hotel: 0,
+      transferAirport: 0,
+      transferEvent: 0,
+    };
 
     let commissionRate = 0.1;
 
@@ -363,78 +374,60 @@ const CheckoutScreen = () => {
       servicesList.push("E-Ticket");
     }
 
-    // EXISTING BOOKING
-    if (
-      booking &&
-      !flightOffer &&
-      !hotelOffer &&
-      !airportToHotelOffer &&
-      !hotelToEventOffer
-    ) {
-      const { flight, hotel, transfer } = booking;
-
-      if (flight.offer) {
-        servicesList.push("Round-trip Flight");
-        if (!flight.booking?.id) {
-          baseEUR += Number(flight.offer.converted.totalAmount);
-        }
-      }
-
-      if (hotel.offer) {
-        servicesList.push("Hotel Accommodation");
-        if (!hotel.booking?.id) {
-          baseEUR += Number(hotel.offer.converted.totalAmount);
-        }
-      }
-
-      if (transfer.airportToHotel.offer) {
-        servicesList.push("Airport Transfer");
-        if (!transfer.airportToHotel?.booking?.bookingId) {
-          baseEUR += Number(
-            transfer.airportToHotel.offer.converted.totalAmount,
-          );
-        }
-      }
-
-      if (transfer.hotelToEvent.offer) {
-        servicesList.push("Event Shuttle");
-
-        if (!transfer.hotelToEvent?.booking?.bookingId) {
-          baseEUR += Number(transfer.hotelToEvent.offer.converted.totalAmount);
-        }
-      }
-    } else {
-      // NEW BOOKING
-      if (flightOffer) {
-        servicesList.push("One-Way Flight");
-        baseEUR += Number(flightOffer.converted.totalAmount);
-      }
-
-      if (hotelOffer) {
-        servicesList.push("Hotel Accommodation");
-        baseEUR += Number(hotelOffer.converted.totalAmount);
-      }
-
-      if (airportToHotelOffer) {
-        servicesList.push("Airport Transfer");
-        baseEUR += Number(airportToHotelOffer.converted.totalAmount);
-      }
-
-      if (hotelToEventOffer) {
-        servicesList.push("Event Shuttle");
-        baseEUR += Number(hotelToEventOffer.converted.totalAmount);
-      }
+    if (flightOffer) {
+      servicesList.push("One-Way Flight");
+      breakdown.flight = Number(
+        Number(
+          Number(flightOffer.converted.totalAmount) +
+            Number(flightOffer.converted.totalAmount * commissionRate),
+        ).toFixed(2),
+      );
     }
 
+    if (hotelOffer) {
+      servicesList.push("Hotel Accommodation");
+      breakdown.hotel = Number(
+        Number(
+          Number(hotelOffer.converted.totalAmount) +
+            Number(hotelOffer.converted.totalAmount * commissionRate),
+        ).toFixed(2),
+      );
+    }
+
+    if (airportToHotelOffer) {
+      servicesList.push("Airport Transfer");
+      breakdown.transferAirport = Number(
+        Number(
+          Number(airportToHotelOffer.converted.totalAmount) +
+            Number(airportToHotelOffer.converted.totalAmount * commissionRate),
+        ).toFixed(2),
+      );
+    }
+
+    if (hotelToEventOffer) {
+      servicesList.push("Event Shuttle");
+      breakdown.transferEvent = Number(
+        Number(
+          Number(hotelToEventOffer.converted.totalAmount) +
+            Number(hotelToEventOffer.converted.totalAmount * commissionRate),
+        ).toFixed(2),
+      );
+    }
+
+    const baseEUR =
+      breakdown.flight +
+      breakdown.hotel +
+      breakdown.transferAirport +
+      breakdown.transferEvent;
     const commissionEUR = Number((baseEUR * commissionRate).toFixed(2));
-    const totalEUR = Number((baseEUR + commissionEUR).toFixed(2));
+    const totalEUR = Number(baseEUR.toFixed(2));
 
     // 🔹 CONVERT IF CRYPTO
     if (paymentMethod === "crypto" || paymentMethod === "token") {
       const price = cryptoPrices[crypto as keyof typeof cryptoPrices];
 
       if (price) {
-        const baseToken = Number((baseEUR / price).toFixed(2));
+        const baseToken = Number((baseEUR / price).toFixed(6));
         const commissionToken = Number((commissionEUR / price).toFixed(2));
         const totalToken = Number((totalEUR / price).toFixed(2));
 
@@ -442,7 +435,6 @@ const CheckoutScreen = () => {
         setCommissionAmount(commissionToken);
         setTotalAmount(totalToken);
       } else {
-        // fallback
         setBaseAmount(Number(baseEUR.toFixed(2)));
         setCommissionAmount(commissionEUR);
         setTotalAmount(totalEUR);
@@ -454,13 +446,13 @@ const CheckoutScreen = () => {
     }
 
     setServices(servicesList);
+    setPriceBreakdown(breakdown);
   }, [
     flightOffer,
     hotelOffer,
     airportToHotelOffer,
     hotelToEventOffer,
     event,
-    booking,
     user,
     currency,
     cryptoPrices,
@@ -500,8 +492,41 @@ const CheckoutScreen = () => {
           return;
         }
 
-        await BookingAPI.update(booking._id as string, {
+        await BookingAPI.update(bookingId, {
           ...booking,
+          flight: {
+            ...booking.flight,
+            offer: flightOffer || booking.flight.offer,
+            booking: flightOffer ? null : booking.flight.booking,
+          },
+          hotel: {
+            ...booking.hotel,
+            offer: hotelOffer || booking.hotel.offer,
+            booking: hotelOffer ? null : booking.hotel.booking,
+          },
+          transfer: {
+            ...booking.transfer,
+            airportToHotel: {
+              ...booking.transfer.airportToHotel,
+              offer:
+                airportToHotelOffer || booking.transfer.airportToHotel.offer,
+              booking: airportToHotelOffer
+                ? null
+                : booking.transfer.airportToHotel.booking,
+            },
+            hotelToEvent: {
+              ...booking.transfer.hotelToEvent,
+              offer: hotelToEventOffer || booking.transfer.hotelToEvent.offer,
+              booking: hotelToEventOffer
+                ? null
+                : booking.transfer.hotelToEvent.booking,
+            },
+          },
+          paymentStatus: "pending",
+          price: {
+            ...booking.price,
+            breakdown: priceBreakdown,
+          },
         });
       }
 
@@ -678,8 +703,9 @@ const CheckoutScreen = () => {
       packageType: packageType as any,
       paymentStatus: "created",
       price: {
-        totalAmount,
+        totalAmount: 0,
         currency: currency,
+        breakdown: priceBreakdown,
       },
       ticketStatus: event?.type === "ai" ? "pending" : "completed",
       status: "pending",

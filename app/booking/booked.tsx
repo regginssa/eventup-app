@@ -219,7 +219,7 @@ const BookedScreen = () => {
           {/* Trip Summary Section */}
           <TripSummary
             totalPrice={booking?.price.totalAmount || 0}
-            currency={booking?.price.currency || "USD"}
+            currency={booking?.price.currency || "EUR"}
             services={services}
             ticketStatus={booking?.ticketStatus || "pending"}
           />
