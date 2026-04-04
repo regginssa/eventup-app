@@ -355,6 +355,7 @@ const CheckoutScreen = () => {
     };
 
     let commissionRate = 0.1;
+    let baseEUR = 0;
 
     if (currency === "chrle" || currency === "babyu") {
       commissionRate = 0.03;
@@ -382,6 +383,7 @@ const CheckoutScreen = () => {
             Number(flightOffer.converted.totalAmount * commissionRate),
         ).toFixed(2),
       );
+      baseEUR += Number(flightOffer.converted.totalAmount);
     }
 
     if (hotelOffer) {
@@ -392,6 +394,7 @@ const CheckoutScreen = () => {
             Number(hotelOffer.converted.totalAmount * commissionRate),
         ).toFixed(2),
       );
+      baseEUR += Number(hotelOffer.converted.totalAmount);
     }
 
     if (airportToHotelOffer) {
@@ -402,6 +405,7 @@ const CheckoutScreen = () => {
             Number(airportToHotelOffer.converted.totalAmount * commissionRate),
         ).toFixed(2),
       );
+      baseEUR += Number(airportToHotelOffer.converted.totalAmount);
     }
 
     if (hotelToEventOffer) {
@@ -412,15 +416,16 @@ const CheckoutScreen = () => {
             Number(hotelToEventOffer.converted.totalAmount * commissionRate),
         ).toFixed(2),
       );
+      baseEUR += Number(hotelToEventOffer.converted.totalAmount);
     }
 
-    const baseEUR =
+    const total =
       breakdown.flight +
       breakdown.hotel +
       breakdown.transferAirport +
       breakdown.transferEvent;
-    const commissionEUR = Number((baseEUR * commissionRate).toFixed(2));
-    const totalEUR = Number(baseEUR.toFixed(2));
+    const commissionEUR = Number((total * commissionRate).toFixed(2));
+    const totalEUR = Number(total.toFixed(2));
 
     // 🔹 CONVERT IF CRYPTO
     if (paymentMethod === "crypto" || paymentMethod === "token") {
@@ -428,14 +433,22 @@ const CheckoutScreen = () => {
 
       if (price) {
         const baseToken = Number((baseEUR / price).toFixed(6));
-        const commissionToken = Number((commissionEUR / price).toFixed(2));
-        const totalToken = Number((totalEUR / price).toFixed(2));
+        const commissionToken = Number((commissionEUR / price).toFixed(6));
+        const totalToken = Number((totalEUR / price).toFixed(6));
+        breakdown = {
+          flight: Number((breakdown.flight / price).toFixed(6)),
+          hotel: Number((breakdown.hotel / price).toFixed(6)),
+          transferAirport: Number(
+            (breakdown.transferAirport / price).toFixed(6),
+          ),
+          transferEvent: Number((breakdown.transferEvent / price).toFixed(6)),
+        };
 
         setBaseAmount(baseToken);
         setCommissionAmount(commissionToken);
         setTotalAmount(totalToken);
       } else {
-        setBaseAmount(Number(baseEUR.toFixed(2)));
+        setBaseAmount(Number(baseEUR.toFixed(6)));
         setCommissionAmount(commissionEUR);
         setTotalAmount(totalEUR);
       }
@@ -506,30 +519,38 @@ const CheckoutScreen = () => {
           ...booking,
           flight: {
             ...booking.flight,
-            offer: flightOffer || booking.flight.offer,
-            booking: flightOffer ? null : booking.flight.booking,
+            offer: flightOffer || booking.flight?.offer,
+            booking: flightOffer ? null : booking.flight?.booking,
+            status: flightOffer ? "processing" : booking.flight?.status,
           },
           hotel: {
             ...booking.hotel,
-            offer: hotelOffer || booking.hotel.offer,
-            booking: hotelOffer ? null : booking.hotel.booking,
+            offer: hotelOffer || booking.hotel?.offer,
+            booking: hotelOffer ? null : booking.hotel?.booking,
+            status: hotelOffer ? "pending" : booking.hotel?.status,
           },
           transfer: {
             ...booking.transfer,
             airportToHotel: {
               ...booking.transfer.airportToHotel,
               offer:
-                airportToHotelOffer || booking.transfer.airportToHotel.offer,
+                airportToHotelOffer || booking.transfer.airportToHotel?.offer,
               booking: airportToHotelOffer
                 ? null
-                : booking.transfer.airportToHotel.booking,
+                : booking.transfer.airportToHotel?.booking,
+              status: airportToHotelOffer
+                ? "pending"
+                : booking.transfer?.airportToHotel?.status,
             },
             hotelToEvent: {
               ...booking.transfer.hotelToEvent,
-              offer: hotelToEventOffer || booking.transfer.hotelToEvent.offer,
+              offer: hotelToEventOffer || booking.transfer.hotelToEvent?.offer,
               booking: hotelToEventOffer
                 ? null
                 : booking.transfer.hotelToEvent.booking,
+              status: hotelToEventOffer
+                ? "pending"
+                : booking.transfer?.hotelToEvent?.status,
             },
           },
           paymentStatus: "pending",
@@ -662,6 +683,7 @@ const CheckoutScreen = () => {
       metadata: {
         type: "booking",
         bookingId,
+        isNewBooking: !booking ? "true" : "false",
       },
     });
 
@@ -681,7 +703,12 @@ const CheckoutScreen = () => {
       amount: totalAmount,
       currency: crypto,
       webhook: SERVER_API_ENDPOINT + "/cryptocheckout/webhook",
-      metadata: { type: "booking", bookingId, userId: user?._id },
+      metadata: {
+        type: "booking",
+        bookingId,
+        userId: user?._id,
+        isNewBooking: !booking ? "true" : "false",
+      },
       redirect: `eventworld://booking/status?id=${bookingId}`,
     };
 

@@ -23,6 +23,7 @@ const BookingStatus = () => {
   const [initLoading, setInitLoading] = useState<boolean>(false);
   const [completed, setCompleted] = useState<boolean>(false);
   const [viewLoading, setViewLoading] = useState<boolean>(false);
+  const [captureAmount, setCaptureAmount] = useState<number>(0);
 
   const { id: bookingId } = useLocalSearchParams();
   const router = useRouter();
@@ -33,7 +34,14 @@ const BookingStatus = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const bookingChanged = ({ booking: incoming }: { booking: IBooking }) => {
+    const bookingChanged = ({
+      booking: incoming,
+      amount,
+    }: {
+      booking: IBooking;
+      amount: number;
+    }) => {
+      setCaptureAmount(amount);
       setBooking((prev) => {
         if (!prev || prev._id !== incoming._id) return prev;
 
@@ -207,7 +215,7 @@ const BookingStatus = () => {
   ].filter(Boolean);
 
   return (
-    <SimpleContainer title="Booking Status" scrolled>
+    <SimpleContainer title="Booking Status" scrolled hiddenBack>
       {initLoading ? (
         <Spinner size="lg" text="Syncing..." />
       ) : (
@@ -247,10 +255,10 @@ const BookingStatus = () => {
                     </Text>
                     <View className="flex-row items-baseline mt-1">
                       <Text className="text-slate-200 font-poppins-bold text-sm">
-                        {price.currency}
+                        {price.currency.toUpperCase()}
                       </Text>
                       <Text className="text-white font-poppins-bold text-3xl">
-                        {price.totalAmount}
+                        {captureAmount}
                       </Text>
                     </View>
                   </View>

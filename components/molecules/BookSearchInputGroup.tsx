@@ -222,6 +222,29 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
       await searchTransfer(params, "ah");
       setLoading("airportToHotel", false);
+    } else if (
+      booking?.flight?.status === "confirmed" &&
+      booking.hotel?.status === "confirmed"
+    ) {
+      const flightOffer = booking.flight.offer;
+      const hotelOffer = booking.hotel.offer;
+      const destinationIata =
+        flightOffer.slices[flightOffer.slices.length - 1].destinationIata;
+      setLoading("airportToHotel", true);
+      const params = {
+        from: {
+          type: "IATA",
+          code: destinationIata,
+        },
+        to: {
+          type: "GPS",
+          code: `${hotelOffer.latitude},${hotelOffer.longitude}`,
+        },
+        departureDateTime: flightOffer.arrivalTime,
+        packageType,
+      };
+      await searchTransfer(params, "ah");
+      setLoading("airportToHotel", false);
     }
   };
 
@@ -237,6 +260,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     if (includes.hotel) {
       if (!hotelOffer) return;
 
+      fromParams = {
+        type: "GPS",
+        code: `${hotelOffer.latitude},${hotelOffer.longitude}`,
+      };
+    } else if (booking?.hotel?.status === "confirmed") {
+      const hotelOffer = booking.hotel.offer;
       fromParams = {
         type: "GPS",
         code: `${hotelOffer.latitude},${hotelOffer.longitude}`,
