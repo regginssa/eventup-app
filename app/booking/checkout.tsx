@@ -857,7 +857,8 @@ const CheckoutScreen = () => {
               </Text>
               <Text className="font-dm-sans-bold text-slate-500 text-xs">
                 Pay with $CHRLE or $BABYU and reduce service fees from 10% to
-                3%. You save ${(baseAmount * 0.07).toFixed(2)} EUR.
+                3%. You save ${(baseAmount * 0.07).toFixed(2)}{" "}
+                {currency.toUpperCase()}.
               </Text>
             </View>
           </View>
