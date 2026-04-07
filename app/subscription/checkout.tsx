@@ -296,6 +296,9 @@ const SubscriptionCheckout = () => {
       setSubLoading(true);
 
       if (method === "credit") {
+        if (stripePaymentMethodId === "") {
+          return toast.error("Please select a credit card or add one here.");
+        }
         const tx = await payStripe({
           paymentMethodId: stripePaymentMethodId,
           amount,

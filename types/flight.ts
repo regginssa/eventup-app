@@ -11,11 +11,13 @@ export type TTripType = "round" | "one_way";
 
 export interface IFlightOffer {
   id: string;
+  tag: string;
   airlineName: string;
   airlineLogo: string;
   totalAmount: string;
   currency: string;
   passengerIds: string[];
+  duration: string;
 
   slices: IFlightSlice[];
   arrivalTime: string;

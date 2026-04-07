@@ -676,6 +676,9 @@ const CheckoutScreen = () => {
   };
 
   const handleCreditPayment = async (bookingId: string) => {
+    if (stripePaymentId === "") {
+      return toast.error("Please select a credit card or add one here.");
+    }
     const tx = await captureStripe({
       paymentMethodId: stripePaymentId,
       amount: totalAmount,

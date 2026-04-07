@@ -3,7 +3,7 @@ import { IFlightBookingResponse, IFlightOffer } from "@/types/flight";
 import AxiosInstance from "../client";
 import { FLIGHT_BASE } from "../endpoints";
 
-const get = async (params: any): Promise<ApiResponse<IFlightOffer | null>> => {
+const get = async (params: any): Promise<ApiResponse<IFlightOffer[]>> => {
   return await AxiosInstance.get(FLIGHT_BASE, { params });
 };
 

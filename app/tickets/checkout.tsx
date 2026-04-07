@@ -270,6 +270,9 @@ const TicketsCheckout = () => {
 
       switch (paymentMethod) {
         case "credit":
+          if (stripePaymentMethodId === "") {
+            return toast.error("Please select a credit card or add one here.");
+          }
           const tx = await payStripe({
             paymentMethodId: stripePaymentMethodId,
             amount,

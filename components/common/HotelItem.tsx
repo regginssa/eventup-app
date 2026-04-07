@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import RadioButton from "./RadioButton";
 
 interface HotelItemProps {
   data: IHotelOffer | null;
@@ -18,6 +19,8 @@ interface HotelItemProps {
   reference?: string;
   refreshLoading?: boolean;
   onRefresh?: () => Promise<void>;
+  onSelect?: (offer: IHotelOffer) => void;
+  checked?: boolean;
 }
 
 const serviceIconMap: Record<string, any> = {
@@ -56,6 +59,8 @@ const HotelItem: React.FC<HotelItemProps> = ({
   reference,
   refreshLoading,
   onRefresh,
+  checked,
+  onSelect,
 }) => {
   const [showAmenities, setShowAmenities] = useState(false);
 
@@ -216,6 +221,13 @@ const HotelItem: React.FC<HotelItemProps> = ({
                     />
                   )}
                 </TouchableOpacity>
+              )}
+
+              {onSelect && (
+                <RadioButton
+                  checked={!!checked}
+                  onPress={() => onSelect(offer)}
+                />
               )}
             </View>
 

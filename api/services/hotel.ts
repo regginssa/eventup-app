@@ -3,7 +3,7 @@ import { IHotelBookingResponse, IHotelOffer } from "@/types/hotel";
 import AxiosInstance from "../client";
 import { HOTEL_BASE } from "../endpoints";
 
-const get = async (params: any): Promise<ApiResponse<IHotelOffer | null>> => {
+const get = async (params: any): Promise<ApiResponse<IHotelOffer[]>> => {
   return await AxiosInstance.get(HOTEL_BASE, { params });
 };
 

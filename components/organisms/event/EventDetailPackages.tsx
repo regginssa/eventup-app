@@ -39,11 +39,11 @@ const EventDetailPackages: React.FC<EventDetailPackagesProps> = ({
   const router = useRouter();
 
   const standardItems = [
-    "Flights (economy)",
+    "Flight (economy)",
     "Mid-range hotel",
     "Basic transport",
   ];
-  const goldItems = ["Premium flight", "Luxury hotel", "Private chauffeur"];
+  const goldItems = ["Flight (business)", "Luxury hotel", "Private chauffeur"];
 
   return (
     <>

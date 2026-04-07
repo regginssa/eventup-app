@@ -129,7 +129,8 @@ const BookingStatus = () => {
       check(booking.hotel) &&
       check(booking.transfer?.airportToHotel) &&
       check(booking.transfer?.hotelToEvent) &&
-      booking.paymentStatus === "completed";
+      (booking.paymentStatus === "completed" ||
+        booking.paymentStatus === "pending");
 
     setCompleted(allConfirmed);
   }, [booking]);

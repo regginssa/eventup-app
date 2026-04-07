@@ -1,6 +1,7 @@
 import services from "@/api/services/transfer";
 import { ITransferBookingResponse, ITransferOffer } from "@/types/transfer";
 import { createContext, useContext, useState } from "react";
+import { useToast } from "./ToastProvider";
 
 interface TransferContextProps {
   airportToHotelOffer: ITransferOffer | null;
@@ -31,13 +32,24 @@ const TransferProvider: React.FC<TransferProviderProps> = ({ children }) => {
     useState<ITransferOffer | null>(null);
   const [hotelToEventOffer, setHotelToEventOffer] =
     useState<ITransferOffer | null>(null);
+  const toast = useToast();
 
   const search = async (params: any, transferType: "ah" | "he") => {
     const response = await services.get(params);
     if (transferType === "ah") {
       setAirportToHotelOffer(response.data);
+      if (!response.data) {
+        toast.error(
+          "No airport-to-hotel transfer offers found. Please adjust your search criteria.",
+        );
+      }
     } else {
       setHotelToEventOffer(response.data);
+      if (!response.data) {
+        toast.error(
+          "No hotel-to-event transfer offers found. Please adjust your search criteria.",
+        );
+      }
     }
   };
 

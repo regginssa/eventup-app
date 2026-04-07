@@ -4,9 +4,11 @@ import { createContext, useContext, useState } from "react";
 import { useAuth } from "./AuthProvider";
 
 interface FlightContextProps {
+  topOffers: IFlightOffer[];
   offer: IFlightOffer | null;
   search: (params: any) => Promise<IFlightOffer | null>;
   book: (offer: IFlightOffer) => Promise<IFlightBookingResponse>;
+  updateOffer?: (offer: IFlightOffer | null) => void;
   initialize: () => void;
 }
 
@@ -26,13 +28,15 @@ interface FlightProviderProps {
 
 const FlightProvider: React.FC<FlightProviderProps> = ({ children }) => {
   const [offer, setOffer] = useState<IFlightOffer | null>(null);
+  const [topOffers, setTopOffers] = useState<IFlightOffer[]>([]);
 
   const { user } = useAuth();
 
   const search = async (params: any): Promise<IFlightOffer | null> => {
     const response = await flightServices.get(params);
-    setOffer(response.data);
-    return response.data;
+    setTopOffers(response.data);
+    setOffer(response.data[0]);
+    return response.data[0];
   };
 
   const book = async (offer: IFlightOffer): Promise<IFlightBookingResponse> => {
@@ -62,10 +66,19 @@ const FlightProvider: React.FC<FlightProviderProps> = ({ children }) => {
     return response.data;
   };
 
-  const initialize = () => setOffer(null);
+  const updateOffer = (offer: IFlightOffer | null) => {
+    setOffer(offer);
+  };
+
+  const initialize = () => {
+    setOffer(null);
+    setTopOffers([]);
+  };
 
   return (
-    <FlightContext.Provider value={{ offer, search, book, initialize }}>
+    <FlightContext.Provider
+      value={{ offer, topOffers, search, book, updateOffer, initialize }}
+    >
       {children}
     </FlightContext.Provider>
   );

@@ -83,7 +83,9 @@ const TripSummary = ({
               Total Paid
             </Text>
             <View className="flex flex-row items-end gap-1 mt-1">
-              <Text className="text-lg text-slate-400">{currency}</Text>
+              <Text className="text-lg text-slate-400">
+                {currency.toUpperCase()}
+              </Text>
               <Text className="font-poppins-bold text-slate-900 text-3xl">
                 {totalPrice}
               </Text>

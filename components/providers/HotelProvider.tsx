@@ -4,10 +4,12 @@ import { createContext, useContext, useState } from "react";
 import { useAuth } from "./AuthProvider";
 
 interface HotelContextProps {
+  topOffers: IHotelOffer[];
   offer: IHotelOffer | null;
   search: (params: any) => Promise<IHotelOffer | null>;
   quote: (rateId: string) => Promise<IHotelOffer | null>;
   book: (quoteId: string) => Promise<IHotelBookingResponse>;
+  updateOffer: (offer: IHotelOffer | null) => void;
   initialize: () => void;
 }
 
@@ -27,13 +29,15 @@ interface HotelProviderProps {
 
 const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
   const [offer, setOffer] = useState<IHotelOffer | null>(null);
+  const [topOffers, setTopOffers] = useState<IHotelOffer[]>([]);
 
   const { user } = useAuth();
 
   const search = async (params: IHotelOffer | null) => {
     const response = await services.get(params);
-    setOffer(response.data);
-    return response.data;
+    setTopOffers(response.data);
+    setOffer(response.data[0]);
+    return response.data[0];
   };
 
   const quote = async (rateId: string): Promise<IHotelOffer | null> => {
@@ -61,10 +65,16 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
     return response.data;
   };
 
-  const initialize = () => setOffer(null);
+  const initialize = () => {
+    setOffer(null);
+    setTopOffers([]);
+  };
+  const updateOffer = (offer: IHotelOffer | null) => setOffer(offer);
 
   return (
-    <HotelContext.Provider value={{ offer, search, quote, book, initialize }}>
+    <HotelContext.Provider
+      value={{ offer, topOffers, search, quote, book, initialize, updateOffer }}
+    >
       {children}
     </HotelContext.Provider>
   );

@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { useFlight } from "../providers/FlightProvider";
+import RadioButton from "./RadioButton";
 
 interface FlightItemProps {
   data: IFlightOffer | null;
@@ -13,6 +14,8 @@ interface FlightItemProps {
   reference?: string;
   refreshLoading?: boolean;
   onRefresh?: () => Promise<void>;
+  onSelect?: (offer: IFlightOffer) => void;
+  checked?: boolean;
   isRemovable?: boolean;
 }
 
@@ -23,13 +26,38 @@ const FlightItem: React.FC<FlightItemProps> = ({
   refreshLoading,
   onRefresh,
   isRemovable,
+  checked,
+  onSelect,
 }) => {
   const [expanded, setExpanded] = useState(false);
+
+  const tagConfig = {
+    best: {
+      label: "Best",
+      color: "bg-purple-100 text-purple-600",
+      icon: "star",
+    },
+    fastest: {
+      label: "Fastest",
+      color: "bg-blue-100 text-blue-600",
+      icon: "flash",
+    },
+    cheapest: {
+      label: "Cheapest",
+      color: "bg-emerald-100 text-emerald-600",
+      icon: "cash",
+    },
+    extra: {
+      label: "Option",
+      color: "bg-slate-100 text-slate-600",
+      icon: "airplane",
+    },
+  };
 
   if (!offer) return null;
   const { initialize } = useFlight();
 
-  const { airlineLogo, airlineName, slices } = offer;
+  const { airlineLogo, airlineName, slices, duration, tag } = offer;
   const { currency, totalAmount } = offer.converted;
 
   return (
@@ -58,9 +86,28 @@ const FlightItem: React.FC<FlightItemProps> = ({
                 {airlineName}
               </Text>
 
-              <Text className="font-dm-sans-bold text-[11px] text-slate-400">
-                {slices.length === 2 ? "Round Trip Flight" : "One Way Flight"}
-              </Text>
+              <View className="flex-row items-center gap-2 mt-1">
+                <Text className="font-dm-sans-bold text-[11px] text-slate-400">
+                  {slices.length === 2 ? "Round Trip Flight" : "One Way Flight"}
+                </Text>
+
+                {tag && tagConfig[tag as keyof typeof tagConfig] && (
+                  <View
+                    className={`flex-row items-center px-2 py-[2px] rounded-full ${tagConfig[tag as keyof typeof tagConfig].color}`}
+                  >
+                    <MaterialCommunityIcons
+                      name={
+                        tagConfig[tag as keyof typeof tagConfig].icon as any
+                      }
+                      size={10}
+                      color="currentColor"
+                    />
+                    <Text className="ml-1 text-[9px] font-dm-sans-bold uppercase">
+                      {tagConfig[tag as keyof typeof tagConfig].label}
+                    </Text>
+                  </View>
+                )}
+              </View>
             </View>
 
             {/* STATUS */}
@@ -125,6 +172,13 @@ const FlightItem: React.FC<FlightItemProps> = ({
               </TouchableOpacity>
             )}
 
+            {onSelect && (
+              <RadioButton
+                checked={!!checked}
+                onPress={() => onSelect(offer)}
+              />
+            )}
+
             {isRemovable && (
               <TouchableOpacity
                 onPress={initialize}
@@ -176,7 +230,7 @@ const FlightItem: React.FC<FlightItemProps> = ({
                   {/* CENTER */}
                   <View className="flex-1 items-center px-4">
                     <Text className="font-dm-sans-bold text-[10px] text-purple-400 mb-1">
-                      {slice.duration}
+                      {duration}
                     </Text>
 
                     <View className="flex-row items-center w-full">

@@ -9,13 +9,14 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Platform, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import {
   Button,
   DateTimePicker,
   Dropdown,
   FlightItem,
   HotelItem,
+  Modal,
   RadioButton,
   TransferItem,
 } from "../common";
@@ -61,6 +62,12 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [hotelDepartureDate, setHotelDepartureDate] = useState<Date>(
     new Date(),
   );
+  const [isFlightOpen, setIsFlightOpen] = useState<boolean>(false);
+  const [isHotelOpen, setIsHotelOpen] = useState<boolean>(false);
+  const [isTransferAirportOpen, setIsTransferAirportOpen] =
+    useState<boolean>(false);
+  const [isTransferEventOpen, setIsTransferEventOpen] =
+    useState<boolean>(false);
   const [hotelCheckInDate, setHotelCheckInDate] = useState<Date>(new Date());
   const [hotelCheckoutDate, setHotelCheckoutDate] = useState<Date>(new Date());
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
@@ -75,14 +82,18 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
   const { user } = useAuth();
   const {
+    topOffers: flightTopOffers,
     offer: flightOffer,
     search: searchFlight,
     initialize: initializeFlight,
+    updateOffer: updateFlightOffer,
   } = useFlight();
   const {
+    topOffers: hotelTopOffers,
     offer: hotelOffer,
     search: searchHotel,
     initialize: initializeHotel,
+    updateOffer: updateHotelOffer,
   } = useHotel();
   const {
     airportToHotelOffer,
@@ -140,6 +151,11 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
 
     const data = await searchFlight(params);
     setLoading("flight", false);
+    if (!data) {
+      toast.error(
+        "No flight offers found. Please adjust your search criteria.",
+      );
+    }
     return data;
   };
 
@@ -193,7 +209,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     setLoading("hotel", true);
     const data = await searchHotel(params);
     setLoading("hotel", false);
-
+    if (!data) {
+      toast.error("No hotel offers found. Please adjust your search criteria.");
+    }
     return data;
   };
 
@@ -228,6 +246,25 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     ) {
       const flightOffer = booking.flight.offer;
       const hotelOffer = booking.hotel.offer;
+      const destinationIata =
+        flightOffer.slices[flightOffer.slices.length - 1].destinationIata;
+      setLoading("airportToHotel", true);
+      const params = {
+        from: {
+          type: "IATA",
+          code: destinationIata,
+        },
+        to: {
+          type: "GPS",
+          code: `${hotelOffer.latitude},${hotelOffer.longitude}`,
+        },
+        departureDateTime: flightOffer.arrivalTime,
+        packageType,
+      };
+      await searchTransfer(params, "ah");
+      setLoading("airportToHotel", false);
+    } else if (booking?.flight.status === "confirmed" && hotelOffer) {
+      const flightOffer = booking.flight.offer;
       const destinationIata =
         flightOffer.slices[flightOffer.slices.length - 1].destinationIata;
       setLoading("airportToHotel", true);
@@ -765,44 +802,116 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
             </Text>
           </View>
 
-          <View className="gap-2">
-            {includes.flight && (
-              <FlightItem
-                data={flightOffer}
-                refreshLoading={refreshLoading.get("flight")}
-                onRefresh={async () => {
-                  await handleFlight();
-                }}
-              />
+          <View className="gap-4">
+            {flightOffer && (
+              <View className="gap-2">
+                <FlightItem
+                  data={flightOffer}
+                  refreshLoading={refreshLoading.get("flight")}
+                  onRefresh={async () => {
+                    await handleFlight();
+                  }}
+                />
+                <Button
+                  type="gradient-soft"
+                  label="View more flights"
+                  buttonClassName="h-10"
+                  onPress={() => setIsFlightOpen(true)}
+                />
+              </View>
             )}
-            {includes.hotel && (
-              <HotelItem
-                data={hotelOffer}
-                refreshLoading={refreshLoading.get("hotel")}
-                onRefresh={async () => {
-                  await handleHotel(flightOffer);
-                }}
-              />
+            {hotelOffer && (
+              <View className="gap-2">
+                <HotelItem
+                  data={hotelOffer}
+                  refreshLoading={refreshLoading.get("hotel")}
+                  onRefresh={async () => {
+                    await handleHotel(flightOffer);
+                  }}
+                />
+                <Button
+                  type="gradient-soft"
+                  label="View more hotels"
+                  buttonClassName="h-10"
+                  onPress={() => setIsHotelOpen(true)}
+                />
+              </View>
             )}
             {includes.transferAirport && (
-              <TransferItem
-                data={airportToHotelOffer}
-                refreshLoading={refreshLoading.get("airportToHotel")}
-                onRefresh={() => handleAirportToHotel(flightOffer, hotelOffer)}
-              />
+              <>
+                <TransferItem
+                  data={airportToHotelOffer}
+                  refreshLoading={refreshLoading.get("airportToHotel")}
+                  onRefresh={() =>
+                    handleAirportToHotel(flightOffer, hotelOffer)
+                  }
+                />
+                {/* <Button
+                  type="gradient-soft"
+                  label="View more transfers"
+                  buttonClassName="h-10"
+                  onPress={() => setIsTransferAirportOpen(true)}
+                /> */}
+              </>
             )}
             {includes.transferEvent && (
-              <TransferItem
-                data={hotelToEventOffer}
-                refreshLoading={refreshLoading.get("hotelToEvent")}
-                onRefresh={() => handleHotelToEvent(hotelOffer)}
-              />
+              <>
+                <TransferItem
+                  data={hotelToEventOffer}
+                  refreshLoading={refreshLoading.get("hotelToEvent")}
+                  onRefresh={() => handleHotelToEvent(hotelOffer)}
+                />
+                {/* <Button
+                  type="gradient-soft"
+                  label="View more transfers"
+                  buttonClassName="h-10"
+                  onPress={() => setIsTransferEventOpen(true)}
+                /> */}
+              </>
             )}
           </View>
         </View>
       )}
 
-      {Platform.OS === "ios" && <View className="h-4"></View>}
+      <View className="h-4"></View>
+
+      <Modal
+        isOpen={isFlightOpen}
+        title="Flights"
+        scrolled
+        onClose={() => setIsFlightOpen(false)}
+      >
+        {flightTopOffers.map((offer, index) => (
+          <FlightItem
+            data={offer}
+            key={`flight-offer-${index}`}
+            checked={flightOffer?.id === offer.id}
+            onSelect={(offer: IFlightOffer) => {
+              if (updateFlightOffer) updateFlightOffer(offer);
+              setIsFlightOpen(false);
+            }}
+          />
+        ))}
+      </Modal>
+
+      <Modal
+        isOpen={isHotelOpen}
+        title="Hotels"
+        scrolled
+        onClose={() => setIsHotelOpen(false)}
+      >
+        {hotelTopOffers.map((offer, index) => (
+          <HotelItem
+            data={offer}
+            key={`flight-offer-${index}`}
+            checked={hotelOffer?.id === offer.id}
+            onSelect={(offer: IHotelOffer) => {
+              if (updateHotelOffer) updateHotelOffer(offer);
+              setIsHotelOpen(false);
+            }}
+          />
+        ))}
+      </Modal>
 
       {/* SEARCH BUTTON */}
       <Button
