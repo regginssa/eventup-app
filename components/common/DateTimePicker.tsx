@@ -1,14 +1,8 @@
 import { formatDateTime, formatTime } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
-import {
-  Platform,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 interface CustomDatePickerProps {
   mode?: "date" | "datetime";
@@ -30,38 +24,9 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   onPick,
 }) => {
   const [showDate, setShowDate] = useState(false);
-  const [showTime, setShowTime] = useState(false);
-  const [tempDate, setTempDate] = useState<Date | null>(null);
 
   const openPicker = () => {
     setShowDate(true);
-  };
-
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDate(false);
-
-    if (selectedDate) {
-      setTempDate(selectedDate);
-
-      if (mode === "datetime") {
-        setShowTime(true);
-      } else {
-        onPick(new Date(selectedDate));
-      }
-    }
-  };
-
-  const handleTimeChange = (event: any, selectedTime?: Date) => {
-    setShowTime(false);
-
-    if (selectedTime && tempDate) {
-      const final = new Date(tempDate);
-      final.setHours(selectedTime.getHours());
-      final.setMinutes(selectedTime.getMinutes());
-
-      onPick(final);
-      setTempDate(null);
-    }
   };
 
   return (
@@ -104,24 +69,15 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       </TouchableOpacity>
 
       {/* DATE PICKER */}
-      {showDate && (
-        <DateTimePicker
-          value={value ?? new Date()}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={handleDateChange}
-        />
-      )}
-
-      {/* TIME PICKER */}
-      {showTime && (
-        <DateTimePicker
-          value={value ?? new Date()}
-          mode="time"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={handleTimeChange}
-        />
-      )}
+      <DateTimePickerModal
+        isVisible={showDate}
+        mode={mode || "date"}
+        onConfirm={(date) => {
+          onPick(date);
+          setShowDate(false);
+        }}
+        onCancel={() => setShowDate(false)}
+      />
     </View>
   );
 };

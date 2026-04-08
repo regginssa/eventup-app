@@ -67,7 +67,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const [departureDate, setDepartureDate] = useState<Date>(new Date());
   const [depatureCountry, setDepatureCountry] = useState<Country | null>(null);
   const [depatureRegion, setDepatureRegion] = useState<RegionType | null>(null);
-  const [airportRadius, setAirportRadius] = useState<string>("20");
+  const [airportRadius, setAirportRadius] = useState<string>("50");
   const [hotelDepartureDate, setHotelDepartureDate] = useState<Date>(
     new Date(),
   );
@@ -130,21 +130,13 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
   const handleFlight = async () => {
     if (!includes.flight || booked.flight) return null;
 
-    // const eventDateTime = normalizeDateUTC(
-    //   new Date(event.dates?.start?.date as string),
-    // );
-    // const departureDateTime = normalizeDateUTC(departureDate);
-
-    // if (eventDateTime < departureDateTime) {
-    //   toast.info("The departure date cannot be after the event date.");
-    //   return null;
-    // }
-
     setLoading("flight", true);
     const originGeo =
       departureLocation === "current"
         ? currentLocationCoords
-        : user?.location.coordinate;
+        : departureLocation === "home"
+          ? user?.location.coordinate
+          : depaturePoint?.coordinate;
     const destGeo = event.location?.coordinate;
 
     const params = {
@@ -156,6 +148,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
       packageType,
       tripType: tripType.value,
       returnDate: df.toISOString(flightReturnDate),
+      radius: Number(airportRadius) * 1000 || 50000, // convert km to meters, default to 50km if invalid
     };
 
     const data = await searchFlight(params);
@@ -732,7 +725,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                   Select Location
                 </Text>
                 <Text className="font-dm-sans-medium text-slate-700 text-xs mt-0.5">
-                  {currentCity}, {currentCountryCode}
+                  Depature Point
                 </Text>
               </View>
 
@@ -767,14 +760,14 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               {departureLocation === "select" && (
                 <>
                   <CountryPicker
-                    label="Country"
+                    label="Departure Country"
                     placeholder="Select depature country"
                     value={depatureCountry}
                     onPick={setDepatureCountry}
                     bordered
                   />
                   <RegionPicker
-                    label="Region"
+                    label="Departure Region"
                     placeholder="Select depature country first"
                     countryCode={depatureCountry?.cca2}
                     value={depatureRegion}
@@ -782,7 +775,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                     bordered
                   />
                   <LocationPicker
-                    label="Depature Point"
+                    label="Depature Address"
                     placeholder="Select depature country and region first"
                     country={depatureCountry?.cca2}
                     region={depatureRegion?.name}

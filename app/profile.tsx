@@ -549,14 +549,18 @@ ${url}`;
               </Text>
 
               <View className="gap-4">
-                {/* Email */}
+                {/* Sign in Option */}
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-3">
                     <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center">
                       <Feather name="mail" size={16} color="#64748b" />
                     </View>
                     <Text className="text-slate-700 font-dm-sans-medium">
-                      {user.email}
+                      {user.signOption === "apple"
+                        ? "Apple"
+                        : user.signOption === "google"
+                          ? "Google"
+                          : "Email"}
                     </Text>
                   </View>
 
@@ -564,7 +568,7 @@ ${url}`;
                     <View className="flex-row items-center gap-1">
                       <Feather name="check-circle" size={14} color="#10b981" />
                       <Text className="text-emerald-600 text-xs font-dm-sans-bold">
-                        VERIFIED
+                        EMAIL VERIFIED
                       </Text>
                     </View>
                   )}

@@ -4,6 +4,7 @@ import {
   CountryPicker,
   DateTimePicker,
   Dropdown,
+  Input,
   LocationPicker,
   PhoneInput,
   RegionPicker,
@@ -29,6 +30,9 @@ const OnboardingStep1Screen = () => {
   const [selectedGender, setSelectedGender] = useState<TDropdownItem>(
     genders[0],
   );
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [country, setCountry] = useState<Country | null>(null);
   const [region, setRegion] = useState<RegionType | null>(null);
   const [address, setAddress] = useState<TLocation | null>(null);
@@ -75,6 +79,10 @@ const OnboardingStep1Screen = () => {
 
       const updates: IUser = {
         ...user,
+        firstName,
+        lastName,
+        email,
+        name: `${firstName} ${lastName}`,
         location: {
           country: {
             name: country?.name as any,
@@ -118,6 +126,13 @@ const OnboardingStep1Screen = () => {
     setAddress(null);
   }, [region]);
 
+  useEffect(() => {
+    if (!user) return;
+    setFirstName(user.firstName);
+    setLastName(user.lastName);
+    setEmail(user.email);
+  }, [user]);
+
   return (
     <OnboardingContainer
       step={1}
@@ -155,6 +170,57 @@ const OnboardingStep1Screen = () => {
           </View>
         </View>
       </LinearGradient>
+
+      {!user?.firstName && (
+        <Input
+          type="string"
+          placeholder="First Name"
+          label="First Name"
+          icon={
+            <MaterialCommunityIcons
+              name="account-outline"
+              size={16}
+              color="#4b5563"
+            />
+          }
+          value={firstName}
+          onChange={setFirstName}
+        />
+      )}
+
+      {!user?.lastName && (
+        <Input
+          type="string"
+          placeholder="Last Name"
+          label="Last Name"
+          icon={
+            <MaterialCommunityIcons
+              name="account-outline"
+              size={16}
+              color="#4b5563"
+            />
+          }
+          value={lastName}
+          onChange={setLastName}
+        />
+      )}
+
+      {!user?.email && (
+        <Input
+          type="string"
+          placeholder="Email"
+          label="Email"
+          icon={
+            <MaterialCommunityIcons
+              name="account-outline"
+              size={16}
+              color="#4b5563"
+            />
+          }
+          value={email}
+          onChange={setEmail}
+        />
+      )}
 
       <Dropdown
         label="Gender"

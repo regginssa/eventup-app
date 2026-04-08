@@ -24,6 +24,7 @@ const BookingStatus = () => {
   const [completed, setCompleted] = useState<boolean>(false);
   const [viewLoading, setViewLoading] = useState<boolean>(false);
   const [captureAmount, setCaptureAmount] = useState<number>(0);
+  const [refreshLoading, setRefreshLoading] = useState<boolean>(false);
 
   const { id: bookingId } = useLocalSearchParams();
   const router = useRouter();
@@ -274,6 +275,58 @@ const BookingStatus = () => {
               </LinearGradient>
             </View>
 
+            {/* Refresh Section */}
+            <View className="rounded-xl border border-purple-100 bg-purple-50/40 p-4 flex flex-row items-center gap-3">
+              {/* Icon */}
+              <View className="w-10 h-10 rounded-full bg-white items-center justify-center border border-purple-100">
+                <LinearGradient
+                  colors={["#C427E0", "#844AFF", "#12A9FF"]}
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: 13,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="refresh"
+                    size={16}
+                    color="white"
+                  />
+                </LinearGradient>
+              </View>
+
+              {/* Text */}
+              <View className="flex-1 gap-1">
+                <Text className="font-poppins-semibold text-sm text-gray-800">
+                  Waiting for booking updates?
+                </Text>
+
+                <Text className="font-dm-sans text-xs text-gray-600">
+                  Updates may not always be real-time. Tap refresh to check the
+                  latest status of your bookings.
+                </Text>
+              </View>
+
+              {/* Button */}
+              <Button
+                type="gradient-soft"
+                label="Refresh"
+                buttonClassName="h-10"
+                loading={refreshLoading}
+                onPress={async () => {
+                  setRefreshLoading(true);
+                  const response = await bookingServices.get(
+                    bookingId as string,
+                  );
+                  setBooking(response.data);
+                  setEvent(response.data?.event || null);
+                  setRefreshLoading(false);
+                }}
+              />
+            </View>
+
             {/* Timeline Section */}
             <View className="mt-8 bg-white rounded-[32px] p-8 border border-slate-50 shadow-sm shadow-slate-200">
               <View className="flex-row justify-between items-center mb-8">
@@ -307,6 +360,54 @@ const BookingStatus = () => {
                 ),
               )}
             </View>
+
+            <LinearGradient
+              colors={["#12A9FF15", "#00C48C15"]}
+              start={{ x: 0, y: 0 }}
+              style={{
+                marginTop: 16,
+                borderRadius: 20,
+                padding: 20,
+                borderWidth: 1,
+                borderColor: "#12A9FF20",
+              }}
+            >
+              <View className="flex-row items-start">
+                <View className="bg-[#12A9FF] w-12 h-12 rounded-xl items-center justify-center mr-4 shadow-lg shadow-blue-300">
+                  <MaterialCommunityIcons
+                    name="cash-refund"
+                    size={24}
+                    color="white"
+                  />
+                </View>
+
+                <View className="flex-1">
+                  <Text className="font-poppins-semibold uppercase text-slate-900 text-sm">
+                    Refund & Payment Info
+                  </Text>
+
+                  <Text className="font-dm-sans-medium text-slate-600 text-xs mt-2 leading-5">
+                    •{" "}
+                    <Text className="font-dm-sans-bold">Credit payments:</Text>{" "}
+                    You are only charged for successfully confirmed bookings.
+                    Failed services are never billed.
+                  </Text>
+
+                  <Text className="font-dm-sans-medium text-slate-600 text-xs mt-2 leading-5">
+                    •{" "}
+                    <Text className="font-dm-sans-bold">Crypto payments:</Text>{" "}
+                    If any booking (flight, hotel, or transfer) fails, the
+                    corresponding amount is automatically refunded to your
+                    wallet.
+                  </Text>
+
+                  <Text className="font-dm-sans-medium text-slate-600 text-xs mt-2 leading-5">
+                    • You will never be charged for services that are not
+                    successfully booked.
+                  </Text>
+                </View>
+              </View>
+            </LinearGradient>
 
             {!completed && (
               <LinearGradient
