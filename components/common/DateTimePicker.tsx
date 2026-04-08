@@ -72,6 +72,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       <DateTimePickerModal
         isVisible={showDate}
         mode={mode || "date"}
+        display="inline"
         onConfirm={(date) => {
           onPick(date);
           setShowDate(false);

@@ -790,7 +790,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
               <Input
                 type="string"
                 label="Departure Airport Radius (km)"
-                placeholder="20"
+                placeholder="Enter radius in km (e.g. 50)"
                 bordered
                 value={airportRadius}
                 onChange={setAirportRadius}
