@@ -88,7 +88,11 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!token) return;
 
       const response = await getMe();
-      if (!response.data) return;
+      if (!response.data) {
+        await AsyncStorage.removeItem("Authorization");
+        if (pathname !== "/start") router.replace("/start");
+        return;
+      }
       setUser(response.data);
       redirect(response.data);
     };

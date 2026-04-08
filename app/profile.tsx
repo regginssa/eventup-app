@@ -541,7 +541,7 @@ ${url}`;
         </View>
 
         {isMe && (
-          <View className="w-full mb-6">
+          <View className="w-full mb-6 overflow-hidden">
             {/* Upper */}
             <View className="bg-white rounded-t-[24px] border-t border-l border-r border-slate-200 p-6">
               <Text className="text-slate-400 font-poppins-bold text-[10px] uppercase tracking-[2px] mb-4">
@@ -556,20 +556,7 @@ ${url}`;
                       <Feather name="key" size={16} color="#64748b" />
                     </View>
                     <Text className="text-slate-700 font-dm-sans-medium">
-                      {user.signOption === "apple"
-                        ? "Apple"
-                        : user.signOption === "google"
-                          ? "Google"
-                          : "Email"}
-                    </Text>
-                  </View>
-
-                  <View className="flex-row items-center gap-3">
-                    <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center">
-                      <Feather name="mail" size={16} color="#64748b" />
-                    </View>
-                    <Text className="text-slate-700 font-dm-sans-medium">
-                      {user.email || "No email added"}
+                      Sign in with
                     </Text>
                   </View>
 
@@ -577,10 +564,43 @@ ${url}`;
                     <View className="flex-row items-center gap-1">
                       <Feather name="check-circle" size={14} color="#10b981" />
                       <Text className="text-emerald-600 text-xs font-dm-sans-bold">
-                        EMAIL VERIFIED
+                        {user.signOption === "apple"
+                          ? "Apple"
+                          : user.signOption === "google"
+                            ? "Google"
+                            : "Email"}
                       </Text>
                     </View>
                   )}
+                </View>
+
+                {user.email && (
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center gap-3">
+                      <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center">
+                        <Feather name="key" size={16} color="#64748b" />
+                      </View>
+                      <Text className="text-slate-700 font-dm-sans-medium">
+                        Email
+                      </Text>
+                    </View>
+
+                    <View className="flex-row items-center gap-1">
+                      <Feather name="check-circle" size={14} color="#10b981" />
+                      <Text className="text-emerald-600 text-xs font-dm-sans-bold">
+                        {user.email}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                <View className="flex-row items-center gap-3">
+                  <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center">
+                    <Feather name="mail" size={16} color="#64748b" />
+                  </View>
+                  <Text className="text-slate-700 font-dm-sans-medium">
+                    {user.email || "No email added"}
+                  </Text>
                 </View>
 
                 {/* Phone */}

@@ -5,7 +5,6 @@ import { Entypo, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -162,22 +161,22 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
       const cityName = extractCityName(components);
 
-      let valid = true;
-      if (region) {
-        const allText = components.map((c: any) => c.long_name.toLowerCase());
+      // let valid = true;
+      // if (region) {
+      //   const allText = components.map((c: any) => c.long_name.toLowerCase());
 
-        if (
-          region &&
-          !allText.some((t: string) => t.includes(region.toLowerCase()))
-        ) {
-          valid = false;
-        }
-      }
+      //   if (
+      //     region &&
+      //     !allText.some((t: string) => t.includes(region.toLowerCase()))
+      //   ) {
+      //     valid = false;
+      //   }
+      // }
 
-      if (!valid) {
-        Alert.alert("Invalid address", "Picked place is outside allowed area");
-        return;
-      }
+      // if (!valid) {
+      //   Alert.alert("Invalid address", "Picked place is outside allowed area");
+      //   return;
+      // }
 
       if (location) {
         skipNextFetchRef.current = true;
