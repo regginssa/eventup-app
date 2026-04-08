@@ -125,13 +125,8 @@ const SubscriptionScreen = () => {
 
   const isFreePlan = selectedSubscription?.month === 0;
 
-  const isCurrentPlan = selectedSubscriptionId === currentSubscription?._id;
-
   const hasValidSubscription =
     currentSubscription && currentSubscription.month > 0 && !isExpired;
-
-  const shouldDisableButton =
-    isFreePlan || isCurrentPlan || hasValidSubscription;
 
   const renderItem = ({
     item,
@@ -192,11 +187,7 @@ const SubscriptionScreen = () => {
             inset: 1,
           }}
           disabled={item._id === currentSubscription?._id}
-          onPress={
-            shouldDisableButton
-              ? undefined
-              : () => setSelectedSubscriptionId(item._id)
-          }
+          onPress={() => setSelectedSubscriptionId(item._id)}
         >
           {/* Header */}
           <View className="w-full flex flex-row items-start justify-between">
@@ -433,7 +424,7 @@ const SubscriptionScreen = () => {
         />
       </View>
 
-      <Text className="font-poppins-medium text-gray-700">Select plan</Text>
+      <Text className="font-poppins-medium text-gray-700">Select a plan</Text>
 
       <View className="flex-1 -mt-5">
         {loading ? (
@@ -465,15 +456,18 @@ const SubscriptionScreen = () => {
         buttonClassName="h-12"
         disabled={disabled}
         loading={loading}
-        onPress={() =>
+        onPress={() => {
+          if (selectedSubscription?.month === 0) {
+            return;
+          }
           router.push({
             pathname: "/subscription/checkout",
             params: {
               id: selectedSubscriptionId,
               oneMonthPrice,
             },
-          })
-        }
+          });
+        }}
       />
     </SubscriptionContainer>
   );

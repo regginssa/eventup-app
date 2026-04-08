@@ -17,7 +17,6 @@ import { useStripe } from "@/hooks";
 import { TPaymentMethod } from "@/types";
 import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
-import { INotification } from "@/types/notification";
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -647,7 +646,7 @@ const CheckoutScreen = () => {
       });
 
       if (updatedEvent.data) {
-        const notifyBody: INotification = {
+        const notifyBody: any = {
           type: "new_attendees",
           metadata: {
             eventId: event._id,

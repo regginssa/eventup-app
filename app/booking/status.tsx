@@ -190,7 +190,7 @@ const BookingStatus = () => {
         booking.paymentStatus === "completed" ? "confirmed" : "processing",
     },
     {
-      label: "Ticke",
+      label: "Event Ticke",
       icon: "ticket-outline",
       status: booking.ticketStatus,
     },

@@ -556,22 +556,14 @@ ${url}`;
                       <Feather name="key" size={16} color="#64748b" />
                     </View>
                     <Text className="text-slate-700 font-dm-sans-medium">
-                      Sign in with
+                      Sign in with{" "}
+                      {user.signOption === "apple"
+                        ? "Apple"
+                        : user.signOption === "google"
+                          ? "Google"
+                          : "Email"}
                     </Text>
                   </View>
-
-                  {user.emailVerified && (
-                    <View className="flex-row items-center gap-1">
-                      <Feather name="check-circle" size={14} color="#10b981" />
-                      <Text className="text-emerald-600 text-xs font-dm-sans-bold">
-                        {user.signOption === "apple"
-                          ? "Apple"
-                          : user.signOption === "google"
-                            ? "Google"
-                            : "Email"}
-                      </Text>
-                    </View>
-                  )}
                 </View>
 
                 {user.email && (
@@ -581,13 +573,6 @@ ${url}`;
                         <Feather name="mail" size={16} color="#64748b" />
                       </View>
                       <Text className="text-slate-700 font-dm-sans-medium">
-                        Email
-                      </Text>
-                    </View>
-
-                    <View className="flex-row items-center gap-1">
-                      <Feather name="check-circle" size={14} color="#10b981" />
-                      <Text className="text-emerald-600 text-xs font-dm-sans-bold">
                         {user.email}
                       </Text>
                     </View>
@@ -717,7 +702,7 @@ ${url}`;
                   Member Since
                 </Text>
                 <Text className="font-poppins-bold text-slate-800 text-lg">
-                  {user.createdAt && `${df.toMonthYear(user.createdAt)}`}
+                  {user.createdAt ? `${df.toMonthYear(user.createdAt)}` : "-"}
                 </Text>
               </View>
               <View className="bg-purple-100 px-3 py-1.5 rounded-xl flex-row items-center gap-1">

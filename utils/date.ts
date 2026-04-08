@@ -18,12 +18,23 @@ const toShortDate = (date: Date | string | null): string => {
 
 const toMonthYear = (date: Date | string | null): string => {
   if (!date) return "-";
-  const toDate = new Date(date);
-  const datePart = toDate.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-  });
-  return `${datePart}`;
+  const formattedDate = new Date(date);
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  return `${months[formattedDate.getMonth()]} ${formattedDate.getFullYear()}`;
 };
 
 const toShortDateTime = (date: Date | string | null): string => {
