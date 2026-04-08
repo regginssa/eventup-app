@@ -276,7 +276,7 @@ const BookingStatus = () => {
             </View>
 
             {/* Refresh Section */}
-            <View className="rounded-xl border border-purple-100 bg-purple-50/40 p-4 flex flex-row items-center gap-3">
+            <View className="rounded-xl border border-purple-100 bg-purple-50/40 p-4 flex flex-row items-center gap-3 mt-4">
               {/* Icon */}
               <View className="w-10 h-10 rounded-full bg-white items-center justify-center border border-purple-100">
                 <LinearGradient

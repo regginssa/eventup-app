@@ -81,7 +81,11 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
     if (!user?._id) return;
     const res = await notificationServices.getByUserId(user._id);
     if (!res.data) return;
-    setNotifications(res.data);
+    const sorted = res.data.sort(
+      (a: INotification, b: INotification) =>
+        new Date(b?.createdAt).getTime() - new Date(a?.createdAt).getTime(),
+    );
+    setNotifications(sorted);
   };
 
   const send = (payload: any) => {

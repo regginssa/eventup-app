@@ -553,7 +553,7 @@ ${url}`;
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-3">
                     <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center">
-                      <Feather name="mail" size={16} color="#64748b" />
+                      <Feather name="key" size={16} color="#64748b" />
                     </View>
                     <Text className="text-slate-700 font-dm-sans-medium">
                       {user.signOption === "apple"
@@ -561,6 +561,15 @@ ${url}`;
                         : user.signOption === "google"
                           ? "Google"
                           : "Email"}
+                    </Text>
+                  </View>
+
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center">
+                      <Feather name="mail" size={16} color="#64748b" />
+                    </View>
+                    <Text className="text-slate-700 font-dm-sans-medium">
+                      {user.email || "No email added"}
                     </Text>
                   </View>
 
