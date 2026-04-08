@@ -1,8 +1,9 @@
-import { TCoordinate, TDropdownItem, TPackageType } from "@/types";
+import { TCoordinate, TDropdownItem, TLocation, TPackageType } from "@/types";
 import { IBooking } from "@/types/booking";
 import { IEvent } from "@/types/event";
 import { IFlightOffer } from "@/types/flight";
 import { IHotelOffer } from "@/types/hotel";
+import { Country, RegionType } from "@/types/location.types";
 import df from "@/utils/date";
 import { normalizeDateUTC } from "@/utils/format";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -12,12 +13,16 @@ import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import {
   Button,
+  CountryPicker,
   DateTimePicker,
   Dropdown,
   FlightItem,
   HotelItem,
+  Input,
+  LocationPicker,
   Modal,
   RadioButton,
+  RegionPicker,
   TransferItem,
 } from "../common";
 import { useAuth } from "../providers/AuthProvider";
@@ -50,8 +55,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     transferEvent: true,
   });
   const [departureLocation, setDepartureLocation] = useState<
-    "current" | "home"
+    "current" | "home" | "select"
   >("current");
+  const [depaturePoint, setDeparturePoint] = useState<TLocation | null>(null);
   const [booked, setBooked] = useState({
     flight: false,
     hotel: false,
@@ -59,6 +65,9 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
     transferEvent: false,
   });
   const [departureDate, setDepartureDate] = useState<Date>(new Date());
+  const [depatureCountry, setDepatureCountry] = useState<Country | null>(null);
+  const [depatureRegion, setDepatureRegion] = useState<RegionType | null>(null);
+  const [airportRadius, setAirportRadius] = useState<string>("20");
   const [hotelDepartureDate, setHotelDepartureDate] = useState<Date>(
     new Date(),
   );
@@ -696,6 +705,42 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
                 />
               </TouchableOpacity>
             )}
+
+            {/* Select Location Option */}
+            <TouchableOpacity
+              style={getCardStyle(departureLocation === "select")}
+              className="rounded-full"
+              onPress={() => setDepartureLocation("select")}
+              activeOpacity={0.7}
+            >
+              <View className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm">
+                <MaterialCommunityIcons
+                  name="map-marker-radius"
+                  size={22}
+                  color={departureLocation === "select" ? "#844AFF" : "#94a3b8"}
+                />
+              </View>
+
+              <View className="flex-1 ml-3">
+                <Text
+                  style={{
+                    color:
+                      departureLocation === "select" ? "#844AFF" : "#94a3b8",
+                  }}
+                  className="font-dm-sans-bold text-[10px] uppercase tracking-[1.5px]"
+                >
+                  Select Location
+                </Text>
+                <Text className="font-dm-sans-medium text-slate-700 text-xs mt-0.5">
+                  {currentCity}, {currentCountryCode}
+                </Text>
+              </View>
+
+              <RadioButton
+                checked={departureLocation === "select"}
+                onPress={() => setDepartureLocation("select")}
+              />
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -718,6 +763,46 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
         <View className="gap-6">
           {includes.flight && !booked.flight && (
             <>
+              {/* LOCATION PICKER - only show if flight is included and not booked */}
+              {departureLocation === "select" && (
+                <>
+                  <CountryPicker
+                    label="Country"
+                    placeholder="Select depature country"
+                    value={depatureCountry}
+                    onPick={setDepatureCountry}
+                    bordered
+                  />
+                  <RegionPicker
+                    label="Region"
+                    placeholder="Select depature country first"
+                    countryCode={depatureCountry?.cca2}
+                    value={depatureRegion}
+                    onPick={setDepatureRegion}
+                    bordered
+                  />
+                  <LocationPicker
+                    label="Depature Point"
+                    placeholder="Select depature country and region first"
+                    country={depatureCountry?.cca2}
+                    region={depatureRegion?.name}
+                    city={depatureRegion?.code}
+                    value={depaturePoint}
+                    onPick={setDeparturePoint}
+                    bordered
+                  />
+                </>
+              )}
+
+              <Input
+                type="string"
+                label="Departure Airport Radius (km)"
+                placeholder="20"
+                bordered
+                value={airportRadius}
+                onChange={setAirportRadius}
+              />
+
               <Dropdown
                 label="Flight Trip Type"
                 bordered
