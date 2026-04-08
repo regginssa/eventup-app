@@ -715,7 +715,7 @@ const BookSearchInputGroup: React.FC<BookSearchInputGroupProps> = ({
           </Text>
         </View>
 
-        <View className="gap-4">
+        <View className="gap-6">
           {includes.flight && !booked.flight && (
             <>
               <Dropdown
