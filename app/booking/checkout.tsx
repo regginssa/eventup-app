@@ -278,6 +278,7 @@ const CheckoutScreen = () => {
   const [services, setServices] = useState<string[]>([]);
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [baseAmount, setBaseAmount] = useState<number>(0);
+  const [baseEUR, setBaseEUR] = useState<number>(0);
   const [commissionAmount, setCommissionAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<TPaymentMethod>("credit");
   const [priceBreakdown, setPriceBreakdown] = useState({
@@ -423,6 +424,7 @@ const CheckoutScreen = () => {
       breakdown.hotel +
       breakdown.transferAirport +
       breakdown.transferEvent;
+    setBaseEUR(baseEUR);
     const commissionEUR = Number((total * commissionRate).toFixed(2));
     const totalEUR = Number(total.toFixed(2));
 
@@ -857,11 +859,13 @@ const CheckoutScreen = () => {
               <Text className="font-poppins-semibold uppercase text-slate-900 text-sm">
                 Save with $CHRLE or $BABYU
               </Text>
-              <Text className="font-dm-sans-bold text-slate-500 text-xs">
-                Pay with $CHRLE or $BABYU and reduce service fees from 10% to
-                3%. You save {(baseAmount * 0.07).toFixed(2)}{" "}
-                {currency.toUpperCase()}.
-              </Text>
+
+              <View className="flex flex-row gap-1">
+                <Text className="font-dm-sans-bold text-slate-500 text-xs">
+                  Pay with $CHRLE or $BABYU and reduce service fees from 10% to
+                  3%. You save {(baseEUR * 0.07).toFixed(2)}EUR.
+                </Text>
+              </View>
             </View>
           </View>
         </LinearGradient>
