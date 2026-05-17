@@ -14,7 +14,6 @@ import {
   OfficialTicketItem,
   TransferItem,
 } from "../common";
-import { useDuffel } from "../providers/DuffelProvider";
 import { useFlight } from "../providers/FlightProvider";
 import { useHotel } from "../providers/HotelProvider";
 import { useToast } from "../providers/ToastProvider";
@@ -42,7 +41,6 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
   const { offer: flightOffer } = useFlight();
   const { offer: hotelOffer, quote } = useHotel();
   const { airportToHotelOffer, hotelToEventOffer } = useTransfer();
-  const { initClientKey } = useDuffel();
   const toast = useToast();
 
   const handleCheckout = async () => {
@@ -217,7 +215,7 @@ const PackageConfirmModal: React.FC<PackageConfirmModalProps> = ({
               </View>
               <View className="flex-1">
                 {hotelOffer ? (
-                  <HotelItem data={hotelOffer} />
+                  <HotelItem data={hotelOffer} hiddenPolicy />
                 ) : (
                   <Text className="italic text-slate-400 text-xs py-2">
                     No hotel selected

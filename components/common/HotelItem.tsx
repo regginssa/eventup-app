@@ -6,12 +6,15 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  Modal,
+  Modal as RNModal,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useHotel } from "../providers/HotelProvider";
+import Button from "./Button";
+import Modal from "./Modal";
 import RadioButton from "./RadioButton";
 
 interface HotelItemProps {
@@ -22,6 +25,7 @@ interface HotelItemProps {
   onRefresh?: () => Promise<void>;
   onSelect?: (offer: IHotelOffer) => void;
   checked?: boolean;
+  hiddenPolicy?: boolean;
 }
 
 const serviceIconMap: Record<string, any> = {
@@ -66,6 +70,74 @@ const getNights = (checkIn: string, checkOut: string) => {
   );
 };
 
+const mapRateToDisplay = (defaultRate: any) => {
+  const getCondition = (title: string) =>
+    defaultRate?.conditions?.find(
+      (c: any) => c.title?.toLowerCase() === title.toLowerCase(),
+    )?.description || null;
+
+  const cancellationTimeline = defaultRate?.cancellation_timeline ?? [];
+  const conditions = defaultRate?.conditions ?? [];
+
+  const ratePolicy =
+    getCondition("Rate Description") ||
+    getCondition("Description") ||
+    defaultRate?.description ||
+    null;
+
+  const cancellationSummary =
+    getCondition("Guarantee Policy") ||
+    getCondition("Cancellation Policy") ||
+    null;
+
+  const refundable =
+    cancellationTimeline.length > 0 ||
+    conditions.some((c: any) =>
+      c.title?.toLowerCase().includes("cancellation"),
+    );
+
+  return {
+    // =========================
+    // RAW (for debugging / modal)
+    // =========================
+    raw: defaultRate,
+
+    // =========================
+    // UI FIELDS
+    // =========================
+    ratePolicy,
+    cancellationPolicy: {
+      raw: conditions,
+      summary: cancellationSummary,
+      refundable,
+      timeline: cancellationTimeline,
+    },
+
+    // =========================
+    // QUICK DISPLAY HELPERS
+    // =========================
+    badges: {
+      refundable: refundable,
+      paymentType: defaultRate?.payment_type,
+      boardType: defaultRate?.board_type,
+    },
+
+    pricing: {
+      total: defaultRate?.total_amount,
+      currency: defaultRate?.total_currency,
+      base: defaultRate?.base_amount,
+      tax: defaultRate?.tax_amount,
+      fee: defaultRate?.fee_amount,
+      dueAtHotel: defaultRate?.due_at_accommodation_amount,
+    },
+
+    availability: {
+      quantity: defaultRate?.quantity_available,
+      expiresAt: defaultRate?.expires_at,
+    },
+  };
+};
+
 const HotelItem: React.FC<HotelItemProps> = ({
   data: offer,
   status,
@@ -74,8 +146,11 @@ const HotelItem: React.FC<HotelItemProps> = ({
   onRefresh,
   checked,
   onSelect,
+  hiddenPolicy,
 }) => {
   const [showAmenities, setShowAmenities] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const { updateOffer, offer: cxOffer } = useHotel();
 
   if (!offer) return null;
 
@@ -85,25 +160,48 @@ const HotelItem: React.FC<HotelItemProps> = ({
     address,
     city,
     countryCode,
-    roomName,
-    boardName,
     services,
     checkIn,
     checkOut,
     checkInInfo,
     image,
-    ratePolicy,
-    cancellationPolicy,
     rooms,
     converted,
   } = offer;
 
-  const { currency, totalAmount } = offer.converted;
+  const { currency, totalAmount } = converted;
 
   const starCount = parseInt(category?.match(/\d+/)?.[0] || "0");
 
   const visibleServices = services.slice(0, 5);
   const remainingServices = services.length - visibleServices.length;
+  const selectedRoom = cxOffer?.defaultRoom ?? rooms?.[0];
+
+  const selectedRate = cxOffer?.defaultRate ?? selectedRoom?.rates?.[0];
+  const selectedDisplay = cxOffer?.defaultRate
+    ? mapRateToDisplay(cxOffer.defaultRate)
+    : null;
+  if (!selectedRoom || !selectedRate) return null;
+
+  const handleRoomSelect = (room: any) => {
+    updateOffer({
+      ...offer,
+      defaultRoom: room,
+      defaultRate: room?.rates?.[0],
+    });
+  };
+
+  const handleRateSelect = (rate: any) => {
+    updateOffer({
+      ...offer,
+      id: rate.id,
+      defaultRate: rate,
+      converted: {
+        ...cxOffer?.converted,
+        totalAmount: Number(rate.total_amount),
+      } as any,
+    });
+  };
 
   const renderIcon = (type: string) => {
     const icon = serviceIconMap[type];
@@ -144,7 +242,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
             {/* HERO IMAGE */}
             <View className="relative h-64">
               <Image
-                source={{ uri: image }}
+                source={{ uri: image || "" }}
                 style={{
                   width: "100%",
                   height: "100%",
@@ -340,7 +438,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
 
               {/* AMENITIES */}
               {services.length > 0 && (
-                <View className="mb-5">
+                <View className="">
                   <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-3">
                     Amenities
                   </Text>
@@ -373,67 +471,113 @@ const HotelItem: React.FC<HotelItemProps> = ({
                 </View>
               )}
 
-              {/* PNR */}
-              {reference && (
-                <View className="mb-5 bg-purple-50 border border-purple-100 rounded-2xl px-4 py-3 flex-row items-center justify-between">
-                  <View className="flex-row items-center">
-                    <MaterialCommunityIcons
-                      name="ticket-confirmation-outline"
-                      size={16}
-                      color="#844AFF"
-                    />
+              {/* SELECTED ROOM & RATE SUMMARY */}
+              {cxOffer?.defaultRoom &&
+                cxOffer.defaultRate &&
+                selectedDisplay && (
+                  <View className="mt-5 p-4 rounded-2xl border border-purple-100 bg-purple-50">
+                    {/* HEADER */}
+                    <Text className="text-[10px] font-dm-sans-bold text-purple-500 uppercase tracking-widest mb-3">
+                      Selected Choice
+                    </Text>
 
-                    <Text className="ml-2 font-dm-sans-bold text-[11px] text-purple-600 uppercase">
-                      PNR
+                    {/* ROOM */}
+                    <View className="mb-3">
+                      <Text className="text-sm font-poppins-bold text-slate-900">
+                        {selectedRoom.name}
+                      </Text>
+
+                      {selectedRoom.name && (
+                        <Text className="text-xs text-slate-600">
+                          {selectedRoom.name}
+                        </Text>
+                      )}
+                    </View>
+
+                    {/* RATE */}
+                    <View className="flex-row justify-between items-center">
+                      {/* PRICE */}
+                      <View>
+                        <Text className="text-[11px] text-slate-500">
+                          {selectedDisplay.badges.paymentType === "pay_now"
+                            ? "Pay now"
+                            : "Pay at hotel"}
+                        </Text>
+                      </View>
+
+                      {/* BADGE */}
+                      <View
+                        className={`px-3 py-1 rounded-full ${
+                          selectedDisplay.cancellationPolicy.refundable
+                            ? "bg-green-100"
+                            : "bg-red-100"
+                        }`}
+                      >
+                        <Text
+                          className={`text-[11px] font-semibold ${
+                            selectedDisplay.cancellationPolicy.refundable
+                              ? "text-green-700"
+                              : "text-red-700"
+                          }`}
+                        >
+                          {selectedDisplay.cancellationPolicy.refundable
+                            ? "Free cancellation"
+                            : "Non-refundable"}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* SMALL POLICY HINT */}
+                    <Text className="mt-2 text-[11px] text-slate-600 leading-4">
+                      {selectedDisplay.cancellationPolicy.summary ||
+                        selectedDisplay.ratePolicy ||
+                        "Standard hotel conditions apply"}
                     </Text>
                   </View>
+                )}
+            </View>
 
-                  <Text className="font-poppins-bold text-sm tracking-widest text-slate-900">
-                    {reference}
+            {/* ACTION BUTTON GROUP */}
+            {!hiddenPolicy && rooms.length > 0 && (
+              <View className="mb-5 px-5">
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  className="flex-1 rounded-lg bg-[#bc9efcf0] flex items-center justify-center p-2"
+                  onPress={() => setShowDetails(true)}
+                >
+                  <Text className="font-poppins-semibold text-xs text-[#570cfa]">
+                    SELECT ROOM & RATE
                   </Text>
-                </View>
-              )}
+                </TouchableOpacity>
+              </View>
+            )}
 
-              {/* FOOTER */}
-              {/* <LinearGradient
-                colors={["#F8FAFC", "#FFFFFF"]}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: 14,
-                  borderRadius: 18,
-                  borderWidth: 1,
-                  borderColor: "#f1f5f9",
-                }}
-              >
-                <View className="flex-row items-center gap-2">
-                  <View className="w-2 h-2 rounded-full bg-emerald-500" />
-
-                  <Text className="font-dm-sans-bold text-[10px] text-emerald-600 uppercase tracking-wider">
-                    Instant Confirmation
-                  </Text>
-                </View>
-
+            {/* PNR */}
+            {reference && (
+              <View className="mb-5 bg-purple-50 border border-purple-100 rounded-2xl px-4 py-3 flex-row items-center justify-between">
                 <View className="flex-row items-center">
                   <MaterialCommunityIcons
-                    name="shield-check-outline"
+                    name="ticket-confirmation-outline"
                     size={16}
-                    color="#10b981"
+                    color="#844AFF"
                   />
 
-                  <Text className="ml-1 text-[11px] text-slate-500 font-dm-sans-bold">
-                    Secure Booking
+                  <Text className="ml-2 font-dm-sans-bold text-[11px] text-purple-600 uppercase">
+                    PNR
                   </Text>
                 </View>
-              </LinearGradient> */}
-            </View>
+
+                <Text className="font-poppins-bold text-sm tracking-widest text-slate-900">
+                  {reference}
+                </Text>
+              </View>
+            )}
           </View>
         </LinearGradient>
       </View>
 
       {/* AMENITIES MODAL */}
-      <Modal visible={showAmenities} animationType="slide" transparent>
+      <RNModal visible={showAmenities} animationType="slide" transparent>
         <View className="flex-1 bg-black/40 justify-end">
           <View className="bg-white rounded-t-3xl p-6 max-h-[70%]">
             <View className="flex-row justify-between items-center mb-5">
@@ -466,8 +610,340 @@ const HotelItem: React.FC<HotelItemProps> = ({
             </ScrollView>
           </View>
         </View>
+      </RNModal>
+
+      <Modal
+        isOpen={showDetails}
+        title="Rooms & Rates"
+        scrolled
+        onClose={() => setShowDetails(false)}
+      >
+        <View className="gap-4 mt-4">
+          <Text className="font-poppins-bold text-lg text-slate-800">
+            ROOMS ({rooms.length})
+          </Text>
+          <ScrollView
+            horizontal
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 16 }}
+          >
+            {rooms.map((r, i) => (
+              <TouchableOpacity
+                key={`${name}_room_${i}`}
+                activeOpacity={0.7}
+                className="relative rounded-lg overflow-hidden"
+                style={{ width: 200, height: 200 }}
+                onPress={() => handleRoomSelect(r)}
+              >
+                <Image
+                  source={{ uri: r.photos?.[0]?.url || "" }}
+                  style={{ width: "100%", height: "100%" }}
+                />
+
+                <LinearGradient
+                  colors={["transparent", "rgba(0,0,0,0.8)"]}
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    top: 0,
+                    justifyContent: "space-between",
+                    padding: 18,
+                  }}
+                >
+                  <View className="absolute top-0 right-0 px-4 pt-4">
+                    <RadioButton
+                      checked={cxOffer?.defaultRoom === r}
+                      onPress={() => {}}
+                    />
+                  </View>
+
+                  <View className="absolute bottom-0 px-4 pb-4 left-0">
+                    <Text className="font-poppins-semibold text-sm text-white">
+                      {r.name}
+                    </Text>
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View className="gap-4 mt-10">
+          <Text className="font-poppins-bold text-lg text-slate-800">
+            RATES ({selectedRoom.rates.length})
+          </Text>
+
+          <ScrollView
+            horizontal
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8 }}
+          >
+            {selectedRoom.rates.map((rate: any, index: number) => (
+              <RateCard
+                key={`${name}_${selectedRoom.name}_rate_${index}`}
+                rate={rate}
+                selected={cxOffer?.defaultRate === rate}
+                onSelect={() => handleRateSelect(rate)}
+              />
+            ))}
+          </ScrollView>
+        </View>
+
+        {selectedRate && <RateDetails rate={selectedRate} />}
+
+        {/* SUPPORT & COMPANY INFO */}
+        <View className="mt-6 p-4 rounded-2xl border border-slate-200 bg-white">
+          {/* HEADER */}
+          <Text className="text-xs font-poppins-bold text-slate-500 uppercase tracking-widest mb-3">
+            Booking Support & Legal Info
+          </Text>
+
+          {/* COMPANY */}
+          <View className="mb-3">
+            <Text className="text-sm font-semibold text-slate-900">
+              CHARLIE UNICORN AI
+            </Text>
+          </View>
+
+          {/* CONTACT */}
+          <View className="mb-3">
+            <Text className="text-xs font-semibold text-slate-800">
+              Support
+            </Text>
+
+            <Text className="text-xs text-slate-600">
+              Email: team@charlieunicornai.eu
+            </Text>
+
+            <Text className="text-xs text-slate-600">
+              Phone: +48 504 412 991
+            </Text>
+          </View>
+
+          {/* ADDRESS */}
+          <View className="mb-3">
+            <Text className="text-xs font-semibold text-slate-800">
+              Address
+            </Text>
+
+            <Text className="text-xs text-slate-600 leading-4">
+              Kasztanowa Street 17/1, Manowo, Poland
+            </Text>
+          </View>
+
+          {/* TERMS */}
+          <View>
+            <Text className="text-xs font-semibold text-slate-800 mb-1">
+              Terms & Conditions
+            </Text>
+
+            <Text className="text-[11px] text-slate-500 leading-4">
+              By completing this booking, you agree to the hotel's policies,
+              cancellation rules, and our platform terms of service. Prices and
+              availability are not guaranteed until payment is confirmed.
+            </Text>
+          </View>
+        </View>
+
+        <View className="mt-8">
+          <Button
+            type="primary"
+            label="Confirm"
+            onPress={() => setShowDetails(false)}
+          />
+        </View>
       </Modal>
     </>
+  );
+};
+
+const RateCard = ({ rate, selected, onSelect }: any) => {
+  const display = mapRateToDisplay(rate);
+
+  return (
+    <TouchableOpacity
+      onPress={onSelect}
+      activeOpacity={0.8}
+      className={`p-4 rounded-2xl border ${
+        selected
+          ? "border-purple-500 bg-purple-50"
+          : "border-slate-200 bg-white"
+      }`}
+      style={{ width: 300 }}
+    >
+      {/* TOP ROW: PRICE + PAYMENT TYPE */}
+      <View className="flex-row justify-between items-start">
+        <View>
+          <Text className="text-lg font-poppins-bold text-slate-900">
+            {display.pricing.currency} {display.pricing.total}
+          </Text>
+
+          <Text className="text-xs text-slate-500">
+            {display.badges.paymentType === "pay_now"
+              ? "Pay now"
+              : "Pay at hotel"}
+          </Text>
+        </View>
+
+        {/* REFUND BADGE */}
+        <View
+          className={`px-3 py-1 rounded-full ${
+            display.cancellationPolicy.refundable
+              ? "bg-green-100"
+              : "bg-red-100"
+          }`}
+        >
+          <Text
+            className={`text-xs font-semibold ${
+              display.cancellationPolicy.refundable
+                ? "text-green-700"
+                : "text-red-700"
+            }`}
+          >
+            {display.cancellationPolicy.refundable
+              ? "Free cancellation"
+              : "Non-refundable"}
+          </Text>
+        </View>
+      </View>
+
+      {/* MIDDLE: KEY POLICY SUMMARY */}
+      <Text className="mt-2 text-xs text-slate-700 leading-4">
+        {display.cancellationPolicy.summary ||
+          display.ratePolicy ||
+          "Standard hotel conditions apply"}
+      </Text>
+
+      {/* BADGES ROW */}
+      <View className="flex-row gap-2 mt-3 flex-wrap">
+        <View className="bg-slate-100 px-2 py-1 rounded-md">
+          <Text className="text-[10px] text-slate-600">
+            {display.badges.boardType}
+          </Text>
+        </View>
+
+        {display.pricing.dueAtHotel !== "0.00" && (
+          <View className="bg-orange-100 px-2 py-1 rounded-md">
+            <Text className="text-[10px] text-orange-700">
+              Pay at hotel: {display.pricing.dueAtHotel}
+            </Text>
+          </View>
+        )}
+
+        <View className="bg-slate-100 px-2 py-1 rounded-md">
+          <Text className="text-[10px] text-slate-600">
+            {display.availability.quantity} left
+          </Text>
+        </View>
+      </View>
+
+      {/* FOOTER HINT */}
+    </TouchableOpacity>
+  );
+};
+
+const RateDetails = ({ rate }: any) => {
+  const display = mapRateToDisplay(rate);
+
+  return (
+    <ScrollView contentContainerStyle={{ marginTop: 40 }}>
+      {/* TITLE */}
+      <Text className="text-lg font-poppins-bold text-slate-900 mb-4">
+        Rate Details
+      </Text>
+
+      {/* PRICE SUMMARY */}
+      <View className="bg-slate-50 p-4 rounded-2xl mb-4">
+        <Text className="text-sm font-semibold text-slate-700">
+          Price Breakdown
+        </Text>
+
+        <Text className="text-xs text-slate-600 mt-2">
+          Base: {display.pricing.base}
+        </Text>
+        <Text className="text-xs text-slate-600">
+          Taxes: {display.pricing.tax}
+        </Text>
+        <Text className="text-xs text-slate-600">
+          Fees: {display.pricing.fee}
+        </Text>
+
+        <Text className="text-sm font-bold mt-2 text-slate-900">
+          Total: {display.pricing.currency} {display.pricing.total}
+        </Text>
+
+        {Number(display.pricing.dueAtHotel) > 0 && (
+          <Text className="text-xs text-orange-600 mt-1">
+            Pay at hotel: {display.pricing.dueAtHotel}
+          </Text>
+        )}
+      </View>
+
+      {/* CANCELLATION POLICY */}
+      <View className="mb-4">
+        <Text className="font-semibold text-slate-800 mb-2">
+          Cancellation Policy
+        </Text>
+
+        <Text className="text-xs text-slate-600 leading-5">
+          {display.cancellationPolicy.summary ||
+            "Standard cancellation rules apply"}
+        </Text>
+
+        <View className="mt-2">
+          {display.cancellationPolicy.timeline?.length > 0 ? (
+            display.cancellationPolicy.timeline.map((t: any, i: number) => {
+              const item = typeof t === "string" ? JSON.parse(t) : t;
+
+              return (
+                <Text
+                  key={i}
+                  className="text-[11px] font-dm-sans-medium text-slate-500"
+                >
+                  • Refund {item.refund_amount} {item.currency} before{" "}
+                  {new Date(item.before).toLocaleString()}
+                </Text>
+              );
+            })
+          ) : (
+            <Text className="text-[11px] text-slate-400">
+              No detailed timeline available
+            </Text>
+          )}
+        </View>
+      </View>
+
+      {/* GUARANTEE + CONDITIONS */}
+      <View className="mb-4">
+        <Text className="font-semibold text-slate-800 mb-2">
+          Hotel Conditions
+        </Text>
+
+        {display.cancellationPolicy.raw?.map((c: any, i: number) => (
+          <View key={i} className="mb-3">
+            <Text className="text-sm font-semibold text-slate-800">
+              {c.title}
+            </Text>
+            <Text className="text-xs text-slate-600 leading-5">
+              {c.description}
+            </Text>
+          </View>
+        ))}
+      </View>
+
+      {/* POLICY TYPE SUMMARY */}
+      <View className="p-3 rounded-xl bg-purple-50">
+        <Text className="text-xs text-purple-700 font-semibold">
+          {display.cancellationPolicy.refundable
+            ? "✓ This rate is refundable under conditions"
+            : "⚠️ This rate is non-refundable"}
+        </Text>
+      </View>
+    </ScrollView>
   );
 };
 

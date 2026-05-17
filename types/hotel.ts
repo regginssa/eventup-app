@@ -16,12 +16,7 @@ export type THotelService = {
 };
 
 export interface IHotelOffer {
-  // =====================
-  // IDS
-  // =====================
-  id: string; // UI unique id (hotel + rate)
-  hotelId: string;
-  rateId: string;
+  id: string;
 
   // =====================
   // HOTEL
@@ -87,6 +82,7 @@ export interface IHotelOffer {
   rooms: {
     name: string;
     rates: any[];
+    photos: { url: string }[];
   }[];
 
   defaultRoom: any;

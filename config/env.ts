@@ -6,15 +6,14 @@ export const GOOGLE_IOS_CLIENT_ID =
 export const GOOGLE_WEB_CLIENT_ID =
   "732132936043-85fpifatj1b2kusu319c6urvdnub7aq7.apps.googleusercontent.com";
 export const GOOGLE_WEB_CLIENT_SECRET = "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";
-export const SERVER_API_ENDPOINT =
-  "http://198.18.4.145:5001/api/v1";
+export const SERVER_API_ENDPOINT = "http://198.18.13.185:5001/api/v1";
 export const SERVER_SOCKET_URL =
   "wss://eventworld-server-production.up.railway.app";
 // https://eventworld-server-production.up.railway.app
 // http://38.180.245.212:5001
-// http://198.18.4.145:5001
+// http://198.18.13.185:5001
 export const STRIPE_PUBLISHABLE_KEY =
   "pk_test_51RGgNOB3QdeQ8arQcprVRXtbcpeDjhIQV6pBlLRrNJpb9MqGi9lrR7VTLYaHbsnozaqQjP42RM8FBqSBPzmjAJ5m00FAlzmRBY";
 // pk_live_51RGgNHBskVGUaFIhHgMDMkSPvDXoWNtxj4IhiIM8aRMBZtsxMFqqu5ksk9oNaHdC1e09q5oeeGptrL4SfLflDdmB001j70onjH
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-// 198.18.4.145
+// 198.18.13.185
