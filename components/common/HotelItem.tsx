@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Modal,
   ScrollView,
   Text,
@@ -37,7 +38,10 @@ const serviceIconMap: Record<string, any> = {
   business_centre: { lib: "mc", name: "briefcase-outline" },
   childcare_service: { lib: "mc", name: "baby-face-outline" },
   pets_allowed: { lib: "mc", name: "dog" },
-  accessibility_mobility: { lib: "mc", name: "wheelchair-accessibility" },
+  accessibility_mobility: {
+    lib: "mc",
+    name: "wheelchair-accessibility",
+  },
   accessibility_hearing: { lib: "mc", name: "ear-hearing" },
   "24_hour_front_desk": { lib: "mc", name: "desk" },
   cash_machine: { lib: "mc", name: "cash" },
@@ -51,6 +55,15 @@ const serviceIconMap: Record<string, any> = {
   garden: { lib: "mc", name: "flower" },
   air_conditioning: { lib: "mc", name: "air-conditioner" },
   heating: { lib: "mc", name: "fire" },
+};
+
+const getNights = (checkIn: string, checkOut: string) => {
+  const start = new Date(checkIn);
+  const end = new Date(checkOut);
+  return Math.max(
+    1,
+    Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)),
+  );
 };
 
 const HotelItem: React.FC<HotelItemProps> = ({
@@ -78,6 +91,11 @@ const HotelItem: React.FC<HotelItemProps> = ({
     checkIn,
     checkOut,
     checkInInfo,
+    image,
+    ratePolicy,
+    cancellationPolicy,
+    rooms,
+    converted,
   } = offer;
 
   const { currency, totalAmount } = offer.converted;
@@ -111,305 +129,305 @@ const HotelItem: React.FC<HotelItemProps> = ({
 
   return (
     <>
-      <View className="mb-4 shadow-xl shadow-purple-200">
+      <View className="mb-5 shadow-xl shadow-purple-200">
         <LinearGradient
           colors={["#844AFF", "#C427E0"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={{ borderRadius: 24, padding: 1, elevation: 5 }}
+          style={{
+            borderRadius: 28,
+            padding: 1.2,
+            elevation: 6,
+          }}
         >
-          <View className="bg-white/95 rounded-[23px] p-5 overflow-hidden">
-            {/* LARGE BACKGROUND ICON */}
-            <View className="absolute -right-12 -top-12 opacity-[0.05]">
-              <MaterialCommunityIcons name="bed-king" size={160} color="#000" />
-            </View>
+          <View className="bg-white rounded-[27px] overflow-hidden">
+            {/* HERO IMAGE */}
+            <View className="relative h-64">
+              <Image
+                source={{ uri: image }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                }}
+                resizeMode="cover"
+              />
 
-            {/* HEADER */}
-            <View className="flex flex-row justify-between items-start mb-5">
-              <View className="flex-1 pr-4">
-                {starCount > 0 && (
-                  <View className="flex flex-row mb-1.5">
-                    {[...Array(starCount)].map((_, i) => (
-                      <MaterialCommunityIcons
-                        key={i}
-                        name="star"
-                        size={14}
-                        color="#844AFF"
-                      />
-                    ))}
+              {/* OVERLAY */}
+              <LinearGradient
+                colors={["transparent", "rgba(0,0,0,0.8)"]}
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  top: 0,
+                  justifyContent: "space-between",
+                  padding: 18,
+                }}
+              >
+                {/* TOP ACTIONS */}
+                <View className="flex-row justify-between items-start">
+                  {/* STARS */}
+                  {starCount > 0 ? (
+                    <View className="flex-row bg-black/30 px-3 py-1.5 rounded-full">
+                      {[...Array(starCount)].map((_, i) => (
+                        <MaterialCommunityIcons
+                          key={i}
+                          name="star"
+                          size={14}
+                          color="#FFD700"
+                        />
+                      ))}
+                    </View>
+                  ) : (
+                    <View />
+                  )}
+
+                  <View className="flex-row items-center gap-2">
+                    {/* STATUS */}
+                    {status && (
+                      <View
+                        className={`${
+                          status === "pending"
+                            ? "bg-yellow-500/90"
+                            : status === "failed"
+                              ? "bg-red-500/90"
+                              : "bg-emerald-500/90"
+                        } px-3 py-1 rounded-full`}
+                      >
+                        <Text className="text-white text-[10px] font-bold uppercase">
+                          {status}
+                        </Text>
+                      </View>
+                    )}
+
+                    {/* REFRESH */}
+                    {onRefresh && (
+                      <TouchableOpacity
+                        onPress={onRefresh}
+                        disabled={refreshLoading}
+                        className="w-9 h-9 rounded-full bg-black/30 items-center justify-center"
+                      >
+                        {refreshLoading ? (
+                          <ActivityIndicator size={12} color="#fff" />
+                        ) : (
+                          <MaterialCommunityIcons
+                            name="cached"
+                            size={18}
+                            color="#fff"
+                          />
+                        )}
+                      </TouchableOpacity>
+                    )}
+
+                    {/* SELECT */}
+                    {onSelect && (
+                      <View className="bg-white rounded-full p-1">
+                        <RadioButton
+                          checked={!!checked}
+                          onPress={() => onSelect(offer)}
+                        />
+                      </View>
+                    )}
                   </View>
-                )}
+                </View>
 
-                <Text
-                  className="font-poppins-bold text-lg text-slate-900 leading-6"
-                  numberOfLines={2}
-                >
-                  {name}
-                </Text>
-
-                <View className="flex flex-row items-center gap-1 mt-1.5">
-                  <MaterialIcons
-                    name="location-pin"
-                    size={14}
-                    color="#C427E0"
-                  />
+                {/* HOTEL INFO */}
+                <View>
                   <Text
-                    className="font-dm-sans-bold text-slate-400 text-[11px] flex-1"
+                    className="font-poppins-bold text-2xl text-white leading-8"
                     numberOfLines={2}
                   >
-                    {address} | {city}, {countryCode}
+                    {name}
                   </Text>
-                </View>
-              </View>
 
-              {/* STATUS */}
-              {status && (
-                <View
-                  className={`${
-                    status === "pending"
-                      ? "bg-yellow-100"
-                      : status === "failed"
-                        ? "bg-red-100"
-                        : "bg-green-100"
-                  } px-3 py-1 rounded-full flex-row items-center mr-2`}
-                >
-                  <MaterialCommunityIcons
-                    name={
-                      status === "pending"
-                        ? "clock-outline"
-                        : status === "failed"
-                          ? "close-circle-outline"
-                          : "check-decagram"
-                    }
-                    size={14}
-                    color={
-                      status === "pending"
-                        ? "#a16207"
-                        : status === "failed"
-                          ? "#b91c1c"
-                          : "#16a34a"
-                    }
-                  />
-                  <Text
-                    className={`${
-                      status === "pending"
-                        ? "text-yellow-700"
-                        : status === "failed"
-                          ? "text-red-700"
-                          : "text-green-700"
-                    } font-dm-sans-bold text-[10px] ml-1 uppercase`}
-                  >
-                    {status === "pending" ? "Pending" : status}
-                  </Text>
-                </View>
-              )}
-
-              {/* REFRESH */}
-              {onRefresh && (
-                <TouchableOpacity
-                  onPress={onRefresh}
-                  disabled={refreshLoading}
-                  className="w-8 h-8 items-center justify-center rounded-full bg-slate-50 border border-slate-100"
-                >
-                  {refreshLoading ? (
-                    <ActivityIndicator size={12} color="#844AFF" />
-                  ) : (
-                    <MaterialCommunityIcons
-                      name="cached"
+                  <View className="flex-row items-center mt-2">
+                    <MaterialIcons
+                      name="location-pin"
                       size={16}
-                      color="#64748b"
+                      color="#E9D5FF"
                     />
-                  )}
-                </TouchableOpacity>
-              )}
 
-              {onSelect && (
-                <RadioButton
-                  checked={!!checked}
-                  onPress={() => onSelect(offer)}
-                />
-              )}
-            </View>
-
-            {/* STAY INFO */}
-            <View className="flex-row items-center justify-between mb-5">
-              <View className="flex-1 items-start">
-                <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-1">
-                  Check-In
-                </Text>
-
-                <View className="flex-row items-center gap-1">
-                  <MaterialCommunityIcons
-                    name="login"
-                    size={14}
-                    color="#844AFF"
-                  />
-                  <Text className="font-poppins-bold text-sm text-slate-800">
-                    {df.toShortDate(checkIn)}
-                  </Text>
-                </View>
-              </View>
-
-              <View className="px-4 items-center">
-                <View className="w-8 h-8 rounded-full bg-slate-50 items-center justify-center border border-slate-100">
-                  <MaterialCommunityIcons
-                    name="calendar-range"
-                    size={18}
-                    color="#844AFF"
-                  />
-                </View>
-              </View>
-
-              <View className="flex-1 items-end">
-                <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-1">
-                  Check-Out
-                </Text>
-
-                <View className="flex-row items-center gap-1">
-                  <MaterialCommunityIcons
-                    name="logout"
-                    size={14}
-                    color="#844AFF"
-                  />
-                  <Text className="font-poppins-bold text-sm text-slate-800 text-right">
-                    {df.toShortDate(checkOut)}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            {/* CHECK-IN INFO */}
-            {checkInInfo && (
-              <View className="mb-5 bg-purple-50 border border-purple-100 rounded-xl p-3 flex-row items-start gap-2">
-                <MaterialCommunityIcons
-                  name="information-outline"
-                  size={16}
-                  color="#844AFF"
-                />
-                <Text className="flex-1 text-[11px] text-purple-700 font-dm-sans-bold">
-                  {checkInInfo}
-                </Text>
-              </View>
-            )}
-
-            {/* ROOM & BOARD */}
-            <View className="flex flex-row items-center justify-between relative mb-5">
-              <View className="flex-1 items-start">
-                <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-1">
-                  Room Category
-                </Text>
-                <Text
-                  className="font-poppins-bold text-sm text-slate-800"
-                  numberOfLines={1}
-                >
-                  {roomName}
-                </Text>
-              </View>
-
-              <View className="px-4 items-center">
-                <View className="w-8 h-8 rounded-full bg-slate-50 items-center justify-center border border-slate-100">
-                  <MaterialCommunityIcons
-                    name="bed-king-outline"
-                    size={18}
-                    color="#844AFF"
-                  />
-                </View>
-              </View>
-
-              <View className="flex-1 items-end">
-                <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-1">
-                  Inclusions
-                </Text>
-                <Text className="font-poppins-bold text-sm text-slate-800 text-right">
-                  {boardName}
-                </Text>
-              </View>
-            </View>
-
-            {/* SERVICES */}
-            {services.length > 0 && (
-              <View className="mb-5">
-                <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-2">
-                  Amenities
-                </Text>
-
-                <View className="flex-row flex-wrap gap-2">
-                  {visibleServices.map((s: any, i: number) => (
-                    <View
-                      key={i}
-                      className="flex-row items-center bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100"
+                    <Text
+                      className="text-purple-100 text-xs flex-1"
+                      numberOfLines={1}
                     >
-                      {renderIcon(s.type)}
-                      <Text className="ml-1 font-dm-sans-bold text-[10px] text-slate-600">
-                        {s.description}
+                      {address} • {city}, {countryCode}
+                    </Text>
+                  </View>
+
+                  {/* PRICE FLOAT */}
+                  <View className="mt-4 self-start bg-white px-4 py-2 rounded-2xl">
+                    <View className="flex-row items-end gap-1">
+                      <Text className="font-dm-sans-bold text-[11px] text-slate-400 uppercase">
+                        {currency}
+                      </Text>
+
+                      <Text className="font-poppins-bold text-xl text-slate-900">
+                        {totalAmount}
                       </Text>
                     </View>
-                  ))}
-
-                  {remainingServices > 0 && (
-                    <TouchableOpacity
-                      onPress={() => setShowAmenities(true)}
-                      className="px-3 py-1.5 rounded-full bg-purple-50 border border-purple-100"
-                    >
-                      <Text className="font-dm-sans-bold text-[10px] text-purple-600">
-                        +{remainingServices} more
-                      </Text>
-                    </TouchableOpacity>
-                  )}
+                  </View>
                 </View>
-              </View>
-            )}
+              </LinearGradient>
+            </View>
 
-            {/* REFERENCE */}
-            {reference && (
-              <View className="mb-4 flex-row items-center justify-between bg-purple-50 border border-purple-100 rounded-xl px-3 py-2">
-                <View className="flex-row items-center gap-2">
-                  <MaterialCommunityIcons
-                    name="ticket-confirmation-outline"
-                    size={16}
-                    color="#844AFF"
-                  />
-                  <Text className="font-dm-sans-bold text-[11px] text-purple-600 uppercase">
-                    Booking Ref
+            {/* CONTENT */}
+            <View className="p-5">
+              {/* STAY INFO */}
+              <View className="flex-row items-center justify-between mb-5">
+                <View className="flex-1">
+                  <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-1">
+                    Check-In
+                  </Text>
+
+                  <View className="flex-row items-center gap-1">
+                    <MaterialCommunityIcons
+                      name="login"
+                      size={14}
+                      color="#844AFF"
+                    />
+
+                    <Text className="font-poppins-bold text-sm text-slate-800">
+                      {df.toShortDate(checkIn)}
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="items-center px-2">
+                  <Text className="text-[10px] text-purple-400 uppercase font-dm-sans-bold">
+                    Nights
+                  </Text>
+
+                  <Text className="font-poppins-bold text-sm text-slate-800">
+                    {getNights(checkIn, checkOut)}
                   </Text>
                 </View>
 
-                <Text className="font-poppins-bold text-sm tracking-widest text-slate-900">
-                  {reference}
-                </Text>
-              </View>
-            )}
+                <View className="flex-1 items-end">
+                  <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-1">
+                    Check-Out
+                  </Text>
 
-            {/* PRICE */}
-            <LinearGradient
-              colors={["#F8FAFC", "#FFFFFF"]}
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: 12,
-                borderRadius: 16,
-                borderWidth: 1,
-                borderColor: "#f8fafc",
-              }}
-            >
-              <View className="flex-row items-center gap-2">
-                <View className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200" />
-                <Text className="font-dm-sans-bold text-[10px] text-emerald-600 uppercase tracking-wider">
-                  Instant Confirmation
-                </Text>
+                  <View className="flex-row items-center gap-1">
+                    <MaterialCommunityIcons
+                      name="logout"
+                      size={14}
+                      color="#844AFF"
+                    />
+
+                    <Text className="font-poppins-bold text-sm text-slate-800">
+                      {df.toShortDate(checkOut)}
+                    </Text>
+                  </View>
+                </View>
               </View>
 
-              <View className="flex-row items-baseline gap-1">
-                <Text className="font-dm-sans-bold text-[10px] text-slate-400 uppercase">
-                  {currency}
-                </Text>
-                <Text className="font-poppins-bold text-xl text-slate-900">
-                  {totalAmount}
-                </Text>
-              </View>
-            </LinearGradient>
+              {/* CHECK IN INFO */}
+              {checkInInfo && (
+                <View className="mb-5 bg-purple-50 border border-purple-100 rounded-2xl p-4 flex-row items-start">
+                  <MaterialCommunityIcons
+                    name="information-outline"
+                    size={18}
+                    color="#844AFF"
+                  />
+
+                  <Text className="flex-1 ml-2 text-[11px] text-purple-700 font-dm-sans-bold leading-5">
+                    {checkInInfo}
+                  </Text>
+                </View>
+              )}
+
+              {/* AMENITIES */}
+              {services.length > 0 && (
+                <View className="mb-5">
+                  <Text className="font-dm-sans-bold text-[9px] text-purple-400 uppercase tracking-widest mb-3">
+                    Amenities
+                  </Text>
+
+                  <View className="flex-row flex-wrap gap-2">
+                    {visibleServices.map((s: any, i: number) => (
+                      <View
+                        key={i}
+                        className="flex-row items-center bg-slate-50 px-3 py-2 rounded-full border border-slate-100"
+                      >
+                        {renderIcon(s.type)}
+
+                        <Text className="ml-1 font-dm-sans-bold text-[10px] text-slate-600">
+                          {s.description}
+                        </Text>
+                      </View>
+                    ))}
+
+                    {remainingServices > 0 && (
+                      <TouchableOpacity
+                        onPress={() => setShowAmenities(true)}
+                        className="px-3 py-2 rounded-full bg-purple-50 border border-purple-100"
+                      >
+                        <Text className="font-dm-sans-bold text-[10px] text-purple-600">
+                          +{remainingServices} more
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              )}
+
+              {/* PNR */}
+              {reference && (
+                <View className="mb-5 bg-purple-50 border border-purple-100 rounded-2xl px-4 py-3 flex-row items-center justify-between">
+                  <View className="flex-row items-center">
+                    <MaterialCommunityIcons
+                      name="ticket-confirmation-outline"
+                      size={16}
+                      color="#844AFF"
+                    />
+
+                    <Text className="ml-2 font-dm-sans-bold text-[11px] text-purple-600 uppercase">
+                      PNR
+                    </Text>
+                  </View>
+
+                  <Text className="font-poppins-bold text-sm tracking-widest text-slate-900">
+                    {reference}
+                  </Text>
+                </View>
+              )}
+
+              {/* FOOTER */}
+              {/* <LinearGradient
+                colors={["#F8FAFC", "#FFFFFF"]}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: 14,
+                  borderRadius: 18,
+                  borderWidth: 1,
+                  borderColor: "#f1f5f9",
+                }}
+              >
+                <View className="flex-row items-center gap-2">
+                  <View className="w-2 h-2 rounded-full bg-emerald-500" />
+
+                  <Text className="font-dm-sans-bold text-[10px] text-emerald-600 uppercase tracking-wider">
+                    Instant Confirmation
+                  </Text>
+                </View>
+
+                <View className="flex-row items-center">
+                  <MaterialCommunityIcons
+                    name="shield-check-outline"
+                    size={16}
+                    color="#10b981"
+                  />
+
+                  <Text className="ml-1 text-[11px] text-slate-500 font-dm-sans-bold">
+                    Secure Booking
+                  </Text>
+                </View>
+              </LinearGradient> */}
+            </View>
           </View>
         </LinearGradient>
       </View>
@@ -418,22 +436,31 @@ const HotelItem: React.FC<HotelItemProps> = ({
       <Modal visible={showAmenities} animationType="slide" transparent>
         <View className="flex-1 bg-black/40 justify-end">
           <View className="bg-white rounded-t-3xl p-6 max-h-[70%]">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-bold">Amenities</Text>
+            <View className="flex-row justify-between items-center mb-5">
+              <Text className="text-xl font-poppins-bold text-slate-900">
+                Amenities
+              </Text>
 
               <TouchableOpacity onPress={() => setShowAmenities(false)}>
-                <MaterialCommunityIcons name="close" size={22} />
+                <MaterialCommunityIcons
+                  name="close"
+                  size={24}
+                  color="#0f172a"
+                />
               </TouchableOpacity>
             </View>
 
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
               {services.map((s: any, i: number) => (
                 <View
                   key={i}
-                  className="flex-row items-center py-3 border-b border-slate-100"
+                  className="flex-row items-center py-4 border-b border-slate-100"
                 >
                   {renderIcon(s.type)}
-                  <Text className="ml-3 text-slate-700">{s.description}</Text>
+
+                  <Text className="ml-3 text-slate-700 font-dm-sans-bold">
+                    {s.description}
+                  </Text>
                 </View>
               ))}
             </ScrollView>

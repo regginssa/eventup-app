@@ -119,7 +119,7 @@ const AIEventDetail = () => {
       setLoading(true);
       await fetchEventData();
       await fetchBookingData();
-      await fetchUserCurrentLocation();
+      // await fetchUserCurrentLocation();
 
       setLoading(false);
     };
