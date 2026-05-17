@@ -198,6 +198,7 @@ const BookedScreen = () => {
               <HotelItem
                 data={booking?.hotel.offer || null}
                 reference={booking?.hotel?.booking?.reference}
+                hiddenPolicy
               />
             )}
             {booking?.transfer.airportToHotel?.booking?.status ===

@@ -554,7 +554,7 @@ const HotelItem: React.FC<HotelItemProps> = ({
 
             {/* PNR */}
             {reference && (
-              <View className="mb-5 bg-purple-50 border border-purple-100 rounded-2xl px-4 py-3 flex-row items-center justify-between">
+              <View className="mb-5 mx-4 bg-purple-50 border border-purple-100 rounded-2xl px-4 py-3 flex-row items-center justify-between">
                 <View className="flex-row items-center">
                   <MaterialCommunityIcons
                     name="ticket-confirmation-outline"

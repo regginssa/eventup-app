@@ -261,7 +261,7 @@ const TransferItem: React.FC<TransferItemProps> = ({
                     color="#844AFF"
                   />
                   <Text className="font-dm-sans-bold text-[11px] text-purple-600 uppercase">
-                    Booking Ref
+                    PNR
                   </Text>
                 </View>
 

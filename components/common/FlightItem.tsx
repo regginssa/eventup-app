@@ -351,7 +351,7 @@ const FlightItem: React.FC<FlightItemProps> = ({
                 />
 
                 <Text className="font-dm-sans-bold text-[11px] text-purple-600 uppercase">
-                  Booking Ref
+                  PNR
                 </Text>
               </View>
 
