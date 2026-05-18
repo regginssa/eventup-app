@@ -328,6 +328,7 @@ const EventDetailItinerary: React.FC<EventDetailItineraryProps> = ({
                 data={hotel.offer}
                 status={hotel.status}
                 reference={hotel.booking?.reference}
+                hiddenPolicy
               />
             </View>
           </View>
