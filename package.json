@@ -12,9 +12,6 @@
   },
   "dependencies": {
     "@babel/core": "^7.26.0",
-    "@duffel/api": "^4.21.6",
-    "@duffel/react-native-components": "^5.0.0",
-    "@evervault/react-native": "^2.6.3",
     "@expo-google-fonts/dm-sans": "^0.4.2",
     "@expo-google-fonts/poppins": "^0.4.1",
     "@expo/vector-icons": "^15.0.2",
@@ -27,7 +24,6 @@
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@stripe/stripe-react-native": "0.50.3",
-    "airwallex-payment-react-native": "^0.1.7",
     "axios": "^1.12.2",
     "country-region-data": "^3.1.0",
     "expo": "~54.0.12",
