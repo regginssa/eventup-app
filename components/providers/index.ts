@@ -11,4 +11,3 @@ export { default as SocketProvider } from "./SocketProvider";
 export { default as SubscriptionProvider } from "./SubscriptionProvider";
 export { default as ToastProvider } from "./ToastProvider";
 export { default as TransferProvider } from "./TransferProvider";
-export { default as AirwallexProvider } from "./AirwallexProvider";

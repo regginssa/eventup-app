@@ -67,7 +67,6 @@ export interface IUser {
   gender: "mr" | "ms";
   emailVerified: boolean;
   blockedUsers: string[];
-  airwallexCustomerId?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
