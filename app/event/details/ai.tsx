@@ -75,6 +75,8 @@ const AIEventDetail = () => {
   const fetchUserCurrentLocation = async () => {
     const coords = await getUserLocationAndSave();
 
+    console.log("coords", coords);
+
     setCurrentLocationCoords(coords);
     try {
       const reverseGeocode = await Location.reverseGeocodeAsync({
@@ -100,7 +102,7 @@ const AIEventDetail = () => {
     try {
       const response = await bookingServices.getByUserIdAndEventId(
         user._id,
-        id as string,
+        id as string
       );
 
       if (response.data) {
@@ -117,9 +119,9 @@ const AIEventDetail = () => {
     const init = async () => {
       if (!id) return;
       setLoading(true);
+      await fetchUserCurrentLocation();
       await fetchEventData();
       await fetchBookingData();
-      // await fetchUserCurrentLocation();
 
       setLoading(false);
     };
@@ -139,7 +141,7 @@ const AIEventDetail = () => {
             image={event.images?.[0] as string}
             title={event.name as string}
             category={formatEventLabel(
-              event.classifications?.category as string,
+              event.classifications?.category as string
             )}
             city={event.location?.city?.name}
             country={event.location?.country?.name as string}
